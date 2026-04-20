@@ -67,12 +67,51 @@ Pluggable adapters around a stateless pipeline:
 |------------------|-------------------|--------------------------|--------------------------|
 | `DocSource`      | `markdown-git`    | `wordpress-rest`         | `sitemap-crawler`, `local-markdown`, `a8c-context` |
 | `CodeSource`     | `git-clone`       | (reuse)                  | `multi-repo`, `local-path` |
-| `DocCodeMapper`  | `manual-map` (YAML) | (reuse)                | `symbol-search`, `embedding-retrieval` |
+| `DocCodeMapper`  | `manual-map` (tiered YAML) + LLM-bootstrap helper | (reuse) | `symbol-search`, `embedding-retrieval`, `hybrid` |
 | `Validator`      | `claude`          | (reuse)                  | (only one needed)         |
 
 The registry lives in `packages/core/src/adapters/index.ts`. Unimplemented Later-stub adapters throw `NotImplementedError` — this documents the extension surface without adding dead code.
 
 **`wordpress-rest` DocSource** (Phase 2) fetches via `GET /wp-json/wp/v2/<post_type>?per_page=100` with pagination, unwraps rendered HTML back to a markdown-equivalent structure (via `turndown` or `node-html-parser` + a light converter), and returns the same `Doc[]` shape as `markdown-git` so every downstream stage is source-agnostic. Auth via Application Passwords for private sites; for A8C-internal sites, delegate to the `context-a8c` MCP (a separate adapter variant).
+
+## Doc ↔ Code Mapping
+
+The relationship is **many-to-many**: one doc typically references multiple source files (e.g. `block-metadata.md` touches `registration.js`, `parser.js`, `process-block-type.js`, `schemas/json/block.json`, and PHP side in WP core), and one source file is referenced by multiple docs.
+
+### Tiered mapping schema
+
+To handle this without blowing the token budget, mappings are **tiered**:
+
+```yaml
+# mappings/block-api.yml
+- doc: reference-guides/block-api/block-metadata.md
+  code:
+    primary:      # always sent to the validator — source of truth for this doc
+      - packages/blocks/src/api/registration.js
+      - schemas/json/block.json
+    secondary:    # usually sent — supporting context that catches most real drift
+      - packages/blocks/src/api/parser.js
+      - packages/blocks/src/api/process-block-type.js
+    context:      # dropped first when the budget is tight; re-fetched on demand in Pass 2
+      - packages/block-editor/src/components/block-edit/index.js
+```
+
+The validator starts with `primary + secondary`, adds `context` if budget allows, and in Pass 2 can targeted-fetch additional files by path (retrieval-on-demand rather than pre-loading everything). That shape generalizes to thousands of docs later.
+
+### LLM-assisted bootstrap
+
+Hand-writing mappings doesn't scale past ~50 docs. We keep the YAML as source of truth but add a one-shot dev-time helper: `scripts/bootstrap-mapping.ts <doc-path>` asks Claude *"given this doc and this file tree, which files are `primary`/`secondary`/`context`?"* and writes a YAML candidate. A human reviews and trims before committing. Cuts manual mapping work from minutes-per-doc to seconds-per-doc review.
+
+This is **not a runtime adapter** — it's a CLI helper the doc maintainer runs once per doc. The `manual-map` adapter stays simple and deterministic at analysis time.
+
+### Scaling path beyond PoC
+
+1. **Phase 1 (PoC):** `manual-map` tiered YAML + bootstrap script. 5–8 docs, done in <1 hour.
+2. **Phase 2+:** `symbol-search` adapter — extract symbols from doc (functions, hooks, attribute names, code-block imports), AST-grep the codebase, rank by proximity/recency. Fully automatic but noisy on generic names.
+3. **Phase 3:** `hybrid` adapter — `symbol-search` candidates + YAML include/exclude overrides. The long-term shape.
+4. **(Optional) `embedding-retrieval`:** semantic similarity when symbol matching isn't enough. Heavier infra; defer unless needed.
+
+All four share the same `DocCodeMapper` interface, so swapping is an adapter-config change, not a rewrite.
 
 ## Tech Stack
 
@@ -127,7 +166,9 @@ wp-docs-health-monitor/
 ├── config/
 │   └── gutenberg-block-api.yml    # PoC config
 ├── mappings/
-│   └── block-api.yml              # manual doc→code map (Dev A)
+│   └── block-api.yml              # tiered doc→code map (Dev A, seeded by bootstrap script)
+├── scripts/
+│   └── bootstrap-mapping.ts       # LLM-assisted helper: doc → YAML candidate (Dev A)
 ├── .github/workflows/
 │   └── analyze-docs.yml           # Dev B (stretch)
 ├── examples/
@@ -176,10 +217,25 @@ export const DocResultSchema = z.object({
     externalLinks: z.number(),
     lastModified: z.string().datetime().optional()
   }),
-  relatedCode: z.array(z.string()),
+  relatedCode: z.array(z.object({
+    path: z.string(),
+    tier: z.enum(["primary", "secondary", "context"]),
+    includedInAnalysis: z.boolean()  // false if dropped to fit token budget
+  })),
   issues: z.array(IssueSchema),
   positives: z.array(z.string())
 });
+
+// Shape returned by any DocCodeMapper adapter
+export const MappingEntrySchema = z.object({
+  doc: z.string(),
+  code: z.object({
+    primary:   z.array(z.string()).default([]),
+    secondary: z.array(z.string()).default([]),
+    context:   z.array(z.string()).default([])
+  })
+});
+export type MappingEntry = z.infer<typeof MappingEntrySchema>;
 
 export const RunResultsSchema = z.object({
   project: z.string(),
@@ -217,19 +273,15 @@ Numbering prefix: A = pipeline (Dev A), B = presentation (Dev B), S = shared/str
 - **A1** Adapter interfaces + registry (`doc-source`, `code-source`, `mapper`, `validator`). Unimplemented adapters throw `NotImplementedError`.
 - **A2** `markdown-git` DocSource: clones a repo shallowly, reads a section's `.md` files, parses frontmatter + code blocks via `gray-matter` + `remark`. Returns `Doc[]` with `{path, url, content, codeExamples, metrics}`.
 - **A3** `git-clone` CodeSource: shallow-clones a repo, exposes `readFile(relPath)` and `listDir(relPath)`. Handles caching between runs via commit SHA.
-- **A4** `manual-map` Mapper: loads `mappings/block-api.yml`, resolves doc path → list of code file paths.
-- **A5** Manual mapping file: write `mappings/block-api.yml` for the 5–8 chosen docs. Format:
-  ```yaml
-  - doc: reference-guides/block-api/block-metadata.md
-    code:
-      - packages/blocks/src/api/registration.js
-      - packages/blocks/src/api/parser.js
-  ```
+- **A4** `manual-map` Mapper: loads `mappings/*.yml`, validates against `MappingEntrySchema`, resolves doc path → tiered code paths (`primary`/`secondary`/`context`). See "Doc ↔ Code Mapping" section for the schema.
+- **A4b** `bootstrap-mapping` helper: `scripts/bootstrap-mapping.ts <doc-path>` — one-shot Claude call that, given the doc content and the repo file tree, proposes a tiered YAML entry for human review. **Not a runtime adapter** — a dev-time helper to seed the YAML. Keeps `manual-map` deterministic at analysis time.
+- **A5** Seed `mappings/block-api.yml` for the 5–8 chosen docs. Use A4b to propose, then a human trims. Target: ≤3 primary, ≤5 secondary, ≤8 context per doc.
 - **A6** Claude Validator:
   - System prompt (cached): rules for identifying genuine drift, forbidding hallucination, requiring quoted evidence.
   - Tool-use schema matches `IssueSchema`.
+  - **Tier- and budget-aware context assembly.** Start with `primary + secondary` files from the mapping. Add `context` files in order until the 50k input-token budget is hit; record which files were dropped in `DocResult.relatedCode[].includedInAnalysis`.
   - Pass 1 (cached code context): emit candidate issues.
-  - Pass 2 (per-issue): for each candidate, re-fetch the exact code lines referenced and ask the model to confirm/reject. Discard confidence < 0.7.
+  - Pass 2 (per-issue): for each candidate, retrieve-on-demand — re-fetch the exact code lines referenced (even from `context` files that were dropped in Pass 1). The validator exposes a `fetch_code(path, startLine?, endLine?)` tool Claude can call. Discard any issue with confidence < 0.7.
   - Budget: 50k input tokens/doc max, most of it cached.
 - **A7** Pipeline orchestrator (`runPipeline`): wires the adapters, emits `RunResults`. Concurrency: analyze docs in parallel with `p-limit` (default 3).
 - **A8** Health scorer: formula + thresholds for `healthScore` and `status`. Keep it simple (e.g. `100 - (critical*15 + major*7 + minor*2)`, clamp 0..100).
