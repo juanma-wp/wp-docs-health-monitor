@@ -60,7 +60,7 @@ wp-docs-health-monitor/
     └── backlog.md
 ```
 
-No `packages/` directory, no monorepo, no GitHub Action workflow in Week 1. All deferred to Phase 2.
+No `packages/` directory, no monorepo, no GitHub Action workflow in Week 1. The Action ships in Phase 2 (M7); monorepo stays out unless genuinely needed later.
 
 ---
 
@@ -347,5 +347,5 @@ gh-pages branch:
 - **Track A / Track B divergence** → Day-1 schema handshake + mock fixture; Track B never blocks on Track A.
 - **Mapping accuracy for ~10 docs** → hand-curated via bootstrap script, checked into git. Mapping errors are trivial to fix.
 - **Slug renames breaking mappings silently** → deferred. A lint step handles it later when it bites.
-- **Timeline pressure (1 week)** → GitHub Action, `symbol-search` mapper, change detector all deferred to Phase 2. Core shippable demo is CLI + local dashboard + manual `gh-pages` push.
+- **Timeline pressure (1 week)** → GitHub Action (M7) and `symbol-search` mapper (M1) deferred to Phase 2. Change detector further deferred to Stretch (S3). Core Week-1 shippable demo is CLI + local dashboard + manual `gh-pages` push via `publish.sh`.
 - **Cost runaway** → 50k input-token cap per doc + prompt caching. Expected total per 10-doc run: ≤$1. Alert threshold: $5. Measured at the end of each run, logged to console.

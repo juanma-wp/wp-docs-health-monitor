@@ -1,6 +1,6 @@
 # WP Docs Health Monitor — PoC Plan
 
-> **Reading order:** start here. Technical details live in [docs/architecture.md](./docs/architecture.md). Issues to pick up live in [docs/backlog.md](./docs/backlog.md).
+> **Reading order:** start here for the overview. Technical details → [docs/architecture.md](./docs/architecture.md). Tasks (what to build) → [docs/backlog.md](./docs/backlog.md). Schedule (when to build it) → [docs/timeline.md](./docs/timeline.md).
 
 ## Context
 
@@ -35,7 +35,7 @@ The blog post at https://radicalupdates.wordpress.com/2026/04/15/block-editor-do
 
 **Phase 2 (Weeks 2–4, month-end target):** Scale to the **full Block Editor Handbook** — ~150 editorial docs (filter out auto-generated package READMEs). Build the `symbol-search` mapper so we don't hand-curate 150 entries. Harden the dashboard for scale. Ship a **GitHub Action with a weekly cron** that runs the pipeline and auto-deploys the dashboard to GitHub Pages — the cron is what makes "CI/CD for docs" real, not a manual habit.
 
-**Post-month (not committed):** `wordpress-rest` DocSource, second handbook (e.g. Themes Handbook — assuming it's actually WP-edited and not markdown-sourced), GitHub Action automation, trend tracking. Architecturally supported since Week 1, but deliberately deferred so month-end stays achievable.
+**Post-month (not committed):** `wordpress-rest` DocSource, second handbook (e.g. Themes Handbook — assuming it's actually WP-edited and not markdown-sourced), `fs-walk` adapter, source-type awareness in the dashboard, `a8c-context` MCP adapter. Architecturally supported since Week 1, but deliberately deferred so month-end stays achievable.
 
 ## Architecture at a Glance
 
@@ -71,11 +71,11 @@ Pluggable adapters around a stateless pipeline:
       (static HTML)                   (orchestration)
 ```
 
-| Interface        | Phase 1 (PoC)     | Phase 2 (committed)      | Later stubs              |
+| Interface        | Phase 1 (PoC, Week 1)     | Phase 2 (committed, Weeks 2–4) | Post-month / Later stubs              |
 |------------------|-------------------|--------------------------|--------------------------|
-| `DocSource`      | `manifest-url` (consumes Gutenberg-style `manifest.json`) | `wordpress-rest`, `fs-walk` (generate manifest for markdown sites without one) | `sitemap-crawler`, `a8c-context` |
+| `DocSource`      | `manifest-url` (consumes Gutenberg-style `manifest.json`) | (reuse `manifest-url`) | `wordpress-rest` (D1), `fs-walk` (D4), `a8c-context` (D5), `sitemap-crawler` |
 | `CodeSource`     | `git-clone`       | (reuse)                  | `multi-repo`, `local-path` |
-| `DocCodeMapper`  | `manual-map` (slug-keyed JSON, tiered) + LLM-bootstrap helper | (reuse) | `symbol-search`, `embedding-retrieval`, `hybrid` |
+| `DocCodeMapper`  | `manual-map` (slug-keyed JSON, tiered) + LLM-bootstrap helper | `symbol-search` (M1) | `hybrid`, `embedding-retrieval` |
 | `Validator`      | `claude`          | (reuse)                  | (only one needed)         |
 
 Unimplemented Later-stub adapters throw `NotImplementedError` — documents the extension surface without adding dead code.
@@ -110,20 +110,23 @@ Architecture supports these; we defer to keep month-end achievable. Promote to c
 ## Stretch — nice to have
 
 - **S3** Change Detector: diffs last-analyzed commit SHA vs current, queues only changed docs + docs whose mapped code changed. Biggest cost lever per the blog post.
-- **S6** Trend tracking across runs (store history, show trend line in dashboard).
 - **S7** Slug-rename lint: warn when `mapping.json` keys aren't in the current manifest.
 - **S8** Round-trip: open a GitHub PR on the markdown source (or draft a WP post update via REST) for issues above a confidence threshold.
 
+*(S5 promoted to committed Phase 2 as M1 `symbol-search` mapper. S6 trend tracking now covered by committed M8 historical dashboard.)*
+
 ## Out of Scope for PoC (Week 1)
 
-- GitHub Action workflow and weekly cron — deferred to Phase 2 (P2-1).
-- `wordpress-rest` / `fs-walk` / `a8c-context` DocSources — interfaces defined, implementations deferred.
-- `symbol-search` / `hybrid` / `embedding-retrieval` mappers — interface-compatible, implementations deferred.
+- GitHub Action workflow and weekly cron — Week 1 out of scope; lands in Phase 2 (M7).
+- `symbol-search` mapper — Week 1 uses manual mapping; `symbol-search` lands in Phase 2 (M1).
+- Historical dashboard UI — Week 1 ships the data-model groundwork; UI lands in Phase 2 (M8).
+- `wordpress-rest` / `fs-walk` / `a8c-context` DocSources — interfaces defined; implementations post-month.
+- `hybrid` / `embedding-retrieval` mappers — interface-compatible; implementations post-month.
 - Auto-generated package READMEs (`packages/*/README.md`) — most are docgen output, low drift signal.
 - Auto-PRs with fixes, screenshots/image link-checking, multi-handbook coverage.
 - Fine-tuning — off-the-shelf Claude Sonnet 4.6.
 - PHP / wordpress-develop code source — gutenberg repo only in Week 1.
-- Slug-rename detection, trend tracking, gamification.
+- Slug-rename detection, gamification.
 
 ## Open Questions (non-blocking)
 

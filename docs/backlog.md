@@ -1,216 +1,125 @@
 # Backlog
 
-Back to [PLAN.md](../PLAN.md) · For architecture and schemas see [architecture.md](./architecture.md).
+Back to [PLAN.md](../PLAN.md) · Schedule in [timeline.md](./timeline.md) · Architecture and schemas in [architecture.md](./architecture.md).
 
-What to build, in order. Each issue is individually shippable (one person, one PR, one merge). Sizes: **S** <1h, **M** 1–3h, **L** 3–6h.
+**What to build.** Not *when* — that's in [timeline.md](./timeline.md).
+
+**Week 1: five ambitious feature-level issues**, each with a clear outcome and a detailed checklist of what's inside. Breaking each into smaller sub-PRs during implementation is fine — the issue here is the *unit of agreement*, not the unit of merge.
+
+Sizes: **S** <1h, **M** 1–3h, **L** 3–6h, **XL** 6+h (likely multi-day).
 
 Every issue has:
 - **Track** (A = pipeline / B = presentation / Either) — suggested, swap freely. Both devs using Claude Code so either can pick up either track.
-- **Deps** — prerequisite issue IDs that must be merged first
-- **Done when** — acceptance check a reviewer uses
-
-**Total:** ~30 issues, ~50 dev-hours. Fits two devs × ~5 days with buffer.
-
----
-
-## Month-end Target
-
-By end of month: the **full Block Editor Handbook** (~150 editorial docs) analyzed and published on GitHub Pages. Architecture stays source-agnostic so post-month we can add `wordpress-rest` for a second handbook, but that's not committed for this month.
-
-Three phases:
-
-- **Week 1 — PoC** (issues S/A/B/V below, ~50 dev-hours): 10 docs from Block API Reference, manual mapping, two-pass Claude validator, static dashboard.
-- **Weeks 2–4 — Scale-up** (milestones M1–M6 below, sized at Week-2 kickoff): `symbol-search` mapper, editorial-only filter, pipeline + dashboard at 150-doc scale, one production run, runbook.
-
-## Week 1 Timeline
-
-- **Deadline:** ~2026-04-27 (one week from kickoff).
-- **Capacity:** 2 devs × 5 working days × 6 focused hours ≈ 60 dev-hours. Plan for ~50h of issues, leaving 20% buffer.
-- **Rough split:** Track A (pipeline) ~30h, Track B (presentation) ~15h, shared ~5h. Track B finishes presentation early → helps with A9 fixtures and V0 manual review.
-
-### Week-1 cut list (already applied)
-
-- ❌ GitHub Action workflow — deferred to Phase 2 (P2-1).
-- ❌ pnpm workspaces / monorepo — single flat package.
-- ❌ `wordpress-rest` / `fs-walk` / `a8c-context` DocSources — Phase 2.
-- ❌ `symbol-search` / `hybrid` / `embedding-retrieval` mappers — Phase 2+.
-- ❌ PHP / wordpress-develop code source — gutenberg only.
-- ❌ Change detector, slug-rename lint, trend tracking, auto-PRs.
-- ✅ **Kept:** two-pass validation (with Day-3 decision point), LLM-bootstrap script, Tailwind-CDN dashboard.
-
-### Day-3 decision point on two-pass validation
-
-If Phase 0 precision on 3 docs ≥80% AND the clean doc shows 0 issues → **keep** Pass 2 (A6e) and proceed. If <80% or false positives on the clean doc → **cut** Pass 2 (A6e), tighten `confidence ≥ 0.8`, rely on the runtime verbatim-evidence check (A6d), ship the Pass-1-only version. Dashboard still demos.
+- **Outcome** — one-line "done" that a reviewer can check.
+- **Includes** — the concrete deliverables inside.
+- **Deps** — prerequisite issues that must land first.
 
 ---
 
-## Day 1 — Shared Kickoff (both devs, half-day pair session)
+## Week 1 Issues
 
-- **S0 — Bootstrap repo** · Either · S
-  - Deps: —
-  - Done when: `package.json`, `tsconfig.json` (strict), ESLint + Prettier, `.gitignore`, `src/index.ts` placeholder. `npm run typecheck` passes on an empty project.
-
-- **S1 — Manifest + mapping types** · Track A · S
-  - Deps: S0
-  - Done when: `src/types/mapping.ts` exports `ManifestEntrySchema`, `CodeTiersSchema`, `MappingSchema` (zod). Types compile.
-
-- **S2 — Issue + result types** · Track A · M
-  - Deps: S0
-  - Done when: `src/types/results.ts` exports `IssueSchema`, `DocResultSchema`, `RunResultsSchema` (zod). Matches the Shared Contract in [architecture.md](./architecture.md#shared-contract-day-1-before-branching) exactly.
-
-- **S3 — Config schema** · Track B · S
-  - Deps: S0
-  - Done when: `src/config/schema.ts` exports `ConfigSchema` with fields for project, docs source, code source, mapping path, output dir.
-
-- **S4 — Pipeline entry stub** · Either · S
-  - Deps: S2
-  - Done when: `src/pipeline.ts` exports `runPipeline(config: Config): Promise<RunResults>` returning an empty-but-valid `RunResults`. This is the interface Track B codes against.
-
-- **S5 — Export JSON Schema** · Either · S
-  - Deps: S2
-  - Done when: `npm run gen:schema` writes `examples/results.schema.json` via `zod-to-json-schema`.
-
-- **S6 — Mock results fixture** · Either · M
-  - Deps: S2, S5
-  - Done when: `examples/mock-results.json` has ~4 fake docs (one healthy, one needs-attention, one critical, one with varied issue types) and passes `RunResultsSchema` validation. **Unblocks Track B fully.**
-
-- **S7 — History data-model groundwork** · Either · S
-  - Deps: S2
-  - Done when: `src/history.ts` exports `fingerprintIssue(slug, type, codeFile, issueText) → string` (stable hash, tolerant of line shifts — normalizes whitespace + line numbers). Output layout documented: results write to `out/data/runs/<runId>/results.json`, plus an updated `out/data/history.json` run index. Publish script preserves prior runs when pushing to `gh-pages`. UI for history is Phase 2 (M8); this is the data-model foundation so Run 1 isn't lost.
+Five feature-level issues. Each can be broken into smaller sub-PRs during implementation — the issue is the *unit of agreement* on scope and outcome, not necessarily the unit of merge.
 
 ---
 
-## Track A — Pipeline (~30h)
+### Issue #1 — Project foundation & shared contracts
 
-- **A1 — Adapter registry** · Track A · S
-  - Deps: S0
-  - Done when: `src/adapters/index.ts` exports a registry and `NotImplementedError`. Empty type files for `doc-source`, `code-source`, `mapper`, `validator`.
+**Track:** Either (pair session on Day 1) · **Size:** M (~5h) · **Deps:** —
 
-- **A2a — DocSource interface** · Track A · S
-  - Deps: A1, S1
-  - Done when: `src/adapters/doc-source/types.ts` defines `DocSource.list(config) → Doc[]` returning `{slug, title, parent, sourceUrl, content, codeExamples, metrics}`.
+**Outcome:** Repo skeleton in place, every zod schema locked, CLI entry stub compiles, mock fixture passes validation. After this lands on `main`, both tracks work fully in parallel with zero schema ambiguity.
 
-- **A2b — `manifest-url`: fetch + validate** · Track A · M
-  - Deps: A2a
-  - Done when: given a manifest URL, fetches JSON, validates each entry against `ManifestEntrySchema`, warns on invalid entries without crashing.
-
-- **A2c — `manifest-url`: filter + fetch markdown** · Track A · M
-  - Deps: A2b
-  - Done when: filters entries by `parent` slug, fetches each `markdown_source` URL, handles 404/500 gracefully, returns `{entry, content}` pairs.
-
-- **A2d — `manifest-url`: parse markdown → Doc** · Track A · M
-  - Deps: A2c
-  - Done when: frontmatter via `gray-matter`, code blocks/links counted via `remark`. Returns complete `Doc[]`. Unit test against a checked-in mini-manifest fixture.
-
-- **A3a — `git-clone` CodeSource** · Track A · M
-  - Deps: A1
-  - Done when: `src/adapters/code-source/git-clone.ts` shallow-clones a repo, exposes `readFile(path, startLine?, endLine?)` and `listDir(path)`. Cleans up old clones.
-
-- **A3b — `git-clone`: SHA caching** · Track A · S
-  - Deps: A3a
-  - Done when: if cache exists and HEAD SHA matches ref, skips clone. Reruns are <1s.
-
-- **A4 — `manual-map` Mapper** · Track A · M
-  - Deps: A1, S1
-  - Done when: reads `mappings/<project>.json`, validates against `MappingSchema`, returns `CodeTiers` by slug. Throws helpful error when a requested slug is missing.
-
-- **A4c — `bootstrap-mapping` script** · Track A · L
-  - Deps: A2d, A3a
-  - Done when: `npx tsx scripts/bootstrap-mapping.ts <slug>` prints a proposed `{slug: CodeTiers}` JSON snippet. Uses Claude with the doc content + repo file tree. Human reviews, pastes into `mappings/*.json`.
-
-- **A5 — Seed mapping for ~10 slugs** · Track A · M
-  - Deps: A4c
-  - Done when: `mappings/gutenberg-block-api.json` has entries for ~10 Block API Reference slugs. Caps: ≤3 primary, ≤5 secondary, ≤8 context each. Committed.
-
-- **A6a — Validator interface** · Track A · S
-  - Deps: A1, S2
-  - Done when: `src/adapters/validator/types.ts` defines `Validator.validate(doc, context) → Issue[]`.
-
-- **A6b — Validator: context assembler** · Track A · M
-  - Deps: A3a, A4, S2
-  - Done when: `assembleContext(doc, mapping, budget) → {files, stats}`. Starts with primary+secondary, adds context until budget hit, records what was dropped.
-
-- **A6c — Validator: Pass 1 (system prompt + tool use)** · Track A · L
-  - Deps: A6a, A6b
-  - Done when: Claude call with cached system prompt emits `Issue[]` via tool-use matching `IssueSchema`. Unit-tested against fixture doc+code.
-
-- **A6d — Validator: verbatim evidence check** · Track A · S
-  - Deps: A6c
-  - Done when: issues whose `evidence.codeSays` isn't literally found in the referenced file are silently rejected. Counter logged.
-
-- **A6e — Validator: Pass 2 (`fetch_code` retrieve-on-demand)** · Track A · L
-  - Deps: A6c, A3a
-  - Done when: for each candidate issue, Claude can call `fetch_code(path, startLine?, endLine?)` to verify. Issues with `confidence < 0.7` dropped. **This is the issue to cut at the Day-3 decision point if it's not stable.**
-
-- **A7 — Pipeline orchestrator** · Track A · M
-  - Deps: A2d, A3a, A4, A6c (Pass 1 at minimum)
-  - Done when: `runPipeline(config)` wires DocSource → CodeSource → Mapper → Validator, analyzes docs with `p-limit(3)`, emits `RunResults` that validates against the schema.
-
-- **A8 — Health scorer** · Track A · S
-  - Deps: S2
-  - Done when: `scoreDoc(issues) → {healthScore, status}` implemented. Formula `100 − (critical*15 + major*7 + minor*2)`, clamped 0..100. Thresholds: ≥85 healthy, 60–84 needs-attention, <60 critical. Overall average computed in the orchestrator.
-
-- **A9a — Test fixture: drifted doc** · Track A · M
-  - Deps: A6c
-  - Done when: `tests/fixtures/drifted/` has a hand-tampered doc+code pair. Validator reports ≥1 `critical` issue.
-
-- **A9b — Test fixture: clean doc** · Track A · S
-  - Deps: A6c
-  - Done when: `tests/fixtures/clean/` has a known-accurate doc+code pair. Validator reports 0 issues (after confidence filter).
+**Includes:**
+- `package.json`, `tsconfig.json` (strict), ESLint + Prettier, `.gitignore`, placeholder `src/index.ts`. `npm run typecheck` passes on an empty project.
+- `src/types/mapping.ts` — `ManifestEntrySchema`, `CodeTiersSchema`, `MappingSchema` (zod). Matches the Shared Contract in [architecture.md](./architecture.md#shared-contract-day-1-before-branching).
+- `src/types/results.ts` — `IssueSchema` (with `fingerprint`), `DocResultSchema` (with `diagnostics`), `RunResultsSchema`.
+- `src/config/schema.ts` — `ConfigSchema` (project, docs source, code source, mapping path, output dir).
+- `src/pipeline.ts` — exports stub `runPipeline(config: Config): Promise<RunResults>` returning an empty-but-valid `RunResults`. This is the interface Track B codes against from Day 2 onward.
+- `src/history.ts` — exports `fingerprintIssue(slug, type, codeFile, issueText) → string` (stable hash, line-shift tolerant). Output layout documented: `out/data/runs/<runId>/results.json` + `out/data/history.json` run index.
+- `examples/results.schema.json` — generated from zod via `zod-to-json-schema`. `npm run gen:schema` rebuilds it.
+- `examples/mock-results.json` — ~4 fake docs (one healthy, one needs-attention, one critical, one with varied issue types) passing `RunResultsSchema`. **This unblocks Track B entirely.**
 
 ---
 
-## Track B — Presentation (~15h)
+### Issue #2 — Doc + code ingestion pipeline
 
-- **B1 — Config loader** · Track B · S
-  - Deps: S3
-  - Done when: `loadConfig(path)` reads YAML, validates via `ConfigSchema`, returns typed `Config`.
+**Track:** A (pipeline) · **Size:** L (~12h) · **Deps:** #1
 
-- **B2a — CLI skeleton** · Track B · S
-  - Deps: S0
-  - Done when: `src/cli.ts` with flags `--config`, `--output`, `--only <slug>`, `--dry-run`. `npm run analyze -- --help` prints usage.
+**Outcome:** The pipeline can pull the Gutenberg manifest, filter to Block API Reference slugs, fetch each doc's markdown, clone Gutenberg source, and resolve tiered code mappings from a slug-keyed JSON file. Returns typed `{Doc, CodeTiers}` pairs for every doc in scope. No AI yet — pure plumbing, cost $0.
 
-- **B2b — CLI wired to pipeline** · Track B · S
-  - Deps: B2a, B1, S4
-  - Done when: `npm run analyze -- --config config/gutenberg-block-api.yml --output ./out` writes `out/results.json` + a log file. Works with stub `runPipeline` returning empty results.
+**Includes:**
+- `src/adapters/index.ts` — registry + `NotImplementedError` for unimplemented adapters.
+- `DocSource` interface in `src/adapters/doc-source/types.ts`. Returns `Doc[]` with `{slug, title, parent, sourceUrl, content, codeExamples, metrics}`.
+- `manifest-url` DocSource: fetches manifest JSON, validates against `ManifestEntrySchema`, filters by `parent` slug (e.g. `block-api`), fetches each `markdown_source` URL with graceful 404/500 handling, parses frontmatter via `gray-matter`, counts code blocks + links via `remark`.
+- `CodeSource` interface + `git-clone` implementation: shallow-clones a repo into a cache dir, exposes `readFile(path, startLine?, endLine?)` and `listDir(path)`, caches by commit SHA so reruns are <1s.
+- `DocCodeMapper` interface + `manual-map` implementation: reads `mappings/<project>.json`, validates against `MappingSchema`, returns `CodeTiers` by slug, throws a helpful error on missing slugs.
+- `scripts/bootstrap-mapping.ts <slug>` — LLM helper that proposes a `{slug: CodeTiers}` JSON snippet using Claude with doc content + repo file tree. Human-reviewed output pastes into `mappings/*.json`. Dev-time only, not a runtime adapter.
+- `mappings/gutenberg-block-api.json` seeded with the ~10 PoC slugs (`block-metadata`, `block-registration`, `block-attributes`, `block-supports`, `block-variations`, `block-context`, `block-deprecation`, `block-transforms`, `block-patterns`, `block-bindings`). Caps: ≤3 primary, ≤5 secondary, ≤8 context per slug.
+- Unit tests against a checked-in mini-manifest fixture (no network).
 
-- **B3a — Dashboard: reader + generator entry** · Track B · S
-  - Deps: S6
-  - Done when: `src/dashboard/generate.ts` reads + validates a `results.json`, exposes `generate(results, outDir)` that writes to disk.
+**Done when:** calling `runPipeline(config)` (validator stubbed) prints each slug + its primary code file list for all ~10 docs. Zero API cost.
 
-- **B3b — Dashboard: index.html** · Track B · M
-  - Deps: B3a, B4
-  - Done when: `out/index.html` shows overall health %, totals (critical/major/minor), and the tree view grouped by parent slug with per-folder aggregated score. Tailwind CDN, one-file HTML.
+---
 
-- **B3c — Dashboard: doc-detail.html** · Track B · L
-  - Deps: B3a
-  - Done when: `out/doc/<slug>.html` shows title, health score, metrics, issues (severity, confidence, quoted evidence, proposed action), positives, related-code list, source URL link. Generated one per doc from `examples/mock-results.json`.
+### Issue #3 — Claude drift validator with two-pass evaluation
 
-- **B3d — Dashboard: folder.html** · Track B · M
-  - Deps: B3a, B4
-  - Done when: `out/folder/<parent>.html` shows a section's rollup and its docs. Reached via links in `index.html`.
+**Track:** A (pipeline) · **Size:** XL (~18h) · **Deps:** #2
 
-- **B4 — Tree builder** · Track B · M
-  - Deps: S2
-  - Done when: `buildTree(docs) → TreeNode[]` groups by parent slug, aggregates health (doc-count weighted). Handles ≥200 docs cleanly.
+**Outcome:** End-to-end pipeline produces a valid `RunResults` over all ~10 docs. Each doc has a health score, evidence-backed issues (or 0 issues when healthy), evidence-backed positives, and diagnostics where relevant. Day-3 Phase 0 gate documented (Go, No-go with Pass 2 cut, or Abort).
 
-- **B6 — `publish.sh`** · Track B · S
-  - Deps: B3b, B3c, B3d
-  - Done when: `scripts/publish.sh` (or `npm run publish`) copies `out/` to a `gh-pages` worktree and pushes. GitHub Pages serves the result.
+**Includes:**
+- `Validator` interface in `src/adapters/validator/types.ts`.
+- Context assembler: `assembleContext(doc, mapping, budget) → {files, stats}`. Loads `primary + secondary`, appends `context` until the 50k-token budget is hit, records dropped files in `DocResult.relatedCode[].includedInAnalysis`.
+- **Pass 1** — Claude Sonnet 4.6 call with a cached system prompt encoding the Validator Behavior rules from [architecture.md](./architecture.md#validator-behavior-prompt-rules) (drift definition, severity calibration, evidence-backed positives cap 3, suggestion quality bar). Tool-use emits `Issue[]` matching `IssueSchema`. `Issue.fingerprint` computed from `src/history.ts`.
+- Runtime verbatim evidence check: any issue whose `evidence.codeSays` doesn't literally appear in the referenced code file is silently dropped. Drop counter logged.
+- **Pass 2** — for each Pass-1 candidate, Claude can call a `fetch_code(path, startLine?, endLine?)` tool to verify. Issues with `confidence < 0.7` dropped. Critical/major issues with weak suggestions (generic words like "update", "revise") retry once with a sharper prompt; still-weak → drop.
+- `src/health-scorer.ts` — `scoreDoc(issues) → {healthScore, status}`. Formula `100 − (critical*15 + major*7 + minor*2)`, clamped 0..100. Thresholds: ≥85 `healthy`, 60–84 `needs-attention`, <60 `critical`. Overall = average across docs.
+- Pipeline orchestrator: wires DocSource → CodeSource → Mapper → ContextAssembler → Validator → HealthScorer. Concurrency `p-limit(3)`. Run-end cost meter.
+- Test fixtures: `tests/fixtures/drifted/` (hand-tampered doc+code, must yield ≥1 critical) and `tests/fixtures/clean/` (known-accurate, must yield 0 issues post-filter).
+- **Day-3 Phase 0 gate** — run the validator on 3 docs (1 known-drifted, 1 known-clean, 1 uncertain). Measure precision ≥80%, recall ≥70%, clean-doc false positives = 0. Document results + decision in `docs/phase-0-results.md`. If no-go, cut Pass 2 and tighten `confidence ≥ 0.8` for Pass-1-only ship. If still failing, abort honestly.
 
-- **B7 — README** · Track B · M
-  - Deps: B2b (so examples are real)
-  - Done when: install steps, API key setup, CLI usage, sample output, cost expectation, dashboard screenshot. Enough for your partner's partner to reproduce.
+**Done when:** `npm run analyze` on the PoC config produces a valid `RunResults` with real issues on drifted docs, 0 issues on healthy docs, for under $1 per 10-doc run. `docs/phase-0-results.md` documents the decision.
+
+---
+
+### Issue #4 — Static HTML dashboard + CLI
+
+**Track:** B (presentation) · **Size:** L (~12h) · **Deps:** #1
+
+**Outcome:** `npm run analyze -- --config config/gutenberg-block-api.yml --output ./out` runs the pipeline (or reads `results.json`) and produces a browsable static dashboard with overall health %, tree view of docs by parent slug, per-doc detail pages with issues + evidence + suggestions + diagnostics + positives, and per-folder rollups. Track B builds against the mock fixture from #1 and never waits for #2 or #3.
+
+**Includes:**
+- `src/config/loader.ts` — `loadConfig(path)` reads YAML, validates via `ConfigSchema`, returns typed `Config`.
+- `src/cli.ts` — flags `--config`, `--output`, `--only <slug>`, `--dry-run`. `npm run analyze -- --help` prints usage. Wires config loader → `runPipeline` → writes `out/data/runs/<runId>/results.json` + `out/data/logs.txt`.
+- `src/dashboard/generate.ts` — reads and validates `results.json`, exposes `generate(results, outDir)` that writes the full static site.
+- `src/dashboard/tree-builder.ts` — `buildTree(docs) → TreeNode[]` groups by parent slug, doc-count-weighted health aggregation. Handles ≥200 docs for Phase 2.
+- Templates (`eta` or plain template literals), rendered with Tailwind via CDN (no build step):
+  - `out/index.html` — overall health %, totals (critical/major/minor), tree view grouped by parent with per-folder aggregated scores.
+  - `out/doc/<slug>.html` — title, health score, metrics, issues (severity, confidence, quoted evidence, proposed action), positives, related-code list, diagnostics strip, source URL link.
+  - `out/folder/<parent>.html` — section rollup + list of its docs.
+- `README.md` — install, `ANTHROPIC_API_KEY` setup, CLI usage, sample invocation, cost expectation (~$1/10-doc run), screenshot of the dashboard.
+
+**Done when:** feeding `examples/mock-results.json` through the dashboard generator produces a browsable static site at `out/` with working navigation between index, folders, and per-doc pages. The same command works with a real `results.json` from Issue #3 once it lands.
+
+---
+
+### Issue #5 — Publish to GitHub Pages
+
+**Track:** B (presentation) · **Size:** S (~2h) · **Deps:** #4
+
+**Outcome:** One command publishes the generated dashboard publicly at `https://juanma-wp.github.io/wp-docs-health-monitor/`. Prior runs are preserved under `data/runs/<runId>/` on the `gh-pages` branch so Phase 2's historical UI (M8) has data to draw on.
+
+**Includes:**
+- `scripts/publish.sh` (also `npm run publish`) — uses a `gh-pages` git worktree, copies `out/` into it *preserving* any existing `data/runs/<runId>/` directories from prior runs, commits, pushes.
+- Repo settings: public visibility confirmed, GitHub Pages source = `gh-pages` branch root.
+- Runbook entry in `docs/runbook.md`: one paragraph on how to run it, what to expect, how to revert if the publish goes wrong.
+
+**Done when:** `npm run analyze && npm run publish` results in a publicly reachable dashboard URL. A second run archives its `results.json` under `data/runs/<runId>/` without clobbering the first.
 
 ---
 
 ## Phase 0 Validation Gate (Day 3 — Decision Point)
 
-Gate everything else behind this check. It's also the go/no-go for two-pass validation.
-
-- **V0 — Run on 3 docs, measure P/R** · Track A + manual review · M
-  - Deps: A5, A7 (with at least Pass 1 wired)
-  - Done when: `docs/phase-0-results.md` (or PR comment) records precision, recall, clean-doc false positives. Day-3 decision documented.
+Embedded in Issue #3 but called out here because it's the project's single most important gate.
 
 ### Method
 
