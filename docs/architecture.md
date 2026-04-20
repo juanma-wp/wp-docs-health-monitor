@@ -11,7 +11,7 @@ Technical reference: how the pieces fit, the schemas they exchange, and the file
 ```
 wp-docs-health-monitor/
 ├── src/
-│   ├── adapters/                    # Dev A
+│   ├── adapters/                    # Track A
 │   │   ├── index.ts                  # registry
 │   │   ├── doc-source/
 │   │   │   ├── types.ts
@@ -25,30 +25,30 @@ wp-docs-health-monitor/
 │   │   └── validator/
 │   │       ├── types.ts
 │   │       └── claude.ts             # two-pass, prompt-cached, tool-use
-│   ├── pipeline.ts                  # Dev A — wires adapters, emits RunResults
-│   ├── health-scorer.ts             # Dev A
-│   ├── config/                      # Dev B
+│   ├── pipeline.ts                  # Track A — wires adapters, emits RunResults
+│   ├── health-scorer.ts             # Track A
+│   ├── config/                      # Track B
 │   │   ├── schema.ts
 │   │   └── loader.ts
-│   ├── dashboard/                   # Dev B
+│   ├── dashboard/                   # Track B
 │   │   ├── generate.ts               # RunResults → static HTML
 │   │   ├── templates/
 │   │   │   ├── index.html.eta
 │   │   │   ├── doc-detail.html.eta
 │   │   │   └── folder.html.eta
 │   │   └── tree-builder.ts
-│   ├── cli.ts                       # Dev B — main entry
+│   ├── cli.ts                       # Track B — main entry
 │   └── types/
 │       ├── results.ts                # SHARED CONTRACT (zod)
 │       └── mapping.ts                # MappingSchema + Manifest types
 ├── scripts/
-│   └── bootstrap-mapping.ts         # LLM-assisted helper: slug → JSON candidate (Dev A)
+│   └── bootstrap-mapping.ts         # LLM-assisted helper: slug → JSON candidate (Track A)
 ├── config/
 │   └── gutenberg-block-api.yml      # PoC config
 ├── mappings/
-│   └── gutenberg-block-api.json     # slug-keyed tiered map (Dev A)
+│   └── gutenberg-block-api.json     # slug-keyed tiered map (Track A)
 ├── examples/
-│   ├── mock-results.json            # for dashboard dev without running pipeline (Dev B)
+│   ├── mock-results.json            # for dashboard dev without running pipeline (Track B)
 │   └── results.schema.json          # generated from zod
 ├── out/                             # gitignored — generated dashboard
 ├── package.json                     # single flat package
@@ -183,10 +183,12 @@ export type Mapping = z.infer<typeof MappingSchema>;
 
 export const IssueSchema = z.object({
   id: z.string(),
+  fingerprint: z.string(),                 // hash(slug + type + codeFile + normalize(issue)) — stable across runs
   severity: z.enum(["critical", "major", "minor"]),
   type: z.enum([
     "outdated-api", "missing-parameter", "incorrect-example",
-    "broken-link", "unclear-explanation", "deprecated-usage"
+    "broken-code-reference",                // doc references a code path that no longer exists
+    "unclear-explanation", "deprecated-usage"
   ]),
   location: z.object({ line: z.number().int(), text: z.string() }),
   issue: z.string(),
@@ -223,7 +225,8 @@ export const DocResultSchema = z.object({
     includedInAnalysis: z.boolean()                        // false if dropped to fit budget
   })),
   issues: z.array(IssueSchema),
-  positives: z.array(z.string())
+  positives: z.array(z.string()),
+  diagnostics: z.array(z.string()).default([])             // honesty signal: "2 mapped files not found", "budget exhausted, 3 context files skipped"
 });
 
 export const RunResultsSchema = z.object({
@@ -246,7 +249,93 @@ export const RunResultsSchema = z.object({
 export type RunResults = z.infer<typeof RunResultsSchema>;
 ```
 
-Dev B generates `examples/results.schema.json` from this and mocks a fixture, so Dev B's dashboard work is unblocked immediately — doesn't have to wait for real pipeline output.
+Track B generates `examples/results.schema.json` from this and mocks a fixture, so dashboard work is unblocked immediately — doesn't have to wait for real pipeline output.
+
+---
+
+## Validator Behavior (Prompt Rules)
+
+Decisions from design review, encoded into the validator's system prompt + runtime wrappers. The prompt is cached; these rules are part of what's cached.
+
+### What counts as drift (report it)
+
+- Type signature changes (param added/removed/renamed, return type changed).
+- Default value changes.
+- Deprecated APIs shown as current or recommended.
+- Code examples that would throw if run against the current code.
+- Function/hook/attribute names that no longer exist in the source.
+- Required parameters documented as optional (or vice versa).
+
+### What does not count as drift (skip silently)
+
+- Teaching simplifications — docs intentionally omitting edge cases or error handling for clarity.
+- Undocumented optional parameters (unless commonly used and absence would surprise a reader).
+- Style, grammar, typos.
+- Broken external links (a future phase).
+
+### The judgment rule for partial coverage
+
+> *If the documented behavior is a strict subset of actual behavior AND the omission doesn't mislead a reader following the doc, it's not drift. If omission would cause a reader's code to fail or be surprised, it is drift.*
+
+### Severity calibration
+
+- **Critical** — a reader's code would break or behave incorrectly if they followed the doc.
+- **Major** — the doc is meaningfully misleading but a reader's code usually still works.
+- **Minor** — technically wrong but most readers wouldn't be misled.
+
+Health score: `100 − (critical*15 + major*7 + minor*2)`, clamped 0..100. Thresholds: ≥85 healthy, 60–84 needs-attention, <60 critical.
+
+### Confidence thresholds
+
+- **Two-pass validation** (Pass 1 + `fetch_code` Pass 2): discard issues with `confidence < 0.7`.
+- **Pass-1-only fallback** (if Day-3 gate cuts Pass 2): tighten to `confidence < 0.8`.
+- Low-confidence hunches (0.5–0.7) are silently dropped for PoC, not exposed as "needs review." Re-evaluate post-month.
+
+### Evidence requirements
+
+- Every `Issue.evidence.codeSays` must appear **verbatim** in the referenced code file. Runtime check rejects fabrications the prompt missed.
+- Every `positive` must be evidence-backed too — not praise for its own sake. Cap of 3 positives per doc to force substantive picks.
+
+### Suggestion quality bar
+
+- **Critical / Major:** the suggestion must include specific proposed text — a rewritten sentence, a code snippet to replace the current example, or an explicit *"add parameter X of type Y here"* instruction. No hand-waving.
+- **Minor:** a loose nudge is fine.
+- Enforcement: if a critical/major issue comes back with a weak suggestion (e.g., *"update the wording"*), the validator retries once with a sharper prompt; if still weak, the issue is dropped. Trustworthiness > coverage.
+
+### Scope
+
+- **Per-doc only.** Cross-doc analysis (inter-doc link validity, inter-doc consistency) is out of scope for month-end — it's a separate batch pass over completed `RunResults`.
+- `broken-code-reference` means *the doc → code pointer is broken*, not *doc → other doc*.
+
+### Graceful degradation
+
+When the validator can't fully assess a doc (stale mapping, missing file, budget exhausted), it **proceeds and records the caveat** in `DocResult.diagnostics`. No special `inconclusive` status — the dashboard shows the diagnostics next to the health score so readers know the assessment has caveats.
+
+---
+
+## Results Storage & History
+
+Historical data from Week 1 onward — UI lands in Phase 2 (milestone M8). Shape:
+
+```
+gh-pages branch:
+├── index.html                       # latest dashboard (points to latest run)
+├── doc/<slug>.html                  # latest per-doc pages
+├── folder/<parent>.html             # latest folder pages
+└── data/
+    ├── latest.json                  # symlink/pointer to newest runs/<runId>/results.json
+    ├── runs/
+    │   ├── 2026-04-22T06-00-00Z/
+    │   │   └── results.json
+    │   ├── 2026-04-29T06-00-00Z/
+    │   │   └── results.json
+    │   └── ...
+    └── history.json                 # { runs: [{runId, timestamp, commitSha, overallHealth, totals}] }
+```
+
+**Issue fingerprinting** — each `Issue.fingerprint` is a stable hash of `slug + type + evidence.codeFile + normalize(issue.text)`. Same fingerprint across runs = same issue. Tolerant of doc line shifts (the normalized text ignores line numbers and minor whitespace). Enables "new this week" and "persistent for N runs" badges in M8.
+
+**Retention** — no pruning for PoC. At ~50–200 KB per `results.json` × 52 weeks ≈ 2–10 MB per year on the `gh-pages` branch. Revisit if it bloats.
 
 ---
 
@@ -255,7 +344,7 @@ Dev B generates `examples/results.schema.json` from this and mocks a fixture, so
 - **AI hallucination / false positives** → two-pass validation + quoted evidence + `confidence ≥ 0.7` + **runtime verbatim check** (`evidence.codeSays` must literally appear in the referenced file). Clean-doc fixture in tests catches drift in the validator itself.
 - **Two-pass validation is complex and time-hungry** → Day-3 decision point with a Pass-1-only fallback that still demos.
 - **Premature abstraction** → adapter interfaces designed broadly, implemented narrowly. Registry documents extension surface without dead code.
-- **Dev A / Dev B divergence** → Day-1 schema handshake + mock fixture; Dev B never blocks on Dev A.
+- **Track A / Track B divergence** → Day-1 schema handshake + mock fixture; Track B never blocks on Track A.
 - **Mapping accuracy for ~10 docs** → hand-curated via bootstrap script, checked into git. Mapping errors are trivial to fix.
 - **Slug renames breaking mappings silently** → deferred. A lint step handles it later when it bites.
 - **Timeline pressure (1 week)** → GitHub Action, `symbol-search` mapper, change detector all deferred to Phase 2. Core shippable demo is CLI + local dashboard + manual `gh-pages` push.
