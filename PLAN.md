@@ -1,138 +1,155 @@
-# WP Docs Health Monitor — PoC Plan
+# WP Docs Health Monitor — Plan
 
-> **Reading order:** start here for the overview. Technical details → [docs/architecture.md](./docs/architecture.md). Tasks (what to build) → [docs/backlog.md](./docs/backlog.md). Schedule (when to build it) → [docs/timeline.md](./docs/timeline.md).
+> **Reading order:** start here for the overview. Components and issues → [docs/backlog.md](./docs/backlog.md). Schedule → [docs/timeline.md](./docs/timeline.md). Technical details → [docs/architecture.md](./docs/architecture.md).
+
+---
+
+## Contents
+
+- [Context](#context)
+- [Constraints](#constraints)
+- [Key Components](#key-components)
+  - [1. Project Foundation](#1-project-foundation)
+  - [2. Doc Ingestion](#2-doc-ingestion-docsource)
+  - [3. Code Ingestion](#3-code-ingestion-codesource)
+  - [4. Doc–Code Mapping](#4-doccode-mapping-doccodemapper)
+  - [5. Drift Validator](#5-drift-validator)
+  - [6. Dashboard + CLI](#6-dashboard--cli)
+  - [7. GitHub Pages Publish](#7-github-pages-publish)
+- [Component Dependency Map](#component-dependency-map)
+- [Phase 1 — PoC](#phase-1--poc)
+- [Phase 2 — Scale to Full Block Editor Handbook](#phase-2--scale-to-full-block-editor-handbook)
+- [Post-Phase 2](#post-phase-2-not-committed)
+- [Open Questions](#open-questions)
+
+---
 
 ## Context
 
 **End goal:** Keep WordPress-hosted documentation sites (developer.wordpress.org, WooCommerce docs, internal A8C docs, etc.) accurate and up-to-date against the code they describe. Docs on those sites come from two kinds of sources:
 
-1. **Markdown in a source repo** that gets synced to a WordPress site (e.g. Gutenberg's `docs/` → developer.wordpress.org Block Editor Handbook CPTs).
-2. **Custom posts edited directly in WordPress** — no git, authors write inside wp-admin (common for WooCommerce, internal A8C docs, and self-managed handbooks).
+1. **Markdown in a source repo** synced to a WordPress site (e.g. Gutenberg's `docs/` → developer.wordpress.org Block Editor Handbook).
+2. **Custom posts edited directly in WordPress** — no git, authors write inside wp-admin.
 
-Both paths drift from the code silently. No one today has a prioritized punch list of what's wrong on those WordPress sites.
+Both paths drift from the code silently. No one today has a prioritized punch list of what's wrong on those sites.
 
-This project ships an automated tool that:
-- Pulls docs from either source (markdown repo OR a WordPress REST API).
-- Pulls the related source code.
-- Uses Claude to compare them and produce evidence-backed issues with health scores.
-- Renders a static dashboard doc authors can act on.
-
-The blog post at https://radicalupdates.wordpress.com/2026/04/15/block-editor-docs-health-monitor/ sets the north star (weekly runs, $0.50/week after change-detection caching, CI/CD for docs). The project should eventually feed fixes back into either source type — a PR for markdown, a WordPress post update for direct-edit sites.
+This project ships an automated tool that pulls docs and code, uses Claude to compare them, and renders a static dashboard doc authors can act on.
 
 ## Constraints
 
-- **Week 1 PoC deadline:** ~2026-04-27 (one week from kickoff). Aggressive scope discipline.
-- Small validatable first iteration (~10 docs) but **architecture designed to scale to ~200 docs/site**.
-- **"Docs might be OK" is a valid outcome** — the tool must confidently report *healthy* when nothing is wrong, not just find issues. Recall (did we miss drift?) matters as much as precision (is what we found real?).
-- Two developers working in parallel — cleanly separable, independently shippable issues.
-- Vertical split: Track A owns the analysis pipeline, Track B owns CLI + dashboard + config. Either dev can own either track — both using Claude Code.
-- **Public GitHub repo + GitHub Pages** for the dashboard. Dashboard is the product — overall health %, per-doc detail pages with evidence and proposed actions, informational (no gamification).
-- Quality first, cost secondary. Flag if costs go off rails (rough guardrail: < $5 per full 10-doc PoC run).
+- Aggressive scope discipline — small, validatable first iteration (~10 docs) with architecture designed to scale to ~200 docs/site.
+- **"Docs might be OK" is a valid outcome** — the tool must confidently report *healthy* when nothing is wrong. Recall matters as much as precision.
+- Two developers working in parallel on cleanly separable tracks: **Track A** (analysis pipeline) and **Track B** (CLI + dashboard + config).
+- Public GitHub repo + GitHub Pages for the dashboard. The dashboard is the product — overall health %, per-doc detail pages with evidence and proposed actions, informational (no gamification).
+- Quality first, cost secondary. Rough guardrail: < $5 per full run at scale.
 
-## Targets
+## Key Components
 
-**Phase 1 (Week 1, PoC):** ~10 docs from the Gutenberg Block API Reference (https://developer.wordpress.org/block-editor/reference-guides/block-api/) — e.g. `block-metadata`, `block-registration`, `block-attributes`, `block-supports`, `block-variations`, `block-context`, `block-deprecation`, `block-transforms`, `block-patterns`, `block-bindings`. Tight mappings to `packages/blocks/src/api/*` and `schemas/json/block.json`. Code source: **gutenberg only**. Manual mapping. Proves the pipeline.
+Six building blocks, each a discrete issue or group of issues:
 
-**Phase 2 (Weeks 2–4, month-end target):** Scale to the **full Block Editor Handbook** — ~150 editorial docs (filter out auto-generated package READMEs). Build the `symbol-search` mapper so we don't hand-curate 150 entries. Harden the dashboard for scale. Ship a **GitHub Action with a weekly cron** that runs the pipeline and auto-deploys the dashboard to GitHub Pages — the cron is what makes "CI/CD for docs" real, not a manual habit.
+### 1. Project Foundation
+Establishes the shared contract that lets both tracks work in parallel from day one — shared type contracts, zod schemas, CLI entry stub, and a mock fixture that validates all schemas. Without this, both tracks would be guessing at interfaces and stepping on each other.
 
-**Post-month (not committed):** `wordpress-rest` DocSource, second handbook (e.g. Themes Handbook — assuming it's actually WP-edited and not markdown-sourced), `fs-walk` adapter, source-type awareness in the dashboard, `a8c-context` MCP adapter. Architecturally supported since Week 1, but deliberately deferred so month-end stays achievable.
+**Connects to:** all other components.
 
-## Architecture at a Glance
+### 2. Doc Ingestion (`DocSource`)
+Answers "what docs exist and what do they say?" — pulling documentation from a source into a normalised `Doc[]` and abstracting away where they live. In Phase 1 docs come from a Gutenberg-style `manifest.json`; later they may come from a WordPress REST API. Everything downstream receives the same normalised `Doc` regardless of origin.
 
-Pluggable adapters around a stateless pipeline:
+**Connects to:** Mapper, Validator.
+
+### 3. Code Ingestion (`CodeSource`)
+Answers "what does the code actually say right now?" — fetching and caching source files so the Validator has exact, current file contents to compare against. Abstracting this out means the pipeline can later support multiple repos or local paths without touching the Validator. Phase 1: shallow-clone via git.
+
+**Connects to:** Mapper, Validator.
+
+### 4. Doc–Code Mapping (`DocCodeMapper`)
+Tells the Validator *which* code files are relevant to each doc — the bridge between the documentation world and the source world. Without this, the Validator would have no idea where to look. Phase 1 uses a hand-curated slug-keyed JSON file with tiered relevance (`primary`, `secondary`, `context`); Phase 2 automates this with symbol extraction and AST search so it scales beyond what a human can maintain.
+
+**Connects to:** Validator.
+
+### 5. Drift Validator
+The core analysis step: determines whether each doc accurately describes the code it maps to, and produces evidence-backed findings a doc author can act on. Claude reads doc + code together, identifies specific claims that are wrong or outdated, and scores each finding by severity and confidence. It also surfaces what *is* correct — so the output is an honest health report, not just a bug list. Issues with unsupported or low-confidence findings are filtered out before results are written.
+
+**Depends on:** Doc Ingestion, Code Ingestion, Mapping.  
+**Connects to:** results.json, which feeds the Dashboard.
+
+### 6. Dashboard + CLI
+Makes findings useful to doc authors, not just developers. The CLI runs the pipeline on demand and writes `results.json`; the dashboard turns those results into a browsable static site — overall health at a glance, per-folder rollups, and per-doc detail pages with quoted evidence and proposed fixes. The dashboard is the product: it's what a doc author opens to decide what to work on next. Track B builds this against the mock fixture from Foundation and never waits for the pipeline.
+
+**Depends on:** Project Foundation (mock fixture). Swaps to real results once the Validator lands.  
+**Connects to:** GitHub Pages publish.
+
+### 7. GitHub Pages Publish
+Makes the dashboard publicly reachable and persistent. A single command pushes the generated site to the `gh-pages` branch while preserving prior run data for future historical views. Phase 2 automates this step via a GitHub Action on a weekly cron.
+
+**Depends on:** Dashboard.
+
+---
+
+## Component Dependency Map
 
 ```
-         ┌──────────────────────────────────────────┐
-         │  config.yml (project, sources, mapping)   │
-         └────────────────────┬──────────────────────┘
-                              ▼
-  ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-  │  DocSource  │     │ CodeSource  │     │DocCodeMapper│
-  │  (adapter)  │     │  (adapter)  │     │  (adapter)  │
-  └──────┬──────┘     └──────┬──────┘     └──────┬──────┘
-         │                   │                   │
-         ▼                   ▼                   ▼
-    docs[]              code files          doc→code[] pairs
-                              │
-                              ▼
-                    ┌──────────────────┐
-                    │    Validator     │  (Claude, two-pass,
-                    │    (adapter)     │   prompt-cached)
-                    └────────┬─────────┘
-                             ▼
-                       issues[] + scores
-                             │
-                             ▼
-                      results.json
-                             │
-              ┌──────────────┴──────────────┐
-              ▼                             ▼
-      Dashboard Generator             CLI/Action
-      (static HTML)                   (orchestration)
+Foundation
+  ├→ Doc Ingestion ──┐
+  ├→ Code Ingestion ─┤
+  ├→ Mapping ────────┴→ Validator → results.json ─→ Dashboard → Publish
+  └→ Dashboard (mock)────────────────────────────→ Dashboard
 ```
 
-| Interface        | Phase 1 (PoC, Week 1)     | Phase 2 (committed, Weeks 2–4) | Post-month / Later stubs              |
-|------------------|-------------------|--------------------------|--------------------------|
-| `DocSource`      | `manifest-url` (consumes Gutenberg-style `manifest.json`) | (reuse `manifest-url`) | `wordpress-rest` (D1), `fs-walk` (D4), `a8c-context` (D5), `sitemap-crawler` |
-| `CodeSource`     | `git-clone`       | (reuse)                  | `multi-repo`, `local-path` |
-| `DocCodeMapper`  | `manual-map` (slug-keyed JSON, tiered) + LLM-bootstrap helper | `symbol-search` (M1) | `hybrid`, `embedding-retrieval` |
-| `Validator`      | `claude`          | (reuse)                  | (only one needed)         |
+Track B (Dashboard) builds against the mock from Foundation and never waits for Track A (pipeline components).
 
-Unimplemented Later-stub adapters throw `NotImplementedError` — documents the extension surface without adding dead code.
+---
 
-Full technical details (schemas, repo layout, mapping format, tech stack) → [docs/architecture.md](./docs/architecture.md).
+## Phase 1 — PoC
 
-Issue-level plan with owners, deps, and acceptance criteria → [docs/backlog.md](./docs/backlog.md).
+**Scope:** ~10 docs from the Gutenberg Block API Reference, analyzed end-to-end, with a live public dashboard.
 
-## Phase 2 — Scale-up to Full Block Editor Handbook (Weeks 2–4)
+**In scope:**
+- All six components above, with Phase 1 adapters (`manifest-url`, `git-clone`, `manual-map`, `claude` validator).
+- A Phase 0 validation gate: run the validator on 3 docs (one known-drifted, one known-clean, one uncertain) and measure precision ≥80%, recall ≥70%, zero false positives on the clean doc before proceeding to the full run.
+- A manual mapping file seeded for the ~10 Block API Reference slugs.
 
-Committed. Breaks into issues at Week-2 kickoff; coarse milestones here:
+**Out of scope for Phase 1:**
+- GitHub Action / weekly cron — deferred to Phase 2.
+- `symbol-search` mapper — Phase 1 uses manual mapping.
+- Historical dashboard UI — data groundwork ships in Phase 1; UI needs multiple runs.
+- `wordpress-rest`, `fs-walk`, `a8c-context` DocSources — interfaces defined; implementations deferred.
+- Auto-generated package READMEs — low drift signal, excluded.
 
-- **M1** `symbol-search` Mapper — extract symbols from each doc (function names, types, hooks, attribute names, code-block imports); AST-grep Gutenberg via `ast-grep`/`tree-sitter`; rank by specificity × centrality × recency; output tiered `MappingSchema`. Validated against Week-1 manual mappings (≥70% agreement on `primary`).
-- **M2** Editorial-only filter in `manifest-url` — exclude `packages/*/README.md` and `packages/components/src/*/README.md`. Filters ~424 → ~150 docs.
-- **M3** Pipeline at scale — raise concurrency, add per-run cost meter with a hard stop at $5 (configurable), checkpoint results after each doc so a crash doesn't restart the whole run.
-- **M4** Dashboard at scale — tree collapse, search/filter by status, page loads <1s with 150 docs.
-- **M5** Full-handbook run + publish — one production-shaped run on all ~150 docs, manual spot-check of ~20 issues, published to `https://juanma-wp.github.io/wp-docs-health-monitor/`.
-- **M6** Runbook — documented procedure for manual one-off runs (backup path when the Action is down or under development).
-- **M7** GitHub Action with weekly cron — `.github/workflows/analyze-docs.yml` with `workflow_dispatch` for manual dispatch and `schedule: cron: '0 6 * * 1'` (Mondays 06:00 UTC) for the weekly run. Uses an `ANTHROPIC_API_KEY` repo secret, uploads `results.json` as an artifact, and auto-deploys the dashboard to GitHub Pages via the `actions/deploy-pages` flow. One green scheduled run is the acceptance bar.
-- **M8** Historical dashboard — each run archived as `data/runs/<runId>/results.json` on the `gh-pages` branch. Dashboard shows a trend line of overall health, "new this week" / "persistent for N runs" badges on issues (using stable `Issue.fingerprint` hashes), and a per-doc sparkline. Data-model groundwork ships with S-track in Week 1; UI lands in Phase 2 once there are 2–3 runs to draw on.
+---
 
-## Post-month (not committed, deliberately deferred)
+## Phase 2 — Scale to Full Block Editor Handbook
 
-Architecture supports these; we defer to keep month-end achievable. Promote to committed once the month-end demo lands.
+**Scope:** ~150 editorial Block Editor Handbook docs, weekly automated runs, historical dashboard.
 
-- **D1** `wordpress-rest` DocSource: pagination, HTML→markdown normalization, Application Password auth. Produces a manifest-shaped list from a live WP site.
-- **D2** Second handbook PoC: **Themes Handbook** (if actually WP-edited and not markdown-sourced — verify first) or a WooCommerce docs page, through `wordpress-rest`.
-- **D3** Source-type awareness in dashboard: label docs "markdown" / "wordpress", deep-link to WP edit URL for WP-sourced docs.
-- **D4** `fs-walk` DocSource for markdown repos without a manifest.
-- **D5** `a8c-context` DocSource variant (context-a8c MCP for A8C-internal sites).
+**Key additions over Phase 1:**
+- **`symbol-search` Mapper** — replaces manual mapping at scale. Extracts symbols from each doc, finds their definitions in the Gutenberg AST, tiers results. Validated against Phase 1 manual mappings.
+- **Editorial filter** — excludes auto-generated package READMEs from the manifest (~424 → ~150 docs).
+- **Pipeline hardening** — higher concurrency, per-run cost cap, checkpointing so a crash resumes rather than restarts.
+- **Dashboard at scale** — tree collapse, search/filter, page loads <1s with 150 docs.
+- **GitHub Action with weekly cron** — automated Monday runs, deploys to GitHub Pages, enforces cost cap. Manual `workflow_dispatch` also supported.
+- **Historical UI** — trend line of overall health across runs, "new this week" / "persistent N runs" badges on issues using stable fingerprint hashes.
 
-## Stretch — nice to have
+---
 
-- **S3** Change Detector: diffs last-analyzed commit SHA vs current, queues only changed docs + docs whose mapped code changed. Biggest cost lever per the blog post.
-- **S7** Slug-rename lint: warn when `mapping.json` keys aren't in the current manifest.
-- **S8** Round-trip: open a GitHub PR on the markdown source (or draft a WP post update via REST) for issues above a confidence threshold.
+## Post-Phase 2 (not committed)
 
-*(S5 promoted to committed Phase 2 as M1 `symbol-search` mapper. S6 trend tracking now covered by committed M8 historical dashboard.)*
+Architecture supports these; deferred until the Phase 2 demo lands.
 
-## Out of Scope for PoC (Week 1)
+- **`wordpress-rest` DocSource** — pull docs from a live WordPress site via REST API with Application Password auth.
+- **Second handbook** — Themes Handbook (if WP-edited) or WooCommerce docs through `wordpress-rest`.
+- **Source-type awareness** — label docs "markdown" / "wordpress" in the dashboard; deep-link to WP edit URL for WP-sourced docs.
+- **`fs-walk` DocSource** — markdown repos without a manifest.
+- **`a8c-context` DocSource** — context-a8c MCP for A8C-internal sites.
+- **Fix round-trip** — open a GitHub PR (markdown source) or draft a WP post update (REST) for issues above a confidence threshold.
+- **Change detector** — diff last-analyzed SHA vs current, queue only changed docs. Biggest cost lever.
 
-- GitHub Action workflow and weekly cron — Week 1 out of scope; lands in Phase 2 (M7).
-- `symbol-search` mapper — Week 1 uses manual mapping; `symbol-search` lands in Phase 2 (M1).
-- Historical dashboard UI — Week 1 ships the data-model groundwork; UI lands in Phase 2 (M8).
-- `wordpress-rest` / `fs-walk` / `a8c-context` DocSources — interfaces defined; implementations post-month.
-- `hybrid` / `embedding-retrieval` mappers — interface-compatible; implementations post-month.
-- Auto-generated package READMEs (`packages/*/README.md`) — most are docgen output, low drift signal.
-- Auto-PRs with fixes, screenshots/image link-checking, multi-handbook coverage.
-- Fine-tuning — off-the-shelf Claude Sonnet 4.6.
-- PHP / wordpress-develop code source — gutenberg repo only in Week 1.
-- Slug-rename detection, gamification.
+---
 
-## Open Questions (non-blocking)
+## Open Questions
 
-- **Known-clean controls in the 10 docs:** which 1–2 of the chosen Block API docs are known to be accurate? Include them on purpose so recall measurement has a baseline.
-- **Editorial-only filter rules:** are all `packages/*/README.md` truly auto-generated docgen output? Confirm before M2 excludes them wholesale — a false exclusion hides real drift.
-- **Themes Handbook source model:** verify whether it's markdown-sourced or actually WP-edited. Answer gates whether D3 becomes a meaningful `wordpress-rest` demo or just another markdown handbook.
-- **Fix round-trip (S8):** auto-open PRs / draft WP post updates, or stay strictly read-only? Auto-PRs change the trust bar significantly.
-- **Markdown↔WP drift:** when both a markdown source AND a WP-edited post exist for the same doc, they can drift from *each other*. Worth flagging as a real failure mode for later.
-- **Bifrost P2 / Radical Speed Month framing:** does the month-end demo need to hit a specific forum or write-up beyond the generic "publish + share link" bar?
+- **Known-clean controls:** which 1–2 of the chosen Block API docs are known-accurate? Include them explicitly so recall measurement has a baseline.
+- **Editorial-only filter rules:** are all `packages/*/README.md` truly auto-generated? Confirm before Phase 2 excludes them wholesale — a false exclusion hides real drift.
+- **Themes Handbook source model:** verify whether it's markdown-sourced or WP-edited. Answer gates whether D3 becomes a meaningful `wordpress-rest` demo.
+- **Fix round-trip (stretch):** auto-open PRs / draft WP post updates, or stay strictly read-only? Auto-PRs change the trust bar significantly.
+- **Markdown↔WP drift:** when both a markdown source AND a WP-edited post exist for the same doc, they can drift from *each other*. Worth flagging as a failure mode for later.

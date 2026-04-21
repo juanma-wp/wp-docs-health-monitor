@@ -8,6 +8,29 @@ Dates are aspirational — adjust as reality hits. The *sequence* and *gates* ma
 
 ---
 
+## Contents
+
+- [At a glance](#at-a-glance)
+- [Week 1 — PoC milestones](#week-1--poc-milestones)
+  - [W1-M1: Foundation locked](#-w1-m1-foundation-locked-target-end-of-day-1--mon)
+  - [W1-M2: Ingestion pipeline ready](#-w1-m2-ingestion-pipeline-ready-target-end-of-day-2--tue)
+  - [W1-M3: Dashboard against mock fixture](#-w1-m3-dashboard-against-mock-fixture-target-end-of-day-3--wed)
+  - [W1-M4: Phase 0 validation gate](#-w1-m4-phase-0-validation-gate-target-end-of-day-3--wed)
+  - [W1-M5: Full 10-doc run](#-w1-m5-full-10-doc-run-target-end-of-day-5--fri)
+  - [W1-M6: Dashboard complete](#-w1-m6-dashboard-complete-target-end-of-day-5--fri)
+  - [W1-M7: PoC live publicly](#-w1-m7-poc-live-publicly-target-end-of-day-7--sunmon)
+- [Phase 2 — Scale-up milestones](#phase-2--scale-up-milestones)
+  - [P2-M1: Symbol-search mapper validated](#-p2-m1-symbol-search-mapper-validated-target-end-of-week-2)
+  - [P2-M2: Dashboard handles scale](#-p2-m2-dashboard-handles-scale-target-end-of-week-2)
+  - [P2-M3: 150-doc pipeline](#-p2-m3-150-doc-pipeline-target-mid-week-3)
+  - [P2-M4: First automated cron run](#-p2-m4-first-automated-cron-run-target-end-of-week-3)
+  - [P2-M5: Historical UI](#-p2-m5-historical-ui-target-mid-week-4)
+  - [P2-M6: Month-end demo](#-p2-m6-month-end-demo-target-2026-05-15)
+- [Milestone calendar](#milestone-calendar-headline-dates)
+- [Risks that can shift the schedule](#risks-that-can-shift-the-schedule)
+
+---
+
 ## At a glance
 
 | Phase | Window | Goal |

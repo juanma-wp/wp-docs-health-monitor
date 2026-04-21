@@ -2,6 +2,20 @@
 
 Back to [PLAN.md](../PLAN.md) · Schedule in [timeline.md](./timeline.md) · Architecture and schemas in [architecture.md](./architecture.md).
 
+## Contents
+
+- [Week 1 Issues](#week-1-issues)
+  - [Issue #1 — Project foundation & shared contracts](#issue-1--project-foundation--shared-contracts)
+  - [Issue #2 — Doc + code ingestion pipeline](#issue-2--doc--code-ingestion-pipeline)
+  - [Issue #3 — Claude drift validator with two-pass evaluation](#issue-3--claude-drift-validator-with-two-pass-evaluation)
+  - [Issue #4 — Static HTML dashboard + CLI](#issue-4--static-html-dashboard--cli)
+  - [Issue #5 — Publish to GitHub Pages](#issue-5--publish-to-github-pages)
+- [Phase 0 Validation Gate](#phase-0-validation-gate-day-3--decision-point)
+- [End-to-end Verification](#end-to-end-verification-day-67)
+- [Phase 2 — Scale-up](#phase-2--scale-up-to-full-block-editor-handbook-weeks-24)
+
+---
+
 **What to build.** Not *when* — that's in [timeline.md](./timeline.md).
 
 **Week 1: five ambitious feature-level issues**, each with a clear outcome and a detailed checklist of what's inside. Breaking each into smaller sub-PRs during implementation is fine — the issue here is the *unit of agreement*, not the unit of merge.
@@ -85,7 +99,7 @@ Five feature-level issues. Each can be broken into smaller sub-PRs during implem
 
 **Track:** B (presentation) · **Size:** L (~12h) · **Deps:** #1
 
-**Outcome:** `npm run analyze -- --config config/gutenberg-block-api.yml --output ./out` runs the pipeline (or reads `results.json`) and produces a browsable static dashboard with overall health %, tree view of docs by parent slug, per-doc detail pages with issues + evidence + suggestions + diagnostics + positives, and per-folder rollups. Track B builds against the mock fixture from #1 and never waits for #2 or #3.
+**Outcome:** `npm run analyze -- --config config/gutenberg-block-api.json --output ./out` runs the pipeline (or reads `results.json`) and produces a browsable static dashboard with overall health %, tree view of docs by parent slug, per-doc detail pages with issues + evidence + suggestions + diagnostics + positives, and per-folder rollups. Track B builds against the mock fixture from #1 and never waits for #2 or #3.
 
 **Includes:**
 - `src/config/loader.ts` — `loadConfig(path)` reads YAML, validates via `ConfigSchema`, returns typed `Config`.
@@ -141,7 +155,7 @@ Embedded in Issue #3 but called out here because it's the project's single most 
 
 1. `npm install`
 2. `export ANTHROPIC_API_KEY=...`
-3. `npm run analyze -- --config config/gutenberg-block-api.yml --output ./out`
+3. `npm run analyze -- --config config/gutenberg-block-api.json --output ./out`
 4. `open out/index.html` — verify overall health %, tree view renders all ~10 docs grouped under `block-api`, clicking a doc opens a detail page with issues, evidence, proposed actions, and a link to the source URL.
 5. Manual precision check on 10 random issues: confirm they're real drift, not hallucination.
 6. Clean-doc check: at least one doc shows `healthy` status with 0 issues (or proves the tool can recognize health).
@@ -199,7 +213,7 @@ Committed. Break into individual issues at Week-2 kickoff once Week-1 findings a
 - **M7 — GitHub Action with weekly cron** · Track B · ~1–2 days
   - `.github/workflows/analyze-docs.yml` with `workflow_dispatch` (manual) and `schedule: - cron: '0 6 * * 1'` (weekly, Mon 06:00 UTC).
   - Uses `ANTHROPIC_API_KEY` as a repo secret (set this up in Settings once).
-  - Steps: checkout → setup-node 20 → `npm ci` → `npm run analyze -- --config config/gutenberg-block-api.yml --output ./out` → upload `out/results.json` as artifact → `actions/deploy-pages` for the dashboard.
+  - Steps: checkout → setup-node 20 → `npm ci` → `npm run analyze -- --config config/gutenberg-block-api.json --output ./out` → upload `out/results.json` as artifact → `actions/deploy-pages` for the dashboard.
   - Cost-cap flag (`--cost-cap 5`) on the CLI so a runaway run can't blow the budget.
   - Slack/email notification on failure (stretch — can be step-level `if: failure()` using `actions/github-script` or just rely on GitHub's default email to the repo owner).
   - **Acceptance:**

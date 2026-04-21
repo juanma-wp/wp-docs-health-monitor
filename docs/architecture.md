@@ -1,351 +1,201 @@
 # Architecture
 
-Back to [PLAN.md](../PLAN.md) · For the issue backlog see [backlog.md](./backlog.md).
+Back to [PLAN.md](../PLAN.md) · Issues in [backlog.md](./backlog.md) · Schedule in [timeline.md](./timeline.md).
 
-Technical reference: how the pieces fit, the schemas they exchange, and the file layout. Changes as we learn; keep in sync with `src/types/*`.
-
----
-
-## Repo Layout
-
-```
-wp-docs-health-monitor/
-├── src/
-│   ├── adapters/                    # Track A
-│   │   ├── index.ts                  # registry
-│   │   ├── doc-source/
-│   │   │   ├── types.ts
-│   │   │   └── manifest-url.ts       # PoC impl (consumes Gutenberg manifest.json)
-│   │   ├── code-source/
-│   │   │   ├── types.ts
-│   │   │   └── git-clone.ts
-│   │   ├── mapper/
-│   │   │   ├── types.ts
-│   │   │   └── manual-map.ts         # reads slug-keyed JSON
-│   │   └── validator/
-│   │       ├── types.ts
-│   │       └── claude.ts             # two-pass, prompt-cached, tool-use
-│   ├── pipeline.ts                  # Track A — wires adapters, emits RunResults
-│   ├── health-scorer.ts             # Track A
-│   ├── config/                      # Track B
-│   │   ├── schema.ts
-│   │   └── loader.ts
-│   ├── dashboard/                   # Track B
-│   │   ├── generate.ts               # RunResults → static HTML
-│   │   ├── templates/
-│   │   │   ├── index.html.eta
-│   │   │   ├── doc-detail.html.eta
-│   │   │   └── folder.html.eta
-│   │   └── tree-builder.ts
-│   ├── cli.ts                       # Track B — main entry
-│   └── types/
-│       ├── results.ts                # SHARED CONTRACT (zod)
-│       └── mapping.ts                # MappingSchema + Manifest types
-├── scripts/
-│   └── bootstrap-mapping.ts         # LLM-assisted helper: slug → JSON candidate (Track A)
-├── config/
-│   └── gutenberg-block-api.yml      # PoC config
-├── mappings/
-│   └── gutenberg-block-api.json     # slug-keyed tiered map (Track A)
-├── examples/
-│   ├── mock-results.json            # for dashboard dev without running pipeline (Track B)
-│   └── results.schema.json          # generated from zod
-├── out/                             # gitignored — generated dashboard
-├── package.json                     # single flat package
-├── tsconfig.json
-├── PLAN.md
-├── README.md
-└── docs/
-    ├── architecture.md              # this file
-    └── backlog.md
-```
-
-No `packages/` directory, no monorepo, no GitHub Action workflow in Week 1. The Action ships in Phase 2 (M7); monorepo stays out unless genuinely needed later.
+Technical decisions, patterns, and the rationale behind them. Not a file map — for that, read the source. This document explains *why* the system is built the way it is and what to reach for when building each part.
 
 ---
 
-## Tech Stack
+## Contents
 
-- **Node.js 20 + TypeScript (strict).** Matches Gutenberg ecosystem, first-class Anthropic SDK, natural fit for `setup-node` in Actions later.
-- **Anthropic SDK (`@anthropic-ai/sdk`)** with **prompt caching** for the system prompt + shared code context, and **tool use with JSON schema** for structured issue output. Two-pass validation: (1) find candidate issues with quoted evidence, (2) verify each with targeted code re-read. Model: **`claude-sonnet-4-6`** (cost/accuracy sweet spot; upgrade to `claude-opus-4-7` only if Sonnet misses real issues during Phase 0).
-- **`simple-git`** for repo clones. **`gray-matter` + `remark`** for markdown parsing. **`zod`** for runtime schema validation on config + results.
-- **Static HTML dashboard** — no framework. `index.html` + per-doc detail pages via templates (`eta` or plain template literals). Tailwind via CDN, no build step.
-- **Single flat npm package** for Week 1. No monorepo, no pnpm workspaces.
-
-When implementing, use the **context7 MCP** for up-to-date Anthropic SDK docs (prompt caching, tool use, streaming).
-
----
-
-## Doc Index & Mapping Format
-
-Two files per site. Decoupled concerns: *what docs exist* vs *what code each one relates to*.
-
-### File 1 — `manifest.json` (doc index)
-
-Canonical format = **Gutenberg's `manifest.json`** (https://github.com/WordPress/gutenberg/blob/trunk/docs/manifest.json). Each entry:
-
-```json
-{
-  "title": "Block Metadata",
-  "slug": "block-metadata",
-  "markdown_source": "https://raw.githubusercontent.com/WordPress/gutenberg/trunk/docs/reference-guides/block-api/block-metadata.md",
-  "parent": "block-api"
-}
-```
-
-For Gutenberg, we **consume the existing manifest verbatim** — no work, no maintenance. Just fetch the URL and filter by `parent: "block-api"` for Week 1.
-
-For sites that don't publish a manifest (WooCommerce docs, internal A8C sites, any markdown repo), later phases **generate** one: `fs-walk` adapter for markdown repos, `wordpress-rest` adapter for WP-sourced sites. Output conforms to the same shape.
-
-### File 2 — `mapping.json` (doc → code)
-
-Slug-keyed JSON with tiered code lists. **Slug is the primary key**, not file path — more stable when docs get reorganized.
-
-```json
-// mappings/gutenberg-block-api.json
-{
-  "block-metadata": {
-    "primary":   ["packages/blocks/src/api/registration.js", "schemas/json/block.json"],
-    "secondary": ["packages/blocks/src/api/parser.js", "packages/blocks/src/api/process-block-type.js"],
-    "context":   ["packages/block-editor/src/components/block-edit/index.js"]
-  },
-  "block-registration": {
-    "primary":   ["packages/blocks/src/api/registration.js"],
-    "secondary": [],
-    "context":   []
-  }
-}
-```
-
-**Tiers are token-budget hints for the validator:**
-- `primary` — always sent. Source of truth for this doc.
-- `secondary` — usually sent. Supporting context that catches most real drift.
-- `context` — dropped first when budget is tight; retrieved on demand in Pass 2.
-
-### Why two separate files
-
-- `manifest.json` is **site metadata** (could be upstreamed, machine-generated, maintained by doc owners).
-- `mapping.json` is **tool-specific knowledge** (maintained by us or by contributors using the tool).
-- Separation means we can drop a new site in by adding one `mapping.json` — the manifest is whatever the site already has (or generated once).
-
-### LLM-assisted bootstrap
-
-Hand-writing mappings doesn't scale past ~50 docs. A one-shot dev-time helper — `scripts/bootstrap-mapping.ts <slug>` — asks Claude *"given this doc and this file tree, which files are `primary`/`secondary`/`context`?"* and writes a candidate JSON block. A human reviews and trims before committing.
-
-Not a runtime adapter — a CLI helper you run once per doc. The `manual-map` adapter stays deterministic at analysis time.
-
-### Scaling path beyond PoC
-
-1. **Phase 1 (PoC):** `manual-map` slug-keyed JSON + bootstrap script. ~10 docs, <1 hour with the helper.
-2. **Phase 2+:** `symbol-search` mapper — extract symbols from doc (functions, hooks, attribute names, code-block imports), AST-grep the codebase via `ast-grep`/`tree-sitter`, rank by proximity and specificity. Auto-generates a candidate mapping.
-3. **Phase 3:** `hybrid` mapper — `symbol-search` candidates + a JSON overrides layer (`include` / `exclude` / `pin`) for manual corrections. Long-term shape.
-4. **(Optional) `embedding-retrieval`:** semantic similarity when symbol matching isn't enough. Heavier infra; only if needed.
-
-All four share the same `DocCodeMapper` interface — swapping is an adapter-config change, not a rewrite. The PoC JSON format is forward-compatible: it becomes the "override" layer in the hybrid adapter with an `overrides:` key added.
-
-### Known limitation (deferred)
-
-**Slug renames break the mapping silently.** If the manifest renames `block-metadata` → `block-json-metadata`, our `mapping.json` key is stale and the validator reports "no mapping found". Low probability in practice. Mitigation when we hit it: a lint step at run-start warning about mapping keys not present in the manifest. Deferred — not implemented in Week 1.
+- [Stack](#stack)
+- [Adapter Pattern](#adapter-pattern)
+- [Project Foundation — Shared Contract](#project-foundation--shared-contract)
+- [Doc Ingestion](#doc-ingestion-docsource)
+- [Code Ingestion](#code-ingestion-codesource)
+- [Doc–Code Mapping](#doccode-mapping-doccodemapper)
+- [Drift Validator](#drift-validator)
+  - [What counts as drift](#what-counts-as-drift)
+  - [What does not count as drift](#what-does-not-count-as-drift)
+- [Dashboard + CLI](#dashboard--cli)
+- [Results Storage & History](#results-storage--history)
+- [Risks and Mitigations](#risks-and-mitigations)
 
 ---
 
-## Shared Contract (Day 1, before branching)
+## Stack
 
-This is the single most important artifact. Both devs pair on it in a 1-hour kickoff, commit to `main`, then diverge.
+**Node.js 20 + TypeScript (strict).** Matches the Gutenberg ecosystem tooling, has first-class support from the Anthropic SDK, and fits naturally into a GitHub Action (`setup-node`). Strict TypeScript catches interface mismatches between adapters at compile time, which matters when two devs build against the same contract.
 
-```ts
-// src/types/results.ts
-import { z } from "zod";
+**Zod for runtime validation.** All data that crosses a boundary — config files, manifest JSON, Claude's tool-use output, `results.json` — is validated with Zod schemas. The same schemas generate the JSON Schema for documentation and the TypeScript types for the rest of the codebase. Single source of truth; no manual sync.
 
-// ─── Manifest (doc index) ──────────────────────────────────────────────
+**Anthropic SDK (`@anthropic-ai/sdk`).** Used with prompt caching (system prompt + shared code context cached across a run) and structured tool use (Claude emits typed `Issue[]` rather than free prose). Always fetch current SDK docs via the context7 MCP before writing Claude API code — caching and tool-use APIs change between model generations.
 
-export const ManifestEntrySchema = z.object({
-  title: z.string(),
-  slug: z.string(),                       // primary key within a site
-  markdown_source: z.string().url(),      // URL to raw markdown (or local path)
-  parent: z.string().optional()           // parent slug for hierarchy
-});
-export type ManifestEntry = z.infer<typeof ManifestEntrySchema>;
+**`simple-git`** for repo operations. **`gray-matter` + `remark`** for markdown parsing (frontmatter extraction + code block / link counting). **`p-limit`** for bounded concurrency across docs. **`eta`** or plain template literals for HTML generation — no frontend framework, no build step. Tailwind via CDN keeps the dashboard self-contained.
 
-// ─── Mapping (slug → code files) ───────────────────────────────────────
-
-export const CodeTiersSchema = z.object({
-  primary:   z.array(z.string()).default([]),
-  secondary: z.array(z.string()).default([]),
-  context:   z.array(z.string()).default([])
-});
-
-// mapping.json is a Record<slug, CodeTiers>
-export const MappingSchema = z.record(z.string(), CodeTiersSchema);
-export type Mapping = z.infer<typeof MappingSchema>;
-
-// ─── Issues & results ──────────────────────────────────────────────────
-
-export const IssueSchema = z.object({
-  id: z.string(),
-  fingerprint: z.string(),                 // hash(slug + type + codeFile + normalize(issue)) — stable across runs
-  severity: z.enum(["critical", "major", "minor"]),
-  type: z.enum([
-    "outdated-api", "missing-parameter", "incorrect-example",
-    "broken-code-reference",                // doc references a code path that no longer exists
-    "unclear-explanation", "deprecated-usage"
-  ]),
-  location: z.object({ line: z.number().int(), text: z.string() }),
-  issue: z.string(),
-  evidence: z.object({
-    docSays: z.string(),
-    codeSays: z.string(),
-    codeFile: z.string(),
-    codeLine: z.number().int().optional()
-  }),
-  suggestion: z.string(),
-  confidence: z.number().min(0).max(1)
-});
-
-export const DocResultSchema = z.object({
-  slug: z.string(),                                        // key from manifest
-  title: z.string(),
-  parent: z.string().optional(),
-  sourceUrl: z.string().url(),                             // markdown_source
-  publishedUrl: z.string().url().optional(),               // rendered doc URL if known
-  analyzedAt: z.string().datetime(),
-  commitSha: z.string().optional(),                        // enables change detection later
-  healthScore: z.number().min(0).max(100),
-  status: z.enum(["healthy", "needs-attention", "critical"]),
-  metrics: z.object({
-    wordCount: z.number(),
-    codeExamples: z.number(),
-    internalLinks: z.number(),
-    externalLinks: z.number(),
-    lastModified: z.string().datetime().optional()
-  }),
-  relatedCode: z.array(z.object({
-    path: z.string(),
-    tier: z.enum(["primary", "secondary", "context"]),
-    includedInAnalysis: z.boolean()                        // false if dropped to fit budget
-  })),
-  issues: z.array(IssueSchema),
-  positives: z.array(z.string()),
-  diagnostics: z.array(z.string()).default([])             // honesty signal: "2 mapped files not found", "budget exhausted, 3 context files skipped"
-});
-
-export const RunResultsSchema = z.object({
-  project: z.string(),
-  runId: z.string(),
-  analyzedAt: z.string().datetime(),
-  scope: z.object({
-    source: z.string(),
-    docsCount: z.number()
-  }),
-  overallHealth: z.number().min(0).max(100),
-  totals: z.object({
-    critical: z.number(),
-    major: z.number(),
-    minor: z.number()
-  }),
-  docs: z.array(DocResultSchema)
-});
-
-export type RunResults = z.infer<typeof RunResultsSchema>;
-```
-
-Track B generates `examples/results.schema.json` from this and mocks a fixture, so dashboard work is unblocked immediately — doesn't have to wait for real pipeline output.
+**Config format: JSON.** Config files (`config/*.json`) and mapping files (`mappings/*.json`) use JSON rather than YAML — consistent with the rest of the data layer, no extra parser dependency, and easier to validate with the same Zod schemas used everywhere else.
 
 ---
 
-## Validator Behavior (Prompt Rules)
+## Adapter Pattern
 
-Decisions from design review, encoded into the validator's system prompt + runtime wrappers. The prompt is cached; these rules are part of what's cached.
+Every component that touches an external system — doc sources, code sources, mappers, the validator — is behind an interface with a pluggable implementation. The pipeline wires adapters together at runtime from config; it doesn't import concrete implementations directly.
 
-### What counts as drift (report it)
+```
+config.json
+  └── adapter type string ("manifest-url", "git-clone", "manual-map", "claude")
+        └── registry resolves → concrete adapter instance
+              └── pipeline calls interface methods only
+```
+
+**Why:** isolates change. Adding a `wordpress-rest` DocSource doesn't touch the pipeline. Swapping the mapper from `manual-map` to `symbol-search` doesn't touch the validator. Unimplemented adapters throw `NotImplementedError` — they document the extension surface without adding dead code.
+
+**Registry pattern:** a central `adapters/index.ts` maps type strings to factory functions. This is the only place where concrete adapter modules are imported. Everything else depends on the interface types.
+
+---
+
+## Project Foundation — Shared Contract
+
+Before either track writes domain code, both agree on the shape of every data object the system passes around. These are the types that matter:
+
+- **`ManifestEntry`** — one doc as listed in the index (`slug`, `title`, `markdown_source`, `parent`).
+- **`CodeTiers`** — the code files mapped to a doc, split into `primary` / `secondary` / `context` tiers. Tiers are token-budget hints: primary is always sent; context is dropped first.
+- **`Issue`** — one drift finding: `severity`, `type`, `evidence` (what the doc says vs. what the code says, with exact file + verbatim quote), `suggestion`, `confidence`, and a stable `fingerprint` hash used to track the same issue across runs.
+- **`DocResult`** — the full analysis of one doc: health score, status, issues, positives, related code list with `includedInAnalysis` flags, and `diagnostics` (caveats like "2 mapped files not found").
+- **`RunResults`** — the complete output of one pipeline run: all `DocResult`s, aggregated totals, overall health score.
+
+A mock fixture (`examples/mock-results.json`) exercises every schema and unblocks dashboard development before any real pipeline output exists. This is the primary coordination mechanism between Track A and Track B.
+
+---
+
+## Doc Ingestion (`DocSource`)
+
+**Purpose:** produce a normalised list of docs with their content, regardless of where they live. The rest of the pipeline — mapping, validation, dashboard — should never know whether a doc came from a git repo, a WordPress site, or a local filesystem. DocSource is the boundary that absorbs that complexity.
+
+**Pattern:** source-agnostic fetch, normalised output. Each `DocSource` implementation returns `Doc[]` with a consistent shape regardless of where the docs came from.
+
+**Phase 1 — `manifest-url`:** fetches a Gutenberg-style `manifest.json`, filters entries by `parent` slug, fetches each `markdown_source` URL, parses frontmatter via `gray-matter`, and counts code blocks + links via `remark`. Graceful 404/500 handling — a failed fetch produces a diagnostic, not a crash.
+
+**Why manifest-first:** Gutenberg already publishes a `manifest.json`. Consuming it verbatim means zero maintenance for the doc index on the most important PoC target. Later sources (`wordpress-rest`, `fs-walk`) produce the same manifest shape so nothing downstream changes.
+
+**Key decision — metrics at ingest time:** word count, code example count, and link counts are computed here during fetch, not during validation. The Validator receives a `Doc` that already has these; it never re-parses markdown.
+
+---
+
+## Code Ingestion (`CodeSource`)
+
+**Purpose:** give the validator access to exact, current file contents from the source repository — the ground truth the docs are supposed to reflect. Without this, the validator would have to trust the doc's own claims about the code rather than verifying them directly.
+
+**Pattern:** fetch-once, cache by commit SHA. The code source clones (or reads) a repository into a local cache dir and exposes `readFile(path)` and `listDir(path)`. Callers never know if the file came from a fresh clone or a cache hit.
+
+**Phase 1 — `git-clone`:** shallow-clone via `simple-git` into a temp dir keyed by repo URL + commit SHA. On re-runs the cache dir exists and clone is skipped — the full run goes from ~30s clone to <1s. Exposes line-range reads (`readFile(path, startLine, endLine)`) for Pass 2 targeted verification.
+
+**Key decision — commit SHA on `DocResult`:** the SHA of the code repo at analysis time is stored on every `DocResult`. This enables the change detector (deferred to Stretch): next run compares current SHA to stored SHA and skips docs whose mapped code hasn't changed.
+
+---
+
+## Doc–Code Mapping (`DocCodeMapper`)
+
+**Purpose:** tell the validator *which* code files are relevant to each doc. This is the bridge between the documentation world and the source world — without it, the validator would have no idea where to look and would either guess wrong or ignore large parts of the codebase. Getting the mapping right is the single biggest factor in the quality of the analysis.
+
+**Pattern:** slug → tiered file list. The mapper answers "given this doc slug, which code files should the validator read?" It produces a `CodeTiers` object that the context assembler turns into a token-budgeted file set.
+
+**Phase 1 — `manual-map`:** reads a slug-keyed JSON file checked into the repo. Deterministic, zero cost, auditable. A dev-time LLM helper (`scripts/bootstrap-mapping.ts`) proposes initial entries — it asks Claude "given this doc content and this repo file tree, which files are primary/secondary/context?" — but a human reviews and commits the result. The bootstrap script is a one-time accelerator, not a runtime dependency.
+
+**Two files, decoupled concerns:**
+- `manifest.json` (doc index) — *what docs exist*. Could be upstreamed, machine-generated, owned by doc authors.
+- `mapping.json` (doc → code) — *what code each doc relates to*. Tool-specific knowledge, owned by the analysis team.
+
+This separation means adding a new site requires only a new `mapping.json`. The manifest comes from the site itself.
+
+**Phase 2 — `symbol-search`:** extracts symbols from doc prose and code fences (function names, hooks, attribute names, import paths), runs AST search over the Gutenberg codebase via `ast-grep` or `tree-sitter`, and ranks candidates by symbol specificity × package centrality × recency. Validated against Phase 1 manual mappings (target: ≥70% agreement on `primary`). The manual `mapping.json` becomes an overrides layer — corrections that the automatic search can't infer.
+
+**Known limitation:** slug renames break mappings silently. If `block-metadata` is renamed in the manifest, the mapping key becomes stale and the validator reports "no mapping found." Mitigation is a lint step at run-start — deferred.
+
+---
+
+## Drift Validator
+
+**Purpose:** determine whether each doc accurately describes the code it maps to, and produce actionable findings a doc author can act on. This is where the core problem is solved — comparing what a doc claims against what the code actually does, at a level of specificity that makes the output trustworthy rather than just suggestive. It also needs to confidently report when a doc is healthy, not just find problems.
+
+**Pattern:** two-pass LLM evaluation with evidence requirements and a runtime fabrication check.
+
+**Pass 1 — candidate generation.** A single Claude call with a cached system prompt receives the full doc + tiered code context assembled to a token budget (~50k tokens). Claude uses structured tool use to emit `Issue[]` — not free prose. Each issue must include a verbatim `codeSays` quote from the referenced file. A runtime check immediately after the call drops any issue where `evidence.codeSays` doesn't literally appear in the referenced file — catches hallucinations the prompt missed.
+
+**Pass 2 — targeted verification.** For each surviving candidate, Claude can call a `fetch_code(path, startLine, endLine)` tool to read a specific file region and re-evaluate. Issues with `confidence < 0.7` are dropped. Critical/major issues with weak suggestions (generic words like "update", "revise") retry once; if still weak, the issue is dropped. Pass 2 can be cut entirely (fall back to confidence ≥ 0.8 threshold in Pass 1 only) if the Phase 0 validation gate reveals it adds noise rather than signal.
+
+**Prompt caching:** the system prompt (which includes the drift definition, severity calibration, and evidence rules) and the shared code context are cached across the run. Cache hit rate >90% on a typical run cuts both cost and latency significantly.
+
+**Positives:** the validator also emits evidence-backed `positives` — specific things the doc gets right. Capped at 3 per doc to force substantive picks, not boilerplate praise. The health report must be able to say "this doc is healthy" credibly, not just find problems.
+
+**Health scoring:** `100 − (critical×15 + major×7 + minor×2)`, clamped 0..100. Thresholds: ≥85 = healthy, 60–84 = needs-attention, <60 = critical. Overall score = average across docs.
+
+**Graceful degradation:** when the validator can't fully assess a doc (stale mapping, missing file, budget exhausted), it proceeds and records caveats in `DocResult.diagnostics`. No special `inconclusive` status — the dashboard shows diagnostics next to the score so readers know the assessment has caveats.
+
+---
+
+### What counts as drift
 
 - Type signature changes (param added/removed/renamed, return type changed).
 - Default value changes.
 - Deprecated APIs shown as current or recommended.
-- Code examples that would throw if run against the current code.
-- Function/hook/attribute names that no longer exist in the source.
+- Code examples that would throw against current code.
+- Function/hook/attribute names that no longer exist.
 - Required parameters documented as optional (or vice versa).
 
-### What does not count as drift (skip silently)
+### What does not count as drift
 
-- Teaching simplifications — docs intentionally omitting edge cases or error handling for clarity.
-- Undocumented optional parameters (unless commonly used and absence would surprise a reader).
+- Teaching simplifications — intentional omission of edge cases for clarity.
+- Undocumented optional parameters (unless commonly used and their absence would surprise a reader).
 - Style, grammar, typos.
 - Broken external links (a future phase).
 
-### The judgment rule for partial coverage
+**Judgment rule for partial coverage:** if the documented behavior is a strict subset of actual behavior *and* the omission doesn't mislead a reader following the doc, it's not drift. If the omission would cause a reader's code to fail or produce a surprise, it is drift.
 
-> *If the documented behavior is a strict subset of actual behavior AND the omission doesn't mislead a reader following the doc, it's not drift. If omission would cause a reader's code to fail or be surprised, it is drift.*
+---
 
-### Severity calibration
+## Dashboard + CLI
 
-- **Critical** — a reader's code would break or behave incorrectly if they followed the doc.
-- **Major** — the doc is meaningfully misleading but a reader's code usually still works.
-- **Minor** — technically wrong but most readers wouldn't be misled.
+**Purpose:** make the findings useful to doc authors, not just developers. The pipeline produces a `results.json`; the dashboard turns that into something a human can open, browse, and act on. The CLI is the operational entry point that ties everything together. These two concerns are coupled by the output format but otherwise independent — Track B can build and validate the full dashboard experience before a single real analysis run exists.
 
-Health score: `100 − (critical*15 + major*7 + minor*2)`, clamped 0..100. Thresholds: ≥85 healthy, 60–84 needs-attention, <60 critical.
+**Pattern:** pipeline orchestrator + static site generator, built against a contract not an implementation.
 
-### Confidence thresholds
+The CLI is the entry point: loads config, wires adapters, calls `runPipeline()`, writes `results.json`, invokes the dashboard generator. Track B builds the dashboard against the mock fixture from day one — `runPipeline()` is a stub that returns mock data until Track A's implementation lands. The CLI and dashboard never import concrete pipeline code directly; they depend on the `RunResults` type and the `runPipeline` function signature.
 
-- **Two-pass validation** (Pass 1 + `fetch_code` Pass 2): discard issues with `confidence < 0.7`.
-- **Pass-1-only fallback** (if Day-3 gate cuts Pass 2): tighten to `confidence < 0.8`.
-- Low-confidence hunches (0.5–0.7) are silently dropped for PoC, not exposed as "needs review." Re-evaluate post-month.
+**Static HTML, no framework.** Templates (`eta` or plain template literals) + Tailwind CDN. No build step means the dashboard can be opened directly from the filesystem without a local server — important for the publish flow. Three page types: index (overall health + tree view), per-doc detail (issues, evidence, suggestions, positives, diagnostics), folder rollup (section aggregation).
 
-### Evidence requirements
-
-- Every `Issue.evidence.codeSays` must appear **verbatim** in the referenced code file. Runtime check rejects fabrications the prompt missed.
-- Every `positive` must be evidence-backed too — not praise for its own sake. Cap of 3 positives per doc to force substantive picks.
-
-### Suggestion quality bar
-
-- **Critical / Major:** the suggestion must include specific proposed text — a rewritten sentence, a code snippet to replace the current example, or an explicit *"add parameter X of type Y here"* instruction. No hand-waving.
-- **Minor:** a loose nudge is fine.
-- Enforcement: if a critical/major issue comes back with a weak suggestion (e.g., *"update the wording"*), the validator retries once with a sharper prompt; if still weak, the issue is dropped. Trustworthiness > coverage.
-
-### Scope
-
-- **Per-doc only.** Cross-doc analysis (inter-doc link validity, inter-doc consistency) is out of scope for month-end — it's a separate batch pass over completed `RunResults`.
-- `broken-code-reference` means *the doc → code pointer is broken*, not *doc → other doc*.
-
-### Graceful degradation
-
-When the validator can't fully assess a doc (stale mapping, missing file, budget exhausted), it **proceeds and records the caveat** in `DocResult.diagnostics`. No special `inconclusive` status — the dashboard shows the diagnostics next to the health score so readers know the assessment has caveats.
+**Tree structure:** docs are grouped by `parent` slug from the manifest. Folder health scores are weighted averages of their docs. The tree builder must handle ≥200 docs without layout collapse — Phase 2 adds collapse/expand and search/filter on top of the same data structure.
 
 ---
 
 ## Results Storage & History
 
-Historical data from Week 1 onward — UI lands in Phase 2 (milestone M8). Shape:
+**Purpose:** preserve every run's output so the dashboard can show trends over time and issues can be tracked across runs — without a database. The `gh-pages` branch doubles as both the published dashboard host and the append-only data store.
+
+Run output is stored on the `gh-pages` branch, not in the source repo:
 
 ```
-gh-pages branch:
-├── index.html                       # latest dashboard (points to latest run)
-├── doc/<slug>.html                  # latest per-doc pages
-├── folder/<parent>.html             # latest folder pages
-└── data/
-    ├── latest.json                  # symlink/pointer to newest runs/<runId>/results.json
-    ├── runs/
-    │   ├── 2026-04-22T06-00-00Z/
-    │   │   └── results.json
-    │   ├── 2026-04-29T06-00-00Z/
-    │   │   └── results.json
-    │   └── ...
-    └── history.json                 # { runs: [{runId, timestamp, commitSha, overallHealth, totals}] }
+data/
+  runs/<runId>/results.json     # one per run, never overwritten
+  history.json                  # index: [{runId, timestamp, commitSha, overallHealth, totals}]
 ```
 
-**Issue fingerprinting** — each `Issue.fingerprint` is a stable hash of `slug + type + evidence.codeFile + normalize(issue.text)`. Same fingerprint across runs = same issue. Tolerant of doc line shifts (the normalized text ignores line numbers and minor whitespace). Enables "new this week" and "persistent for N runs" badges in M8.
+The `publish` script copies the generated `out/` into `gh-pages` while *preserving* any existing `data/runs/` dirs — it never clobbers prior run data.
 
-**Retention** — no pruning for PoC. At ~50–200 KB per `results.json` × 52 weeks ≈ 2–10 MB per year on the `gh-pages` branch. Revisit if it bloats.
+**Issue fingerprinting:** `Issue.fingerprint` is a stable hash of `slug + type + evidence.codeFile + normalize(issue.text)`. Same fingerprint across runs = same issue. Tolerant of doc line shifts. Enables "new this week" and "persistent for N runs" badges without a database — the history index is the only persistent state.
+
+**Retention:** no pruning for PoC. ~50–200 KB per `results.json` × 52 weeks ≈ 2–10 MB/year on `gh-pages`. Revisit if it grows.
 
 ---
 
 ## Risks and Mitigations
 
-- **AI hallucination / false positives** → two-pass validation + quoted evidence + `confidence ≥ 0.7` + **runtime verbatim check** (`evidence.codeSays` must literally appear in the referenced file). Clean-doc fixture in tests catches drift in the validator itself.
-- **Two-pass validation is complex and time-hungry** → Day-3 decision point with a Pass-1-only fallback that still demos.
-- **Premature abstraction** → adapter interfaces designed broadly, implemented narrowly. Registry documents extension surface without dead code.
-- **Track A / Track B divergence** → Day-1 schema handshake + mock fixture; Track B never blocks on Track A.
-- **Mapping accuracy for ~10 docs** → hand-curated via bootstrap script, checked into git. Mapping errors are trivial to fix.
-- **Slug renames breaking mappings silently** → deferred. A lint step handles it later when it bites.
-- **Timeline pressure (1 week)** → GitHub Action (M7) and `symbol-search` mapper (M1) deferred to Phase 2. Change detector further deferred to Stretch (S3). Core Week-1 shippable demo is CLI + local dashboard + manual `gh-pages` push via `publish.sh`.
-- **Cost runaway** → 50k input-token cap per doc + prompt caching. Expected total per 10-doc run: ≤$1. Alert threshold: $5. Measured at the end of each run, logged to console.
+| Risk | Mitigation |
+|------|-----------|
+| AI hallucination / false positives | Two-pass validation + runtime verbatim check + `confidence ≥ 0.7`. Clean-doc fixture in tests catches validator regression. |
+| Pass 2 adds noise rather than signal | Phase 0 gate at 3 docs measures this explicitly. Fallback: cut Pass 2, tighten confidence to ≥ 0.8 for Pass-1-only ship. |
+| Track A / Track B divergence | Day-1 schema handshake + mock fixture. Track B never blocks on Track A. |
+| Mapping inaccuracy | Hand-curated via bootstrap script, reviewed and committed. Mapping errors are cheap to fix. |
+| Slug renames breaking mappings silently | Deferred. A lint step at run-start will surface stale keys when we hit it. |
+| Cost overrun | 50k input-token cap per doc + prompt caching. Per-run cost logged to console. Phase 2 adds a hard `--cost-cap` flag. |
+| Premature abstraction | Adapter interfaces designed broadly, implemented narrowly. `NotImplementedError` stubs document the surface without adding dead code to maintain. |
