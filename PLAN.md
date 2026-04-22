@@ -148,6 +148,7 @@ Architecture supports these; deferred until the Phase 2 demo lands.
 
 ## Open Questions
 
+- **Release pinning:** `CodeSource` currently defaults to `trunk`, which contains unreleased code no end user runs. See [docs/release-pinning.md](./docs/release-pinning.md) for the proposed fix (pin to the latest stable Gutenberg release tag) and the Phase 2 deferral rationale.
 - **Known-clean controls:** which 1–2 of the chosen Block API docs are known-accurate? Include them explicitly so recall measurement has a baseline.
 - **Editorial-only filter rules:** are all `packages/*/README.md` truly auto-generated? Confirm before Phase 2 excludes them wholesale — a false exclusion hides real drift.
 - **Themes Handbook source model:** verify whether it's markdown-sourced or WP-edited. Answer gates whether D3 becomes a meaningful `wordpress-rest` demo.
