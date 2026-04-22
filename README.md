@@ -6,7 +6,12 @@ The tool compares docs (from markdown in a repo or from a WordPress REST API) ag
 
 ## Status
 
-🌱 Early. The first design proposal lives in [`PLAN.md`](./PLAN.md) (proposed via PR — review, challenge, and refine there before any implementation starts).
+🌱 Early. Design proposed via PR — review, challenge, and refine before implementation starts.
+
+- **[`PLAN.md`](./PLAN.md)** — overview, scope, architecture at a glance, out-of-scope, open questions.
+- **[`docs/architecture.md`](./docs/architecture.md)** — technical details: repo layout, schemas, mapping format, tech stack, risks.
+- **[`docs/backlog.md`](./docs/backlog.md)** — what to build: 5 Week-1 issues + Phase 2 milestones, with owner, deps, and acceptance criteria.
+- **[`docs/timeline.md`](./docs/timeline.md)** — when to build it: milestones with target dates, gates, dependencies across the month.
 
 ## Why
 
@@ -19,7 +24,7 @@ The Block Editor Handbook alone has 150+ editorial docs that silently drift from
 3. **Static HTML dashboard** — one file per doc, color-coded health scores, linkable deep-URLs for fixing.
 4. **GitHub Action** for weekly cron + manual dispatch (stretch for the PoC).
 
-See [`PLAN.md`](./PLAN.md) for the full design, issue breakdown, and verification plan.
+See [`PLAN.md`](./PLAN.md) for the design, [`docs/architecture.md`](./docs/architecture.md) for the schemas, [`docs/backlog.md`](./docs/backlog.md) for the issue breakdown, and [`docs/timeline.md`](./docs/timeline.md) for the schedule.
 
 ## License
 
