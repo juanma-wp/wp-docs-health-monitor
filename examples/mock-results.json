@@ -1,0 +1,262 @@
+{
+  "runId": "20240415-120000",
+  "timestamp": "2024-04-15T12:00:00.000Z",
+  "overallHealth": 84,
+  "totals": {
+    "docs": 4,
+    "healthy": 2,
+    "needsAttention": 2,
+    "critical": 0,
+    "issues": {
+      "total": 8,
+      "critical": 3,
+      "major": 2,
+      "minor": 3
+    }
+  },
+  "docs": [
+    {
+      "slug": "block-metadata",
+      "title": "Block Metadata",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-metadata/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The `name` field documentation correctly describes the required `blockName/identifier` format.",
+        "The `version` field description accurately matches the semver expectation in the source.",
+        "The `editorScript` field documentation correctly covers the `WPDefinedAsset` type variants."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "lib/blocks.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/actions.js",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/blocks.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+      "analyzedAt": "2024-04-15T12:01:00.000Z"
+    },
+    {
+      "slug": "block-registration",
+      "title": "Block Registration",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-registration/",
+      "healthScore": 89,
+      "status": "healthy",
+      "issues": [
+        {
+          "severity": "major",
+          "type": "type-signature",
+          "evidence": {
+            "docSays": "The `transforms` property accepts a `WPBlockTypeTransforms` object with `from` and `to` arrays.",
+            "codeSays": "In `packages/blocks/src/api/registration.js`, `transforms` is typed as `Object | undefined` with no enforced shape.",
+            "codeFile": "packages/blocks/src/api/registration.js",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Update the documentation to note that while `from` and `to` arrays are conventional, the runtime performs no structural validation of the `transforms` object.",
+          "confidence": 0.87,
+          "fingerprint": "a3f2e1d4c5b6a7f8"
+        },
+        {
+          "severity": "minor",
+          "type": "default-value",
+          "evidence": {
+            "docSays": "The `category` field defaults to `null` when not specified.",
+            "codeSays": "In `packages/blocks/src/store/reducer.js`, unset category resolves to `undefined`, not `null`.",
+            "codeFile": "packages/blocks/src/store/reducer.js",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Replace 'defaults to `null`' with 'defaults to `undefined`' to match the runtime behaviour.",
+          "confidence": 0.91,
+          "fingerprint": "b4c5d6e7f8a9b0c1"
+        },
+        {
+          "severity": "minor",
+          "type": "required-optional-mismatch",
+          "evidence": {
+            "docSays": "The `icon` field is required for all registered blocks.",
+            "codeSays": "In `packages/blocks/src/api/registration.js`, `icon` is optional and falls back to a generic puzzle-piece icon when absent.",
+            "codeFile": "packages/blocks/src/api/registration.js",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Mark `icon` as optional in the documentation and mention the fallback icon behaviour.",
+          "confidence": 0.93,
+          "fingerprint": "c5d6e7f8a9b0c1d2"
+        }
+      ],
+      "positives": [
+        "The `apiVersion` field documentation correctly lists `2` as the current recommended value."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/registration.js",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/reducer.js",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-type.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "b2c3d4e5f6a7b2c3d4e5f6a7b2c3d4e5f6a7b8c3",
+      "analyzedAt": "2024-04-15T12:02:00.000Z"
+    },
+    {
+      "slug": "block-attributes",
+      "title": "Block Attributes",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-attributes/",
+      "healthScore": 63,
+      "status": "needs-attention",
+      "issues": [
+        {
+          "severity": "critical",
+          "type": "deprecated-api",
+          "evidence": {
+            "docSays": "Use `source: 'meta'` to store attribute values in post meta.",
+            "codeSays": "In `packages/blocks/src/api/parser/get-block-attributes.js`, the `meta` source was removed and throws a deprecation warning since Gutenberg 12.8; the attribute is silently ignored at runtime.",
+            "codeFile": "packages/blocks/src/api/parser/get-block-attributes.js",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Remove the `source: 'meta'` example and replace it with the recommended approach of using `useEntityProp` with a client-side attribute.",
+          "confidence": 0.97,
+          "fingerprint": "d6e7f8a9b0c1d2e3"
+        },
+        {
+          "severity": "critical",
+          "type": "type-signature",
+          "evidence": {
+            "docSays": "The `query` source accepts an object whose keys map to child-attribute definitions with a `selector` and `source`.",
+            "codeSays": "In `packages/blocks/src/api/parser/get-block-attributes.js`, `query` source iterates `attributeSchema.query` as an array, not a plain object — a plain object will silently produce no results.",
+            "codeFile": "packages/blocks/src/api/parser/get-block-attributes.js",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Correct the documentation: `query` must be an array of attribute descriptor objects, not a keyed object map.",
+          "confidence": 0.88,
+          "fingerprint": "e7f8a9b0c1d2e3f4"
+        },
+        {
+          "severity": "major",
+          "type": "broken-example",
+          "evidence": {
+            "docSays": "Example uses `{ type: 'string', source: 'attribute', selector: 'img', attribute: 'src' }` to read an image URL.",
+            "codeSays": "In `packages/blocks/src/api/parser/get-block-attributes.js`, attribute source lookup requires a non-empty `selector`; when the selector matches nothing, the attribute resolves to `undefined`, not an empty string as the docs imply.",
+            "codeFile": "packages/blocks/src/api/parser/get-block-attributes.js",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Add a note clarifying that if the selector matches no element the returned value is `undefined`, not `''`.",
+          "confidence": 0.82,
+          "fingerprint": "f8a9b0c1d2e3f4a5"
+        }
+      ],
+      "positives": [],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/parser/get-block-attributes.js",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/parser/index.js",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "c3d4e5f6a7b8c3d4e5f6a7b8c3d4e5f6a7b8c3d4",
+      "analyzedAt": "2024-04-15T12:03:00.000Z"
+    },
+    {
+      "slug": "block-supports",
+      "title": "Block Supports",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-supports/",
+      "healthScore": 83,
+      "status": "needs-attention",
+      "issues": [
+        {
+          "severity": "critical",
+          "type": "nonexistent-name",
+          "evidence": {
+            "docSays": "Set `supports.typography.fontStyle` to `true` to enable the font-style control in the editor toolbar.",
+            "codeSays": "In `packages/block-editor/src/hooks/typography.js`, the registered support key is `__experimentalFontStyle`, not `fontStyle`; the stable key does not exist in the current codebase.",
+            "codeFile": "packages/block-editor/src/hooks/typography.js",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Replace `supports.typography.fontStyle` with `supports.typography.__experimentalFontStyle` and note its experimental status.",
+          "confidence": 0.95,
+          "fingerprint": "a9b0c1d2e3f4a5b6"
+        },
+        {
+          "severity": "minor",
+          "type": "default-value",
+          "evidence": {
+            "docSays": "The `supports.align` property defaults to `false`.",
+            "codeSays": "In `packages/block-editor/src/hooks/align.js`, `supports.align` resolves to `undefined` when absent; it is coerced to falsy but the documented default of `false` is misleading.",
+            "codeFile": "packages/block-editor/src/hooks/align.js",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Change 'defaults to `false`' to 'defaults to `undefined` (treated as disabled)' for accuracy.",
+          "confidence": 0.78,
+          "fingerprint": "b0c1d2e3f4a5b6c7"
+        }
+      ],
+      "positives": [
+        "The `supports.color.background` documentation correctly describes the opt-in behaviour and default value of `true`."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/hooks/typography.js",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/hooks/align.js",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-supports.php",
+          "tier": "secondary",
+          "includedInAnalysis": false
+        }
+      ],
+      "diagnostics": [
+        "The mapping file references `packages/block-editor/src/hooks/color.js` which was not found in the cloned repo at ref `trunk`; skipped."
+      ],
+      "commitSha": "d4e5f6a7b8c9d4e5f6a7b8c9d4e5f6a7b8c9d4e5",
+      "analyzedAt": "2024-04-15T12:04:00.000Z"
+    }
+  ]
+}
