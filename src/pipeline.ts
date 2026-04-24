@@ -1,5 +1,7 @@
 import type { Config } from './config/schema.js';
-import type { RunResults } from './types/results.js';
+import type { RunResults, DocResult } from './types/results.js';
+import type { DocFetchResult, Doc } from './adapters/doc-source/types.js';
+import { createDocSource, createCodeSources, createDocCodeMapper } from './adapters/index.js';
 
 function formatRunId(date: Date): string {
   const pad = (n: number, len = 2) => String(n).padStart(len, '0');
@@ -12,17 +14,66 @@ function formatRunId(date: Date): string {
   return `${y}${mo}${d}-${h}${mi}${s}`;
 }
 
-export async function runPipeline(_config: Config): Promise<RunResults> {
+export async function runPipeline(config: Config): Promise<RunResults> {
+  const docSource   = createDocSource(config);
+  const codeSources = createCodeSources(config);
+  const mapper      = createDocCodeMapper(config, codeSources);
+
+  const fetchResults = await docSource.fetchDocs();
+  const docs  = fetchResults.filter((r): r is Extract<DocFetchResult, { ok: true }>  => r.ok).map(r => r.doc as Doc);
+  const failed = fetchResults.filter((r): r is Extract<DocFetchResult, { ok: false }> => !r.ok);
+
+  // Log ingestion summary
+  for (const doc of docs) {
+    const tiers = mapper.getCodeTiers(doc.slug);
+    console.log(`${doc.slug}  primary: ${tiers.primary.map(f => `${f.repo}:${f.path}`).join(', ')}`);
+  }
+
+  // Validator stub — replaced by Issue juanma-wp/wp-docs-health-monitor#3
+  const docResults: DocResult[] = docs.map(doc => ({
+    slug: doc.slug,
+    title: doc.title,
+    parent: doc.parent,
+    sourceUrl: doc.sourceUrl,
+    healthScore: 0,
+    status: 'critical' as const,
+    issues: [],
+    positives: [],
+    relatedCode: [],
+    diagnostics: [],
+    commitSha: '',
+    analyzedAt: new Date().toISOString(),
+  }));
+
+  // Append diagnostic results for failed fetches
+  for (const f of failed) {
+    docResults.push({
+      slug: f.slug,
+      title: f.title,
+      parent: null,
+      sourceUrl: f.sourceUrl,
+      healthScore: 0,
+      status: 'critical',
+      issues: [],
+      positives: [],
+      relatedCode: [],
+      diagnostics: [f.diagnostic],
+      commitSha: '',
+      analyzedAt: new Date().toISOString(),
+    });
+  }
+
   const now = new Date();
+
   return {
     runId:         formatRunId(now),
     timestamp:     now.toISOString(),
-    overallHealth: 100,
+    overallHealth: 0,
     totals: {
-      docs:           0,
+      docs:           docResults.length,
       healthy:        0,
       needsAttention: 0,
-      critical:       0,
+      critical:       docResults.length,
       issues: {
         total:    0,
         critical: 0,
@@ -30,6 +81,7 @@ export async function runPipeline(_config: Config): Promise<RunResults> {
         minor:    0,
       },
     },
-    docs: [],
+    docs: docResults,
   };
 }
+
