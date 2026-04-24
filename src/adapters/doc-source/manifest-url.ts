@@ -15,11 +15,15 @@ interface ManifestUrlConfig {
 
 function deriveSourceUrl(absoluteRawUrl: string, sourceUrlBase?: string): string {
   if (sourceUrlBase) {
-    const docsPath = absoluteRawUrl.split('/docs/')[1];
-    const clean = docsPath
-      .replace(/\/README\.md$/, '/')
-      .replace(/\.md$/, '/');
-    return `${sourceUrlBase}${clean}`;
+    const parts = absoluteRawUrl.split('/docs/');
+    if (parts.length >= 2) {
+      const docsPath = parts[1];
+      const clean = docsPath
+        .replace(/\/README\.md$/, '/')
+        .replace(/\.md$/, '/');
+      return `${sourceUrlBase}${clean}`;
+    }
+    // No /docs/ segment — fall through to GitHub UI URL fallback
   }
   // Fallback: GitHub UI URL
   return absoluteRawUrl

@@ -147,6 +147,20 @@ describe('ManifestUrlDocSource — error handling', () => {
       expect(results[0].doc.lastModified).toBeNull();
     }
   });
+
+  it('returns [] when manifest fetch throws a network error', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+      if (String(url) === MANIFEST_URL) throw new Error('Network failure');
+      return new Response('', { status: 200 });
+    }));
+
+    const source = new ManifestUrlDocSource({
+      manifestUrl: MANIFEST_URL,
+      parentSlug: 'block-api',
+    });
+    const results = await source.fetchDocs();
+    expect(results).toEqual([]);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -173,6 +187,38 @@ describe('ManifestUrlDocSource — sourceUrl', () => {
       parentSlug: 'block-api',
     });
     const results = await source.fetchDocs();
+    expect(results[0].ok).toBe(true);
+    if (results[0].ok) {
+      expect(results[0].doc.sourceUrl).toContain('github.com');
+      expect(results[0].doc.sourceUrl).toContain('/blob/');
+    }
+  });
+
+  it('falls back to GitHub UI URL when sourceUrlBase is set but the URL has no /docs/ segment', async () => {
+    const urlWithoutDocsSegment = 'https://raw.githubusercontent.com/WordPress/gutenberg/trunk/packages/foo.md';
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+      const urlStr = String(url);
+      if (urlStr === MANIFEST_URL) {
+        return new Response(JSON.stringify([{
+          slug: 'foo-doc',
+          title: 'Foo Doc',
+          markdown_source: urlWithoutDocsSegment,
+          parent: 'block-api',
+        }]), { status: 200 });
+      }
+      if (urlStr === urlWithoutDocsSegment) {
+        return new Response('# Foo\nContent.', { status: 200 });
+      }
+      return new Response(JSON.stringify([]), { status: 200 });
+    }));
+
+    const source = new ManifestUrlDocSource({
+      manifestUrl: MANIFEST_URL,
+      parentSlug: 'block-api',
+      sourceUrlBase: 'https://developer.wordpress.org/block-editor/',
+    });
+    const results = await source.fetchDocs();
+    expect(results).toHaveLength(1);
     expect(results[0].ok).toBe(true);
     if (results[0].ok) {
       expect(results[0].doc.sourceUrl).toContain('github.com');
