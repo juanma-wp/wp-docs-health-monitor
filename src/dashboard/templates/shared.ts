@@ -1,4 +1,4 @@
-function escapeHtml(str: string): string {
+export function escapeHtml(str: string): string {
   return str
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -39,5 +39,3 @@ export function htmlShell(title: string, body: string): string {
 </body>
 </html>`;
 }
-
-export { escapeHtml };

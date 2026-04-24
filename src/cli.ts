@@ -75,7 +75,11 @@ async function main(): Promise<void> {
   }
   const outputDir = resolve(opts.output);
 
-  // runId is validated by RunResultsSchema to match /^\d{8}-\d{6}$/ (no path traversal possible)
+  // Explicit guard: runId must match the expected format (digits + hyphen only, no path separators)
+  if (!/^\d{8}-\d{6}$/.test(results.runId)) {
+    process.stderr.write(`Error: runId "${results.runId}" contains unexpected characters.\n`);
+    process.exit(1);
+  }
   const runDir = join(outputDir, 'data', 'runs', results.runId);
   await mkdir(runDir, { recursive: true });
   await writeFile(join(runDir, 'results.json'), JSON.stringify(results, null, 2), 'utf-8');
