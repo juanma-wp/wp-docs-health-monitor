@@ -1,0 +1,20 @@
+[
+  {
+    "slug": "block-api",
+    "title": "Block API",
+    "markdown_source": "../docs/block-api/README.md",
+    "parent": null
+  },
+  {
+    "slug": "block-attributes",
+    "title": "Block Attributes",
+    "markdown_source": "../docs/block-api/block-attributes.md",
+    "parent": "block-api"
+  },
+  {
+    "slug": "other-doc",
+    "title": "Other Doc",
+    "markdown_source": "../docs/other/other-doc.md",
+    "parent": "other-parent"
+  }
+]

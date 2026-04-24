@@ -2,7 +2,9 @@
   "name": "wp-docs-health-monitor",
   "version": "0.1.0",
   "type": "module",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -10,17 +12,24 @@
     "gen:schema": "tsx scripts/gen-schema.ts"
   },
   "dependencies": {
+    "gray-matter": "^4.0.3",
+    "p-limit": "^5.0.0",
+    "remark": "^15.0.1",
+    "remark-parse": "^11.0.0",
+    "simple-git": "^3.36.0",
+    "unist-util-visit": "^5.1.0",
     "zod": "^3.23.0",
     "zod-to-json-schema": "^3.23.0"
   },
   "devDependencies": {
-    "typescript": "^5.4.0",
+    "@anthropic-ai/sdk": "^0.91.0",
     "@types/node": "^20.0.0",
-    "vitest": "^1.6.0",
-    "tsx": "^4.0.0",
-    "prettier": "^3.3.0",
-    "eslint": "^8.57.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
-    "@typescript-eslint/eslint-plugin": "^7.0.0"
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
   }
 }
