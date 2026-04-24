@@ -1,0 +1,4 @@
+{
+  "minIssues": 2,
+  "mustIncludeTypes": ["type-signature", "nonexistent-name"]
+}

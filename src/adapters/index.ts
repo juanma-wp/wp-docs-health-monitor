@@ -1,12 +1,16 @@
 import { join, basename } from 'path';
 
+import Anthropic from '@anthropic-ai/sdk';
+
 import type { Config } from '../config/schema.js';
 import type { DocSource } from './doc-source/types.js';
 import type { CodeSource } from './code-source/types.js';
 import type { DocCodeMapper } from './doc-code-mapper/types.js';
+import type { Validator } from './validator/types.js';
 import { ManifestUrlDocSource } from './doc-source/manifest-url.js';
 import { GitCloneSource } from './code-source/git-clone.js';
 import { ManualMapDocCodeMapper } from './doc-code-mapper/manual-map.js';
+import { ClaudeValidator } from './validator/claude.js';
 
 export class NotImplementedError extends Error {
   constructor(adapterType: string) {
@@ -39,4 +43,13 @@ export function createCodeSources(config: Config): Record<string, CodeSource> {
 
 export function createDocCodeMapper(config: Config, codeSources: Record<string, CodeSource>): DocCodeMapper {
   return new ManualMapDocCodeMapper(config.mappingPath, codeSources);
+}
+
+export function createValidator(config: Config): Validator {
+  const { type, model } = config.validator;
+  if (type === 'claude') {
+    const anthropic = new Anthropic();
+    return new ClaudeValidator(model, anthropic);
+  }
+  throw new NotImplementedError(type);
 }
