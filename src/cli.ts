@@ -69,14 +69,13 @@ async function main(): Promise<void> {
   }
 
   // Determine output directory
-  const outputDir = opts.output
-    ? resolve(opts.output)
-    : (() => {
-        process.stderr.write('Error: --output is required.\n');
-        process.exit(1);
-      })();
+  if (!opts.output) {
+    process.stderr.write('Error: --output is required.\n');
+    process.exit(1);
+  }
+  const outputDir = resolve(opts.output);
 
-  // Write results JSON
+  // runId is validated by RunResultsSchema to match /^\d{8}-\d{6}$/ (no path traversal possible)
   const runDir = join(outputDir, 'data', 'runs', results.runId);
   await mkdir(runDir, { recursive: true });
   await writeFile(join(runDir, 'results.json'), JSON.stringify(results, null, 2), 'utf-8');
