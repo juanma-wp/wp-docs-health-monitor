@@ -1,0 +1,30 @@
+{
+  "name": "wp-docs-health-monitor",
+  "version": "0.1.0",
+  "description": "Monitor WordPress documentation health against source code",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "gen:schema": "tsx scripts/gen-schema.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "gray-matter": "^4.0.3",
+    "p-limit": "^5.0.0",
+    "remark": "^15.0.0",
+    "remark-parse": "^11.0.0",
+    "simple-git": "^3.25.0",
+    "unist-util-visit": "^5.0.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0",
+    "zod-to-json-schema": "^3.23.0"
+  }
+}

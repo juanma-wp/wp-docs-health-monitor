@@ -1,0 +1,20 @@
+{
+  "block-attributes": {
+    "primary": [
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/parser/get-block-attributes.js" }
+    ],
+    "secondary": [
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/index.js" }
+    ],
+    "context": []
+  },
+  "block-registration": {
+    "primary": [
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.js" }
+    ],
+    "secondary": [],
+    "context": [
+      { "repo": "gutenberg", "path": "packages/blocks/src/store/actions.js" }
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "project": "gutenberg-block-api",
+  "docSource": {
+    "type": "manifest-url",
+    "manifestUrl": "https://raw.githubusercontent.com/WordPress/gutenberg/trunk/docs/manifest.json",
+    "parentSlug": "block-api",
+    "sourceUrlBase": "https://developer.wordpress.org/block-editor/reference-guides/block-api/"
+  },
+  "codeSources": [
+    {
+      "id": "gutenberg",
+      "type": "git-clone",
+      "url": "https://github.com/WordPress/gutenberg.git",
+      "ref": "trunk"
+    },
+    {
+      "id": "wordpress-develop",
+      "type": "git-clone",
+      "url": "https://github.com/WordPress/wordpress-develop.git",
+      "ref": "trunk"
+    }
+  ],
+  "docCodeMapper": {
+    "type": "manual-map",
+    "mappingPath": "mappings/gutenberg-block-api.json"
+  },
+  "validator": {
+    "type": "claude",
+    "model": "claude-sonnet-4-6"
+  },
+  "outputDir": "out"
+}

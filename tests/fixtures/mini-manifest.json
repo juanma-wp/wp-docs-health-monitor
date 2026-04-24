@@ -1,0 +1,20 @@
+[
+  {
+    "slug": "block-attributes",
+    "title": "Block Attributes",
+    "markdown_source": "https://raw.githubusercontent.com/WordPress/gutenberg/trunk/docs/reference-guides/block-api/block-attributes.md",
+    "parent": "block-api"
+  },
+  {
+    "slug": "block-metadata",
+    "title": "Block Metadata",
+    "markdown_source": "https://raw.githubusercontent.com/WordPress/gutenberg/trunk/docs/reference-guides/block-api/block-metadata.md",
+    "parent": "other-parent"
+  },
+  {
+    "slug": "getting-started",
+    "title": "Getting Started",
+    "markdown_source": "https://raw.githubusercontent.com/WordPress/gutenberg/trunk/docs/getting-started/index.md",
+    "parent": null
+  }
+]
