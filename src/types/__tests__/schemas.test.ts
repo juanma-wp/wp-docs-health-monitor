@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -210,7 +210,22 @@ describe('fingerprintIssue', () => {
 // runPipeline stub
 // ---------------------------------------------------------------------------
 
+const MANIFEST_URL_SCHEMA = 'https://example.com/manifest.json';
+const DOC_URL_SCHEMA = 'https://raw.githubusercontent.com/WordPress/gutenberg/trunk/docs/block-api/block-attributes.md';
+
+/** One-entry manifest whose parent matches minimalConfig.docSource.parentSlug ('test') */
+const singleEntryManifest = JSON.stringify([{
+  slug: 'block-attributes',
+  title: 'Block Attributes',
+  markdown_source: DOC_URL_SCHEMA,
+  parent: 'test',
+}]);
+
 describe('runPipeline', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('returns a RunResults with a correctly-formatted runId', async () => {
     const result = await runPipeline(minimalConfig);
     expect(result.runId).toMatch(/^\d{8}-\d{6}$/);
@@ -218,6 +233,51 @@ describe('runPipeline', () => {
 
   it('returns a result that passes RunResultsSchema.parse', async () => {
     const result = await runPipeline(minimalConfig);
+    expect(() => RunResultsSchema.parse(result)).not.toThrow();
+  });
+
+  it('appends a DocResult with diagnostics when doc fetch returns 404', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+      const urlStr = String(url);
+      if (urlStr === MANIFEST_URL_SCHEMA) {
+        return new Response(singleEntryManifest, { status: 200 });
+      }
+      if (urlStr === DOC_URL_SCHEMA) {
+        return new Response('Not Found', { status: 404 });
+      }
+      return new Response(JSON.stringify([]), { status: 200 });
+    }));
+
+    const result = await runPipeline(minimalConfig);
+
+    expect(result.docs).toHaveLength(1);
+    expect(result.docs[0].slug).toBe('block-attributes');
+    expect(result.docs[0].status).toBe('critical');
+    expect(result.docs[0].diagnostics[0]).toContain('404');
+    expect(() => RunResultsSchema.parse(result)).not.toThrow();
+  });
+
+  it('handles MappingError per-doc without crashing the pipeline when slug is absent from mapping', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+      const urlStr = String(url);
+      if (urlStr === MANIFEST_URL_SCHEMA) {
+        return new Response(singleEntryManifest, { status: 200 });
+      }
+      if (urlStr === DOC_URL_SCHEMA) {
+        return new Response('# Block Attributes\nSome content.', { status: 200 });
+      }
+      // GitHub Commits API
+      return new Response(JSON.stringify([]), { status: 200 });
+    }));
+
+    // minimalConfig uses mappings/test.json which is empty — 'block-attributes' has no entry
+    // MappingError must be caught per-doc; the pipeline must not throw
+    const result = await runPipeline(minimalConfig);
+
+    expect(result.docs).toHaveLength(1);
+    expect(result.docs[0].slug).toBe('block-attributes');
+    expect(result.docs[0].diagnostics.length).toBeGreaterThan(0);
+    expect(result.docs[0].diagnostics[0]).toContain('block-attributes');
     expect(() => RunResultsSchema.parse(result)).not.toThrow();
   });
 });

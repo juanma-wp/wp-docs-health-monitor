@@ -1,0 +1,108 @@
+import { describe, it, expect } from 'vitest';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { writeFileSync, mkdirSync } from 'fs';
+import { ZodError } from 'zod';
+import { ManualMapDocCodeMapper, MappingError, ConfigError } from '../manual-map.js';
+import type { CodeSource } from '../../code-source/types.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const fixturesDir = resolve(__dirname, '../../../../tests/fixtures');
+
+// Minimal stub CodeSource for testing
+const mockCodeSources: Record<string, CodeSource> = {
+  gutenberg: {
+    readFile: async () => '',
+    listDir: async () => [],
+    getCommitSha: async () => 'abc',
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Known slug
+// ---------------------------------------------------------------------------
+
+describe('ManualMapDocCodeMapper — getCodeTiers', () => {
+  it('returns correct CodeTiers for a known slug', () => {
+    const mapper = new ManualMapDocCodeMapper(
+      resolve(fixturesDir, 'mini-mapping.json'),
+      mockCodeSources
+    );
+    const tiers = mapper.getCodeTiers('block-attributes');
+    expect(tiers.primary).toHaveLength(1);
+    expect(tiers.primary[0].repo).toBe('gutenberg');
+    expect(tiers.primary[0].path).toBe('packages/blocks/src/api/parser/get-block-attributes.js');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Unknown slug
+// ---------------------------------------------------------------------------
+
+describe('ManualMapDocCodeMapper — unknown slug', () => {
+  it('throws MappingError on unknown slug — message lists available slugs', () => {
+    const mapper = new ManualMapDocCodeMapper(
+      resolve(fixturesDir, 'mini-mapping.json'),
+      mockCodeSources
+    );
+    expect(() => mapper.getCodeTiers('nonexistent-slug')).toThrow(MappingError);
+    try {
+      mapper.getCodeTiers('nonexistent-slug');
+    } catch (e) {
+      expect(e).toBeInstanceOf(MappingError);
+      const msg = (e as MappingError).message;
+      expect(msg).toContain('nonexistent-slug');
+      expect(msg).toContain('block-attributes');
+      expect(msg).toContain('block-registration');
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Unknown repo at construction time
+// ---------------------------------------------------------------------------
+
+describe('ManualMapDocCodeMapper — construction validation', () => {
+  it('throws ConfigError at construction when mapping references unknown repo', () => {
+    const badSources: Record<string, CodeSource> = {
+      // Only "gutenberg" — "wordpress-core" is unknown
+      gutenberg: mockCodeSources.gutenberg,
+    };
+
+    // Write a temp mapping with an unknown repo reference
+    const tmpDir = resolve(fixturesDir, '../tmp');
+    mkdirSync(tmpDir, { recursive: true });
+    const tmpPath = resolve(tmpDir, 'bad-repo-mapping.json');
+    writeFileSync(tmpPath, JSON.stringify({
+      'block-metadata': {
+        primary: [{ repo: 'wordpress-core', path: 'src/foo.php' }],
+        secondary: [],
+        context: [],
+      },
+    }));
+
+    expect(() => new ManualMapDocCodeMapper(tmpPath, badSources)).toThrow(ConfigError);
+    try {
+      new ManualMapDocCodeMapper(tmpPath, badSources);
+    } catch (e) {
+      expect(e).toBeInstanceOf(ConfigError);
+      const msg = (e as ConfigError).message;
+      expect(msg).toContain('wordpress-core');
+      expect(msg).toContain('block-metadata');
+    }
+  });
+
+  it('throws ZodError at construction when mapping file JSON is structurally invalid', () => {
+    const tmpDir = resolve(fixturesDir, '../tmp');
+    mkdirSync(tmpDir, { recursive: true });
+    const tmpPath = resolve(tmpDir, 'invalid-schema-mapping.json');
+    writeFileSync(tmpPath, JSON.stringify({
+      'block-metadata': {
+        // Missing required 'secondary' and 'context', and primary has wrong shape
+        primary: [{ wrong_field: 'value' }],
+      },
+    }));
+
+    expect(() => new ManualMapDocCodeMapper(tmpPath, mockCodeSources)).toThrow(ZodError);
+  });
+});
