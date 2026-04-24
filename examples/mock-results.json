@@ -1,12 +1,12 @@
 {
   "runId": "20240415-120000",
   "timestamp": "2024-04-15T12:00:00.000Z",
-  "overallHealth": 62,
+  "overallHealth": 65,
   "totals": {
     "docs": 4,
     "healthy": 1,
-    "needsAttention": 2,
-    "critical": 1,
+    "needsAttention": 1,
+    "critical": 2,
     "issues": {
       "total": 8,
       "critical": 3,
@@ -200,7 +200,7 @@
       "parent": "block-api",
       "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-supports/",
       "healthScore": 58,
-      "status": "needs-attention",
+      "status": "critical",
       "issues": [
         {
           "severity": "critical",
