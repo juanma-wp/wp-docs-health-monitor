@@ -18,7 +18,7 @@ export const IssueSchema = z.object({
   }),
   suggestion:  z.string(),
   confidence:  z.number().min(0).max(1),
-  fingerprint: z.string(),
+  fingerprint: z.string().regex(/^[0-9a-f]{16}$/),
 });
 export type Issue = z.infer<typeof IssueSchema>;
 
