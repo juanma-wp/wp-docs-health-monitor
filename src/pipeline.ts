@@ -44,7 +44,6 @@ function logCostSummary(runId: string, docResults: DocResult[], cost: CostAccumu
   console.log(
     `Estimated cost: $${estimatedCost.toFixed(2)} (input: ${cost.inputTokens.toLocaleString()} tokens · output: ${cost.outputTokens.toLocaleString()} tokens)`,
   );
-  void runId;
 }
 
 export async function runPipeline(config: Config): Promise<RunResults> {

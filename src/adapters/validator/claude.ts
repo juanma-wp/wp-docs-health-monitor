@@ -454,7 +454,7 @@ ${JSON.stringify(candidate, null, 2)}`,
         return null;
       }
       // For critical/major: retry once
-      const retried = await this.retryWeakSuggestion(rawIssue, messages, codeSources);
+      const retried = await this.retryWeakSuggestion(rawIssue, messages);
       if (!retried) return null;
       rawIssue.suggestion = retried;
       if (isWeakSuggestion(rawIssue.suggestion)) return null;
@@ -476,7 +476,6 @@ ${JSON.stringify(candidate, null, 2)}`,
   private async retryWeakSuggestion(
     rawIssue: RawIssue,
     prevMessages: Anthropic.MessageParam[],
-    _codeSources: Record<string, CodeSource>,
   ): Promise<string | null> {
     const retryMessages: Anthropic.MessageParam[] = [
       ...prevMessages,
