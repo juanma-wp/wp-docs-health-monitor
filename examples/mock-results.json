@@ -1,7 +1,7 @@
 {
   "runId": "20240415-120000",
   "timestamp": "2024-04-15T12:00:00.000Z",
-  "overallHealth": 62,
+  "overallHealth": 84,
   "totals": {
     "docs": 4,
     "healthy": 1,
@@ -20,7 +20,7 @@
       "title": "Block Metadata",
       "parent": "block-api",
       "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-metadata/",
-      "healthScore": 98,
+      "healthScore": 100,
       "status": "healthy",
       "issues": [],
       "positives": [
@@ -57,7 +57,7 @@
       "title": "Block Registration",
       "parent": "block-api",
       "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-registration/",
-      "healthScore": 71,
+      "healthScore": 89,
       "status": "needs-attention",
       "issues": [
         {
@@ -124,7 +124,7 @@
         }
       ],
       "diagnostics": [],
-      "commitSha": "b2c3d4e5f6a7b2c3d4e5f6a7b2c3d4e5f6a7b2c3",
+      "commitSha": "b2c3d4e5f6a7b2c3d4e5f6a7b2c3d4e5f6a7b8c3",
       "analyzedAt": "2024-04-15T12:02:00.000Z"
     },
     {
@@ -132,7 +132,7 @@
       "title": "Block Attributes",
       "parent": "block-api",
       "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-attributes/",
-      "healthScore": 34,
+      "healthScore": 63,
       "status": "critical",
       "issues": [
         {
@@ -199,7 +199,7 @@
       "title": "Block Supports",
       "parent": "block-api",
       "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-supports/",
-      "healthScore": 58,
+      "healthScore": 83,
       "status": "critical",
       "issues": [
         {
