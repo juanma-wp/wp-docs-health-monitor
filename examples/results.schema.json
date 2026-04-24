@@ -1,0 +1,256 @@
+{
+  "$ref": "#/definitions/RunResults",
+  "definitions": {
+    "RunResults": {
+      "type": "object",
+      "properties": {
+        "runId": {
+          "type": "string",
+          "pattern": "^\\d{8}-\\d{6}$"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "overallHealth": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "totals": {
+          "type": "object",
+          "properties": {
+            "docs": {
+              "type": "integer"
+            },
+            "healthy": {
+              "type": "integer"
+            },
+            "needsAttention": {
+              "type": "integer"
+            },
+            "critical": {
+              "type": "integer"
+            },
+            "issues": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "integer"
+                },
+                "critical": {
+                  "type": "integer"
+                },
+                "major": {
+                  "type": "integer"
+                },
+                "minor": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "total",
+                "critical",
+                "major",
+                "minor"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "docs",
+            "healthy",
+            "needsAttention",
+            "critical",
+            "issues"
+          ],
+          "additionalProperties": false
+        },
+        "docs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slug": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "parent": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "sourceUrl": {
+                "type": "string",
+                "format": "uri"
+              },
+              "healthScore": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "healthy",
+                  "needs-attention",
+                  "critical"
+                ]
+              },
+              "issues": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "severity": {
+                      "type": "string",
+                      "enum": [
+                        "critical",
+                        "major",
+                        "minor"
+                      ]
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "type-signature",
+                        "default-value",
+                        "deprecated-api",
+                        "broken-example",
+                        "nonexistent-name",
+                        "required-optional-mismatch"
+                      ]
+                    },
+                    "evidence": {
+                      "type": "object",
+                      "properties": {
+                        "docSays": {
+                          "type": "string"
+                        },
+                        "codeSays": {
+                          "type": "string"
+                        },
+                        "codeFile": {
+                          "type": "string"
+                        },
+                        "codeRepo": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "docSays",
+                        "codeSays",
+                        "codeFile",
+                        "codeRepo"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "suggestion": {
+                      "type": "string"
+                    },
+                    "confidence": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "fingerprint": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "severity",
+                    "type",
+                    "evidence",
+                    "suggestion",
+                    "confidence",
+                    "fingerprint"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "positives": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 3
+              },
+              "relatedCode": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "repo": {
+                      "type": "string"
+                    },
+                    "file": {
+                      "type": "string"
+                    },
+                    "tier": {
+                      "type": "string",
+                      "enum": [
+                        "primary",
+                        "secondary",
+                        "context"
+                      ]
+                    },
+                    "includedInAnalysis": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "repo",
+                    "file",
+                    "tier",
+                    "includedInAnalysis"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "diagnostics": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "commitSha": {
+                "type": "string"
+              },
+              "analyzedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "slug",
+              "title",
+              "parent",
+              "sourceUrl",
+              "healthScore",
+              "status",
+              "issues",
+              "positives",
+              "relatedCode",
+              "diagnostics",
+              "commitSha",
+              "analyzedAt"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "runId",
+        "timestamp",
+        "overallHealth",
+        "totals",
+        "docs"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
