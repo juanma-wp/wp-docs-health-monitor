@@ -4,9 +4,9 @@
   "overallHealth": 84,
   "totals": {
     "docs": 4,
-    "healthy": 2,
-    "needsAttention": 2,
-    "critical": 0,
+    "healthy": 1,
+    "needsAttention": 1,
+    "critical": 2,
     "issues": {
       "total": 8,
       "critical": 3,
@@ -58,7 +58,7 @@
       "parent": "block-api",
       "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-registration/",
       "healthScore": 89,
-      "status": "healthy",
+      "status": "needs-attention",
       "issues": [
         {
           "severity": "major",
@@ -133,7 +133,7 @@
       "parent": "block-api",
       "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-attributes/",
       "healthScore": 63,
-      "status": "needs-attention",
+      "status": "critical",
       "issues": [
         {
           "severity": "critical",
@@ -200,7 +200,7 @@
       "parent": "block-api",
       "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-supports/",
       "healthScore": 83,
-      "status": "needs-attention",
+      "status": "critical",
       "issues": [
         {
           "severity": "critical",
