@@ -161,6 +161,116 @@ describe('ManifestUrlDocSource — error handling', () => {
     const results = await source.fetchDocs();
     expect(results).toEqual([]);
   });
+
+  it('returns [] when manifest fetch returns a non-2xx response', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+      if (String(url) === MANIFEST_URL) {
+        return new Response('Not Found', { status: 404 });
+      }
+      return new Response('', { status: 200 });
+    }));
+
+    const source = new ManifestUrlDocSource({
+      manifestUrl: MANIFEST_URL,
+      parentSlug: 'block-api',
+    });
+    const results = await source.fetchDocs();
+    expect(results).toEqual([]);
+  });
+
+  it('returns [] when manifest body is not a JSON array', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+      if (String(url) === MANIFEST_URL) {
+        return new Response(JSON.stringify({ not: 'an array' }), { status: 200 });
+      }
+      return new Response('', { status: 200 });
+    }));
+
+    const source = new ManifestUrlDocSource({
+      manifestUrl: MANIFEST_URL,
+      parentSlug: 'block-api',
+    });
+    const results = await source.fetchDocs();
+    expect(results).toEqual([]);
+  });
+
+  it('silently drops manifest entries that fail ManifestEntrySchema validation', async () => {
+    // Mixed manifest: one valid entry + two that should be rejected by the schema.
+    // The adapter must drop the invalid ones and still return the valid one.
+    const validEntry = {
+      slug: 'block-attributes',
+      title: 'Block Attributes',
+      markdown_source: DOC_URL,
+      parent: 'block-api',
+    };
+    const missingSlugEntry = {
+      title: 'No Slug',
+      markdown_source: DOC_URL,
+      parent: 'block-api',
+    };
+    const wrongTypesEntry = {
+      slug: 42,
+      title: 'Wrong Types',
+      markdown_source: 'not-a-url',
+      parent: 'block-api',
+    };
+
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+      const urlStr = String(url);
+      if (urlStr === MANIFEST_URL) {
+        return new Response(
+          JSON.stringify([validEntry, missingSlugEntry, wrongTypesEntry]),
+          { status: 200 }
+        );
+      }
+      if (urlStr === DOC_URL) return new Response(sampleDoc, { status: 200 });
+      if (urlStr.startsWith('https://api.github.com/')) {
+        return new Response(JSON.stringify([]), { status: 200 });
+      }
+      return new Response('Not Found', { status: 404 });
+    }));
+
+    const source = new ManifestUrlDocSource({
+      manifestUrl: MANIFEST_URL,
+      parentSlug: 'block-api',
+    });
+    const results = await source.fetchDocs();
+    expect(results).toHaveLength(1);
+    expect(results[0].ok).toBe(true);
+    if (results[0].ok) {
+      expect(results[0].doc.slug).toBe('block-attributes');
+    }
+  });
+
+  it('lastModified is null when markdown_source is not a raw.githubusercontent URL', async () => {
+    // fetchLastModified has an early-return when the URL does not match the
+    // raw.githubusercontent.com pattern. Exercise that path explicitly.
+    const nonGhUrl = 'https://example.org/docs/block-api/block-attributes.md';
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+      const urlStr = String(url);
+      if (urlStr === MANIFEST_URL) {
+        return new Response(JSON.stringify([{
+          slug: 'block-attributes',
+          title: 'Block Attributes',
+          markdown_source: nonGhUrl,
+          parent: 'block-api',
+        }]), { status: 200 });
+      }
+      if (urlStr === nonGhUrl) return new Response(sampleDoc, { status: 200 });
+      return new Response('Not Found', { status: 404 });
+    }));
+
+    const source = new ManifestUrlDocSource({
+      manifestUrl: MANIFEST_URL,
+      parentSlug: 'block-api',
+    });
+    const results = await source.fetchDocs();
+    expect(results).toHaveLength(1);
+    expect(results[0].ok).toBe(true);
+    if (results[0].ok) {
+      expect(results[0].doc.lastModified).toBeNull();
+    }
+  });
 });
 
 // ---------------------------------------------------------------------------

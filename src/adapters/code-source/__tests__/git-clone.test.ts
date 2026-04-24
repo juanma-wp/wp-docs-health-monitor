@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { mkdirSync, writeFileSync, rmSync, existsSync } from 'fs';
 import { resolve } from 'path';
 import { execSync } from 'child_process';
@@ -52,6 +52,20 @@ describe('GitCloneSource — readFile', () => {
     const content = await source.readFile('README.md', 1, 2);
     expect(content).toBe('Line 1\nLine 2');
   });
+
+  it('returns full content when only startLine is provided (no endLine)', async () => {
+    // Current contract: line-range slicing requires BOTH startLine and endLine.
+    // Partial ranges silently fall through to the full-file branch.
+    const source = new GitCloneSource('unused', 'unused', tmpDir);
+    const content = await source.readFile('README.md', 2);
+    expect(content).toBe(README_CONTENT);
+  });
+
+  it('returns full content when only endLine is provided (no startLine)', async () => {
+    const source = new GitCloneSource('unused', 'unused', tmpDir);
+    const content = await source.readFile('README.md', undefined, 2);
+    expect(content).toBe(README_CONTENT);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -82,6 +96,21 @@ describe('GitCloneSource — getCommitSha', () => {
     const source = new GitCloneSource('unused', 'unused', tmpDir);
     const sha = await source.getCommitSha();
     expect(sha).toMatch(/^[0-9a-f]{40}$/);
+  });
+
+  it('returns "" when ensureReady resolves without populating commitSha', async () => {
+    // Defensive fallback in git-clone.ts:82 — the `?? ''` branch.
+    // Stub the private init() so ensureReady() resolves without setting commitSha;
+    // this exercises the nullish fallback without relying on a real git failure.
+    const source = new GitCloneSource('unused', 'unused', tmpDir);
+    const initSpy = vi
+      .spyOn(source as unknown as { init: () => Promise<void> }, 'init')
+      .mockResolvedValue(undefined);
+
+    const sha = await source.getCommitSha();
+    expect(sha).toBe('');
+    expect(initSpy).toHaveBeenCalled();
+    initSpy.mockRestore();
   });
 });
 
