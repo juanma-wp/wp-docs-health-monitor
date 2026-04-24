@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -211,6 +211,10 @@ describe('fingerprintIssue', () => {
 // ---------------------------------------------------------------------------
 
 describe('runPipeline', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it('returns a RunResults with a correctly-formatted runId', async () => {
     const result = await runPipeline(minimalConfig);
     expect(result.runId).toMatch(/^\d{8}-\d{6}$/);
@@ -219,5 +223,31 @@ describe('runPipeline', () => {
   it('returns a result that passes RunResultsSchema.parse', async () => {
     const result = await runPipeline(minimalConfig);
     expect(() => RunResultsSchema.parse(result)).not.toThrow();
+  });
+
+  it('records one failed DocResult with 404 diagnostic when doc fetch returns 404', async () => {
+    vi.stubGlobal('fetch', async (url: string) => {
+      if (url === 'https://example.com/manifest.json') {
+        return {
+          ok:   true,
+          json: async () => [
+            {
+              slug:            'block-api',
+              title:           'Block API',
+              markdown_source: 'https://example.com/block-api.md',
+              parent:          'test',
+            },
+          ],
+        };
+      }
+      // Doc fetch → 404
+      return { ok: false, status: 404 };
+    });
+
+    const result = await runPipeline(minimalConfig);
+
+    expect(result.docs).toHaveLength(1);
+    expect(result.docs[0].diagnostics.some(d => d.includes('404'))).toBe(true);
+    expect(result.docs[0].parent).toBeNull();
   });
 });
