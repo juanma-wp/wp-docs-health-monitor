@@ -9,9 +9,11 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "gen:schema": "tsx scripts/gen-schema.ts"
+    "gen:schema": "tsx scripts/gen-schema.ts",
+    "analyze": "tsx src/cli.ts"
   },
   "dependencies": {
+    "commander": "^12.1.0",
     "gray-matter": "^4.0.3",
     "p-limit": "^5.0.0",
     "remark": "^15.0.1",
