@@ -44,9 +44,9 @@ scope and validating signal at each level before investing in the next.
 
 | MVP | Phases | Goal |
 |-----|--------|------|
-| **MVP 1 — Tracer bullet** | Phase 2 Track A | One doc, full stack, result to console. Does the idea work? |
-| **MVP 2 — PoC usable** | Phase 2 Track B + Phase 3 + Phase 4 | Ten docs, dashboard, real issues, cost measured, results persisted. Does it generate useful signal? |
-| **MVP 3 — Production monitor** | Phase 5 | ~150 docs, auto-mappings, weekly cron, historical UI, cost cap. Is it a reliable continuous monitor? |
+| **MVP 1 — Tracer bullet** | [Phase 2 — Track A](#track-a--one-doc-full-stack) | One doc, full stack, result to console. Does the idea work? |
+| **MVP 2 — PoC usable** | [Phase 2 — Track B](#track-b--dashboard-against-mock-parallel) + [Phase 3](#phase-3--full-pipeline--phase-0-gate) + [Phase 4](#phase-4--integration--publish) | Ten docs, dashboard, real issues, cost measured, results persisted. Does it generate useful signal? |
+| **MVP 3 — Production monitor** | [Phase 5](#phase-5--scale-weeks-24) | ~150 docs, auto-mappings, weekly cron, historical UI, cost cap. Is it a reliable continuous monitor? |
 
 Acceptance criteria scale with the MVP:
 
