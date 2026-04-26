@@ -12,6 +12,7 @@ The original plan (component breakdown, timeline, backlog) is preserved in
 ## Contents
 
 - [How to prompt each phase](#how-to-prompt-each-phase)
+- [MVP framing](#mvp-framing)
 - [Phase 1 — Foundation](#phase-1--foundation--complete)
 - [Phase 2 — Tracer bullet](#phase-2--tracer-bullet)
 - [Phase 3 — Full pipeline + Phase 0 gate](#phase-3--full-pipeline--phase-0-gate)
@@ -33,6 +34,29 @@ User stories in scope: [numbers from prd.md].
 
 That is all. The PRD is the destination; this file is the journey; the phase block
 scopes the work. After each phase: commit, clear context, move to the next.
+
+---
+
+## MVP framing
+
+The phases map onto three product MVPs. This overlay is useful for communicating
+scope and validating signal at each level before investing in the next.
+
+| MVP | Phases | Goal |
+|-----|--------|------|
+| **MVP 1 — Tracer bullet** | Phase 2 Track A | One doc, full stack, result to console. Does the idea work? |
+| **MVP 2 — PoC usable** | Phase 2 Track B + Phase 3 + Phase 4 | Ten docs, dashboard, real issues, cost measured, results persisted. Does it generate useful signal? |
+| **MVP 3 — Production monitor** | Phase 5 | ~150 docs, auto-mappings, weekly cron, historical UI, cost cap. Is it a reliable continuous monitor? |
+
+Acceptance criteria scale with the MVP:
+
+- **MVP 1:** one `DocResult` produced end-to-end; at least one real issue detected OR
+  explicit `healthy` status; cost < $0.10.
+- **MVP 2:** precision ≥ 80%; zero false positives on a known-clean doc; dashboard
+  renders all three page types; `usage` field populated in `results.json`; full 10-doc
+  run < $1.
+- **MVP 3:** 150-doc run under cost cap; cron runs unattended; historical badges
+  correct across ≥ 2 archived runs; dashboard responsive with 150 docs.
 
 ---
 
@@ -111,6 +135,14 @@ Wire into CLI with `--config` and `--output` flags. Write
 `out/data/runs/<runId>/results.json`. Add `p-limit(3)` concurrency and a per-run cost
 meter printed at completion.
 
+**Usage tracking belongs here.** Accumulate `inputTokens`, `outputTokens`,
+`cacheReadTokens`, `cacheWriteTokens` across all Claude calls in the run. Compute
+`estimatedCostUsd` using the current Sonnet 4.6 pricing. Populate `RunResults.usage`
+before writing `results.json`. Print a cost summary to console at run completion:
+```
+Run complete: 10 docs | $0.42 | 98,234 input | 12,100 output | cache hit 88%
+```
+
 Then run the **Phase 0 gate** before calling this phase complete.
 
 ### Phase 0 gate
@@ -172,12 +204,20 @@ dashboard at `https://juanma-wp.github.io/wp-docs-health-monitor/`. Commit.
 Coarse milestones only — scope depends on Phase 3 and 4 findings.
 
 - **Symbol-search mapper** — auto-generate mappings for ~150 docs via AST search;
-  validated against Phase 3 manual mappings (≥70% agreement on primary files)
+  validated against Phase 3 manual mappings (≥70% agreement on primary files).
+  Manual mappings have priority: if a slug already has a hand-written entry in
+  `mappings/*.json`, the auto-generated mapping is stored separately (e.g.
+  `mappings/gutenberg-block-api.auto.json`) and never overwrites it. The pipeline
+  merges both at load time, preferring manual entries on conflict.
 - **Editorial filter** — exclude auto-generated package READMEs; ~424 → ~150 docs
 - **DocSource git-refactor** — share the existing Gutenberg clone between DocSource
   and CodeSource; eliminates 150+ per-doc HTTP requests per run
 - **Pipeline at scale** — `p-limit(5)`, `--cost-cap` flag, checkpointing on `SIGINT`
-- **Dashboard at scale** — collapse/expand tree, search/filter, <1s initial load
+- **Dashboard at scale** — collapse/expand tree, sortable/filterable table view,
+  <1s initial load. Table columns: health score, issue count, max severity,
+  section/parent, status (healthy/needs-attention/critical), estimated cost,
+  last analyzed, new-this-run badge, persistent-N-runs badge. Sortable on all
+  numeric/enum columns; filterable by section, status, and free-text slug/title.
 - **GitHub Action** — weekly cron Mon 06:00 UTC, `--cost-cap 5`, auto-publish
 - **Historical UI** — trend line across runs, "new this week" / "persistent N runs"
   badges via `Issue.fingerprint`

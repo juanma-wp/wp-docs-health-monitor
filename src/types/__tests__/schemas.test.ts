@@ -183,25 +183,31 @@ describe('ManifestEntrySchema', () => {
 
 describe('fingerprintIssue', () => {
   it('returns a 16-character hex string', () => {
-    const fp = fingerprintIssue('block-metadata', 'type-signature', 'src/index.ts', 'update the foo');
+    const fp = fingerprintIssue('block-metadata', 'type-signature', 'gutenberg', 'src/index.ts');
     expect(fp).toMatch(/^[0-9a-f]{16}$/);
   });
 
   it('is stable: same inputs produce the same fingerprint', () => {
-    const a = fingerprintIssue('block-metadata', 'type-signature', 'src/index.ts', 'update the foo');
-    const b = fingerprintIssue('block-metadata', 'type-signature', 'src/index.ts', 'update the foo');
-    expect(a).toBe(b);
-  });
-
-  it('is whitespace-tolerant: extra spaces produce the same fingerprint', () => {
-    const a = fingerprintIssue('block-metadata', 'type-signature', 'src/index.ts', 'update the foo');
-    const b = fingerprintIssue('block-metadata', 'type-signature', 'src/index.ts', '  update  the  foo  ');
+    const a = fingerprintIssue('block-metadata', 'type-signature', 'gutenberg', 'src/index.ts');
+    const b = fingerprintIssue('block-metadata', 'type-signature', 'gutenberg', 'src/index.ts');
     expect(a).toBe(b);
   });
 
   it('produces different fingerprints for different slugs', () => {
-    const a = fingerprintIssue('block-metadata', 'type-signature', 'src/index.ts', 'update the foo');
-    const b = fingerprintIssue('block-supports', 'type-signature', 'src/index.ts', 'update the foo');
+    const a = fingerprintIssue('block-metadata', 'type-signature', 'gutenberg', 'src/index.ts');
+    const b = fingerprintIssue('block-supports', 'type-signature', 'gutenberg', 'src/index.ts');
+    expect(a).not.toBe(b);
+  });
+
+  it('produces different fingerprints for different codeRepos', () => {
+    const a = fingerprintIssue('block-metadata', 'type-signature', 'gutenberg', 'src/index.ts');
+    const b = fingerprintIssue('block-metadata', 'type-signature', 'wordpress-develop', 'src/index.ts');
+    expect(a).not.toBe(b);
+  });
+
+  it('produces different fingerprints for different codeFiles', () => {
+    const a = fingerprintIssue('block-metadata', 'type-signature', 'gutenberg', 'src/index.ts');
+    const b = fingerprintIssue('block-metadata', 'type-signature', 'gutenberg', 'src/other.ts');
     expect(a).not.toBe(b);
   });
 });
