@@ -1,16 +1,13 @@
 import { createHash } from 'crypto';
 
+// Uses structured fields only — not LLM-generated text — so fingerprints are
+// stable across runs even when Claude paraphrases the same finding differently.
 export function fingerprintIssue(
   slug: string,
   type: string,
+  codeRepo: string,
   codeFile: string,
-  issueText: string,
 ): string {
-  const normalized = issueText
-    .toLowerCase()
-    .replace(/[^\w\s]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-  const input = `${slug}|${type}|${codeFile}|${normalized}`;
+  const input = `${slug}|${type}|${codeRepo}|${codeFile}`;
   return createHash('sha256').update(input).digest('hex').slice(0, 16);
 }
