@@ -180,6 +180,41 @@ describe('ClaudeValidator — verbatim check', () => {
     expect(result.issues).toHaveLength(1);
     expect(validator.droppedHallucinations).toBe(0);
   });
+
+  it('passes a nonexistent-name issue through even when codeSays is not in the file', async () => {
+    // The API named in codeSays genuinely does not exist in the file — that IS the finding
+    const pass1Response = makeReportFindingsResponse([
+      {
+        ...BASE_ISSUE,
+        type: 'nonexistent-name',
+        evidence: {
+          ...BASE_ISSUE.evidence,
+          codeSays: 'source',  // this string is NOT in the file content below
+        },
+      },
+    ], []);
+
+    const pass2Response = makeReportFindingsResponse([
+      {
+        ...BASE_ISSUE,
+        type: 'nonexistent-name',
+        evidence: { ...BASE_ISSUE.evidence, codeSays: 'source' },
+        confidence: 0.9,
+      },
+    ], []);
+
+    const fileContent = 'function registerBlockType(name, settings) {}';
+    const client = makeAnthropicClient([pass1Response, pass2Response]);
+    const codeSources = makeCodeSources(fileContent);
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', client);
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
+
+    // Should NOT be dropped — absence is the evidence
+    expect(result.issues).toHaveLength(1);
+    expect(result.issues[0].type).toBe('nonexistent-name');
+    expect(validator.droppedHallucinations).toBe(0);
+  });
 });
 
 // ---------------------------------------------------------------------------

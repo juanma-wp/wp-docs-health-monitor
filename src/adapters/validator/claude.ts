@@ -264,7 +264,9 @@ ${codeContext || '(No source files were available for this document.)'}`;
       try {
         const fileContent = await codeSources[codeRepo].readFile(codeFile);
         const needle = codeSays.trim();
-        if (!fileContent.includes(needle)) {
+        // nonexistent-name evidence is absence — there is no quote to find in the file
+        const isAbsenceIssue = issue.type === 'nonexistent-name';
+        if (!isAbsenceIssue && !fileContent.includes(needle)) {
           this.droppedHallucinations++;
           console.warn(`[verbatim-check] dropped issue in ${doc.slug}: "${codeSays}" not found in ${codeRepo}:${codeFile}`);
           continue;
