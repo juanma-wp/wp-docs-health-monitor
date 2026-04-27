@@ -25,5 +25,13 @@ export const ConfigSchema = z.object({
     type:  z.literal('claude'),
     model: z.string().default('claude-sonnet-4-6'),
   }),
+  // Token pricing in USD per million tokens. Defaults match Sonnet 4.6 rates.
+  // Check https://www.anthropic.com/pricing for current values and update as needed.
+  pricing: z.object({
+    inputPerMtok:      z.number().default(3.00),
+    outputPerMtok:     z.number().default(15.00),
+    cacheWritePerMtok: z.number().default(3.75),
+    cacheReadPerMtok:  z.number().default(0.30),
+  }).default({}),
 });
 export type Config = z.infer<typeof ConfigSchema>;

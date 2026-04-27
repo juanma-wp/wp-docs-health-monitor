@@ -17,22 +17,18 @@ npm install
 
 ## Environment setup
 
-The tool needs `ANTHROPIC_API_KEY` set when running the live pipeline. You can provide it in any of these ways:
+`ANTHROPIC_API_KEY` must be set in the environment before running the live pipeline. How you provide it is up to you:
 
-**Option 1 — `.env` file** (loaded automatically, gitignored):
-```
-ANTHROPIC_API_KEY=sk-ant-...
-```
-
-**Option 2 — inline when running the command:**
 ```bash
+# Inline
 ANTHROPIC_API_KEY=sk-ant-... npm run analyze -- --config config/gutenberg-block-api.json --output ./out
-```
 
-**Option 3 — exported in your shell session:**
-```bash
+# Exported in your shell session
 export ANTHROPIC_API_KEY=sk-ant-...
 npm run analyze -- --config config/gutenberg-block-api.json --output ./out
+
+# Via 1Password CLI
+op run -- npm run analyze -- --config config/gutenberg-block-api.json --output ./out
 ```
 
 ## Usage
@@ -93,6 +89,8 @@ Then open `./out/index.html` in your browser.
 ## Cost note
 
 Each pipeline run calls the Anthropic API once per doc. With `claude-sonnet-4-6`, a full run over ~20 docs costs roughly $0.10–$0.50 depending on doc length and code context size. Use `--results` with `examples/mock-results.json` to explore the dashboard at zero cost.
+
+The estimated cost is stored in `results.json` under `usage.estimatedCostUsd` and appended to `data/history.json` after each run. It is calculated from the token counts returned by the API using the prices configured in `config.pricing`. The defaults match the current Sonnet 4.6 rates — check [Anthropic's pricing page](https://www.anthropic.com/pricing) for updates and adjust `config.pricing` in your config file if needed.
 
 ## Architecture
 

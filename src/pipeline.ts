@@ -8,7 +8,8 @@ import type { RunResults, DocResult } from './types/results.js';
 import type { DocFetchResult, Doc } from './adapters/doc-source/types.js';
 import { createDocSource, createCodeSources, createDocCodeMapper, createValidator } from './adapters/index.js';
 import { scoreDoc } from './health-scorer.js';
-import { PRICE_INPUT_PER_MTOK, PRICE_OUTPUT_PER_MTOK, type CostAccumulator } from './adapters/validator/claude.js';
+import type { CostAccumulator } from './adapters/validator/claude.js';
+import type { RunUsage } from './types/results.js';
 
 function formatRunId(date: Date): string {
   const pad = (n: number, len = 2) => String(n).padStart(len, '0');
@@ -27,22 +28,36 @@ function computeOverallHealth(docResults: DocResult[]): number {
   return Math.round(sum / docResults.length);
 }
 
-function logCostSummary(runId: string, docResults: DocResult[], cost: CostAccumulator): void {
-  const allIssues = docResults.flatMap(d => d.issues);
-  const critical = allIssues.filter(i => i.severity === 'critical').length;
-  const major    = allIssues.filter(i => i.severity === 'major').length;
-  const minor    = allIssues.filter(i => i.severity === 'minor').length;
-  const overall  = computeOverallHealth(docResults);
+function computeUsage(cost: CostAccumulator, pricing: Config['pricing']): RunUsage {
+  const estimatedCostUsd =
+    (cost.inputTokens         * pricing.inputPerMtok      / 1_000_000) +
+    (cost.outputTokens        * pricing.outputPerMtok     / 1_000_000) +
+    (cost.cacheCreationTokens * pricing.cacheWritePerMtok / 1_000_000) +
+    (cost.cacheReadTokens     * pricing.cacheReadPerMtok  / 1_000_000);
+  return {
+    inputTokens:      cost.inputTokens,
+    outputTokens:     cost.outputTokens,
+    cacheReadTokens:  cost.cacheReadTokens,
+    cacheWriteTokens: cost.cacheCreationTokens,
+    estimatedCostUsd: Math.round(estimatedCostUsd * 10_000) / 10_000,
+  };
+}
 
-  const estimatedCost =
-    (cost.inputTokens  * PRICE_INPUT_PER_MTOK  / 1_000_000) +
-    (cost.outputTokens * PRICE_OUTPUT_PER_MTOK / 1_000_000);
+function logCostSummary(docResults: DocResult[], usage: RunUsage): void {
+  const allIssues = docResults.flatMap(d => d.issues);
+  const critical  = allIssues.filter(i => i.severity === 'critical').length;
+  const major     = allIssues.filter(i => i.severity === 'major').length;
+  const minor     = allIssues.filter(i => i.severity === 'minor').length;
+  const overall   = computeOverallHealth(docResults);
+  const cacheHitRate = usage.inputTokens + usage.cacheReadTokens > 0
+    ? Math.round(usage.cacheReadTokens / (usage.inputTokens + usage.cacheReadTokens) * 100)
+    : 0;
 
   console.log(
     `Run complete: ${docResults.length} docs · ${critical} critical · ${major} major · ${minor} minor · overall health: ${overall}`,
   );
   console.log(
-    `Estimated cost: $${estimatedCost.toFixed(2)} (input: ${cost.inputTokens.toLocaleString()} tokens · output: ${cost.outputTokens.toLocaleString()} tokens)`,
+    `Estimated cost: $${usage.estimatedCostUsd.toFixed(4)} (input: ${usage.inputTokens.toLocaleString()} · output: ${usage.outputTokens.toLocaleString()} · cache hit: ${cacheHitRate}%)`,
   );
 }
 
@@ -135,11 +150,15 @@ export async function runPipeline(config: Config): Promise<RunResults> {
 
   const overallHealth = computeOverallHealth(docResults);
 
+  const costAccumulator = (validator as { costAccumulator?: CostAccumulator }).costAccumulator;
+  const usage = costAccumulator ? computeUsage(costAccumulator, config.pricing) : undefined;
+
   const runResults: RunResults = {
     runId,
     timestamp:     now.toISOString(),
     overallHealth,
     totals,
+    usage,
     docs: docResults,
   };
 
@@ -161,18 +180,14 @@ export async function runPipeline(config: Config): Promise<RunResults> {
       }
     }
     const commitSha = docResults.find(d => d.commitSha)?.commitSha ?? '';
-    history.push({ runId, timestamp: now.toISOString(), commitSha, overallHealth, totals });
+    history.push({ runId, timestamp: now.toISOString(), commitSha, overallHealth, totals, estimatedCostUsd: usage?.estimatedCostUsd });
     mkdirSync(dirname(historyPath), { recursive: true });
     writeFileSync(historyPath, JSON.stringify(history, null, 2) + '\n');
   } catch (err) {
     console.warn(`[pipeline] Could not write output files: ${String(err)}`);
   }
 
-  // Log cost summary if the validator exposes cost info
-  const costAccumulator = (validator as { costAccumulator?: CostAccumulator }).costAccumulator;
-  if (costAccumulator) {
-    logCostSummary(runId, docResults, costAccumulator);
-  }
+  if (usage) logCostSummary(docResults, usage);
 
   return runResults;
 }

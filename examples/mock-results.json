@@ -14,6 +14,13 @@
       "minor": 3
     }
   },
+  "usage": {
+    "inputTokens": 120000,
+    "outputTokens": 8000,
+    "cacheReadTokens": 340000,
+    "cacheWriteTokens": 15000,
+    "estimatedCostUsd": 0.5825
+  },
   "docs": [
     {
       "slug": "block-metadata",

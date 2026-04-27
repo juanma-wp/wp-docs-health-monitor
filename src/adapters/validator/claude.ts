@@ -10,10 +10,13 @@ import { scoreDoc } from '../../health-scorer.js';
 import { fingerprintIssue } from '../../history.js';
 
 // ---------------------------------------------------------------------------
-// Token pricing constants (Sonnet 4.6 at $3/MTok input, $15/MTok output)
+// Default token pricing (Sonnet 4.6). Override via config.pricing.
+// Current rates: https://www.anthropic.com/pricing
 // ---------------------------------------------------------------------------
-export const PRICE_INPUT_PER_MTOK  = 3.0;
-export const PRICE_OUTPUT_PER_MTOK = 15.0;
+export const DEFAULT_PRICE_INPUT_PER_MTOK        = 3.00;
+export const DEFAULT_PRICE_OUTPUT_PER_MTOK        = 15.00;
+export const DEFAULT_PRICE_CACHE_WRITE_PER_MTOK   = 3.75;
+export const DEFAULT_PRICE_CACHE_READ_PER_MTOK    = 0.30;
 
 // ---------------------------------------------------------------------------
 // Types for Claude tool inputs
@@ -188,8 +191,10 @@ export function isWeakSuggestion(suggestion: string): boolean {
 // ---------------------------------------------------------------------------
 
 export type CostAccumulator = {
-  inputTokens:  number;
-  outputTokens: number;
+  inputTokens:        number;
+  outputTokens:       number;
+  cacheReadTokens:    number;
+  cacheCreationTokens: number;
 };
 
 // ---------------------------------------------------------------------------
@@ -199,7 +204,7 @@ export type CostAccumulator = {
 export class ClaudeValidator implements Validator {
   private readonly model: string;
   private readonly anthropic: Anthropic;
-  readonly costAccumulator: CostAccumulator = { inputTokens: 0, outputTokens: 0 };
+  readonly costAccumulator: CostAccumulator = { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheCreationTokens: 0 };
   droppedHallucinations = 0;
 
   constructor(model: string, anthropic: Anthropic) {
@@ -348,8 +353,10 @@ ${codeContext || '(No source files were available for this document.)'}${missing
       tool_choice: { type: 'tool', name: 'report_findings' },
     });
 
-    this.costAccumulator.inputTokens  += response.usage.input_tokens;
-    this.costAccumulator.outputTokens += response.usage.output_tokens;
+    this.costAccumulator.inputTokens         += response.usage.input_tokens;
+    this.costAccumulator.outputTokens        += response.usage.output_tokens;
+    this.costAccumulator.cacheReadTokens     += response.usage.cache_read_input_tokens    ?? 0;
+    this.costAccumulator.cacheCreationTokens += response.usage.cache_creation_input_tokens ?? 0;
 
     for (const block of response.content) {
       if (block.type === 'tool_use' && block.name === 'report_findings') {
@@ -505,8 +512,10 @@ ${JSON.stringify(candidate, null, 2)}`,
       tool_choice: { type: 'tool', name: 'report_findings' },
     });
 
-    this.costAccumulator.inputTokens  += response.usage.input_tokens;
-    this.costAccumulator.outputTokens += response.usage.output_tokens;
+    this.costAccumulator.inputTokens         += response.usage.input_tokens;
+    this.costAccumulator.outputTokens        += response.usage.output_tokens;
+    this.costAccumulator.cacheReadTokens     += response.usage.cache_read_input_tokens    ?? 0;
+    this.costAccumulator.cacheCreationTokens += response.usage.cache_creation_input_tokens ?? 0;
 
     for (const block of response.content) {
       if (block.type === 'tool_use' && block.name === 'report_findings') {
