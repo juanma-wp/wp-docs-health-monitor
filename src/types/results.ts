@@ -43,9 +43,13 @@ export const DocResultSchema = z.object({
 });
 export type DocResult = z.infer<typeof DocResultSchema>;
 
+export const RunModelsSchema = z.object({
+  pass1: z.string(),
+  pass2: z.string(),
+});
+export type RunModels = z.infer<typeof RunModelsSchema>;
+
 export const RunUsageSchema = z.object({
-  pass1Model:       z.string(),
-  pass2Model:       z.string(),
   inputTokens:      z.number().int(),
   outputTokens:     z.number().int(),
   cacheReadTokens:  z.number().int(),
@@ -58,6 +62,7 @@ export const RunResultsSchema = z.object({
   runId:         z.string().regex(/^\d{8}-\d{6}$/),  // YYYYMMDD-HHmmss
   timestamp:     z.string().datetime(),
   overallHealth: z.number().min(0).max(100),
+  models:        RunModelsSchema,
   totals: z.object({
     docs:           z.number().int(),
     healthy:        z.number().int(),

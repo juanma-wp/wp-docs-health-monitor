@@ -17,6 +17,22 @@
           "minimum": 0,
           "maximum": 100
         },
+        "models": {
+          "type": "object",
+          "properties": {
+            "pass1": {
+              "type": "string"
+            },
+            "pass2": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "pass1",
+            "pass2"
+          ],
+          "additionalProperties": false
+        },
         "totals": {
           "type": "object",
           "properties": {
@@ -69,12 +85,6 @@
         "usage": {
           "type": "object",
           "properties": {
-            "pass1Model": {
-              "type": "string"
-            },
-            "pass2Model": {
-              "type": "string"
-            },
             "inputTokens": {
               "type": "integer"
             },
@@ -92,8 +102,6 @@
             }
           },
           "required": [
-            "pass1Model",
-            "pass2Model",
             "inputTokens",
             "outputTokens",
             "cacheReadTokens",
@@ -283,6 +291,7 @@
         "runId",
         "timestamp",
         "overallHealth",
+        "models",
         "totals",
         "docs"
       ],

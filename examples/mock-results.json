@@ -2,6 +2,10 @@
   "runId": "20240415-120000",
   "timestamp": "2024-04-15T12:00:00.000Z",
   "overallHealth": 65,
+  "models": {
+    "pass1": "claude-sonnet-4-6",
+    "pass2": "claude-sonnet-4-6"
+  },
   "totals": {
     "docs": 4,
     "healthy": 1,
@@ -15,8 +19,6 @@
     }
   },
   "usage": {
-    "pass1Model": "claude-sonnet-4-6",
-    "pass2Model": "claude-sonnet-4-6",
     "inputTokens": 120000,
     "outputTokens": 8000,
     "cacheReadTokens": 340000,

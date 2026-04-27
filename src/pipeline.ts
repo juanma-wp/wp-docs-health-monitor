@@ -9,7 +9,7 @@ import type { DocFetchResult, Doc } from './adapters/doc-source/types.js';
 import { createDocSource, createCodeSources, createDocCodeMapper, createValidator } from './adapters/index.js';
 import { scoreDoc } from './health-scorer.js';
 import type { CostAccumulator } from './adapters/validator/claude.js';
-import type { RunUsage } from './types/results.js';
+import type { RunUsage, RunModels } from './types/results.js';
 
 function formatRunId(date: Date): string {
   const pad = (n: number, len = 2) => String(n).padStart(len, '0');
@@ -28,16 +28,13 @@ function computeOverallHealth(docResults: DocResult[]): number {
   return Math.round(sum / docResults.length);
 }
 
-function computeUsage(cost: CostAccumulator, config: Config): RunUsage {
-  const { pricing, validator } = config;
+function computeUsage(cost: CostAccumulator, pricing: Config['pricing']): RunUsage {
   const estimatedCostUsd =
     (cost.inputTokens         * pricing.inputPerMtok      / 1_000_000) +
     (cost.outputTokens        * pricing.outputPerMtok     / 1_000_000) +
     (cost.cacheCreationTokens * pricing.cacheWritePerMtok / 1_000_000) +
     (cost.cacheReadTokens     * pricing.cacheReadPerMtok  / 1_000_000);
   return {
-    pass1Model:       validator.pass1Model,
-    pass2Model:       validator.pass2Model,
     inputTokens:      cost.inputTokens,
     outputTokens:     cost.outputTokens,
     cacheReadTokens:  cost.cacheReadTokens,
@@ -154,12 +151,18 @@ export async function runPipeline(config: Config): Promise<RunResults> {
   const overallHealth = computeOverallHealth(docResults);
 
   const costAccumulator = (validator as { costAccumulator?: CostAccumulator }).costAccumulator;
-  const usage = costAccumulator ? computeUsage(costAccumulator, config) : undefined;
+  const usage = costAccumulator ? computeUsage(costAccumulator, config.pricing) : undefined;
+
+  const models: RunModels = {
+    pass1: config.validator.pass1Model,
+    pass2: config.validator.pass2Model,
+  };
 
   const runResults: RunResults = {
     runId,
     timestamp:     now.toISOString(),
     overallHealth,
+    models,
     totals,
     usage,
     docs: docResults,
