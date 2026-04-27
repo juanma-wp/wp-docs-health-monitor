@@ -66,6 +66,34 @@
           ],
           "additionalProperties": false
         },
+        "usage": {
+          "type": "object",
+          "properties": {
+            "inputTokens": {
+              "type": "integer"
+            },
+            "outputTokens": {
+              "type": "integer"
+            },
+            "cacheReadTokens": {
+              "type": "integer"
+            },
+            "cacheWriteTokens": {
+              "type": "integer"
+            },
+            "estimatedCostUsd": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "inputTokens",
+            "outputTokens",
+            "cacheReadTokens",
+            "cacheWriteTokens",
+            "estimatedCostUsd"
+          ],
+          "additionalProperties": false
+        },
         "docs": {
           "type": "array",
           "items": {
@@ -157,7 +185,8 @@
                       "maximum": 1
                     },
                     "fingerprint": {
-                      "type": "string"
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{16}$"
                     }
                   },
                   "required": [

@@ -43,6 +43,15 @@ export const DocResultSchema = z.object({
 });
 export type DocResult = z.infer<typeof DocResultSchema>;
 
+export const RunUsageSchema = z.object({
+  inputTokens:      z.number().int(),
+  outputTokens:     z.number().int(),
+  cacheReadTokens:  z.number().int(),
+  cacheWriteTokens: z.number().int(),
+  estimatedCostUsd: z.number(),
+});
+export type RunUsage = z.infer<typeof RunUsageSchema>;
+
 export const RunResultsSchema = z.object({
   runId:         z.string().regex(/^\d{8}-\d{6}$/),  // YYYYMMDD-HHmmss
   timestamp:     z.string().datetime(),
@@ -59,6 +68,7 @@ export const RunResultsSchema = z.object({
       minor:    z.number().int(),
     }),
   }),
+  usage: RunUsageSchema.optional(),
   docs: z.array(DocResultSchema),
 });
 export type RunResults = z.infer<typeof RunResultsSchema>;

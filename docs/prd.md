@@ -160,15 +160,57 @@ and suggested fixes, and explicit confirmation when docs are accurate.
 - Three page types: index (overall health + tree view by section), per-doc detail
   (issues, evidence, suggestions, positives, diagnostics, source link), folder rollup
   (section aggregation with weighted health scores).
+- At scale (Phase 5) the index includes a sortable, filterable table view. Columns:
+  health score, issue count, max severity, section/parent, status, estimated cost,
+  last analyzed, new-this-run badge, persistent-N-runs badge. This makes the dashboard
+  an operational tool, not just a report.
 
 ### Results storage
 
 - `gh-pages` branch doubles as static host and append-only data store:
   `data/runs/<runId>/results.json` + `data/history.json` index.
 - Publish script preserves all existing run directories. Never overwrites prior data.
-- Issue fingerprinting: stable hash of `slug + type + codeFile + normalize(text)`.
-  Same fingerprint across runs = same issue, regardless of doc line shifts. Enables
-  story 19 without a database.
+- Each `results.json` carries an optional `usage` field populated by the pipeline once
+  real Claude calls are wired up (Phase 3+):
+  ```json
+  "usage": {
+    "inputTokens": 123456,
+    "outputTokens": 23456,
+    "cacheReadTokens": 90000,
+    "cacheWriteTokens": 12000,
+    "estimatedCostUsd": 3.42
+  }
+  ```
+  The field is optional so Phase 1–2 fixtures validate without it.
+- Issue fingerprinting: stable hash of `slug + type + codeRepo + codeFile`.
+  Deliberately excludes LLM-generated text — Claude may paraphrase the same finding
+  differently across runs, which would produce a different hash and make persistent
+  issues look new. Using only structured fields ensures the same issue maps to the
+  same fingerprint even when the description varies. Enables story 19 without a
+  database. Multiple issues of the same `type` on the same file for the same doc are
+  rare in practice given the specificity of the type enum.
+
+### Operability
+
+The dashboard must surface enough information to answer "what did this run cost and
+was it within budget?" for both development runs and production crons.
+
+Required information per run (rendered in the dashboard index header):
+
+| Field | Description |
+|-------|-------------|
+| Run cost | `estimatedCostUsd` from `usage` |
+| Input tokens | raw + formatted with commas |
+| Output tokens | raw + formatted with commas |
+| Cache hit rate | `cacheReadTokens / (inputTokens + cacheReadTokens)` × 100% |
+| Cost cap | configured value; highlight in red if run approached it |
+| Docs analyzed | count from `totals.docs` |
+| Docs skipped | count from diagnostics entries |
+| Run duration | seconds from start to completion |
+
+This information also answers the "how much does it cost at scale?" question:
+measuring real token usage per doc makes projecting to 150–200 docs straightforward
+without guessing.
 
 ---
 
