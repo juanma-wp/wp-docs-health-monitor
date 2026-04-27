@@ -1,4 +1,9 @@
 #!/usr/bin/env node
+
+// Load .env if present — environment variables already set in the shell take precedence.
+// Silently skips if .env does not exist.
+try { process.loadEnvFile(); } catch { /* .env is optional */ }
+
 import { program } from 'commander';
 import { readFile, writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';

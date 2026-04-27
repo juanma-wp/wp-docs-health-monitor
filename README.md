@@ -7,12 +7,32 @@ The tool compares docs against their underlying source code and produces an evid
 ## Prerequisites
 
 - Node.js ≥ 20
-- `ANTHROPIC_API_KEY` environment variable (required for live pipeline runs)
+- `ANTHROPIC_API_KEY` (required for live pipeline runs)
 
 ## Install
 
 ```bash
 npm install
+```
+
+## Environment setup
+
+The tool needs `ANTHROPIC_API_KEY` set when running the live pipeline. You can provide it in any of these ways:
+
+**Option 1 — `.env` file** (loaded automatically, gitignored):
+```
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+**Option 2 — inline when running the command:**
+```bash
+ANTHROPIC_API_KEY=sk-ant-... npm run analyze -- --config config/gutenberg-block-api.json --output ./out
+```
+
+**Option 3 — exported in your shell session:**
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+npm run analyze -- --config config/gutenberg-block-api.json --output ./out
 ```
 
 ## Usage
