@@ -69,6 +69,12 @@
         "usage": {
           "type": "object",
           "properties": {
+            "pass1Model": {
+              "type": "string"
+            },
+            "pass2Model": {
+              "type": "string"
+            },
             "inputTokens": {
               "type": "integer"
             },
@@ -86,6 +92,8 @@
             }
           },
           "required": [
+            "pass1Model",
+            "pass2Model",
             "inputTokens",
             "outputTokens",
             "cacheReadTokens",

@@ -44,6 +44,8 @@ export const DocResultSchema = z.object({
 export type DocResult = z.infer<typeof DocResultSchema>;
 
 export const RunUsageSchema = z.object({
+  pass1Model:       z.string(),
+  pass2Model:       z.string(),
   inputTokens:      z.number().int(),
   outputTokens:     z.number().int(),
   cacheReadTokens:  z.number().int(),

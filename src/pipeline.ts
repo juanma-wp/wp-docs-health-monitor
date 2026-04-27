@@ -28,13 +28,16 @@ function computeOverallHealth(docResults: DocResult[]): number {
   return Math.round(sum / docResults.length);
 }
 
-function computeUsage(cost: CostAccumulator, pricing: Config['pricing']): RunUsage {
+function computeUsage(cost: CostAccumulator, config: Config): RunUsage {
+  const { pricing, validator } = config;
   const estimatedCostUsd =
     (cost.inputTokens         * pricing.inputPerMtok      / 1_000_000) +
     (cost.outputTokens        * pricing.outputPerMtok     / 1_000_000) +
     (cost.cacheCreationTokens * pricing.cacheWritePerMtok / 1_000_000) +
     (cost.cacheReadTokens     * pricing.cacheReadPerMtok  / 1_000_000);
   return {
+    pass1Model:       validator.pass1Model,
+    pass2Model:       validator.pass2Model,
     inputTokens:      cost.inputTokens,
     outputTokens:     cost.outputTokens,
     cacheReadTokens:  cost.cacheReadTokens,
@@ -151,7 +154,7 @@ export async function runPipeline(config: Config): Promise<RunResults> {
   const overallHealth = computeOverallHealth(docResults);
 
   const costAccumulator = (validator as { costAccumulator?: CostAccumulator }).costAccumulator;
-  const usage = costAccumulator ? computeUsage(costAccumulator, config.pricing) : undefined;
+  const usage = costAccumulator ? computeUsage(costAccumulator, config) : undefined;
 
   const runResults: RunResults = {
     runId,
