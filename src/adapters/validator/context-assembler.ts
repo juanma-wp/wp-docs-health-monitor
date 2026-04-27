@@ -17,6 +17,7 @@ export type AssembledContext = {
   relatedCode: DocResult['relatedCode'];
   estimatedTokens: number;
   diagnostics: string[];
+  missingSymbols: string[];
 };
 
 function inferLanguage(filePath: string): string {
@@ -44,6 +45,22 @@ function inferLanguage(filePath: string): string {
 
 function estimateTokens(content: string): number {
   return Math.ceil(content.length / 4);
+}
+
+// Extract backtick-wrapped identifiers from doc markdown (e.g. `registerBlockType`)
+export function extractDocSymbols(docContent: string): string[] {
+  const matches = docContent.matchAll(/`([^`\s][^`]*[^`\s]|[^`\s])`/g);
+  const seen = new Set<string>();
+  for (const [, symbol] of matches) {
+    if (symbol) seen.add(symbol);
+  }
+  return [...seen];
+}
+
+// Return symbols that do not appear literally in any assembled source file
+export function findMissingSymbols(symbols: string[], fileBlocks: FileBlock[]): string[] {
+  const allCode = fileBlocks.map(fb => fb.content).join('\n');
+  return symbols.filter(sym => !allCode.includes(sym));
 }
 
 export function formatContextForClaude(fileBlocks: FileBlock[]): string {
@@ -108,10 +125,14 @@ export async function assembleContext(
     }
   }
 
+  const symbols = extractDocSymbols(doc.content);
+  const missingSymbols = findMissingSymbols(symbols, fileBlocks);
+
   return {
     fileBlocks,
     relatedCode,
     estimatedTokens: cumulativeTokens,
     diagnostics,
+    missingSymbols,
   };
 }

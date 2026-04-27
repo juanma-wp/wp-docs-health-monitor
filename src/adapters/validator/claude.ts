@@ -228,6 +228,9 @@ export class ClaudeValidator implements Validator {
 
     // Build user message content
     const codeContext = formatContextForClaude(assembled.fileBlocks);
+    const missingSymbolsHint = assembled.missingSymbols.length > 0
+      ? `\n\n## Potentially removed APIs\n\nThe following identifiers appear in the doc but were not found in any source file. Investigate each as a possible \`nonexistent-name\` issue:\n\n${assembled.missingSymbols.map(s => `- \`${s}\``).join('\n')}`
+      : '';
     const userContent = `## Documentation: ${doc.title}
 
 URL: ${doc.sourceUrl}
@@ -238,7 +241,7 @@ ${doc.content}
 
 ## Source Code
 
-${codeContext || '(No source files were available for this document.)'}`;
+${codeContext || '(No source files were available for this document.)'}${missingSymbolsHint}`;
 
     // Pass 1: get initial issues and positives
     let pass1Issues: RawIssue[] = [];
