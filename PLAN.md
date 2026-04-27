@@ -45,18 +45,19 @@ scope and validating signal at each level before investing in the next.
 | MVP | Phases | Goal |
 |-----|--------|------|
 | **MVP 1 — Tracer bullet** | [Phase 2 — Track A](#track-a--one-doc-full-stack) | One doc, full stack, result to console. Does the idea work? |
-| **MVP 2 — PoC usable** | [Phase 2 — Track B](#track-b--dashboard-against-mock-parallel) + [Phase 3](#phase-3--full-pipeline--phase-0-gate) + [Phase 4](#phase-4--integration--publish) | Ten docs, dashboard, real issues, cost measured, results persisted. Does it generate useful signal? |
-| **MVP 3 — Production monitor** | [Phase 5](#phase-5--scale-weeks-24) | ~150 docs, auto-mappings, weekly cron, historical UI, cost cap. Is it a reliable continuous monitor? |
+| **MVP 2 — PoC usable (local)** | [Phase 2 — Track B](#track-b--dashboard-against-mock-parallel) + [Phase 3](#phase-3--full-pipeline--phase-0-gate) | Ten docs, dashboard browsable locally, real issues, cost measured. Does it generate useful signal? |
+| **MVP 3 — PoC published** | [Phase 4](#phase-4--integration--publish) + [Phase 5](#phase-5--scale-weeks-24) | Dashboard published to GitHub Pages, ~150 docs, weekly cron, historical UI, cost cap. |
 
 Acceptance criteria scale with the MVP:
 
 - **MVP 1:** one `DocResult` produced end-to-end; at least one real issue detected OR
   explicit `healthy` status; cost < $0.10.
 - **MVP 2:** precision ≥ 80%; zero false positives on a known-clean doc; dashboard
-  renders all three page types; `usage` field populated in `results.json`; full 10-doc
-  run < $1.
-- **MVP 3:** 150-doc run under cost cap; cron runs unattended; historical badges
-  correct across ≥ 2 archived runs; dashboard responsive with 150 docs.
+  renders all three page types locally; `usage` field populated in `results.json`; full
+  10-doc run < $1.
+- **MVP 3:** dashboard publicly reachable at GitHub Pages; 150-doc run under cost cap;
+  cron runs unattended; historical badges correct across ≥ 2 archived runs; dashboard
+  responsive with 150 docs.
 
 ---
 
@@ -178,19 +179,17 @@ Commit.
 
 ---
 
-## Phase 4 — Integration + Publish
+## Phase 4 — Publish *(MVP 3)*
 
 *User stories: 1, 2, 4, 5, 6, 7, 8, 11, 12, 15*
-
-**Track B:** Swap `examples/mock-results.json` for the real `results.json` produced by
-Phase 3. Confirm all three page types render correctly with real data. Fix any edge
-cases that only appear with real results (empty issue lists, diagnostics present, varied
-severity distributions).
 
 Add `scripts/publish.sh` (aliased as `npm run publish`): uses a `gh-pages` git
 worktree, copies `out/` into it while preserving any existing `data/runs/<runId>/`
 directories from prior runs, commits, pushes. A second run must append to `data/runs/`
 without clobbering the first.
+
+Fix any edge cases that only appear with real results (empty issue lists, diagnostics
+present, varied severity distributions) before publishing.
 
 **Done when:** `npm run analyze && npm run publish` results in a publicly reachable
 dashboard at `https://juanma-wp.github.io/wp-docs-health-monitor/`. Commit.
