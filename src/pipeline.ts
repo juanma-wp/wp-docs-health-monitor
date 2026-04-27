@@ -158,11 +158,17 @@ export async function runPipeline(config: Config): Promise<RunResults> {
     pass2: config.validator.pass2Model,
   };
 
+  const repoUrls: Record<string, string> = {};
+  for (const [id, cs] of Object.entries(config.codeSources)) {
+    repoUrls[id] = cs.repoUrl.replace(/\.git$/, '');
+  }
+
   const runResults: RunResults = {
     runId,
     timestamp:     now.toISOString(),
     overallHealth,
     models,
+    repoUrls,
     totals,
     usage,
     docs: docResults,

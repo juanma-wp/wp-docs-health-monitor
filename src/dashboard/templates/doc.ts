@@ -1,15 +1,27 @@
 import type { DocResult, Issue } from '../../types/results.js';
-import { escapeHtml, healthBadge, statusBadge, htmlShell } from './shared.js';
+import { escapeHtml, inlineCode, healthBadge, statusBadge, htmlShell } from './shared.js';
 
 const SEVERITY_ORDER: Record<Issue['severity'], number> = { critical: 0, major: 1, minor: 2 };
 
-function renderIssue(issue: Issue): string {
+function githubUrl(repoUrls: Record<string, string>, commitSha: string, codeRepo: string, codeFile: string): string | null {
+  const base = repoUrls[codeRepo];
+  if (!base || !commitSha) return null;
+  return `${base}/blob/${commitSha}/${codeFile}`;
+}
+
+function renderIssue(issue: Issue, repoUrls: Record<string, string>, commitSha: string): string {
   const confidence = `${Math.round(issue.confidence * 100)}%`;
   const severityClass = issue.severity === 'critical'
     ? 'border-l-red-500 bg-red-50'
     : issue.severity === 'major'
       ? 'border-l-yellow-500 bg-yellow-50'
       : 'border-l-gray-400 bg-gray-50';
+
+  const url = githubUrl(repoUrls, commitSha, issue.evidence.codeRepo, issue.evidence.codeFile);
+  const fileLabel = `${escapeHtml(issue.evidence.codeRepo)}:${escapeHtml(issue.evidence.codeFile)}`;
+  const fileLink = url
+    ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">${fileLabel}</a>`
+    : fileLabel;
 
   return `
     <div class="border-l-4 ${severityClass} pl-4 py-3 mb-4 rounded-r">
@@ -19,19 +31,19 @@ function renderIssue(issue: Issue): string {
         <span class="text-xs text-gray-400 ml-auto">confidence: ${escapeHtml(confidence)}</span>
       </div>
       <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
-        ${escapeHtml(issue.evidence.docSays)}
+        ${inlineCode(issue.evidence.docSays)}
       </blockquote>
       <div class="mb-2">
-        <p class="text-xs text-gray-500 mb-1">${escapeHtml(issue.evidence.codeRepo)}:${escapeHtml(issue.evidence.codeFile)}</p>
+        <p class="text-xs text-gray-500 mb-1">${fileLink}</p>
         <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>${escapeHtml(issue.evidence.codeSays)}</code></pre>
       </div>
       <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900">
-        💡 ${escapeHtml(issue.suggestion)}
+        💡 ${inlineCode(issue.suggestion)}
       </div>
     </div>`;
 }
 
-export function renderDoc(doc: DocResult): string {
+export function renderDoc(doc: DocResult, repoUrls: Record<string, string>): string {
   const breadcrumb = `
     <nav class="text-sm text-gray-500 mb-6">
       <a href="../index.html" class="hover:underline text-blue-600">Index</a>
@@ -57,7 +69,7 @@ export function renderDoc(doc: DocResult): string {
   const issuesHtml = sortedIssues.length > 0
     ? `<section class="mb-8">
         <h2 class="text-lg font-semibold mb-3">Issues (${sortedIssues.length})</h2>
-        ${sortedIssues.map(renderIssue).join('')}
+        ${sortedIssues.map(i => renderIssue(i, repoUrls, doc.commitSha)).join('')}
       </section>`
     : `<section class="mb-8"><p class="text-green-700 font-medium">✅ No issues found.</p></section>`;
 
@@ -65,7 +77,7 @@ export function renderDoc(doc: DocResult): string {
     ? `<section class="mb-8">
         <h2 class="text-lg font-semibold mb-3">Positives</h2>
         <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
-          ${doc.positives.map(p => `<li>${escapeHtml(p)}</li>`).join('')}
+          ${doc.positives.map(p => `<li>${inlineCode(p)}</li>`).join('')}
         </ul>
       </section>`
     : '';

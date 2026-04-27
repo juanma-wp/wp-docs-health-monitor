@@ -33,6 +33,12 @@
           ],
           "additionalProperties": false
         },
+        "repoUrls": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "totals": {
           "type": "object",
           "properties": {
@@ -292,6 +298,7 @@
         "timestamp",
         "overallHealth",
         "models",
+        "repoUrls",
         "totals",
         "docs"
       ],

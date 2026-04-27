@@ -63,6 +63,7 @@ export const RunResultsSchema = z.object({
   timestamp:     z.string().datetime(),
   overallHealth: z.number().min(0).max(100),
   models:        RunModelsSchema,
+  repoUrls:      z.record(z.string(), z.string()),   // repoId → GitHub base URL (no trailing slash)
   totals: z.object({
     docs:           z.number().int(),
     healthy:        z.number().int(),
