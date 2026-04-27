@@ -2,29 +2,83 @@
 
 Automated health monitor for WordPress-hosted developer documentation sites.
 
-The tool compares docs (from markdown in a repo or from a WordPress REST API) against their underlying source code and produces an evidence-backed, scored report of drift — outdated APIs, missing parameters, broken examples, deprecated usage — with suggested fixes.
+The tool compares docs against their underlying source code and produces an evidence-backed, scored report of drift — outdated APIs, missing parameters, broken examples, deprecated usage — with suggested fixes, rendered as a static HTML dashboard.
 
-## Status
+## Prerequisites
 
-🌱 Early. Phase 1 (Proof of Concept) is in progress. **Ingestion works end-to-end; the drift validator and dashboard are not yet implemented.** Running the pipeline today produces a list of docs with stub analysis results — useful for validating config, mappings, and adapter plumbing, but not yet producing real drift findings.
+- Node.js ≥ 20
+- `ANTHROPIC_API_KEY` environment variable (required for live pipeline runs)
 
-- **[`PLAN.md`](./PLAN.md)** — overview, scope, architecture at a glance, out-of-scope, open questions.
-- **[`docs/architecture.md`](./docs/architecture.md)** — technical details: repo layout, schemas, mapping format, tech stack, risks.
-- **[`docs/backlog.md`](./docs/backlog.md)** — what to build: 5 Week-1 issues + Phase 2 milestones, with owner, deps, and acceptance criteria.
-- **[`docs/timeline.md`](./docs/timeline.md)** — when to build it: milestones with target dates, gates, dependencies across the month.
+## Install
 
-## Why
+```bash
+npm install
+```
 
-The Block Editor Handbook alone has 150+ editorial docs that silently drift from Gutenberg source. Contributors who want to improve docs lack a prioritized punch list. The blog post behind this project: https://radicalupdates.wordpress.com/2026/04/15/block-editor-docs-health-monitor/
+## Usage
 
-## How (high level)
+### Run against live docs (requires config + API key)
 
-1. **Adapter-based pipeline:** pluggable `DocSource`, `CodeSource`, `DocCodeMapper`, `Validator`.
-2. **Claude two-pass validation** with prompt caching + quoted-evidence requirements to keep false positives down.
-3. **Static HTML dashboard** — one file per doc, color-coded health scores, linkable deep-URLs for fixing.
-4. **GitHub Action** for weekly cron + manual dispatch (stretch for the PoC).
+```bash
+npm run analyze -- --config config/gutenberg-block-api.json --output ./out
+```
 
-See [`PLAN.md`](./PLAN.md) for the design, [`docs/architecture.md`](./docs/architecture.md) for the schemas, [`docs/backlog.md`](./docs/backlog.md) for the issue breakdown, and [`docs/timeline.md`](./docs/timeline.md) for the schedule.
+### Preview with mock data (no API key needed)
+
+```bash
+npm run analyze -- --results examples/mock-results.json --output ./out
+```
+
+Then open `./out/index.html` in your browser.
+
+## CLI flags
+
+| Flag | Description |
+|------|-------------|
+| `--config <path>` | Path to a config JSON file. Required unless `--results` is provided. |
+| `--output <dir>` | Output directory for the dashboard. Required. |
+| `--results <path>` | Load a pre-computed `RunResults` JSON instead of running the pipeline. |
+| `--only <slug>` | Analyze only the doc with this slug (pipeline runs only). |
+| `--dry-run` | Print what would be analyzed without running the pipeline. Requires `--config`. |
+
+`--results` and `--config` are mutually exclusive for pipeline execution.
+
+## Config file reference
+
+```json
+{
+  "project": { "name": "Gutenberg Block API" },
+  "docSource": {
+    "type": "manifest-url",
+    "manifestUrl": "https://...",
+    "parentSlug": "block-api",
+    "sourceUrlBase": "https://developer.wordpress.org/block-editor/"
+  },
+  "codeSources": {
+    "gutenberg": {
+      "type": "git-clone",
+      "repoUrl": "https://github.com/WordPress/gutenberg.git",
+      "ref": "trunk"
+    }
+  },
+  "mappingPath": "config/gutenberg-block-api-mapping.json",
+  "outputDir": "./out",
+  "validator": {
+    "type": "claude",
+    "model": "claude-sonnet-4-6"
+  }
+}
+```
+
+## Cost note
+
+Each pipeline run calls the Anthropic API once per doc. With `claude-sonnet-4-6`, a full run over ~20 docs costs roughly $0.10–$0.50 depending on doc length and code context size. Use `--results` with `examples/mock-results.json` to explore the dashboard at zero cost.
+
+## Architecture
+
+- **[`PLAN.md`](./PLAN.md)** — overview, scope, out-of-scope, open questions.
+- **[`docs/architecture.md`](./docs/architecture.md)** — schemas, mapping format, tech stack.
+- **[`docs/backlog.md`](./docs/backlog.md)** — issue breakdown and milestones.
 
 ## Getting started
 
