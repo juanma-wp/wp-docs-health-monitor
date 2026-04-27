@@ -14,7 +14,6 @@ program
   .option('--config <path>', 'Path to config JSON file')
   .option('--output <dir>', 'Output directory for the dashboard')
   .option('--results <path>', 'Load RunResults from a JSON file instead of running the pipeline')
-  .option('--only <slug>', 'Only analyze the doc with this slug')
   .option('--dry-run', 'Print what would be analyzed without running the pipeline')
   .parse(process.argv);
 
@@ -22,7 +21,6 @@ const opts = program.opts<{
   config?: string;
   output?: string;
   results?: string;
-  only?: string;
   dryRun?: boolean;
 }>();
 

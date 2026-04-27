@@ -44,7 +44,7 @@ function parseArgs(argv: string[]): { slug: string; configPath: string } {
 
 async function main() {
   const { slug, configPath } = parseArgs(process.argv);
-  const config = loadConfig(configPath);
+  const config = await loadConfig(configPath);
 
   // 1. Fetch the manifest and find the entry for this slug
   const manifestRes = await fetch(config.docSource.manifestUrl);
