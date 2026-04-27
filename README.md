@@ -116,11 +116,11 @@ npx tsx scripts/verify-ingestion.ts
 What this does:
 
 1. Loads `config/gutenberg-block-api.json` and validates it against the config schema.
-2. Fetches the Gutenberg `manifest.json`, filters to entries where `parent === "block-api"`, and fetches each doc's raw markdown.
-3. Shallow-clones the Gutenberg and `wordpress-develop` repos into `tmp/`.
-4. Prints `Docs fetched: 10` and `Failed: 0` on success (the "Failed" count includes docs whose mapping slug is missing — harmless while the mapping is still being curated).
+2. Fetches the Gutenberg `manifest.json`, filters to entries where `parent === "block-api"`, and fetches each doc's raw markdown — held in memory only, nothing written to disk.
+3. Resolves each doc slug against `mappings/gutenberg-block-api.json` and prints the mapped code files.
+4. Prints `Docs fetched: 16` and `Failed: 6` (the "Failed" count includes docs whose mapping slug is missing — harmless while the mapping is still being curated).
 
-Re-runs reuse the cached clones under `tmp/` — expect ~1s on subsequent runs vs. ~30s the first time. To start fresh, delete `tmp/`.
+The `git-clone` code sources (`tmp/`) are **not** triggered by this script — repos are shallow-cloned on first use once the validator is implemented. Re-runs reuse the cached clones — expect ~30s the first time, ~1s after. To start fresh, delete `tmp/`.
 
 ### Optional environment variables
 

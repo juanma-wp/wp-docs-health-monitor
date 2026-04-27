@@ -38,3 +38,5 @@ Thumbs.db
 /analysis-output/
 /.gutenberg-clone/
 /results-*.json
+
+CLAUDE.local.md

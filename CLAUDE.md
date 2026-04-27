@@ -15,7 +15,7 @@ Node 20+ required. ESM throughout (`"type": "module"`); intra-package imports us
 
 ## Architecture
 
-Read these in order when orienting: `PLAN.md` (overview) → `docs/architecture.md` (why decisions were made) → `AGENTS.md` (role-scoped reviewing/implementation) → `src/pipeline.ts` (the wire-up).
+Read these in order when orienting: `PLAN.md` (phases + decisions) → `docs/prd.md` (requirements + user stories) → `docs/architecture.md` (why decisions were made) → `AGENTS.md` (role-scoped reviewing/implementation) → `src/pipeline.ts` (the wire-up).
 
 ### The contract is the center of gravity
 
