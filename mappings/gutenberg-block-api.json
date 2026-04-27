@@ -2,28 +2,28 @@
   "block-metadata": {
     "primary": [
       { "repo": "gutenberg", "path": "lib/blocks.php" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.js" }
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.ts" }
     ],
     "secondary": [
       { "repo": "wordpress-develop", "path": "src/wp-includes/blocks.php" },
       { "repo": "wordpress-develop", "path": "src/wp-includes/class-wp-block-type.php" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/store/actions.js" }
+      { "repo": "gutenberg", "path": "packages/blocks/src/store/actions.ts" }
     ],
     "context": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/store/reducer.js" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/factory.js" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/store/reducer.ts" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/factory.ts" },
       { "repo": "wordpress-develop", "path": "src/wp-includes/class-wp-block-type-registry.php" }
     ]
   },
   "block-registration": {
     "primary": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.js" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/store/actions.js" }
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.ts" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/store/actions.ts" }
     ],
     "secondary": [
       { "repo": "wordpress-develop", "path": "src/wp-includes/class-wp-block-type.php" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/store/reducer.js" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/factory.js" }
+      { "repo": "gutenberg", "path": "packages/blocks/src/store/reducer.ts" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/factory.ts" }
     ],
     "context": [
       { "repo": "wordpress-develop", "path": "src/wp-includes/blocks.php" },
@@ -33,24 +33,24 @@
   },
   "block-attributes": {
     "primary": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/parser/get-block-attributes.js" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/parser/index.js" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/serializer.js" }
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/parser/get-block-attributes.ts" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/parser/index.ts" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/serializer.tsx" }
     ],
     "secondary": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.js" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/store/reducer.js" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.ts" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/store/reducer.ts" },
       { "repo": "wordpress-develop", "path": "src/wp-includes/class-wp-block.php" }
     ],
     "context": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/validation/index.js" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/factory.js" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/validation/index.ts" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/factory.ts" },
       { "repo": "wordpress-develop", "path": "src/wp-includes/class-wp-block-type.php" }
     ]
   },
   "block-supports": {
     "primary": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.js" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.ts" },
       { "repo": "gutenberg", "path": "packages/block-editor/src/hooks/index.js" }
     ],
     "secondary": [
@@ -60,101 +60,101 @@
     ],
     "context": [
       { "repo": "gutenberg", "path": "packages/block-editor/src/hooks/typography.js" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/store/reducer.js" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/store/reducer.ts" },
       { "repo": "wordpress-develop", "path": "src/wp-includes/blocks.php" },
       { "repo": "gutenberg", "path": "packages/block-editor/src/hooks/dimensions.js" }
     ]
   },
   "block-variations": {
     "primary": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.js" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/store/actions.js" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/store/selectors.js" }
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.ts" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/store/actions.ts" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/store/selectors.ts" }
     ],
     "secondary": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/store/reducer.js" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/store/reducer.ts" },
       { "repo": "gutenberg", "path": "packages/block-editor/src/components/block-variation-picker/index.js" }
     ],
     "context": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/factory.js" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/factory.ts" },
       { "repo": "wordpress-develop", "path": "src/wp-includes/class-wp-block-type.php" }
     ]
   },
   "block-context": {
     "primary": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.js" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.ts" },
       { "repo": "gutenberg", "path": "packages/block-editor/src/components/block-context/index.js" }
     ],
     "secondary": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/parser/index.js" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/parser/index.ts" },
       { "repo": "gutenberg", "path": "packages/block-editor/src/store/selectors.js" }
     ],
     "context": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/factory.js" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/factory.ts" },
       { "repo": "wordpress-develop", "path": "src/wp-includes/class-wp-block.php" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/store/actions.js" }
+      { "repo": "gutenberg", "path": "packages/blocks/src/store/actions.ts" }
     ]
   },
   "block-deprecation": {
     "primary": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.js" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/deprecation.js" }
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.ts" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/parser/apply-block-deprecated-versions.ts" }
     ],
     "secondary": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/parser/index.js" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/validation/index.js" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/serializer.js" }
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/parser/index.ts" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/validation/index.ts" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/serializer.tsx" }
     ],
     "context": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/factory.js" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/store/reducer.js" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/factory.ts" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/store/reducer.ts" },
       { "repo": "wordpress-develop", "path": "src/wp-includes/class-wp-block-type.php" }
     ]
   },
   "block-transforms": {
     "primary": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.js" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/raw-handling/index.js" }
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.ts" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/raw-handling/index.ts" }
     ],
     "secondary": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/factory.js" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/store/actions.js" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/store/selectors.js" }
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/factory.ts" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/store/actions.ts" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/store/selectors.ts" }
     ],
     "context": [
       { "repo": "gutenberg", "path": "packages/block-editor/src/components/block-switcher/index.js" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/parser/index.js" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/serializer.js" }
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/parser/index.ts" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/serializer.tsx" }
     ]
   },
   "block-patterns": {
     "primary": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.js" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.ts" },
       { "repo": "wordpress-develop", "path": "src/wp-includes/class-wp-block-patterns-registry.php" }
     ],
     "secondary": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/store/actions.js" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/store/selectors.js" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/store/actions.ts" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/store/selectors.ts" },
       { "repo": "wordpress-develop", "path": "src/wp-includes/blocks.php" }
     ],
     "context": [
       { "repo": "gutenberg", "path": "packages/block-editor/src/components/inserter/index.js" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/factory.js" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/factory.ts" },
       { "repo": "wordpress-develop", "path": "src/wp-includes/class-wp-block-type-registry.php" }
     ]
   },
   "block-bindings": {
     "primary": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.js" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.ts" },
       { "repo": "wordpress-develop", "path": "src/wp-includes/class-wp-block-bindings-registry.php" }
     ],
     "secondary": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/parser/get-block-attributes.js" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/parser/get-block-attributes.ts" },
       { "repo": "wordpress-develop", "path": "src/wp-includes/class-wp-block-bindings-source.php" },
       { "repo": "wordpress-develop", "path": "src/wp-includes/blocks.php" }
     ],
     "context": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/factory.js" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/factory.ts" },
       { "repo": "gutenberg", "path": "packages/block-editor/src/hooks/index.js" },
       { "repo": "wordpress-develop", "path": "src/wp-includes/class-wp-block.php" }
     ]
