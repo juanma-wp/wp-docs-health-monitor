@@ -4,10 +4,12 @@ import type { Config } from '../../config/schema.js';
 import {
   createDocSource,
   createCodeSources,
+  createValidator,
   NotImplementedError,
 } from '../index.js';
 import { ManifestUrlDocSource } from '../doc-source/manifest-url.js';
 import { GitCloneSource } from '../code-source/git-clone.js';
+import { ClaudeValidator } from '../validator/claude.js';
 
 // ---------------------------------------------------------------------------
 // Helpers: build a Config whose inner `type` strings bypass the z.literal
@@ -89,5 +91,22 @@ describe('createCodeSources', () => {
       expect((e as Error).name).toBe('NotImplementedError');
       expect((e as Error).message).toContain('svn');
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// createValidator
+// ---------------------------------------------------------------------------
+
+describe('createValidator', () => {
+  it('returns a ClaudeValidator for type "claude"', () => {
+    const validator = createValidator(makeDocSourceConfig('manifest-url'));
+    expect(validator).toBeInstanceOf(ClaudeValidator);
+  });
+
+  it('throws NotImplementedError for an unrecognised validator type', () => {
+    const cfg = makeDocSourceConfig('manifest-url');
+    (cfg.validator as { type: string }).type = 'gpt';
+    expect(() => createValidator(cfg)).toThrow(NotImplementedError);
   });
 });
