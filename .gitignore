@@ -39,4 +39,7 @@ Thumbs.db
 /.gutenberg-clone/
 /results-*.json
 
+# Local config overrides (dev settings, not committed)
+config/*.dev.json
+
 CLAUDE.local.md

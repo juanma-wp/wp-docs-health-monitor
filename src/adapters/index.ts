@@ -46,10 +46,10 @@ export function createDocCodeMapper(config: Config, codeSources: Record<string, 
 }
 
 export function createValidator(config: Config): Validator {
-  const { type, model } = config.validator;
+  const { type, pass1Model, pass2Model } = config.validator;
   if (type === 'claude') {
     const anthropic = new Anthropic();
-    return new ClaudeValidator(model, anthropic);
+    return new ClaudeValidator(pass1Model, pass2Model, anthropic);
   }
   throw new NotImplementedError(type);
 }

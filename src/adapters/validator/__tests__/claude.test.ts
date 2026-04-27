@@ -149,7 +149,7 @@ describe('ClaudeValidator — verbatim check', () => {
     const fileContent = 'function registerBlockType(name, settings) { return settings; }';
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', client);
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     // Issue should have been dropped by verbatim check
@@ -174,7 +174,7 @@ describe('ClaudeValidator — verbatim check', () => {
     const client = makeAnthropicClient([pass1Response, pass2Response]);
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', client);
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     expect(result.issues).toHaveLength(1);
@@ -207,7 +207,7 @@ describe('ClaudeValidator — verbatim check', () => {
     const client = makeAnthropicClient([pass1Response, pass2Response]);
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', client);
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     // Should NOT be dropped — absence is the evidence
@@ -238,7 +238,7 @@ describe('ClaudeValidator — confidence filter', () => {
     const client = makeAnthropicClient([pass1Response, pass2Response]);
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', client);
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     expect(result.issues).toHaveLength(0);
@@ -259,7 +259,7 @@ describe('ClaudeValidator — confidence filter', () => {
     const client = makeAnthropicClient([pass1Response, pass2Response]);
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', client);
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     expect(result.issues).toHaveLength(1);
@@ -294,7 +294,7 @@ describe('ClaudeValidator — weak suggestion handling', () => {
     const createSpy = client.messages.create as Mock;
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', client);
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     expect(result.issues).toHaveLength(0);
@@ -336,7 +336,7 @@ describe('ClaudeValidator — weak suggestion handling', () => {
     const createSpy = client.messages.create as Mock;
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', client);
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     // Issue should survive with the retried suggestion
@@ -367,7 +367,7 @@ describe('ClaudeValidator — fingerprint', () => {
     const client = makeAnthropicClient([pass1Response, pass2Response]);
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', client);
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     expect(result.issues).toHaveLength(1);
@@ -416,7 +416,7 @@ describe('ClaudeValidator — Pass 2 fetch_code tool', () => {
     const client = makeAnthropicClient([pass1Response, pass2FetchResponse, pass2ReportResponse]);
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', client);
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     expect(result.issues).toHaveLength(1);

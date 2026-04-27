@@ -108,9 +108,9 @@ ${docContent}
 
 ${fileTrees.join('\n\n')}`;
 
-  console.error(`Asking Claude (${config.validator.model}) for mapping suggestions...`);
+  console.error(`Asking Claude (${config.validator.pass1Model}) for mapping suggestions...`);
   const message = await client.messages.create({
-    model: config.validator.model,
+    model: config.validator.pass1Model,
     max_tokens: 1024,
     messages: [{ role: 'user', content: prompt }],
   });

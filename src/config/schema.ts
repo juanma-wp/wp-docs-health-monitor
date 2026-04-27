@@ -22,8 +22,9 @@ export const ConfigSchema = z.object({
   mappingPath: z.string(),
   outputDir:   z.string(),
   validator: z.object({
-    type:  z.literal('claude'),
-    model: z.string().default('claude-sonnet-4-6'),
+    type:       z.literal('claude'),
+    pass1Model: z.string().default('claude-sonnet-4-6'),
+    pass2Model: z.string().default('claude-sonnet-4-6'),
   }),
   // Token pricing in USD per million tokens. Defaults match Sonnet 4.6 rates.
   // Check https://www.anthropic.com/pricing for current values and update as needed.

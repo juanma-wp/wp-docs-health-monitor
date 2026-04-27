@@ -33,7 +33,7 @@ function makeDocSourceConfig(type: string): Config {
     },
     mappingPath: 'mappings/test.json',
     outputDir: './out',
-    validator: { type: 'claude', model: 'claude-sonnet-4-6' },
+    validator: { type: 'claude', pass1Model: 'claude-sonnet-4-6', pass2Model: 'claude-sonnet-4-6' },
     pricing: { inputPerMtok: 3, outputPerMtok: 15, cacheWritePerMtok: 3.75, cacheReadPerMtok: 0.30 },
   };
 }

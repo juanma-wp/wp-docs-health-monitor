@@ -88,9 +88,24 @@ Then open `./out/index.html` in your browser.
 
 ## Cost note
 
-Each pipeline run calls the Anthropic API once per doc. With `claude-sonnet-4-6`, a full run over ~20 docs costs roughly $0.10–$0.50 depending on doc length and code context size. Use `--results` with `examples/mock-results.json` to explore the dashboard at zero cost.
+Each pipeline run calls the Anthropic API once per doc. With `claude-sonnet-4-6`, a full run over ~10 docs costs roughly $1–$3 depending on doc length and code context size. Use `--results` with `examples/mock-results.json` to explore the dashboard at zero cost.
 
 The estimated cost is stored in `results.json` under `usage.estimatedCostUsd` and appended to `data/history.json` after each run. It is calculated from the token counts returned by the API using the prices configured in `config.pricing`. The defaults match the current Sonnet 4.6 rates — check [Anthropic's pricing page](https://www.anthropic.com/pricing) for updates and adjust `config.pricing` in your config file if needed.
+
+## Dev config overrides
+
+Each config file supports a local `.dev.json` override loaded automatically when present. For example, alongside `config/gutenberg-block-api.json` you can create `config/gutenberg-block-api.dev.json` (gitignored) to override specific settings without touching the base config:
+
+```json
+{
+  "validator": {
+    "pass1Model": "claude-haiku-4-5-20251001",
+    "pass2Model": "claude-haiku-4-5-20251001"
+  }
+}
+```
+
+The override is deep-merged into the base config — only the keys you specify are replaced. This is the recommended way to use cheaper models during development. See `config/gutenberg-block-api.json` for all available settings.
 
 ## Architecture
 

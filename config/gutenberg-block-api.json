@@ -24,6 +24,7 @@
   "outputDir": "./out",
   "validator": {
     "type": "claude",
-    "model": "claude-sonnet-4-6"
+    "pass1Model": "claude-sonnet-4-6",
+    "pass2Model": "claude-sonnet-4-6"
   }
 }

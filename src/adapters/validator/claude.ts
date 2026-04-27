@@ -202,13 +202,15 @@ export type CostAccumulator = {
 // ---------------------------------------------------------------------------
 
 export class ClaudeValidator implements Validator {
-  private readonly model: string;
+  private readonly pass1Model: string;
+  private readonly pass2Model: string;
   private readonly anthropic: Anthropic;
   readonly costAccumulator: CostAccumulator = { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheCreationTokens: 0 };
   droppedHallucinations = 0;
 
-  constructor(model: string, anthropic: Anthropic) {
-    this.model = model;
+  constructor(pass1Model: string, pass2Model: string, anthropic: Anthropic) {
+    this.pass1Model = pass1Model;
+    this.pass2Model = pass2Model;
     this.anthropic = anthropic;
   }
 
@@ -328,7 +330,7 @@ ${codeContext || '(No source files were available for this document.)'}${missing
 
   private async runPass1(userContent: string): Promise<ReportFindingsInput> {
     const response = await this.anthropic.messages.create({
-      model:      this.model,
+      model:      this.pass1Model,
       max_tokens: 4096,
       system: [
         {
@@ -388,7 +390,7 @@ ${JSON.stringify(candidate, null, 2)}`,
     // Agentic loop: allow Claude to call fetch_code before report_findings
     for (let turn = 0; turn < 10; turn++) {
       const response = await this.anthropic.messages.create({
-        model:      this.model,
+        model:      this.pass2Model,
         max_tokens: 2048,
         system: [
           {
@@ -498,7 +500,7 @@ ${JSON.stringify(candidate, null, 2)}`,
     ];
 
     const response = await this.anthropic.messages.create({
-      model:      this.model,
+      model:      this.pass2Model,
       max_tokens: 1024,
       system: [
         {
