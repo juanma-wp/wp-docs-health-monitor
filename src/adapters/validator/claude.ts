@@ -309,7 +309,7 @@ ${codeContext || '(No source files were available for this document.)'}${missing
         const verified = await this.runPass2(candidate, codeSources, doc.slug);
         if (verified) {
           // Deduplicate: same type + codeFile + docSays = same finding reported twice
-          const key = `${verified.type}|${verified.evidence.codeFile}|${verified.evidence.docSays.slice(0, 80)}`;
+          const key = `${verified.type}|${verified.evidence.codeFile}|${verified.evidence.docSays}`;
           if (!seenKeys.has(key)) {
             seenKeys.add(key);
             finalIssues.push(verified);
