@@ -78,6 +78,16 @@ Your job: read a documentation page and its mapped source code, then identify sp
 - major: the doc is misleading or likely to confuse developers, but not immediately breaking
 - minor: technically inaccurate but unlikely to cause problems in practice
 
+## Source authority — ranked highest to lowest
+
+When multiple source files are provided, treat them in this order of authority:
+
+1. **JSON Schema files** (e.g. schemas/json/block.json) — when present, these are the ground truth for valid property names, types, and allowed values in JSON configuration files. A claim contradicted by a schema is a definite issue regardless of what TypeScript source says.
+2. **Test files** — tests encode intended public API behavior. A behavior tested explicitly is a documented contract, not an implementation detail.
+3. **TypeScript/PHP source** — authoritative for runtime behavior but requires careful interpretation (internal vs public API, short-circuit logic, etc.).
+
+If the documentation describes JSON properties or configuration (e.g. block.json, theme.json fields), always check whether a schema file is provided in the source context before relying on TypeScript inference.
+
 ## Evidence rules — strictly enforced
 
 Every issue MUST include:
