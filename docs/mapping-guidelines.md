@@ -76,6 +76,18 @@ The schema is first in `primary` because it is the most authoritative source for
 
 ---
 
+## Site-specific prompt extensions
+
+The validator supports a `systemPromptExtension` in `config.validator` — a path to a Markdown file appended to the base system prompt as a "Site-specific rules" section. Use this to encode project-specific knowledge that would otherwise cause false positives:
+
+- Internal or reserved identifiers that are intentionally undocumented
+- Known patterns in how the codebase uses PHP or JavaScript that the model tends to misread
+- Clarifications about which schemas or sources are authoritative for this project
+
+See `prompts/gutenberg-block-api.md` for an example. Update the extension file whenever the Phase 0 gate review reveals a recurring false positive pattern.
+
+---
+
 ## Adding a new doc
 
 1. Read the doc at developer.wordpress.org

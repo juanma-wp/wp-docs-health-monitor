@@ -1,4 +1,5 @@
 import { join, basename } from 'path';
+import { readFileSync } from 'fs';
 
 import Anthropic from '@anthropic-ai/sdk';
 
@@ -46,10 +47,18 @@ export function createDocCodeMapper(config: Config, codeSources: Record<string, 
 }
 
 export function createValidator(config: Config): Validator {
-  const { type, pass1Model, pass2Model } = config.validator;
+  const { type, pass1Model, pass2Model, systemPromptExtension } = config.validator;
   if (type === 'claude') {
     const anthropic = new Anthropic();
-    return new ClaudeValidator(pass1Model, pass2Model, anthropic);
+    let promptExtension: string | undefined;
+    if (systemPromptExtension) {
+      try {
+        promptExtension = readFileSync(systemPromptExtension, 'utf-8');
+      } catch (err) {
+        throw new Error(`Could not read systemPromptExtension "${systemPromptExtension}": ${(err as Error).message}`);
+      }
+    }
+    return new ClaudeValidator(pass1Model, pass2Model, anthropic, promptExtension);
   }
   throw new NotImplementedError(type);
 }
