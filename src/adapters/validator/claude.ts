@@ -31,7 +31,7 @@ type RawIssue = {
     codeFile: string;
     codeRepo: string;
   };
-  suggestion: string;
+  suggestion: string | undefined;
   confidence: number;
 };
 
@@ -172,7 +172,21 @@ const GENERIC_ONLY_PHRASES = [
 
 const CODE_IDENTIFIER_PATTERN = /`[^`]+`|[a-z][A-Z]\w*|[A-Z][a-z]\w*[A-Z]\w*|\b\w+_\w+\b|[/\\]\w|\.\w{2,4}\b|\w+\(\)/;
 
+const SELF_REJECTION_PATTERNS = [
+  /^rejected[:\s]/i,
+  /no change (needed|required)/i,
+  /should be rejected/i,
+  /this (issue|finding) (should be|is) rejected/i,
+];
+
+// Detects when Pass 2 explicitly rejects its own finding in the suggestion text.
+export function isSelfRejected(suggestion: string): boolean {
+  if (!suggestion) return false;
+  return SELF_REJECTION_PATTERNS.some(re => re.test(suggestion.trim()));
+}
+
 export function isWeakSuggestion(suggestion: string): boolean {
+  if (!suggestion) return true;
   const trimmed = suggestion.trim();
   // Check if it matches known generic-only phrases
   if (GENERIC_ONLY_PHRASES.some(re => re.test(trimmed))) {
@@ -289,11 +303,19 @@ ${codeContext || '(No source files were available for this document.)'}${missing
 
     // Pass 2: targeted verification for each surviving candidate
     const finalIssues: Issue[] = [];
+    const seenKeys = new Set<string>();
     for (const candidate of verbatimPassed) {
       try {
         const verified = await this.runPass2(candidate, codeSources, doc.slug);
         if (verified) {
-          finalIssues.push(verified);
+          // Deduplicate: same type + codeFile + docSays = same finding reported twice
+          const key = `${verified.type}|${verified.evidence.codeFile}|${verified.evidence.docSays}`;
+          if (!seenKeys.has(key)) {
+            seenKeys.add(key);
+            finalIssues.push(verified);
+          } else {
+            console.warn(`[dedup] dropped duplicate issue in ${doc.slug}: ${verified.type} in ${verified.evidence.codeFile}`);
+          }
         }
       } catch (err) {
         diagnostics.push(`Pass 2 failed for issue in ${doc.slug}: ${String(err)}`);
@@ -461,7 +483,12 @@ ${JSON.stringify(candidate, null, 2)}`,
     // Drop if confidence < 0.7
     if (rawIssue.confidence < 0.7) return null;
 
-    // Weak suggestion check
+    // Guard against undefined suggestion from malformed API response
+    if (!rawIssue.suggestion) return null;
+
+    // Drop if the model explicitly rejects its own finding
+    if (isSelfRejected(rawIssue.suggestion)) return null;
+
     if (isWeakSuggestion(rawIssue.suggestion)) {
       if (rawIssue.severity === 'minor') {
         // Drop without retry
@@ -523,7 +550,7 @@ ${JSON.stringify(candidate, null, 2)}`,
       if (block.type === 'tool_use' && block.name === 'report_findings') {
         const retried = block.input as ReportFindingsInput;
         if (retried.issues.length > 0) {
-          return retried.issues[0].suggestion;
+          return retried.issues[0].suggestion ?? null;
         }
       }
     }
