@@ -389,13 +389,7 @@ ${codeContext || '(No source files were available for this document.)'}${missing
       messages: [
         {
           role:    'user',
-          content: [
-            {
-              type:          'text',
-              text:          userContent,
-              cache_control: { type: 'ephemeral' },
-            },
-          ],
+          content: userContent,
         },
       ],
       tools:       [REPORT_FINDINGS_TOOL],
@@ -451,8 +445,10 @@ ${JSON.stringify(candidate, null, 2)}`,
         tool_choice: { type: 'any' },
       });
 
-      this.costAccumulator.inputTokens  += response.usage.input_tokens;
-      this.costAccumulator.outputTokens += response.usage.output_tokens;
+      this.costAccumulator.inputTokens         += response.usage.input_tokens;
+      this.costAccumulator.outputTokens        += response.usage.output_tokens;
+      this.costAccumulator.cacheReadTokens     += response.usage.cache_read_input_tokens    ?? 0;
+      this.costAccumulator.cacheCreationTokens += response.usage.cache_creation_input_tokens ?? 0;
 
       // Add assistant response to the conversation
       messages.push({ role: 'assistant', content: response.content });
