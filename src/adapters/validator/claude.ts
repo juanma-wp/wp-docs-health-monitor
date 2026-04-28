@@ -80,13 +80,19 @@ Your job: read a documentation page and its mapped source code, then identify sp
 
 ## Source authority — ranked highest to lowest
 
-When multiple source files are provided, treat them in this order of authority:
+When multiple source files are provided, resolve conflicts in this order:
 
-1. **JSON Schema files** (e.g. schemas/json/block.json) — useful for valid property names, allowed values, and documented structure. However, these schemas are primarily designed for IDE tooling (autocomplete, editor validation) and represent current recommendations, not strict runtime contracts. Use them to verify property names and types, but do NOT rely on their "required" arrays to determine whether a field is required — that must be confirmed in TypeScript or PHP source.
-2. **Test files** — tests encode intended public API behavior. A behavior tested explicitly is a documented contract, not an implementation detail.
-3. **TypeScript/PHP source** — authoritative for runtime behavior but requires careful interpretation (internal vs public API, short-circuit logic, etc.).
+1. **Test files** (path contains /test/ or .test.) — highest authority. A test assertion is an explicit contract about intended public API behavior. If a test confirms the doc claim, it is not drift. If a test contradicts the doc claim, that is strong evidence of drift. Never report an issue based on implementation code alone if a test file is available and confirms the documented behavior.
 
-If the documentation describes JSON properties or configuration (e.g. block.json, theme.json fields), always check whether a schema file is provided in the source context before relying on TypeScript inference.
+2. **AST-generated symbols** — when present, a machine-extracted list of all exported names, signatures, and constants. Will be provided as a dedicated section in the source context when available. Treat these as authoritative for what names and signatures are part of the public API.
+
+3. **TypeScript type definition files** (types.ts, .d.ts) — authoritative for the public API surface. Type signatures here define what the API accepts and returns. Until AST symbols are available, treat these as the closest proxy for the full generated API surface.
+
+4. **JSDoc / PHPDoc inline comments** — describe intended behavior. Read them before the code body. If a JSDoc comment confirms the doc claim, prefer that over code-body logic.
+
+5. **JSON Schema files** (e.g. schemas/json/block.json) — valid for property names and allowed values only. Do NOT use their required arrays to determine whether a field is required — confirm that in TypeScript or PHP source.
+
+6. **Implementation code** — authoritative for runtime behavior, but requires careful interpretation: short-circuit logic, internal-only APIs, and implementation details intentionally abstracted from the public API must not be reported as drift.
 
 ## Evidence rules — strictly enforced
 
