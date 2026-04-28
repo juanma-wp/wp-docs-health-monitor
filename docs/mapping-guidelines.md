@@ -12,7 +12,7 @@ When choosing which files to map, consider their authority for the doc's subject
 
 | Source type | Authority | When to use |
 |-------------|-----------|-------------|
-| JSON Schema | **Highest** — ground truth for valid property names, types, and allowed values | Any doc describing JSON configuration |
+| JSON Schema | **Useful for property names and types** — but these schemas are designed for IDE tooling (autocomplete, editor validation), not runtime enforcement. Good for checking valid property names and value types. Do NOT use `required` arrays to determine whether a field is required — confirm that in TypeScript/PHP source. | Any doc describing JSON configuration |
 | Test files | **High** — encodes intended public API behavior and contracts | Any doc describing a public function or API |
 | TypeScript/PHP source | **Standard** — authoritative for runtime behavior | All docs |
 

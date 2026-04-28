@@ -82,7 +82,7 @@ Your job: read a documentation page and its mapped source code, then identify sp
 
 When multiple source files are provided, treat them in this order of authority:
 
-1. **JSON Schema files** (e.g. schemas/json/block.json) — when present, these are the ground truth for valid property names, types, and allowed values in JSON configuration files. A claim contradicted by a schema is a definite issue regardless of what TypeScript source says.
+1. **JSON Schema files** (e.g. schemas/json/block.json) — useful for valid property names, allowed values, and documented structure. However, these schemas are primarily designed for IDE tooling (autocomplete, editor validation) and represent current recommendations, not strict runtime contracts. Use them to verify property names and types, but do NOT rely on their "required" arrays to determine whether a field is required — that must be confirmed in TypeScript or PHP source.
 2. **Test files** — tests encode intended public API behavior. A behavior tested explicitly is a documented contract, not an implementation detail.
 3. **TypeScript/PHP source** — authoritative for runtime behavior but requires careful interpretation (internal vs public API, short-circuit logic, etc.).
 
