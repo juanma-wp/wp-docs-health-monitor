@@ -16,19 +16,19 @@ jobs:
 
     steps:
       - name: Trigger Backend Engineer review
-        if: github.event.label.name == 'review: backend'
+        if: "github.event.label.name == 'review: backend'"
         run: |
           gh pr comment $PR_NUMBER --repo $REPO \
             --body "@claude-opus act as the Backend Engineer defined in AGENTS.md and review this PR."
 
       - name: Trigger Frontend Engineer review
-        if: github.event.label.name == 'review: frontend'
+        if: "github.event.label.name == 'review: frontend'"
         run: |
           gh pr comment $PR_NUMBER --repo $REPO \
             --body "@claude-opus act as the Frontend Engineer defined in AGENTS.md and review this PR."
 
       - name: Trigger QA Engineer review
-        if: github.event.label.name == 'review: qa'
+        if: "github.event.label.name == 'review: qa'"
         run: |
           gh pr comment $PR_NUMBER --repo $REPO \
             --body "@claude-opus act as the QA Engineer defined in AGENTS.md and review this PR."
