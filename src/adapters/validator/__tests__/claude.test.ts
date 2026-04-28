@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Mock } from 'vitest';
 
 import type Anthropic from '@anthropic-ai/sdk';
-import { ClaudeValidator, isWeakSuggestion } from '../claude.js';
+import { ClaudeValidator, isWeakSuggestion, isSelfRejected } from '../claude.js';
 import type { Doc } from '../../doc-source/types.js';
 import type { CodeTiers } from '../../../types/mapping.js';
 import type { CodeSource } from '../../code-source/types.js';
@@ -94,6 +94,32 @@ const BASE_ISSUE = {
   suggestion:  'Update the `name` parameter description to match `registerBlockType(name, settings)`',
   confidence:  0.85,
 };
+
+// ---------------------------------------------------------------------------
+// isSelfRejected
+// ---------------------------------------------------------------------------
+
+describe('isSelfRejected', () => {
+  it('detects "REJECTED: no change needed"', () => {
+    expect(isSelfRejected('REJECTED: no change needed')).toBe(true);
+  });
+
+  it('detects "no change needed" mid-suggestion', () => {
+    expect(isSelfRejected('The doc is accurate — no change needed.')).toBe(true);
+  });
+
+  it('detects "should be rejected"', () => {
+    expect(isSelfRejected('This issue should be rejected.')).toBe(true);
+  });
+
+  it('returns false for a normal suggestion', () => {
+    expect(isSelfRejected('Update `registerBlockType` to document the metadata overload.')).toBe(false);
+  });
+
+  it('returns false for empty string', () => {
+    expect(isSelfRejected('')).toBe(false);
+  });
+});
 
 // ---------------------------------------------------------------------------
 // isWeakSuggestion
@@ -345,6 +371,34 @@ describe('ClaudeValidator — weak suggestion handling', () => {
     // pass1 + pass2 + retry = 3 calls
     expect(createSpy).toHaveBeenCalledTimes(3);
   });
+
+  it('does not crash when Pass 2 returns an issue with missing suggestion', async () => {
+    const fileContent = 'function registerBlockType(name, settings) {}';
+    const codeSays = 'function registerBlockType(name, settings)';
+
+    // Pass 1: codeSays is present in the file so it survives the verbatim check
+    const pass1Response = makeReportFindingsResponse([
+      { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays } },
+    ], []);
+
+    // Pass 2: returns an issue with suggestion omitted (undefined)
+    const pass2Response = makeReportFindingsResponse([
+      {
+        ...BASE_ISSUE,
+        evidence:   { ...BASE_ISSUE.evidence, codeSays },
+        confidence: 0.8,
+        suggestion: undefined,
+      },
+    ], []);
+
+    const client = makeAnthropicClient([pass1Response, pass2Response]);
+    const codeSources = makeCodeSources(fileContent);
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
+
+    expect(result.issues).toHaveLength(0);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -372,6 +426,59 @@ describe('ClaudeValidator — fingerprint', () => {
 
     expect(result.issues).toHaveLength(1);
     expect(result.issues[0].fingerprint).toMatch(/^[0-9a-f]{16}$/);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// ClaudeValidator — duplicate suppression
+// ---------------------------------------------------------------------------
+
+describe('ClaudeValidator — duplicate suppression', () => {
+  it('drops a duplicate issue with same type + codeFile + docSays', async () => {
+    const fileContent = 'function registerBlockType(name, settings) { return settings; }';
+    const sharedDocSays = 'The `name` parameter is required.';
+    // Two different codeSays snippets — both are verbatim substrings of fileContent
+    const codeSays1 = 'function registerBlockType(name, settings)';
+    const codeSays2 = 'function registerBlockType(name, settings) { return settings; }';
+
+    // Pass 1 returns two issues: identical type, codeFile, docSays — but different codeSays
+    const pass1Response = makeReportFindingsResponse([
+      {
+        ...BASE_ISSUE,
+        evidence: { ...BASE_ISSUE.evidence, docSays: sharedDocSays, codeSays: codeSays1 },
+      },
+      {
+        ...BASE_ISSUE,
+        evidence: { ...BASE_ISSUE.evidence, docSays: sharedDocSays, codeSays: codeSays2 },
+      },
+    ], []);
+
+    // Pass 2 confirms issue 1
+    const pass2Response1 = makeReportFindingsResponse([
+      {
+        ...BASE_ISSUE,
+        evidence:   { ...BASE_ISSUE.evidence, docSays: sharedDocSays, codeSays: codeSays1 },
+        confidence: 0.9,
+      },
+    ], []);
+
+    // Pass 2 confirms issue 2
+    const pass2Response2 = makeReportFindingsResponse([
+      {
+        ...BASE_ISSUE,
+        evidence:   { ...BASE_ISSUE.evidence, docSays: sharedDocSays, codeSays: codeSays2 },
+        confidence: 0.9,
+      },
+    ], []);
+
+    const client = makeAnthropicClient([pass1Response, pass2Response1, pass2Response2]);
+    const codeSources = makeCodeSources(fileContent);
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
+
+    // Deduplication on (type, codeFile, docSays) must keep only one of the two issues
+    expect(result.issues).toHaveLength(1);
   });
 });
 
