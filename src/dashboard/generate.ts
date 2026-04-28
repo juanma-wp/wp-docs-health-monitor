@@ -17,7 +17,7 @@ export async function generate(results: RunResults, outDir: string): Promise<voi
   await writeFile(join(outDir, 'index.html'), renderIndex(results, tree), 'utf-8');
 
   for (const doc of results.docs) {
-    await writeFile(join(outDir, 'doc', `${doc.slug}.html`), renderDoc(doc, results.repoUrls), 'utf-8');
+    await writeFile(join(outDir, 'doc', `${doc.slug}.html`), renderDoc(doc, results.repoUrls, results.repoRefs), 'utf-8');
   }
 
   for (const node of tree) {

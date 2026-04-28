@@ -3,13 +3,14 @@ import { escapeHtml, inlineCode, renderSuggestion, healthBadge, statusBadge, htm
 
 const SEVERITY_ORDER: Record<Issue['severity'], number> = { critical: 0, major: 1, minor: 2 };
 
-function githubUrl(repoUrls: Record<string, string>, commitSha: string, codeRepo: string, codeFile: string): string | null {
+function githubUrl(repoUrls: Record<string, string>, repoRefs: Record<string, string>, codeRepo: string, codeFile: string): string | null {
   const base = repoUrls[codeRepo];
-  if (!base || !commitSha) return null;
-  return `${base}/blob/${commitSha}/${codeFile}`;
+  const ref = repoRefs[codeRepo];
+  if (!base || !ref) return null;
+  return `${base}/blob/${ref}/${codeFile}`;
 }
 
-function renderIssue(issue: Issue, repoUrls: Record<string, string>, commitSha: string): string {
+function renderIssue(issue: Issue, repoUrls: Record<string, string>, repoRefs: Record<string, string>): string {
   const confidence = `${Math.round(issue.confidence * 100)}%`;
   const severityClass = issue.severity === 'critical'
     ? 'border-l-red-500 bg-red-50'
@@ -17,7 +18,7 @@ function renderIssue(issue: Issue, repoUrls: Record<string, string>, commitSha: 
       ? 'border-l-yellow-500 bg-yellow-50'
       : 'border-l-gray-400 bg-gray-50';
 
-  const url = githubUrl(repoUrls, commitSha, issue.evidence.codeRepo, issue.evidence.codeFile);
+  const url = githubUrl(repoUrls, repoRefs, issue.evidence.codeRepo, issue.evidence.codeFile);
   const fileLabel = `${escapeHtml(issue.evidence.codeRepo)}:${escapeHtml(issue.evidence.codeFile)}`;
   const fileLink = url
     ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">${fileLabel}</a>`
@@ -43,7 +44,7 @@ function renderIssue(issue: Issue, repoUrls: Record<string, string>, commitSha: 
     </div>`;
 }
 
-export function renderDoc(doc: DocResult, repoUrls: Record<string, string>): string {
+export function renderDoc(doc: DocResult, repoUrls: Record<string, string>, repoRefs: Record<string, string>): string {
   const breadcrumb = `
     <nav class="text-sm text-gray-500 mb-6">
       <a href="../index.html" class="hover:underline text-blue-600">Index</a>
@@ -69,7 +70,7 @@ export function renderDoc(doc: DocResult, repoUrls: Record<string, string>): str
   const issuesHtml = sortedIssues.length > 0
     ? `<section class="mb-8">
         <h2 class="text-lg font-semibold mb-3">Issues (${sortedIssues.length})</h2>
-        ${sortedIssues.map(i => renderIssue(i, repoUrls, doc.commitSha)).join('')}
+        ${sortedIssues.map(i => renderIssue(i, repoUrls, repoRefs)).join('')}
       </section>`
     : `<section class="mb-8"><p class="text-green-700 font-medium">✅ No issues found.</p></section>`;
 

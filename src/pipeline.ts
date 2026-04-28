@@ -159,8 +159,10 @@ export async function runPipeline(config: Config): Promise<RunResults> {
   };
 
   const repoUrls: Record<string, string> = {};
+  const repoRefs: Record<string, string> = {};
   for (const [id, cs] of Object.entries(config.codeSources)) {
     repoUrls[id] = cs.repoUrl.replace(/\.git$/, '');
+    repoRefs[id] = cs.ref;
   }
 
   const runResults: RunResults = {
@@ -169,6 +171,7 @@ export async function runPipeline(config: Config): Promise<RunResults> {
     overallHealth,
     models,
     repoUrls,
+    repoRefs,
     totals,
     usage,
     docs: docResults,

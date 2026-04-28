@@ -39,6 +39,12 @@
             "type": "string"
           }
         },
+        "repoRefs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "totals": {
           "type": "object",
           "properties": {
@@ -299,6 +305,7 @@
         "overallHealth",
         "models",
         "repoUrls",
+        "repoRefs",
         "totals",
         "docs"
       ],

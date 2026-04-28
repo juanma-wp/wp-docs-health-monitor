@@ -10,6 +10,10 @@
     "gutenberg": "https://github.com/WordPress/gutenberg",
     "wordpress-develop": "https://github.com/WordPress/wordpress-develop"
   },
+  "repoRefs": {
+    "gutenberg": "trunk",
+    "wordpress-develop": "trunk"
+  },
   "totals": {
     "docs": 4,
     "healthy": 1,
