@@ -289,11 +289,19 @@ ${codeContext || '(No source files were available for this document.)'}${missing
 
     // Pass 2: targeted verification for each surviving candidate
     const finalIssues: Issue[] = [];
+    const seenKeys = new Set<string>();
     for (const candidate of verbatimPassed) {
       try {
         const verified = await this.runPass2(candidate, codeSources, doc.slug);
         if (verified) {
-          finalIssues.push(verified);
+          // Deduplicate: same type + codeFile + docSays = same finding reported twice
+          const key = `${verified.type}|${verified.evidence.codeFile}|${verified.evidence.docSays}`;
+          if (!seenKeys.has(key)) {
+            seenKeys.add(key);
+            finalIssues.push(verified);
+          } else {
+            console.warn(`[dedup] dropped duplicate issue in ${doc.slug}: ${verified.type} in ${verified.evidence.codeFile}`);
+          }
         }
       } catch (err) {
         diagnostics.push(`Pass 2 failed for issue in ${doc.slug}: ${String(err)}`);
