@@ -36,10 +36,10 @@
     "primary": [
       { "repo": "gutenberg", "path": "schemas/json/block.json" },
       { "repo": "gutenberg", "path": "packages/blocks/src/api/parser/get-block-attributes.ts" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/parser/index.ts" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/serializer.tsx" }
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/parser/index.ts" }
     ],
     "secondary": [
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/serializer.tsx" },
       { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.ts" },
       { "repo": "gutenberg", "path": "packages/blocks/src/store/reducer.ts" },
       { "repo": "wordpress-develop", "path": "src/wp-includes/class-wp-block.php" }
