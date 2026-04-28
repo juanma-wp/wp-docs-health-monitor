@@ -19,12 +19,25 @@ export function statusBadge(status: string): string {
   return `<span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">critical</span>`;
 }
 
-// Render basic inline markdown: backtick code, **bold**, and newlines. Safe: escapes HTML first.
+// Render basic inline markdown: backtick code and **bold**. Safe: escapes HTML first.
 export function inlineCode(str: string): string {
   return escapeHtml(str)
     .replace(/`([^`]+)`/g, '<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$1</code>')
-    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-    .replace(/\n/g, '<br>');
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+}
+
+// Render a suggestion: first sentence as summary, followed by a <ul> if bullet lines are present.
+export function renderSuggestion(str: string): string {
+  const lines = str.split('\n').map(l => l.trim()).filter(Boolean);
+  const bullets = lines.filter(l => l.startsWith('- '));
+  const prose = lines.filter(l => !l.startsWith('- '));
+
+  const proseHtml = prose.map(l => `<p class="mb-2">${inlineCode(l)}</p>`).join('');
+  const listHtml = bullets.length > 0
+    ? `<ul class="list-disc list-inside space-y-1 mt-2">${bullets.map(l => `<li>${inlineCode(l.slice(2))}</li>`).join('')}</ul>`
+    : '';
+
+  return proseHtml + listHtml;
 }
 
 export function tailwindScript(): string {

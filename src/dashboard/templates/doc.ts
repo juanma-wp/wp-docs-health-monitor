@@ -1,5 +1,5 @@
 import type { DocResult, Issue } from '../../types/results.js';
-import { escapeHtml, inlineCode, healthBadge, statusBadge, htmlShell } from './shared.js';
+import { escapeHtml, inlineCode, renderSuggestion, healthBadge, statusBadge, htmlShell } from './shared.js';
 
 const SEVERITY_ORDER: Record<Issue['severity'], number> = { critical: 0, major: 1, minor: 2 };
 
@@ -37,8 +37,8 @@ function renderIssue(issue: Issue, repoUrls: Record<string, string>, commitSha: 
         <p class="text-xs text-gray-500 mb-1">${fileLink}</p>
         <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>${escapeHtml(issue.evidence.codeSays)}</code></pre>
       </div>
-      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900">
-        💡 ${inlineCode(issue.suggestion)}
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 ${renderSuggestion(issue.suggestion)}
       </div>
     </div>`;
 }

@@ -98,9 +98,20 @@ Every issue MUST include:
 
 If you cannot find a verbatim quote from the code that directly contradicts the doc claim, do NOT report the issue. Guessed or paraphrased codeSays values are not acceptable.
 
-## Suggestions — must be specific
+## Suggestions — must be specific and structured
 
 Every suggestion must name the exact function, parameter, attribute, hook, or line that needs to change. Examples of unacceptable suggestions: "update the documentation", "revise this section", "fix the description". These will be rejected.
+
+Format every suggestion as:
+1. A single summary sentence stating what needs to change.
+2. A bullet list of specific actions, one per line, starting with "- ".
+
+Example:
+Update the \`registerBlockType\` documentation to reflect the metadata object overload.
+- In the function signature section, add the overload: \`registerBlockType( metadata: BlockConfiguration, settings?: Partial<BlockConfiguration> )\`
+- Note that when a metadata object is passed as the first argument, the \`settings\` parameter becomes optional
+
+Keep the summary sentence short. Put all detail in the bullets.
 
 ## Confidence
 
