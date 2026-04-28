@@ -54,11 +54,8 @@ jobs:
           additional_permissions: |
             actions: read
 
-          # Optional: Give a custom prompt to Claude. If this is not specified, Claude will perform the instructions specified in the comment that tagged it.
-          # prompt: 'Update the pull request description to include a summary of changes.'
+          prompt: |
+            ${{ steps.pr-branch.outputs.branch != '' && format('IMPORTANT: This review is for PR branch `{0}`. When generating any "Fix this" links, always append `&branch={0}` to the claude.ai/code URL so the fix targets the correct branch instead of main. Example format: https://claude.ai/code?q=<task>&repo=<owner/repo>&branch={0}', steps.pr-branch.outputs.branch) || '' }}
 
-          # Optional: Add claude_args to customize behavior and configuration
-          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://code.claude.com/docs/en/cli-reference for available options
-          # claude_args: '--allowed-tools Bash(gh pr *)'
+            Perform the task described in the triggering comment.
 
