@@ -1,5 +1,3 @@
-## WordPress Block Editor — site-specific rules
-
 These rules apply when validating the Gutenberg Block API Reference documentation. They encode learnings from the Phase 0 gate manual review.
 
 ### Known internal / reserved identifiers — do not flag as missing from docs
