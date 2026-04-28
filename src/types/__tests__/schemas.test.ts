@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -229,6 +229,15 @@ const singleEntryManifest = JSON.stringify([{
 }]);
 
 describe('runPipeline', () => {
+  beforeEach(() => {
+    // Default: empty manifest. Individual tests override as needed.
+    // Without this stub, tests that don't override would hit example.com over
+    // the network and could exceed the 5s test timeout on slow/blocked networks.
+    vi.stubGlobal('fetch', vi.fn(async () =>
+      new Response(JSON.stringify([]), { status: 200 })
+    ));
+  });
+
   afterEach(() => {
     vi.restoreAllMocks();
   });
