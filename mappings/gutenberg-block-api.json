@@ -1,6 +1,7 @@
 {
   "block-metadata": {
     "primary": [
+      { "repo": "gutenberg", "path": "schemas/json/block.json" },
       { "repo": "gutenberg", "path": "lib/blocks.php" },
       { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.ts" }
     ],
@@ -33,6 +34,7 @@
   },
   "block-attributes": {
     "primary": [
+      { "repo": "gutenberg", "path": "schemas/json/block.json" },
       { "repo": "gutenberg", "path": "packages/blocks/src/api/parser/get-block-attributes.ts" },
       { "repo": "gutenberg", "path": "packages/blocks/src/api/parser/index.ts" },
       { "repo": "gutenberg", "path": "packages/blocks/src/api/serializer.tsx" }
