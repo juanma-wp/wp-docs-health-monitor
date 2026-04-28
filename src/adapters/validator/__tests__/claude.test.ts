@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Mock } from 'vitest';
 
 import type Anthropic from '@anthropic-ai/sdk';
-import { ClaudeValidator, isWeakSuggestion } from '../claude.js';
+import { ClaudeValidator, isWeakSuggestion, isSelfRejected } from '../claude.js';
 import type { Doc } from '../../doc-source/types.js';
 import type { CodeTiers } from '../../../types/mapping.js';
 import type { CodeSource } from '../../code-source/types.js';
@@ -94,6 +94,32 @@ const BASE_ISSUE = {
   suggestion:  'Update the `name` parameter description to match `registerBlockType(name, settings)`',
   confidence:  0.85,
 };
+
+// ---------------------------------------------------------------------------
+// isSelfRejected
+// ---------------------------------------------------------------------------
+
+describe('isSelfRejected', () => {
+  it('detects "REJECTED: no change needed"', () => {
+    expect(isSelfRejected('REJECTED: no change needed')).toBe(true);
+  });
+
+  it('detects "no change needed" mid-suggestion', () => {
+    expect(isSelfRejected('The doc is accurate — no change needed.')).toBe(true);
+  });
+
+  it('detects "should be rejected"', () => {
+    expect(isSelfRejected('This issue should be rejected.')).toBe(true);
+  });
+
+  it('returns false for a normal suggestion', () => {
+    expect(isSelfRejected('Update `registerBlockType` to document the metadata overload.')).toBe(false);
+  });
+
+  it('returns false for empty string', () => {
+    expect(isSelfRejected('')).toBe(false);
+  });
+});
 
 // ---------------------------------------------------------------------------
 // isWeakSuggestion
