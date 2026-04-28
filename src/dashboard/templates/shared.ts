@@ -19,12 +19,12 @@ export function statusBadge(status: string): string {
   return `<span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">critical</span>`;
 }
 
-// Render backtick-wrapped spans as inline <code> elements. Safe: escapes HTML first.
+// Render basic inline markdown: backtick code, **bold**, and newlines. Safe: escapes HTML first.
 export function inlineCode(str: string): string {
-  return escapeHtml(str).replace(
-    /`([^`]+)`/g,
-    '<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$1</code>',
-  );
+  return escapeHtml(str)
+    .replace(/`([^`]+)`/g, '<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
 }
 
 export function tailwindScript(): string {
