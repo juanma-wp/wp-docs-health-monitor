@@ -18,6 +18,8 @@ A PHP `_doing_it_wrong()` call does not automatically make a field "required" in
 
 These schemas are designed for IDE tooling (VS Code autocomplete, editor validation). They represent current recommendations, not runtime contracts. Do not use their `required` arrays to claim a field is required — confirm that from TypeScript or PHP source instead.
 
+**Hard rule:** Never report a `required-optional-mismatch` issue based solely on a JSON schema `required` array, regardless of confidence level. This applies even when the schema lists the field explicitly. You must find confirmation in TypeScript or PHP source. If you cannot find it there, do not report the issue.
+
 ### Deprecated functions
 
-Only report a deprecated function as drift if the documentation explicitly names and recommends that deprecated function. Do not flag it if the documentation only links to or mentions a related but different identifier.
+Only report a deprecated function as drift if the documentation explicitly names and recommends that deprecated function by name. If the deprecated function does not appear anywhere in the documentation text, do not report it — even if it appears in the same file or module as something the doc does reference.
