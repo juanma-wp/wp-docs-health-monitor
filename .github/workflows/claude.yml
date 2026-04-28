@@ -30,11 +30,25 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Resolve PR head branch
+        id: pr-branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BRANCH=""
+          if [[ "${{ github.event_name }}" == "pull_request_review" || "${{ github.event_name }}" == "pull_request_review_comment" ]]; then
+            BRANCH="${{ github.event.pull_request.head.ref }}"
+          elif [[ "${{ github.event_name }}" == "issue_comment" ]]; then
+            BRANCH=$(gh pr view ${{ github.event.issue.number }} --json headRefName --jq '.headRefName' 2>/dev/null || echo "")
+          fi
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          base_branch: ${{ steps.pr-branch.outputs.branch }}
 
           # This is an optional setting that allows Claude to read CI results on PRs
           additional_permissions: |
