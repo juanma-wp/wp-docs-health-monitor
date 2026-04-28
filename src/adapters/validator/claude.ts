@@ -31,7 +31,7 @@ type RawIssue = {
     codeFile: string;
     codeRepo: string;
   };
-  suggestion: string;
+  suggestion: string | undefined;
   confidence: number;
 };
 
@@ -483,11 +483,12 @@ ${JSON.stringify(candidate, null, 2)}`,
     // Drop if confidence < 0.7
     if (rawIssue.confidence < 0.7) return null;
 
+    // Guard against undefined suggestion from malformed API response
+    if (!rawIssue.suggestion) return null;
+
     // Drop if the model explicitly rejects its own finding
     if (isSelfRejected(rawIssue.suggestion)) return null;
 
-    // Weak suggestion check — guard against undefined suggestion from malformed API response
-    if (!rawIssue.suggestion) return null;
     if (isWeakSuggestion(rawIssue.suggestion)) {
       if (rawIssue.severity === 'minor') {
         // Drop without retry
@@ -549,7 +550,7 @@ ${JSON.stringify(candidate, null, 2)}`,
       if (block.type === 'tool_use' && block.name === 'report_findings') {
         const retried = block.input as ReportFindingsInput;
         if (retried.issues.length > 0) {
-          return retried.issues[0].suggestion;
+          return retried.issues[0].suggestion ?? null;
         }
       }
     }
