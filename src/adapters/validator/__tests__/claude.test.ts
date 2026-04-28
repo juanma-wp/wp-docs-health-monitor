@@ -430,6 +430,59 @@ describe('ClaudeValidator — fingerprint', () => {
 });
 
 // ---------------------------------------------------------------------------
+// ClaudeValidator — duplicate suppression
+// ---------------------------------------------------------------------------
+
+describe('ClaudeValidator — duplicate suppression', () => {
+  it('drops a duplicate issue with same type + codeFile + docSays', async () => {
+    const fileContent = 'function registerBlockType(name, settings) { return settings; }';
+    const sharedDocSays = 'The `name` parameter is required.';
+    // Two different codeSays snippets — both are verbatim substrings of fileContent
+    const codeSays1 = 'function registerBlockType(name, settings)';
+    const codeSays2 = 'function registerBlockType(name, settings) { return settings; }';
+
+    // Pass 1 returns two issues: identical type, codeFile, docSays — but different codeSays
+    const pass1Response = makeReportFindingsResponse([
+      {
+        ...BASE_ISSUE,
+        evidence: { ...BASE_ISSUE.evidence, docSays: sharedDocSays, codeSays: codeSays1 },
+      },
+      {
+        ...BASE_ISSUE,
+        evidence: { ...BASE_ISSUE.evidence, docSays: sharedDocSays, codeSays: codeSays2 },
+      },
+    ], []);
+
+    // Pass 2 confirms issue 1
+    const pass2Response1 = makeReportFindingsResponse([
+      {
+        ...BASE_ISSUE,
+        evidence:   { ...BASE_ISSUE.evidence, docSays: sharedDocSays, codeSays: codeSays1 },
+        confidence: 0.9,
+      },
+    ], []);
+
+    // Pass 2 confirms issue 2
+    const pass2Response2 = makeReportFindingsResponse([
+      {
+        ...BASE_ISSUE,
+        evidence:   { ...BASE_ISSUE.evidence, docSays: sharedDocSays, codeSays: codeSays2 },
+        confidence: 0.9,
+      },
+    ], []);
+
+    const client = makeAnthropicClient([pass1Response, pass2Response1, pass2Response2]);
+    const codeSources = makeCodeSources(fileContent);
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
+
+    // Deduplication on (type, codeFile, docSays) must keep only one of the two issues
+    expect(result.issues).toHaveLength(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // ClaudeValidator — Pass 2 fetch_code agentic loop
 // ---------------------------------------------------------------------------
 
