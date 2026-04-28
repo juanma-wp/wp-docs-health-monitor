@@ -248,7 +248,7 @@ export class ClaudeValidator implements Validator {
     this.pass1Model = pass1Model;
     this.pass2Model = pass2Model;
     this.anthropic = anthropic;
-    this.systemPrompt = promptExtension
+    this.systemPrompt = promptExtension?.trim()
       ? `${SYSTEM_PROMPT}\n\n## Site-specific rules\n\n${promptExtension}`
       : SYSTEM_PROMPT;
   }
