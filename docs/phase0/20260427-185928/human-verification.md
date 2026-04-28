@@ -2,7 +2,7 @@
 **Run:** `20260427-185928`  
 **Model:** claude-sonnet-4-6 (Pass 1 + Pass 2)  
 **Date:** 2026-04-27  
-**Status:** 🔄 In progress
+**Status:** ✅ Complete
 
 ## Reproducing the dashboard
 
@@ -17,14 +17,14 @@ open out/index.html
 
 ## Summary
 
-| Doc | Issues reported | Reviewed | True positive | False positive | Duplicate | Pending |
-|-----|----------------|----------|---------------|----------------|-----------|---------|
-| block-attributes | 3 | 3 | 2 | 0 | 1 | 0 |
-| block-deprecation | 2 | 2 | 1 | 1 | 0 | 0 |
-| block-registration | 2 | 1 | — | — | — | 1 |
-| block-supports | 2 | 0 | — | — | — | 2 |
-| block-variations | 2 | 0 | — | — | — | 2 |
-| **Total** | **11** | **6** | **3** | **1** | **1** | **3** |
+| Doc | Issues reported | True positive | False positive | Duplicate |
+|-----|----------------|---------------|----------------|-----------|
+| block-attributes | 3 | 2 | 0 | 1 |
+| block-deprecation | 2 | 1 | 1 | 0 |
+| block-registration | 2 | 1 | 1 | 0 |
+| block-supports | 2 | 1 | 0 | 1 |
+| block-variations | 2 | 1 | 1 | 0 |
+| **Total** | **11** | **6** | **3** | **2** |
 
 ---
 
@@ -81,26 +81,30 @@ Fix: add `createBlock` to the destructuring: `const { registerBlockType, createB
 ## block-registration
 
 ### Issue 1 — [MAJOR] `registerBlockType` signature incomplete
-**Verdict: 🔄 Pending manual check**
+**Verdict: ✅ True positive**
 
 The doc describes `registerBlockType` as always taking `(name: string, settings: BlockConfiguration)`. The code has a second overload where the first argument can be a `BlockConfiguration` metadata object (e.g. imported from `block.json`), making `settings` optional. This is the recommended modern pattern.
 
 ---
 
 ### Issue 2 — [MINOR] `reusable` category missing from docs
-**Verdict: 🔄 Pending manual check**
+**Verdict: ❌ False positive**
 
-`DEFAULT_CATEGORIES` in `reducer.ts` has a 7th entry `{ slug: 'reusable', title: __('Reusable blocks') }` not listed in the documented core categories.
+`DEFAULT_CATEGORIES` in `reducer.ts` has a 7th entry `{ slug: 'reusable' }` not listed in the docs. However, only `core/block` (the Reusable Block block itself) uses this category, and the inserter has special internal handling for it. It is a reserved internal category, not a public API for block developers. The doc omitting it is intentional.
 
 ---
 
 ## block-supports
 
 ### Issue 1 — [MAJOR] `color.gradient` should be `color.gradients` (plural)
-**Verdict: 🔄 Pending manual check**
+**Verdict: ✅ True positive**
+
+`hasGradientSupport()` in `color.js` checks `colorSupport.gradients` (plural). The correct support key is `supports: { color: { gradients: true } }`.
 
 ### Issue 2 — [MAJOR] Duplicate of Issue 1
-**Verdict: 🔄 Pending manual check**
+**Verdict: 🔁 Duplicate**
+
+Same finding as Issue 1, reported twice with slightly different wording.
 
 ⚠️ Also a Pass 2 crash diagnostic: `TypeError: Cannot read properties of undefined (reading 'trim')` — bug in the validator to fix.
 
@@ -109,12 +113,14 @@ The doc describes `registerBlockType` as always taking `(name: string, settings:
 ## block-variations
 
 ### Issue 1 — [MINOR] `__experimentalBlockVariationPicker` false positive
-**Verdict: 🔄 Pending manual check**
+**Verdict: ❌ False positive**
 
-Note: the tool's own suggestion says "REJECTED: no change needed" — likely a false positive that slipped through Pass 2.
+The doc's use of "experimental" is accurate — the component is exported as `__experimentalBlockVariationPicker`. The tool's own suggestion said "REJECTED: no change needed" but the issue still passed through Pass 2.
 
 ### Issue 2 — [MINOR] `registerBlockVariation()` accepts array, doc says object only
-**Verdict: 🔄 Pending manual check**
+**Verdict: ✅ True positive**
+
+The implementation explicitly handles the array case with its own validation loop (`if (Array.isArray(variation))`). This is intentional public behavior. The doc should say "the object or array of objects defining the variation(s)". Could not verify via tests (shallow clone excludes test directories — see issue #33).
 
 ---
 
