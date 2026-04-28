@@ -1,25 +1,16 @@
-import Anthropic from '@anthropic-ai/sdk';
-
 import type { Doc } from '../doc-source/types.js';
 import type { CodeTiers } from '../../types/mapping.js';
 import type { DocResult, Issue } from '../../types/results.js';
 import type { CodeSource } from '../code-source/types.js';
 import type { Validator } from './types.js';
+import type { LLMClient, ChatMessage, ToolDef } from './llm-client.js';
+import type { CostAccumulator } from './anthropic-client.js';
 import { assembleContext, formatContextForClaude } from './context-assembler.js';
 import { scoreDoc } from '../../health-scorer.js';
 import { fingerprintIssue } from '../../history.js';
 
 // ---------------------------------------------------------------------------
-// Default token pricing (Sonnet 4.6). Override via config.pricing.
-// Current rates: https://www.anthropic.com/pricing
-// ---------------------------------------------------------------------------
-export const DEFAULT_PRICE_INPUT_PER_MTOK        = 3.00;
-export const DEFAULT_PRICE_OUTPUT_PER_MTOK        = 15.00;
-export const DEFAULT_PRICE_CACHE_WRITE_PER_MTOK   = 3.75;
-export const DEFAULT_PRICE_CACHE_READ_PER_MTOK    = 0.30;
-
-// ---------------------------------------------------------------------------
-// Types for Claude tool inputs
+// Types for tool inputs
 // ---------------------------------------------------------------------------
 
 type RawIssue = {
@@ -48,10 +39,10 @@ type FetchCodeInput = {
 };
 
 // ---------------------------------------------------------------------------
-// System prompt (cached across calls)
+// System prompt
 // ---------------------------------------------------------------------------
 
-const SYSTEM_PROMPT = `You are a documentation accuracy validator for the WordPress Block Editor.
+const BASE_SYSTEM_PROMPT = `You are a documentation accuracy validator for the WordPress Block Editor.
 
 Your job: read a documentation page and its mapped source code, then identify specific places where the documentation is inaccurate, outdated, or misleading relative to the current code.
 
@@ -82,7 +73,7 @@ Your job: read a documentation page and its mapped source code, then identify sp
 
 When multiple source files are provided, treat them in this order of authority:
 
-1. **JSON Schema files** (e.g. schemas/json/block.json) — useful for valid property names, allowed values, and documented structure. However, these schemas are primarily designed for IDE tooling (autocomplete, editor validation) and represent current recommendations, not strict runtime contracts. Use them to verify property names and types, but do NOT rely on their "required" arrays to determine whether a field is required — that must be confirmed in TypeScript or PHP source.
+1. **JSON Schema files** (e.g. schemas/json/block.json) — when present, these are the ground truth for valid property names, types, and allowed values in JSON configuration files. A claim contradicted by a schema is a definite issue regardless of what TypeScript source says.
 2. **Test files** — tests encode intended public API behavior. A behavior tested explicitly is a documented contract, not an implementation detail.
 3. **TypeScript/PHP source** — authoritative for runtime behavior but requires careful interpretation (internal vs public API, short-circuit logic, etc.).
 
@@ -122,14 +113,14 @@ Rate your confidence from 0.0 to 1.0. Only report issues you are confident about
 Report up to 3 things the documentation gets specifically right. These must be concrete — point to something in both the doc and the code. Do not write generic positives like "the documentation is clear". If the doc is entirely accurate, these positives are your primary finding.`;
 
 // ---------------------------------------------------------------------------
-// Tool schemas
+// Tool definitions
 // ---------------------------------------------------------------------------
 
-const REPORT_FINDINGS_TOOL: Anthropic.Tool = {
-  name: 'report_findings',
+const REPORT_FINDINGS_TOOL: ToolDef = {
+  name:        'report_findings',
   description: 'Report all drift issues and positives found in the documentation.',
-  input_schema: {
-    type: 'object' as const,
+  parameters: {
+    type: 'object',
     required: ['issues', 'positives'],
     properties: {
       issues: {
@@ -164,11 +155,11 @@ const REPORT_FINDINGS_TOOL: Anthropic.Tool = {
   },
 };
 
-const FETCH_CODE_TOOL: Anthropic.Tool = {
-  name: 'fetch_code',
+const FETCH_CODE_TOOL: ToolDef = {
+  name:        'fetch_code',
   description: 'Fetch a specific line range from a source file for closer inspection.',
-  input_schema: {
-    type: 'object' as const,
+  parameters: {
+    type: 'object',
     required: ['repo', 'path', 'startLine', 'endLine'],
     properties: {
       repo:      { type: 'string', description: "Repo ID — e.g. 'gutenberg' or 'wordpress-develop'" },
@@ -200,7 +191,6 @@ const SELF_REJECTION_PATTERNS = [
   /this (issue|finding) (should be|is) rejected/i,
 ];
 
-// Detects when Pass 2 explicitly rejects its own finding in the suggestion text.
 export function isSelfRejected(suggestion: string): boolean {
   if (!suggestion) return false;
   return SELF_REJECTION_PATTERNS.some(re => re.test(suggestion.trim()));
@@ -209,44 +199,37 @@ export function isSelfRejected(suggestion: string): boolean {
 export function isWeakSuggestion(suggestion: string): boolean {
   if (!suggestion) return true;
   const trimmed = suggestion.trim();
-  // Check if it matches known generic-only phrases
-  if (GENERIC_ONLY_PHRASES.some(re => re.test(trimmed))) {
-    return true;
-  }
-  // Check if it contains at least one code identifier
-  if (CODE_IDENTIFIER_PATTERN.test(trimmed)) {
-    return false;
-  }
-  // Short suggestions with no identifiers are weak
+  if (GENERIC_ONLY_PHRASES.some(re => re.test(trimmed))) return true;
+  if (CODE_IDENTIFIER_PATTERN.test(trimmed)) return false;
   return trimmed.split(/\s+/).length <= 8;
 }
 
 // ---------------------------------------------------------------------------
-// Cost accumulator type
+// ToolUseValidator
 // ---------------------------------------------------------------------------
 
-export type CostAccumulator = {
-  inputTokens:        number;
-  outputTokens:       number;
-  cacheReadTokens:    number;
-  cacheCreationTokens: number;
-};
-
-// ---------------------------------------------------------------------------
-// ClaudeValidator
-// ---------------------------------------------------------------------------
-
-export class ClaudeValidator implements Validator {
-  private readonly pass1Model: string;
-  private readonly pass2Model: string;
-  private readonly anthropic: Anthropic;
-  readonly costAccumulator: CostAccumulator = { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheCreationTokens: 0 };
+export class ToolUseValidator implements Validator {
+  private readonly pass1Model:    string;
+  private readonly pass2Model:    string;
+  private readonly client:        LLMClient;
+  private readonly systemPrompt:  string;
+  readonly costAccumulator: CostAccumulator = {
+    inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheCreationTokens: 0,
+  };
   droppedHallucinations = 0;
 
-  constructor(pass1Model: string, pass2Model: string, anthropic: Anthropic) {
-    this.pass1Model = pass1Model;
-    this.pass2Model = pass2Model;
-    this.anthropic = anthropic;
+  constructor(
+    pass1Model:      string,
+    pass2Model:      string,
+    client:          LLMClient,
+    promptExtension?: string,
+  ) {
+    this.pass1Model   = pass1Model;
+    this.pass2Model   = pass2Model;
+    this.client       = client;
+    this.systemPrompt = promptExtension
+      ? `${BASE_SYSTEM_PROMPT}\n\n${promptExtension}`
+      : BASE_SYSTEM_PROMPT;
   }
 
   async validateDoc(
@@ -254,10 +237,9 @@ export class ClaudeValidator implements Validator {
     codeTiers: CodeTiers,
     codeSources: Record<string, CodeSource>,
   ): Promise<DocResult> {
-    const assembled = await assembleContext(doc, codeTiers, codeSources);
+    const assembled   = await assembleContext(doc, codeTiers, codeSources);
     const diagnostics = [...assembled.diagnostics];
 
-    // Get commit SHA from the first code source that has primary files
     let commitSha = '';
     const primaryRepo = codeTiers.primary[0]?.repo;
     if (primaryRepo && codeSources[primaryRepo]) {
@@ -268,7 +250,6 @@ export class ClaudeValidator implements Validator {
       }
     }
 
-    // Build user message content
     const codeContext = formatContextForClaude(assembled.fileBlocks);
     const missingSymbolsHint = assembled.missingSymbols.length > 0
       ? `\n\n## Potentially removed APIs\n\nThe following identifiers appear in the doc but were not found in any source file. Investigate each as a possible \`nonexistent-name\` issue:\n\n${assembled.missingSymbols.map(s => `- \`${s}\``).join('\n')}`
@@ -285,14 +266,13 @@ ${doc.content}
 
 ${codeContext || '(No source files were available for this document.)'}${missingSymbolsHint}`;
 
-    // Pass 1: get initial issues and positives
     let pass1Issues: RawIssue[] = [];
-    let positives: string[] = [];
+    let positives:   string[]   = [];
 
     try {
       const pass1Result = await this.runPass1(userContent);
       pass1Issues = pass1Result.issues;
-      positives = pass1Result.positives.slice(0, 3);
+      positives   = pass1Result.positives.slice(0, 3);
     } catch (err) {
       diagnostics.push(`Pass 1 failed: ${String(err)}`);
       return this.buildDocResult(doc, [], positives, assembled.relatedCode, diagnostics, commitSha);
@@ -307,9 +287,8 @@ ${codeContext || '(No source files were available for this document.)'}${missing
         continue;
       }
       try {
-        const fileContent = await codeSources[codeRepo].readFile(codeFile);
-        const needle = codeSays.trim();
-        // nonexistent-name evidence is absence — there is no quote to find in the file
+        const fileContent    = await codeSources[codeRepo].readFile(codeFile);
+        const needle         = codeSays.trim();
         const isAbsenceIssue = issue.type === 'nonexistent-name';
         if (!isAbsenceIssue && !fileContent.includes(needle)) {
           this.droppedHallucinations++;
@@ -323,13 +302,12 @@ ${codeContext || '(No source files were available for this document.)'}${missing
     }
 
     // Pass 2: targeted verification for each surviving candidate
-    const finalIssues: Issue[] = [];
-    const seenKeys = new Set<string>();
+    const finalIssues: Issue[]    = [];
+    const seenKeys    = new Set<string>();
     for (const candidate of verbatimPassed) {
       try {
         const verified = await this.runPass2(candidate, codeSources, doc.slug);
         if (verified) {
-          // Deduplicate: same type + codeFile + docSays = same finding reported twice
           const key = `${verified.type}|${verified.evidence.codeFile}|${verified.evidence.docSays}`;
           if (!seenKeys.has(key)) {
             seenKeys.add(key);
@@ -372,55 +350,32 @@ ${codeContext || '(No source files were available for this document.)'}${missing
   }
 
   private async runPass1(userContent: string): Promise<ReportFindingsInput> {
-    const response = await this.anthropic.messages.create({
-      model:      this.pass1Model,
-      max_tokens: 4096,
-      system: [
-        {
-          type:          'text',
-          text:          SYSTEM_PROMPT,
-          cache_control: { type: 'ephemeral' },
-        },
-      ],
-      messages: [
-        {
-          role:    'user',
-          content: [
-            {
-              type:          'text',
-              text:          userContent,
-              cache_control: { type: 'ephemeral' },
-            },
-          ],
-        },
-      ],
-      tools:       [REPORT_FINDINGS_TOOL],
-      tool_choice: { type: 'tool', name: 'report_findings' },
-    });
+    const messages: ChatMessage[] = [{ role: 'user', text: userContent }];
 
-    this.costAccumulator.inputTokens         += response.usage.input_tokens;
-    this.costAccumulator.outputTokens        += response.usage.output_tokens;
-    this.costAccumulator.cacheReadTokens     += response.usage.cache_read_input_tokens    ?? 0;
-    this.costAccumulator.cacheCreationTokens += response.usage.cache_creation_input_tokens ?? 0;
+    const response = await this.client.chat(
+      this.pass1Model,
+      this.systemPrompt,
+      messages,
+      [REPORT_FINDINGS_TOOL],
+      { type: 'tool', name: 'report_findings' },
+      4096,
+    );
 
-    for (const block of response.content) {
-      if (block.type === 'tool_use' && block.name === 'report_findings') {
-        return block.input as ReportFindingsInput;
-      }
-    }
+    this.accumulateUsage(response.usage);
 
-    return { issues: [], positives: [] };
+    const call = response.toolCalls.find(c => c.name === 'report_findings');
+    return call ? (call.input as ReportFindingsInput) : { issues: [], positives: [] };
   }
 
   private async runPass2(
-    candidate: RawIssue,
+    candidate:   RawIssue,
     codeSources: Record<string, CodeSource>,
-    slug: string,
+    slug:        string,
   ): Promise<Issue | null> {
-    const messages: Anthropic.MessageParam[] = [
+    const messages: ChatMessage[] = [
       {
-        role:    'user',
-        content: `Re-evaluate this candidate issue using the fetch_code tool to inspect the relevant code region.
+        role: 'user',
+        text: `Re-evaluate this candidate issue using the fetch_code tool to inspect the relevant code region.
 Confirm or reject the issue. If confirmed, ensure the suggestion is specific.
 
 Issue:
@@ -430,47 +385,34 @@ ${JSON.stringify(candidate, null, 2)}`,
 
     let result: ReportFindingsInput | null = null;
 
-    // Agentic loop: allow Claude to call fetch_code before report_findings
     for (let turn = 0; turn < 10; turn++) {
-      const response = await this.anthropic.messages.create({
-        model:      this.pass2Model,
-        max_tokens: 2048,
-        system: [
-          {
-            type:          'text',
-            text:          SYSTEM_PROMPT,
-            cache_control: { type: 'ephemeral' },
-          },
-        ],
+      const response = await this.client.chat(
+        this.pass2Model,
+        this.systemPrompt,
         messages,
-        tools:       [FETCH_CODE_TOOL, REPORT_FINDINGS_TOOL],
-        tool_choice: { type: 'any' },
-      });
+        [FETCH_CODE_TOOL, REPORT_FINDINGS_TOOL],
+        { type: 'any' },
+        2048,
+      );
 
-      this.costAccumulator.inputTokens  += response.usage.input_tokens;
-      this.costAccumulator.outputTokens += response.usage.output_tokens;
+      this.accumulateUsage(response.usage);
+      messages.push(response.appendMessage);
 
-      // Add assistant response to the conversation
-      messages.push({ role: 'assistant', content: response.content });
+      if (response.stopReason === 'end_turn') break;
+      if (response.stopReason !== 'tool_use')  break;
 
-      if (response.stop_reason === 'end_turn') break;
-      if (response.stop_reason !== 'tool_use') break;
-
-      // Process tool calls
-      const toolResults: Anthropic.ToolResultBlockParam[] = [];
+      const toolResults: Array<{ id: string; content: string }> = [];
       let foundReportFindings = false;
 
-      for (const block of response.content) {
-        if (block.type !== 'tool_use') continue;
-
-        if (block.name === 'report_findings') {
-          result = block.input as ReportFindingsInput;
+      for (const call of response.toolCalls) {
+        if (call.name === 'report_findings') {
+          result = call.input as ReportFindingsInput;
           foundReportFindings = true;
           break;
         }
 
-        if (block.name === 'fetch_code') {
-          const input = block.input as FetchCodeInput;
+        if (call.name === 'fetch_code') {
+          const input = call.input as FetchCodeInput;
           let fetchedContent: string;
           try {
             const src = codeSources[input.repo];
@@ -479,18 +421,14 @@ ${JSON.stringify(candidate, null, 2)}`,
           } catch (err) {
             fetchedContent = `Error fetching code: ${String(err)}`;
           }
-          toolResults.push({
-            type:        'tool_result',
-            tool_use_id: block.id,
-            content:     fetchedContent,
-          });
+          toolResults.push({ id: call.id, content: fetchedContent });
         }
       }
 
       if (foundReportFindings) break;
 
       if (toolResults.length > 0) {
-        messages.push({ role: 'user', content: toolResults });
+        messages.push({ role: 'tool_result', results: toolResults });
       } else {
         break;
       }
@@ -499,31 +437,20 @@ ${JSON.stringify(candidate, null, 2)}`,
     if (!result || result.issues.length === 0) return null;
 
     const rawIssue = result.issues[0];
-    if (!rawIssue) return null;
-
-    // Drop if confidence < 0.7
+    if (!rawIssue)              return null;
     if (rawIssue.confidence < 0.7) return null;
-
-    // Guard against undefined suggestion from malformed API response
-    if (!rawIssue.suggestion) return null;
-
-    // Drop if the model explicitly rejects its own finding
+    if (!rawIssue.suggestion)      return null;
     if (isSelfRejected(rawIssue.suggestion)) return null;
 
     if (isWeakSuggestion(rawIssue.suggestion)) {
-      if (rawIssue.severity === 'minor') {
-        // Drop without retry
-        return null;
-      }
-      // For critical/major: retry once
+      if (rawIssue.severity === 'minor') return null;
       const retried = await this.retryWeakSuggestion(rawIssue, messages);
       if (!retried) return null;
       rawIssue.suggestion = retried;
       if (isWeakSuggestion(rawIssue.suggestion)) return null;
     }
 
-    // Build the Issue with fingerprint
-    const issue: Issue = {
+    return {
       severity:    rawIssue.severity,
       type:        rawIssue.type,
       evidence:    rawIssue.evidence,
@@ -531,51 +458,38 @@ ${JSON.stringify(candidate, null, 2)}`,
       confidence:  rawIssue.confidence,
       fingerprint: fingerprintIssue(slug, rawIssue.type, rawIssue.evidence.codeFile, rawIssue.suggestion),
     };
-
-    return issue;
   }
 
   private async retryWeakSuggestion(
-    rawIssue: RawIssue,
-    prevMessages: Anthropic.MessageParam[],
+    rawIssue:     RawIssue,
+    prevMessages: ChatMessage[],
   ): Promise<string | null> {
-    const retryMessages: Anthropic.MessageParam[] = [
+    const retryMessages: ChatMessage[] = [
       ...prevMessages,
-      {
-        role:    'user',
-        content: 'The suggestion is too generic. Rewrite it to name the exact function, parameter, or line that needs to change.',
-      },
+      { role: 'user', text: 'The suggestion is too generic. Rewrite it to name the exact function, parameter, or line that needs to change.' },
     ];
 
-    const response = await this.anthropic.messages.create({
-      model:      this.pass2Model,
-      max_tokens: 1024,
-      system: [
-        {
-          type:          'text',
-          text:          SYSTEM_PROMPT,
-          cache_control: { type: 'ephemeral' },
-        },
-      ],
-      messages:    retryMessages,
-      tools:       [REPORT_FINDINGS_TOOL],
-      tool_choice: { type: 'tool', name: 'report_findings' },
-    });
+    const response = await this.client.chat(
+      this.pass2Model,
+      this.systemPrompt,
+      retryMessages,
+      [REPORT_FINDINGS_TOOL],
+      { type: 'tool', name: 'report_findings' },
+      1024,
+    );
 
-    this.costAccumulator.inputTokens         += response.usage.input_tokens;
-    this.costAccumulator.outputTokens        += response.usage.output_tokens;
-    this.costAccumulator.cacheReadTokens     += response.usage.cache_read_input_tokens    ?? 0;
-    this.costAccumulator.cacheCreationTokens += response.usage.cache_creation_input_tokens ?? 0;
+    this.accumulateUsage(response.usage);
 
-    for (const block of response.content) {
-      if (block.type === 'tool_use' && block.name === 'report_findings') {
-        const retried = block.input as ReportFindingsInput;
-        if (retried.issues.length > 0) {
-          return retried.issues[0].suggestion ?? null;
-        }
-      }
-    }
+    const call = response.toolCalls.find(c => c.name === 'report_findings');
+    if (!call) return null;
+    const retried = call.input as ReportFindingsInput;
+    return retried.issues[0]?.suggestion ?? null;
+  }
 
-    return null;
+  private accumulateUsage(usage: { inputTokens: number; outputTokens: number; cacheReadTokens?: number; cacheWriteTokens?: number }): void {
+    this.costAccumulator.inputTokens         += usage.inputTokens;
+    this.costAccumulator.outputTokens        += usage.outputTokens;
+    this.costAccumulator.cacheReadTokens     += usage.cacheReadTokens     ?? 0;
+    this.costAccumulator.cacheCreationTokens += usage.cacheWriteTokens    ?? 0;
   }
 }

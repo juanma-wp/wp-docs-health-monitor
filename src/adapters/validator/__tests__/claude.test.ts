@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import type Anthropic from '@anthropic-ai/sdk';
-import { ClaudeValidator, isWeakSuggestion, isSelfRejected } from '../claude.js';
+import { ToolUseValidator, isWeakSuggestion, isSelfRejected } from '../tool-use-validator.js';
+import type { LLMClient, ChatResponse } from '../llm-client.js';
 import type { Doc } from '../../doc-source/types.js';
 import type { CodeTiers } from '../../../types/mapping.js';
 import type { CodeSource } from '../../code-source/types.js';
@@ -43,17 +43,15 @@ function makeCodeSources(fileContent = 'function registerBlockType(name, setting
   };
 }
 
-function makeAnthropicClient(responses: Anthropic.Message[]): Anthropic {
+function makeLLMClient(responses: ChatResponse[]): LLMClient {
   let callCount = 0;
   return {
-    messages: {
-      create: vi.fn(async () => {
-        const resp = responses[callCount] ?? responses[responses.length - 1];
-        callCount++;
-        return resp;
-      }),
-    },
-  } as unknown as Anthropic;
+    chat: vi.fn(async () => {
+      const resp = responses[callCount] ?? responses[responses.length - 1];
+      callCount++;
+      return resp;
+    }),
+  };
 }
 
 function makeReportFindingsResponse(
@@ -61,25 +59,14 @@ function makeReportFindingsResponse(
   positives: string[],
   inputTokens = 100,
   outputTokens = 50,
-): Anthropic.Message {
+): ChatResponse {
+  const call = { id: 'tu_1', name: 'report_findings', input: { issues, positives } };
   return {
-    id:           'msg_test',
-    type:         'message',
-    role:         'assistant',
-    model:        'claude-sonnet-4-6',
-    stop_reason:  'tool_use',
-    stop_sequence: null,
-    usage:        { input_tokens: inputTokens, output_tokens: outputTokens, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 },
-    content: [
-      {
-        type:  'tool_use',
-        id:    'tu_1',
-        name:  'report_findings',
-        input: { issues, positives },
-        caller: { type: 'direct' },
-      } as unknown as Anthropic.ToolUseBlock,
-    ],
-  } as unknown as Anthropic.Message;
+    toolCalls:     [call],
+    appendMessage: { role: 'assistant', toolCalls: [call], _raw: {} },
+    stopReason:    'tool_use',
+    usage:         { inputTokens, outputTokens },
+  };
 }
 
 const BASE_ISSUE = {
@@ -152,12 +139,11 @@ describe('isWeakSuggestion', () => {
 });
 
 // ---------------------------------------------------------------------------
-// ClaudeValidator — verbatim check
+// ToolUseValidator — verbatim check
 // ---------------------------------------------------------------------------
 
-describe('ClaudeValidator — verbatim check', () => {
+describe('ToolUseValidator — verbatim check', () => {
   it('drops an issue where codeSays is NOT a substring of the file content', async () => {
-    // Pass 1 returns 1 issue whose codeSays is NOT in the file
     const pass1Response = makeReportFindingsResponse([
       {
         ...BASE_ISSUE,
@@ -168,39 +154,35 @@ describe('ClaudeValidator — verbatim check', () => {
       },
     ], ['Doc correctly describes the block API']);
 
-    // Pass 2 response for any surviving issues (none should survive)
     const pass2Response = makeReportFindingsResponse([], []);
 
-    const client = makeAnthropicClient([pass1Response, pass2Response]);
+    const client = makeLLMClient([pass1Response, pass2Response]);
     const fileContent = 'function registerBlockType(name, settings) { return settings; }';
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const validator = new ToolUseValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
-    // Issue should have been dropped by verbatim check
     expect(result.issues).toHaveLength(0);
     expect(validator.droppedHallucinations).toBe(1);
   });
 
   it('keeps an issue where codeSays IS found in the file content', async () => {
     const fileContent = 'function registerBlockType(name, settings) { return settings; }';
-    // This codeSays exists verbatim in fileContent
     const codeSays = 'function registerBlockType(name, settings)';
 
     const pass1Response = makeReportFindingsResponse([
       { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays } },
     ], ['Good doc']);
 
-    // Pass 2 confirms the issue
     const pass2Response = makeReportFindingsResponse([
       { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays }, confidence: 0.9 },
     ], []);
 
-    const client = makeAnthropicClient([pass1Response, pass2Response]);
+    const client = makeLLMClient([pass1Response, pass2Response]);
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const validator = new ToolUseValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     expect(result.issues).toHaveLength(1);
@@ -208,14 +190,13 @@ describe('ClaudeValidator — verbatim check', () => {
   });
 
   it('passes a nonexistent-name issue through even when codeSays is not in the file', async () => {
-    // The API named in codeSays genuinely does not exist in the file — that IS the finding
     const pass1Response = makeReportFindingsResponse([
       {
         ...BASE_ISSUE,
         type: 'nonexistent-name',
         evidence: {
           ...BASE_ISSUE.evidence,
-          codeSays: 'source',  // this string is NOT in the file content below
+          codeSays: 'source',
         },
       },
     ], []);
@@ -230,13 +211,12 @@ describe('ClaudeValidator — verbatim check', () => {
     ], []);
 
     const fileContent = 'function registerBlockType(name, settings) {}';
-    const client = makeAnthropicClient([pass1Response, pass2Response]);
+    const client = makeLLMClient([pass1Response, pass2Response]);
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const validator = new ToolUseValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
-    // Should NOT be dropped — absence is the evidence
     expect(result.issues).toHaveLength(1);
     expect(result.issues[0].type).toBe('nonexistent-name');
     expect(validator.droppedHallucinations).toBe(0);
@@ -244,10 +224,10 @@ describe('ClaudeValidator — verbatim check', () => {
 });
 
 // ---------------------------------------------------------------------------
-// ClaudeValidator — confidence filter
+// ToolUseValidator — confidence filter
 // ---------------------------------------------------------------------------
 
-describe('ClaudeValidator — confidence filter', () => {
+describe('ToolUseValidator — confidence filter', () => {
   it('drops an issue with confidence < 0.7 after Pass 2', async () => {
     const fileContent = 'function registerBlockType(name, settings) {}';
     const codeSays = 'function registerBlockType(name, settings)';
@@ -256,15 +236,14 @@ describe('ClaudeValidator — confidence filter', () => {
       { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays } },
     ], []);
 
-    // Pass 2 returns the issue with LOW confidence
     const pass2Response = makeReportFindingsResponse([
       { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays }, confidence: 0.6 },
     ], []);
 
-    const client = makeAnthropicClient([pass1Response, pass2Response]);
+    const client = makeLLMClient([pass1Response, pass2Response]);
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const validator = new ToolUseValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     expect(result.issues).toHaveLength(0);
@@ -282,10 +261,10 @@ describe('ClaudeValidator — confidence filter', () => {
       { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays }, confidence: 0.7 },
     ], []);
 
-    const client = makeAnthropicClient([pass1Response, pass2Response]);
+    const client = makeLLMClient([pass1Response, pass2Response]);
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const validator = new ToolUseValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     expect(result.issues).toHaveLength(1);
@@ -293,10 +272,10 @@ describe('ClaudeValidator — confidence filter', () => {
 });
 
 // ---------------------------------------------------------------------------
-// ClaudeValidator — weak suggestion handling
+// ToolUseValidator — weak suggestion handling
 // ---------------------------------------------------------------------------
 
-describe('ClaudeValidator — weak suggestion handling', () => {
+describe('ToolUseValidator — weak suggestion handling', () => {
   it('drops a minor issue with a weak suggestion without retry', async () => {
     const fileContent = 'function registerBlockType(name, settings) {}';
     const codeSays = 'function registerBlockType(name, settings)';
@@ -305,7 +284,6 @@ describe('ClaudeValidator — weak suggestion handling', () => {
       { ...BASE_ISSUE, severity: 'minor', evidence: { ...BASE_ISSUE.evidence, codeSays } },
     ], []);
 
-    // Pass 2 returns a weak suggestion
     const pass2Response = makeReportFindingsResponse([
       {
         ...BASE_ISSUE,
@@ -316,16 +294,15 @@ describe('ClaudeValidator — weak suggestion handling', () => {
       },
     ], []);
 
-    const client = makeAnthropicClient([pass1Response, pass2Response]);
-    const createSpy = client.messages.create as Mock;
+    const client = makeLLMClient([pass1Response, pass2Response]);
+    const chatSpy = client.chat as Mock;
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const validator = new ToolUseValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     expect(result.issues).toHaveLength(0);
-    // Should NOT have called retry (only pass1 + pass2 = 2 calls)
-    expect(createSpy).toHaveBeenCalledTimes(2);
+    expect(chatSpy).toHaveBeenCalledTimes(2);
   });
 
   it('triggers exactly one retry for a critical issue with a weak suggestion', async () => {
@@ -336,7 +313,6 @@ describe('ClaudeValidator — weak suggestion handling', () => {
       { ...BASE_ISSUE, severity: 'critical', evidence: { ...BASE_ISSUE.evidence, codeSays } },
     ], []);
 
-    // Pass 2 returns a weak suggestion for a critical issue
     const pass2WeakResponse = makeReportFindingsResponse([
       {
         ...BASE_ISSUE,
@@ -347,7 +323,6 @@ describe('ClaudeValidator — weak suggestion handling', () => {
       },
     ], []);
 
-    // Retry response returns a specific suggestion
     const retryResponse = makeReportFindingsResponse([
       {
         ...BASE_ISSUE,
@@ -358,30 +333,26 @@ describe('ClaudeValidator — weak suggestion handling', () => {
       },
     ], []);
 
-    const client = makeAnthropicClient([pass1Response, pass2WeakResponse, retryResponse]);
-    const createSpy = client.messages.create as Mock;
+    const client = makeLLMClient([pass1Response, pass2WeakResponse, retryResponse]);
+    const chatSpy = client.chat as Mock;
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const validator = new ToolUseValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
-    // Issue should survive with the retried suggestion
     expect(result.issues).toHaveLength(1);
     expect(result.issues[0].suggestion).toContain('registerBlockType');
-    // pass1 + pass2 + retry = 3 calls
-    expect(createSpy).toHaveBeenCalledTimes(3);
+    expect(chatSpy).toHaveBeenCalledTimes(3);
   });
 
   it('does not crash when Pass 2 returns an issue with missing suggestion', async () => {
     const fileContent = 'function registerBlockType(name, settings) {}';
     const codeSays = 'function registerBlockType(name, settings)';
 
-    // Pass 1: codeSays is present in the file so it survives the verbatim check
     const pass1Response = makeReportFindingsResponse([
       { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays } },
     ], []);
 
-    // Pass 2: returns an issue with suggestion omitted (undefined)
     const pass2Response = makeReportFindingsResponse([
       {
         ...BASE_ISSUE,
@@ -391,10 +362,10 @@ describe('ClaudeValidator — weak suggestion handling', () => {
       },
     ], []);
 
-    const client = makeAnthropicClient([pass1Response, pass2Response]);
+    const client = makeLLMClient([pass1Response, pass2Response]);
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const validator = new ToolUseValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     expect(result.issues).toHaveLength(0);
@@ -402,10 +373,10 @@ describe('ClaudeValidator — weak suggestion handling', () => {
 });
 
 // ---------------------------------------------------------------------------
-// ClaudeValidator — fingerprint
+// ToolUseValidator — fingerprint
 // ---------------------------------------------------------------------------
 
-describe('ClaudeValidator — fingerprint', () => {
+describe('ToolUseValidator — fingerprint', () => {
   it('sets fingerprint on every surviving issue', async () => {
     const fileContent = 'function registerBlockType(name, settings) {}';
     const codeSays = 'function registerBlockType(name, settings)';
@@ -418,10 +389,10 @@ describe('ClaudeValidator — fingerprint', () => {
       { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays }, confidence: 0.9 },
     ], []);
 
-    const client = makeAnthropicClient([pass1Response, pass2Response]);
+    const client = makeLLMClient([pass1Response, pass2Response]);
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const validator = new ToolUseValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     expect(result.issues).toHaveLength(1);
@@ -430,18 +401,16 @@ describe('ClaudeValidator — fingerprint', () => {
 });
 
 // ---------------------------------------------------------------------------
-// ClaudeValidator — duplicate suppression
+// ToolUseValidator — duplicate suppression
 // ---------------------------------------------------------------------------
 
-describe('ClaudeValidator — duplicate suppression', () => {
+describe('ToolUseValidator — duplicate suppression', () => {
   it('drops a duplicate issue with same type + codeFile + docSays', async () => {
     const fileContent = 'function registerBlockType(name, settings) { return settings; }';
     const sharedDocSays = 'The `name` parameter is required.';
-    // Two different codeSays snippets — both are verbatim substrings of fileContent
     const codeSays1 = 'function registerBlockType(name, settings)';
     const codeSays2 = 'function registerBlockType(name, settings) { return settings; }';
 
-    // Pass 1 returns two issues: identical type, codeFile, docSays — but different codeSays
     const pass1Response = makeReportFindingsResponse([
       {
         ...BASE_ISSUE,
@@ -453,7 +422,6 @@ describe('ClaudeValidator — duplicate suppression', () => {
       },
     ], []);
 
-    // Pass 2 confirms issue 1
     const pass2Response1 = makeReportFindingsResponse([
       {
         ...BASE_ISSUE,
@@ -462,7 +430,6 @@ describe('ClaudeValidator — duplicate suppression', () => {
       },
     ], []);
 
-    // Pass 2 confirms issue 2
     const pass2Response2 = makeReportFindingsResponse([
       {
         ...BASE_ISSUE,
@@ -471,22 +438,21 @@ describe('ClaudeValidator — duplicate suppression', () => {
       },
     ], []);
 
-    const client = makeAnthropicClient([pass1Response, pass2Response1, pass2Response2]);
+    const client = makeLLMClient([pass1Response, pass2Response1, pass2Response2]);
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const validator = new ToolUseValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
-    // Deduplication on (type, codeFile, docSays) must keep only one of the two issues
     expect(result.issues).toHaveLength(1);
   });
 });
 
 // ---------------------------------------------------------------------------
-// ClaudeValidator — Pass 2 fetch_code agentic loop
+// ToolUseValidator — Pass 2 fetch_code agentic loop
 // ---------------------------------------------------------------------------
 
-describe('ClaudeValidator — Pass 2 fetch_code tool', () => {
+describe('ToolUseValidator — Pass 2 fetch_code tool', () => {
   it('handles a fetch_code call in Pass 2 before report_findings', async () => {
     const fileContent = 'function registerBlockType(name, settings) { return settings; }';
     const codeSays = 'function registerBlockType(name, settings)';
@@ -495,40 +461,32 @@ describe('ClaudeValidator — Pass 2 fetch_code tool', () => {
       { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays } },
     ], []);
 
-    // Pass 2 turn 1: Claude calls fetch_code
-    const pass2FetchResponse: Anthropic.Message = {
-      id:           'msg_p2_1',
-      type:         'message',
-      role:         'assistant',
-      model:        'claude-sonnet-4-6',
-      stop_reason:  'tool_use',
-      stop_sequence: null,
-      usage:        { input_tokens: 200, output_tokens: 30, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 },
-      content: [
-        {
-          type:  'tool_use',
-          id:    'tu_fetch',
-          name:  'fetch_code',
-          input: { repo: 'gutenberg', path: 'packages/blocks/src/api/registration.js', startLine: 1, endLine: 5 },
-          caller: { type: 'direct' },
-        } as unknown as Anthropic.ToolUseBlock,
-      ],
-    } as unknown as Anthropic.Message;
+    // Pass 2 turn 1: model calls fetch_code
+    const fetchCall = {
+      id:    'tu_fetch',
+      name:  'fetch_code',
+      input: { repo: 'gutenberg', path: 'packages/blocks/src/api/registration.js', startLine: 1, endLine: 5 },
+    };
+    const pass2FetchResponse: ChatResponse = {
+      toolCalls:     [fetchCall],
+      appendMessage: { role: 'assistant', toolCalls: [fetchCall], _raw: {} },
+      stopReason:    'tool_use',
+      usage:         { inputTokens: 200, outputTokens: 30 },
+    };
 
-    // Pass 2 turn 2: Claude calls report_findings after seeing the fetched code
+    // Pass 2 turn 2: model calls report_findings after seeing fetched code
     const pass2ReportResponse = makeReportFindingsResponse([
       { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays }, confidence: 0.9 },
     ], []);
 
-    const client = makeAnthropicClient([pass1Response, pass2FetchResponse, pass2ReportResponse]);
+    const client = makeLLMClient([pass1Response, pass2FetchResponse, pass2ReportResponse]);
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const validator = new ToolUseValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     expect(result.issues).toHaveLength(1);
     expect(result.issues[0].fingerprint).toMatch(/^[0-9a-f]{16}$/);
-    // fetch was called for the readFile (verbatim check + fetch_code)
     expect(codeSources.gutenberg.readFile).toHaveBeenCalledWith(
       'packages/blocks/src/api/registration.js',
       1,

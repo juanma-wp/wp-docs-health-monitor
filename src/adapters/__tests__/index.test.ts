@@ -9,7 +9,7 @@ import {
 } from '../index.js';
 import { ManifestUrlDocSource } from '../doc-source/manifest-url.js';
 import { GitCloneSource } from '../code-source/git-clone.js';
-import { ClaudeValidator } from '../validator/claude.js';
+import { ToolUseValidator } from '../validator/tool-use-validator.js';
 
 // ---------------------------------------------------------------------------
 // Helpers: build a Config whose inner `type` strings bypass the z.literal
@@ -33,7 +33,7 @@ function makeDocSourceConfig(type: string): Config {
     },
     mappingPath: 'mappings/test.json',
     outputDir: './out',
-    validator: { type: 'claude', pass1Model: 'claude-sonnet-4-6', pass2Model: 'claude-sonnet-4-6' },
+    validator: { provider: 'anthropic' as const, pass1Model: 'claude-sonnet-4-6', pass2Model: 'claude-sonnet-4-6' },
     pricing: { inputPerMtok: 3, outputPerMtok: 15, cacheWritePerMtok: 3.75, cacheReadPerMtok: 0.30 },
   };
 }
@@ -100,14 +100,14 @@ describe('createCodeSources', () => {
 // ---------------------------------------------------------------------------
 
 describe('createValidator', () => {
-  it('returns a ClaudeValidator for type "claude"', () => {
+  it('returns a ToolUseValidator for provider "anthropic"', () => {
     const validator = createValidator(makeDocSourceConfig('manifest-url'));
-    expect(validator).toBeInstanceOf(ClaudeValidator);
+    expect(validator).toBeInstanceOf(ToolUseValidator);
   });
 
-  it('throws NotImplementedError for an unrecognised validator type', () => {
+  it('throws NotImplementedError for an unrecognised validator provider', () => {
     const cfg = makeDocSourceConfig('manifest-url');
-    (cfg.validator as { type: string }).type = 'gpt';
+    (cfg.validator as { provider: string }).provider = 'gpt';
     expect(() => createValidator(cfg)).toThrow(NotImplementedError);
   });
 });
