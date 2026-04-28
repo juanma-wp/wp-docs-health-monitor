@@ -240,13 +240,17 @@ export class ClaudeValidator implements Validator {
   private readonly pass1Model: string;
   private readonly pass2Model: string;
   private readonly anthropic: Anthropic;
+  private readonly systemPrompt: string;
   readonly costAccumulator: CostAccumulator = { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheCreationTokens: 0 };
   droppedHallucinations = 0;
 
-  constructor(pass1Model: string, pass2Model: string, anthropic: Anthropic) {
+  constructor(pass1Model: string, pass2Model: string, anthropic: Anthropic, promptExtension?: string) {
     this.pass1Model = pass1Model;
     this.pass2Model = pass2Model;
     this.anthropic = anthropic;
+    this.systemPrompt = promptExtension
+      ? `${SYSTEM_PROMPT}\n\n## Site-specific rules\n\n${promptExtension}`
+      : SYSTEM_PROMPT;
   }
 
   async validateDoc(
@@ -378,7 +382,7 @@ ${codeContext || '(No source files were available for this document.)'}${missing
       system: [
         {
           type:          'text',
-          text:          SYSTEM_PROMPT,
+          text:          this.systemPrompt,
           cache_control: { type: 'ephemeral' },
         },
       ],
@@ -438,7 +442,7 @@ ${JSON.stringify(candidate, null, 2)}`,
         system: [
           {
             type:          'text',
-            text:          SYSTEM_PROMPT,
+            text:          this.systemPrompt,
             cache_control: { type: 'ephemeral' },
           },
         ],
@@ -553,7 +557,7 @@ ${JSON.stringify(candidate, null, 2)}`,
       system: [
         {
           type:          'text',
-          text:          SYSTEM_PROMPT,
+          text:          this.systemPrompt,
           cache_control: { type: 'ephemeral' },
         },
       ],
