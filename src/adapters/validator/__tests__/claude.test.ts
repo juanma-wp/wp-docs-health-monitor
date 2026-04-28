@@ -371,6 +371,34 @@ describe('ClaudeValidator — weak suggestion handling', () => {
     // pass1 + pass2 + retry = 3 calls
     expect(createSpy).toHaveBeenCalledTimes(3);
   });
+
+  it('does not crash when Pass 2 returns an issue with missing suggestion', async () => {
+    const fileContent = 'function registerBlockType(name, settings) {}';
+    const codeSays = 'function registerBlockType(name, settings)';
+
+    // Pass 1: codeSays is present in the file so it survives the verbatim check
+    const pass1Response = makeReportFindingsResponse([
+      { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays } },
+    ], []);
+
+    // Pass 2: returns an issue with suggestion omitted (undefined)
+    const pass2Response = makeReportFindingsResponse([
+      {
+        ...BASE_ISSUE,
+        evidence:   { ...BASE_ISSUE.evidence, codeSays },
+        confidence: 0.8,
+        suggestion: undefined,
+      },
+    ], []);
+
+    const client = makeAnthropicClient([pass1Response, pass2Response]);
+    const codeSources = makeCodeSources(fileContent);
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
+
+    expect(result.issues).toHaveLength(0);
+  });
 });
 
 // ---------------------------------------------------------------------------
