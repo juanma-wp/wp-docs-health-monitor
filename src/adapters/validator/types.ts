@@ -3,6 +3,13 @@ import type { CodeTiers } from '../../types/mapping.js';
 import type { DocResult } from '../../types/results.js';
 import type { CodeSource } from '../code-source/types.js';
 
+export type CostAccumulator = {
+  inputTokens:        number;
+  outputTokens:       number;
+  cacheReadTokens:    number;
+  cacheCreationTokens: number;
+};
+
 export interface Validator {
   validateDoc(
     doc: Doc,

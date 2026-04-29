@@ -7,7 +7,7 @@ import type { Config } from './config/schema.js';
 import type { RunResults, DocResult } from './types/results.js';
 import type { DocFetchResult, Doc } from './adapters/doc-source/types.js';
 import { createDocSource, createCodeSources, createDocCodeMapper, createValidator } from './adapters/index.js';
-import type { CostAccumulator } from './adapters/validator/claude.js';
+import type { CostAccumulator } from './adapters/validator/types.js';
 import type { RunUsage, RunModels } from './types/results.js';
 
 function formatRunId(date: Date): string {

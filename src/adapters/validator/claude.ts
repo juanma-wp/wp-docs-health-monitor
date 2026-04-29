@@ -4,7 +4,7 @@ import type { Doc } from '../doc-source/types.js';
 import type { CodeTiers } from '../../types/mapping.js';
 import type { DocResult, Issue } from '../../types/results.js';
 import type { CodeSource } from '../code-source/types.js';
-import type { Validator } from './types.js';
+import type { Validator, CostAccumulator } from './types.js';
 import { assembleContext, formatContextForClaude } from './context-assembler.js';
 import { scoreDoc } from '../../health-scorer.js';
 import { fingerprintIssue } from '../../history.js';
@@ -226,17 +226,6 @@ export function isWeakSuggestion(suggestion: string): boolean {
   // Short suggestions with no identifiers are weak
   return trimmed.split(/\s+/).length <= 8;
 }
-
-// ---------------------------------------------------------------------------
-// Cost accumulator type
-// ---------------------------------------------------------------------------
-
-export type CostAccumulator = {
-  inputTokens:        number;
-  outputTokens:       number;
-  cacheReadTokens:    number;
-  cacheCreationTokens: number;
-};
 
 // ---------------------------------------------------------------------------
 // ClaudeValidator
