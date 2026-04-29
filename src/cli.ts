@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import 'dotenv/config';
 
 import { program } from 'commander';
 import { readFile, writeFile, mkdir } from 'fs/promises';
