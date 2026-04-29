@@ -8,7 +8,7 @@ import type { RunResults, DocResult } from './types/results.js';
 import type { DocFetchResult, Doc } from './adapters/doc-source/types.js';
 import { createDocSource, createCodeSources, createDocCodeMapper, createValidator } from './adapters/index.js';
 import { scoreDoc } from './health-scorer.js';
-import type { CostAccumulator } from './adapters/validator/anthropic-client.js';
+import type { CostAccumulator } from './adapters/validator/llm-client.js';
 import type { RunUsage, RunModels } from './types/results.js';
 
 function formatRunId(date: Date): string {

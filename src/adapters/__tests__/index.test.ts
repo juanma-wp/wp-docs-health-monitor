@@ -105,6 +105,18 @@ describe('createValidator', () => {
     expect(validator).toBeInstanceOf(ToolUseValidator);
   });
 
+  it('returns a ToolUseValidator for provider "ollama"', () => {
+    const cfg = makeDocSourceConfig('manifest-url');
+    cfg.validator = {
+      provider:   'ollama',
+      baseUrl:    'http://localhost:11434/v1',
+      pass1Model: 'qwen2.5-coder:7b',
+      pass2Model: 'qwen3-coder:30b',
+    };
+    const validator = createValidator(cfg);
+    expect(validator).toBeInstanceOf(ToolUseValidator);
+  });
+
   it('throws NotImplementedError for an unrecognised validator provider', () => {
     const cfg = makeDocSourceConfig('manifest-url');
     (cfg.validator as { provider: string }).provider = 'gpt';

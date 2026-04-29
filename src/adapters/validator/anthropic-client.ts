@@ -1,13 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 
-import type { LLMClient, ChatMessage, ToolDef, ToolChoice, ChatResponse, AssistantMessage } from './llm-client.js';
-
-export type CostAccumulator = {
-  inputTokens:         number;
-  outputTokens:        number;
-  cacheReadTokens:     number;
-  cacheCreationTokens: number;
-};
+import type { LLMClient, ChatMessage, ToolDef, ToolChoice, ChatResponse, AssistantMessage, CostAccumulator } from './llm-client.js';
 
 export class AnthropicLLMClient implements LLMClient {
   private readonly anthropic: Anthropic;

@@ -163,7 +163,8 @@ export class OllamaLLMClient implements LLMClient {
   private parseArguments(args: string): unknown {
     try {
       return JSON.parse(args);
-    } catch {
+    } catch (err) {
+      console.warn(`[ollama-client] Failed to parse tool_call.function.arguments as JSON: ${String(err)} — raw: ${args}`);
       return {};
     }
   }
