@@ -60,6 +60,9 @@
             "critical": {
               "type": "integer"
             },
+            "notMapped": {
+              "type": "integer"
+            },
             "issues": {
               "type": "object",
               "properties": {
@@ -90,6 +93,7 @@
             "healthy",
             "needsAttention",
             "critical",
+            "notMapped",
             "issues"
           ],
           "additionalProperties": false
@@ -144,16 +148,24 @@
                 "format": "uri"
               },
               "healthScore": {
-                "type": "number",
-                "minimum": 0,
-                "maximum": 100
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "status": {
                 "type": "string",
                 "enum": [
                   "healthy",
                   "needs-attention",
-                  "critical"
+                  "critical",
+                  "not-mapped"
                 ]
               },
               "issues": {

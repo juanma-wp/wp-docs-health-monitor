@@ -7,7 +7,6 @@ import type { Config } from './config/schema.js';
 import type { RunResults, DocResult } from './types/results.js';
 import type { DocFetchResult, Doc } from './adapters/doc-source/types.js';
 import { createDocSource, createCodeSources, createDocCodeMapper, createValidator } from './adapters/index.js';
-import { scoreDoc } from './health-scorer.js';
 import type { CostAccumulator } from './adapters/validator/claude.js';
 import type { RunUsage, RunModels } from './types/results.js';
 
@@ -23,9 +22,10 @@ function formatRunId(date: Date): string {
 }
 
 function computeOverallHealth(docResults: DocResult[]): number {
-  if (docResults.length === 0) return 100;
-  const sum = docResults.reduce((acc, d) => acc + d.healthScore, 0);
-  return Math.round(sum / docResults.length);
+  const analyzed = docResults.filter(d => d.status !== 'not-mapped');
+  if (analyzed.length === 0) return 100;
+  const sum = analyzed.reduce((acc, d) => acc + (d.healthScore ?? 0), 0);
+  return Math.round(sum / analyzed.length);
 }
 
 function computeUsage(cost: CostAccumulator, pricing: Config['pricing']): RunUsage {
@@ -89,15 +89,14 @@ export async function runPipeline(config: Config): Promise<RunResults> {
       try {
         codeTiers = mapper.getCodeTiers(doc.slug);
       } catch (err) {
-        // MappingError or similar — record per-doc, do not crash the run
-        const { healthScore, status } = scoreDoc([]);
+        // MappingError — no code to compare against; mark explicitly rather than scoring
         return {
           slug:        doc.slug,
           title:       doc.title,
           parent:      doc.parent,
           sourceUrl:   doc.sourceUrl,
-          healthScore,
-          status,
+          healthScore: null,
+          status:      'not-mapped' as const,
           issues:      [],
           positives:   [],
           relatedCode: [],
@@ -140,6 +139,7 @@ export async function runPipeline(config: Config): Promise<RunResults> {
     healthy:        docResults.filter(d => d.status === 'healthy').length,
     needsAttention: docResults.filter(d => d.status === 'needs-attention').length,
     critical:       docResults.filter(d => d.status === 'critical').length,
+    notMapped:      docResults.filter(d => d.status === 'not-mapped').length,
     issues: {
       total:    allIssues.length,
       critical: allIssues.filter(i => i.severity === 'critical').length,

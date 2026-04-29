@@ -29,8 +29,11 @@ export function buildTree(docs: DocResult[]): TreeNode[] {
 
   const nodes: TreeNode[] = [];
   for (const [parent, groupDocs] of groups) {
-    const sorted = [...groupDocs].sort((a, b) => a.healthScore - b.healthScore);
-    const avg = sorted.reduce((sum, d) => sum + d.healthScore, 0) / sorted.length;
+    const sorted = [...groupDocs].sort((a, b) => (a.healthScore ?? -1) - (b.healthScore ?? -1));
+    const analyzed = groupDocs.filter(d => d.healthScore !== null);
+    const avg = analyzed.length > 0
+      ? analyzed.reduce((sum, d) => sum + (d.healthScore as number), 0) / analyzed.length
+      : 100;
     nodes.push({
       parent,
       label: parent === 'uncategorized' ? 'Uncategorized' : parent,

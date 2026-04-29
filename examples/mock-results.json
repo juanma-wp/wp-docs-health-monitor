@@ -15,10 +15,11 @@
     "wordpress-develop": "trunk"
   },
   "totals": {
-    "docs": 4,
+    "docs": 5,
     "healthy": 1,
     "needsAttention": 1,
     "critical": 2,
+    "notMapped": 1,
     "issues": {
       "total": 8,
       "critical": 3,
@@ -276,6 +277,22 @@
       ],
       "commitSha": "d4e5f6a7b8c9d4e5f6a7b8c9d4e5f6a7b8c9d4e5",
       "analyzedAt": "2024-04-15T12:04:00.000Z"
+    },
+    {
+      "slug": "block-annotations",
+      "title": "Annotations",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-annotations/",
+      "healthScore": null,
+      "status": "not-mapped",
+      "issues": [],
+      "positives": [],
+      "relatedCode": [],
+      "diagnostics": [
+        "MappingError: no mapping found for slug \"block-annotations\"."
+      ],
+      "commitSha": "",
+      "analyzedAt": "2024-04-15T12:05:00.000Z"
     }
   ]
 }

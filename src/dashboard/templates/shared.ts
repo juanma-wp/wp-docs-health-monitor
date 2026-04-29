@@ -7,7 +7,8 @@ export function escapeHtml(str: string): string {
     .replace(/'/g, '&#39;');
 }
 
-export function healthBadge(score: number): string {
+export function healthBadge(score: number | null): string {
+  if (score === null) return `<span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-gray-100 text-gray-500">N/A</span>`;
   if (score >= 85) return `<span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">${score}</span>`;
   if (score >= 60) return `<span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-yellow-100 text-yellow-800">${score}</span>`;
   return `<span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-red-100 text-red-800">${score}</span>`;
@@ -16,6 +17,7 @@ export function healthBadge(score: number): string {
 export function statusBadge(status: string): string {
   if (status === 'healthy') return `<span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>`;
   if (status === 'needs-attention') return `<span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">needs-attention</span>`;
+  if (status === 'not-mapped') return `<span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">not mapped</span>`;
   return `<span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">critical</span>`;
 }
 
