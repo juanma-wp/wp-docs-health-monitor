@@ -17,9 +17,13 @@ npm install
 
 ## Environment setup
 
-`ANTHROPIC_API_KEY` must be set in the environment before running the live pipeline. How you provide it is up to you:
+`ANTHROPIC_API_KEY` must be set in the environment before running the live pipeline with `provider: "anthropic"`. How you provide it is up to you:
 
 ```bash
+# .env file (recommended — the CLI auto-loads it via dotenv)
+echo 'ANTHROPIC_API_KEY=sk-ant-...' > .env
+npm run analyze -- --config config/gutenberg-block-api.json --output ./out
+
 # Inline
 ANTHROPIC_API_KEY=sk-ant-... npm run analyze -- --config config/gutenberg-block-api.json --output ./out
 
@@ -30,6 +34,8 @@ npm run analyze -- --config config/gutenberg-block-api.json --output ./out
 # Via 1Password CLI
 op run -- npm run analyze -- --config config/gutenberg-block-api.json --output ./out
 ```
+
+The `.env` file is loaded automatically at CLI startup — no `export` required. `.env` is listed in `.gitignore` and should never be committed.
 
 ## Usage
 
