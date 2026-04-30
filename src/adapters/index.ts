@@ -47,7 +47,7 @@ export function createDocCodeMapper(config: Config, codeSources: Record<string, 
 }
 
 export function createValidator(config: Config): Validator {
-  const { type, pass1Model, pass2Model, systemPromptExtension } = config.validator;
+  const { type, pass1Model, pass2Model, systemPromptExtension, responseMode } = config.validator;
   if (type === 'claude') {
     const anthropic = new Anthropic();
     let promptExtension: string | undefined;
@@ -58,7 +58,7 @@ export function createValidator(config: Config): Validator {
         throw new Error(`Could not read systemPromptExtension "${systemPromptExtension}": ${(err as Error).message}`);
       }
     }
-    return new ClaudeValidator(pass1Model, pass2Model, anthropic, promptExtension);
+    return new ClaudeValidator(pass1Model, pass2Model, anthropic, promptExtension, responseMode);
   }
   throw new NotImplementedError(type);
 }

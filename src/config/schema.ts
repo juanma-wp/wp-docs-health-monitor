@@ -26,6 +26,7 @@ export const ConfigSchema = z.object({
     pass1Model:             z.string().default('claude-sonnet-4-6'),
     pass2Model:             z.string().default('claude-sonnet-4-6'),
     systemPromptExtension:  z.string().optional(), // path to a .md file with site-specific prompt rules
+    responseMode:           z.enum(['tool-use', 'single-prompt']).default('tool-use'),
   }),
   // Token pricing in USD per million tokens. Defaults match Sonnet 4.6 rates.
   // Check https://www.anthropic.com/pricing for current values and update as needed.

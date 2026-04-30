@@ -82,6 +82,28 @@ function makeReportFindingsResponse(
   } as unknown as Anthropic.Message;
 }
 
+function makeTextResponse(
+  text: string,
+  inputTokens = 100,
+  outputTokens = 50,
+): Anthropic.Message {
+  return {
+    id:           'msg_text',
+    type:         'message',
+    role:         'assistant',
+    model:        'claude-sonnet-4-6',
+    stop_reason:  'end_turn',
+    stop_sequence: null,
+    usage:        { input_tokens: inputTokens, output_tokens: outputTokens, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 },
+    content: [
+      {
+        type: 'text',
+        text,
+      } as Anthropic.TextBlock,
+    ],
+  } as unknown as Anthropic.Message;
+}
+
 const BASE_ISSUE = {
   severity:   'major' as const,
   type:       'type-signature' as const,
@@ -534,5 +556,41 @@ describe('ClaudeValidator — Pass 2 fetch_code tool', () => {
       1,
       5,
     );
+  });
+});
+
+describe('ClaudeValidator — single-prompt mode', () => {
+  it('validates from a single JSON text response without tool use', async () => {
+    const fileContent = 'function registerBlockType(name, settings) { return settings; }';
+    const codeSays = 'function registerBlockType(name, settings)';
+    const singlePromptResponse = makeTextResponse(JSON.stringify({
+      issues: [
+        { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays }, confidence: 0.9 },
+      ],
+      positives: ['Good note about `registerBlockType` arguments'],
+    }));
+
+    const client = makeAnthropicClient([singlePromptResponse]);
+    const createSpy = client.messages.create as Mock;
+    const codeSources = makeCodeSources(fileContent);
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, 'single-prompt');
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
+
+    expect(result.issues).toHaveLength(1);
+    expect(result.positives).toHaveLength(1);
+    expect(createSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns diagnostics when single-prompt response is not parseable JSON', async () => {
+    const singlePromptResponse = makeTextResponse('Not JSON');
+    const client = makeAnthropicClient([singlePromptResponse]);
+    const codeSources = makeCodeSources('function registerBlockType(name, settings) {}');
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, 'single-prompt');
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
+
+    expect(result.issues).toHaveLength(0);
+    expect(result.diagnostics.some(d => d.includes('Pass 1 failed:'))).toBe(true);
   });
 });

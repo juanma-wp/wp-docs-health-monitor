@@ -47,6 +47,8 @@ type FetchCodeInput = {
   endLine:   number;
 };
 
+type ValidatorResponseMode = 'tool-use' | 'single-prompt';
+
 // ---------------------------------------------------------------------------
 // System prompt (cached across calls)
 // ---------------------------------------------------------------------------
@@ -245,14 +247,22 @@ export type CostAccumulator = {
 export class ClaudeValidator implements Validator {
   private readonly pass1Model: string;
   private readonly pass2Model: string;
+  private readonly responseMode: ValidatorResponseMode;
   private readonly anthropic: Anthropic;
   private readonly systemPrompt: string;
   readonly costAccumulator: CostAccumulator = { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheCreationTokens: 0 };
   droppedHallucinations = 0;
 
-  constructor(pass1Model: string, pass2Model: string, anthropic: Anthropic, promptExtension?: string) {
+  constructor(
+    pass1Model: string,
+    pass2Model: string,
+    anthropic: Anthropic,
+    promptExtension?: string,
+    responseMode: ValidatorResponseMode = 'tool-use',
+  ) {
     this.pass1Model = pass1Model;
     this.pass2Model = pass2Model;
+    this.responseMode = responseMode;
     this.anthropic = anthropic;
     this.systemPrompt = promptExtension?.trim()
       ? `${SYSTEM_PROMPT}\n\n## Site-specific rules\n\n${promptExtension}`
@@ -332,12 +342,14 @@ ${codeContext || '(No source files were available for this document.)'}${missing
       }
     }
 
-    // Pass 2: targeted verification for each surviving candidate
+    // Pass 2 (tool-use mode only): targeted verification for each surviving candidate
     const finalIssues: Issue[] = [];
     const seenKeys = new Set<string>();
     for (const candidate of verbatimPassed) {
       try {
-        const verified = await this.runPass2(candidate, codeSources, doc.slug);
+        const verified = this.responseMode === 'single-prompt'
+          ? this.toIssueWithoutPass2(candidate, doc.slug)
+          : await this.runPass2(candidate, codeSources, doc.slug);
         if (verified) {
           // Deduplicate: same type + codeFile + docSays = same finding reported twice
           const key = `${verified.type}|${verified.evidence.codeFile}|${verified.evidence.docSays}`;
@@ -382,6 +394,10 @@ ${codeContext || '(No source files were available for this document.)'}${missing
   }
 
   private async runPass1(userContent: string): Promise<ReportFindingsInput> {
+    if (this.responseMode === 'single-prompt') {
+      return this.runSinglePromptPass1(userContent);
+    }
+
     const response = await this.anthropic.messages.create({
       model:      this.pass1Model,
       max_tokens: 4096,
@@ -414,6 +430,67 @@ ${codeContext || '(No source files were available for this document.)'}${missing
     }
 
     return { issues: [], positives: [] };
+  }
+
+  private async runSinglePromptPass1(userContent: string): Promise<ReportFindingsInput> {
+    const response = await this.anthropic.messages.create({
+      model:      this.pass1Model,
+      max_tokens: 4096,
+      system: [
+        {
+          type:          'text',
+          text:          this.systemPrompt,
+          cache_control: { type: 'ephemeral' },
+        },
+      ],
+      messages: [
+        {
+          role: 'user',
+          content: `${userContent}
+
+Return JSON only with this shape:
+{"issues":[{"severity":"critical|major|minor","type":"type-signature|default-value|deprecated-api|broken-example|nonexistent-name|required-optional-mismatch","evidence":{"docSays":"...","codeSays":"...","codeFile":"...","codeRepo":"..."},"suggestion":"...","confidence":0.0}],"positives":["..."]}`,
+        },
+      ],
+    });
+
+    this.costAccumulator.inputTokens         += response.usage.input_tokens;
+    this.costAccumulator.outputTokens        += response.usage.output_tokens;
+    this.costAccumulator.cacheReadTokens     += response.usage.cache_read_input_tokens    ?? 0;
+    this.costAccumulator.cacheCreationTokens += response.usage.cache_creation_input_tokens ?? 0;
+
+    const text = response.content
+      .filter((block): block is Anthropic.TextBlock => block.type === 'text')
+      .map(block => block.text)
+      .join('\n')
+      .trim();
+
+    const parsed = this.parseReportFindingsFromText(text);
+    return {
+      issues:    parsed.issues,
+      positives: parsed.positives.slice(0, 3),
+    };
+  }
+
+  private parseReportFindingsFromText(text: string): ReportFindingsInput {
+    if (!text) {
+      throw new Error('Single-prompt response was empty');
+    }
+
+    const fencedJsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+    const candidate = fencedJsonMatch?.[1] ?? text;
+    const firstBrace = candidate.indexOf('{');
+    const lastBrace = candidate.lastIndexOf('}');
+    if (firstBrace === -1 || lastBrace === -1 || lastBrace < firstBrace) {
+      throw new Error('Could not find JSON object in single-prompt response');
+    }
+
+    const maybeJson = candidate.slice(firstBrace, lastBrace + 1);
+    const parsed = JSON.parse(maybeJson) as Partial<ReportFindingsInput>;
+    return {
+      issues:    Array.isArray(parsed.issues) ? parsed.issues as RawIssue[] : [],
+      positives: Array.isArray(parsed.positives) ? parsed.positives.filter((p): p is string => typeof p === 'string') : [],
+    };
   }
 
   private async runPass2(
@@ -539,6 +616,22 @@ ${JSON.stringify(candidate, null, 2)}`,
     };
 
     return issue;
+  }
+
+  private toIssueWithoutPass2(candidate: RawIssue, slug: string): Issue | null {
+    if (candidate.confidence < 0.7) return null;
+    if (!candidate.suggestion) return null;
+    if (isSelfRejected(candidate.suggestion)) return null;
+    if (isWeakSuggestion(candidate.suggestion)) return null;
+
+    return {
+      severity:    candidate.severity,
+      type:        candidate.type,
+      evidence:    candidate.evidence,
+      suggestion:  candidate.suggestion,
+      confidence:  candidate.confidence,
+      fingerprint: fingerprintIssue(slug, candidate.type, candidate.evidence.codeFile, candidate.suggestion),
+    };
   }
 
   private async retryWeakSuggestion(
