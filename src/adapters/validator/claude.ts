@@ -358,7 +358,7 @@ ${codeContext || '(No source files were available for this document.)'}${missing
     for (const candidate of verbatimPassed) {
       try {
         const verified = this.responseMode === 'single-prompt'
-          ? this.toIssueWithoutPass2(candidate, doc.slug)
+          ? await this.toIssueWithoutPass2(candidate, doc.slug)
           : await this.runPass2(candidate, codeSources, doc.slug);
         if (verified) {
           // Deduplicate: same type + codeFile + docSays = same finding reported twice
@@ -459,7 +459,9 @@ ${codeContext || '(No source files were available for this document.)'}${missing
           content: `${userContent}
 
 Return JSON only with this shape:
-{"issues":[{"severity":"critical|major|minor","type":"type-signature|default-value|deprecated-api|broken-example|nonexistent-name|required-optional-mismatch","evidence":{"docSays":"...","codeSays":"...","codeFile":"...","codeRepo":"..."},"suggestion":"...","confidence":0.0}],"positives":["..."]}`,
+{"issues":[{"severity":"critical|major|minor","type":"type-signature|default-value|deprecated-api|broken-example|nonexistent-name|required-optional-mismatch","evidence":{"docSays":"...","codeSays":"...","codeFile":"...","codeRepo":"..."},"suggestion":"...","confidence":0.85}],"positives":["..."]}
+
+Set confidence between 0.0 and 1.0 based on certainty.`,
         },
       ],
     });
@@ -478,7 +480,7 @@ Return JSON only with this shape:
     const parsed = this.parseReportFindingsFromText(text);
     return {
       issues:    parsed.issues,
-      positives: parsed.positives.slice(0, 3),
+      positives: parsed.positives,
     };
   }
 
@@ -489,18 +491,30 @@ Return JSON only with this shape:
 
     const fencedJsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
     const candidate = fencedJsonMatch?.[1] ?? text;
-    const firstBrace = candidate.indexOf('{');
-    const lastBrace = candidate.lastIndexOf('}');
-    if (firstBrace === -1 || lastBrace === -1 || lastBrace < firstBrace) {
+    const jsonCandidates = this.extractJsonObjectCandidates(candidate);
+    if (jsonCandidates.length === 0) {
       throw new Error('Pass 1 single-prompt validation failed: could not extract JSON from response text');
     }
 
-    const maybeJson = candidate.slice(firstBrace, lastBrace + 1);
-    let parsed: Partial<ReportFindingsInput>;
-    try {
-      parsed = JSON.parse(maybeJson) as Partial<ReportFindingsInput>;
-    } catch (err) {
-      throw new Error(`Pass 1 single-prompt validation failed: invalid JSON response (${(err as Error).message})`);
+    let parsed: Partial<ReportFindingsInput> | null = null;
+    let lastParseError: Error | null = null;
+    for (const jsonCandidate of jsonCandidates) {
+      try {
+        const candidateParsed = JSON.parse(jsonCandidate) as Partial<ReportFindingsInput>;
+        if (this.looksLikeReportFindings(candidateParsed)) {
+          parsed = candidateParsed;
+          break;
+        }
+      } catch (err) {
+        lastParseError = err as Error;
+      }
+    }
+
+    if (!parsed) {
+      if (lastParseError) {
+        throw new Error(`Pass 1 single-prompt validation failed: invalid JSON response (${lastParseError.message})`);
+      }
+      throw new Error('Pass 1 single-prompt validation failed: response JSON did not match expected shape');
     }
 
     const issues = Array.isArray(parsed.issues)
@@ -513,6 +527,62 @@ Return JSON only with this shape:
     };
   }
 
+  private extractJsonObjectCandidates(text: string): string[] {
+    const candidates: string[] = [];
+    let depth = 0;
+    let start = -1;
+    let inString = false;
+    let escaped = false;
+
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (!ch) continue;
+
+      if (inString) {
+        if (escaped) {
+          escaped = false;
+          continue;
+        }
+        if (ch === '\\') {
+          escaped = true;
+          continue;
+        }
+        if (ch === '"') {
+          inString = false;
+        }
+        continue;
+      }
+
+      if (ch === '"') {
+        inString = true;
+        continue;
+      }
+
+      if (ch === '{') {
+        if (depth === 0) {
+          start = i;
+        }
+        depth++;
+        continue;
+      }
+
+      if (ch === '}' && depth > 0) {
+        depth--;
+        if (depth === 0 && start !== -1) {
+          candidates.push(text.slice(start, i + 1));
+          start = -1;
+        }
+      }
+    }
+
+    return candidates;
+  }
+
+  private looksLikeReportFindings(value: Partial<ReportFindingsInput>): boolean {
+    return Array.isArray(value.issues) || Array.isArray(value.positives);
+  }
+
+  // Strictly validates a pass-1 issue so downstream code can rely on suggestion being a non-empty string.
   private isRawIssue(value: unknown): value is RawIssue {
     if (!value || typeof value !== 'object') return false;
     const candidate = value as Partial<RawIssue>;
@@ -655,11 +725,18 @@ ${JSON.stringify(candidate, null, 2)}`,
     return issue;
   }
 
-  private toIssueWithoutPass2(candidate: RawIssue, slug: string): Issue | null {
+  private async toIssueWithoutPass2(candidate: RawIssue, slug: string): Promise<Issue | null> {
     if (candidate.confidence < 0.7) return null;
     if (!candidate.suggestion) return null;
     if (isSelfRejected(candidate.suggestion)) return null;
-    if (isWeakSuggestion(candidate.suggestion)) return null;
+    if (isWeakSuggestion(candidate.suggestion)) {
+      if (candidate.severity === 'minor') return null;
+      const retried = await this.retryWeakSuggestionSinglePrompt(candidate);
+      if (!retried) return null;
+      if (isSelfRejected(retried)) return null;
+      if (isWeakSuggestion(retried)) return null;
+      candidate.suggestion = retried;
+    }
 
     return {
       severity:    candidate.severity,
@@ -669,6 +746,59 @@ ${JSON.stringify(candidate, null, 2)}`,
       confidence:  candidate.confidence,
       fingerprint: fingerprintIssue(slug, candidate.type, candidate.evidence.codeFile, candidate.suggestion),
     };
+  }
+
+  private async retryWeakSuggestionSinglePrompt(rawIssue: RawIssue): Promise<string | null> {
+    const response = await this.anthropic.messages.create({
+      model:      this.pass2Model,
+      max_tokens: 512,
+      system: [
+        {
+          type:          'text',
+          text:          this.systemPrompt,
+          cache_control: { type: 'ephemeral' },
+        },
+      ],
+      messages: [
+        {
+          role: 'user',
+          content: `Rewrite the suggestion below so it names the exact function, parameter, attribute, hook, or file path that must change.
+Return either:
+- plain suggestion text, OR
+- JSON object: {"suggestion":"..."}
+
+Issue:
+${JSON.stringify(rawIssue, null, 2)}`,
+        },
+      ],
+    });
+
+    this.costAccumulator.inputTokens         += response.usage.input_tokens;
+    this.costAccumulator.outputTokens        += response.usage.output_tokens;
+    this.costAccumulator.cacheReadTokens     += response.usage.cache_read_input_tokens    ?? 0;
+    this.costAccumulator.cacheCreationTokens += response.usage.cache_creation_input_tokens ?? 0;
+
+    const text = response.content
+      .filter((block): block is Anthropic.TextBlock => block.type === 'text')
+      .map(block => block.text)
+      .join('\n')
+      .trim();
+    if (!text) return null;
+
+    const fencedJsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+    const candidate = fencedJsonMatch?.[1] ?? text;
+    for (const jsonCandidate of this.extractJsonObjectCandidates(candidate)) {
+      try {
+        const parsed = JSON.parse(jsonCandidate) as { suggestion?: unknown };
+        if (typeof parsed.suggestion === 'string' && parsed.suggestion.trim()) {
+          return parsed.suggestion.trim();
+        }
+      } catch {
+        // fall through to raw text
+      }
+    }
+
+    return candidate.trim();
   }
 
   private async retryWeakSuggestion(

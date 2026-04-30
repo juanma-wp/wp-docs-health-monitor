@@ -26,7 +26,6 @@
     "type": "claude",
     "pass1Model": "claude-sonnet-4-6",
     "pass2Model": "claude-sonnet-4-6",
-    "systemPromptExtension": "prompts/gutenberg-block-api.md",
-    "responseMode": "tool-use"
+    "systemPromptExtension": "prompts/gutenberg-block-api.md"
   }
 }

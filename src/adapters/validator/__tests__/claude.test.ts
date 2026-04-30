@@ -621,4 +621,124 @@ describe('ClaudeValidator — single-prompt mode', () => {
 
     expect(result.issues).toHaveLength(1);
   });
+
+  it('accepts fenced JSON responses in single-prompt mode', async () => {
+    const fileContent = 'function registerBlockType(name, settings) { return settings; }';
+    const codeSays = 'function registerBlockType(name, settings)';
+    const singlePromptResponse = makeTextResponse(`Here is the result:
+\`\`\`json
+${JSON.stringify({
+  issues: [
+    { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays }, confidence: 0.9 },
+  ],
+  positives: ['Accurate call signature note'],
+})}
+\`\`\``);
+
+    const client = makeAnthropicClient([singlePromptResponse]);
+    const codeSources = makeCodeSources(fileContent);
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, 'single-prompt');
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
+
+    expect(result.issues).toHaveLength(1);
+    expect(result.positives).toHaveLength(1);
+  });
+
+  it('drops single-prompt issues with confidence < 0.7', async () => {
+    const fileContent = 'function registerBlockType(name, settings) { return settings; }';
+    const codeSays = 'function registerBlockType(name, settings)';
+    const singlePromptResponse = makeTextResponse(JSON.stringify({
+      issues: [
+        { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays }, confidence: 0.69 },
+      ],
+      positives: [],
+    }));
+
+    const client = makeAnthropicClient([singlePromptResponse]);
+    const codeSources = makeCodeSources(fileContent);
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, 'single-prompt');
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
+
+    expect(result.issues).toHaveLength(0);
+  });
+
+  it('drops a minor single-prompt issue with weak suggestion', async () => {
+    const fileContent = 'function registerBlockType(name, settings) { return settings; }';
+    const codeSays = 'function registerBlockType(name, settings)';
+    const singlePromptResponse = makeTextResponse(JSON.stringify({
+      issues: [
+        {
+          ...BASE_ISSUE,
+          severity: 'minor',
+          evidence: { ...BASE_ISSUE.evidence, codeSays },
+          confidence: 0.9,
+          suggestion: 'update the documentation',
+        },
+      ],
+      positives: [],
+    }));
+
+    const client = makeAnthropicClient([singlePromptResponse]);
+    const createSpy = client.messages.create as Mock;
+    const codeSources = makeCodeSources(fileContent);
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, 'single-prompt');
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
+
+    expect(result.issues).toHaveLength(0);
+    expect(createSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries once for critical/major single-prompt issues with weak suggestions', async () => {
+    const fileContent = 'function registerBlockType(name, settings) { return settings; }';
+    const codeSays = 'function registerBlockType(name, settings)';
+    const singlePromptResponse = makeTextResponse(JSON.stringify({
+      issues: [
+        {
+          ...BASE_ISSUE,
+          severity: 'major',
+          evidence: { ...BASE_ISSUE.evidence, codeSays },
+          confidence: 0.9,
+          suggestion: 'fix the description',
+        },
+      ],
+      positives: [],
+    }));
+    const retryResponse = makeTextResponse('Update `registerBlockType` to document the `settings` parameter behavior.');
+
+    const client = makeAnthropicClient([singlePromptResponse, retryResponse]);
+    const createSpy = client.messages.create as Mock;
+    const codeSources = makeCodeSources(fileContent);
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, 'single-prompt');
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
+
+    expect(result.issues).toHaveLength(1);
+    expect(result.issues[0].suggestion).toContain('registerBlockType');
+    expect(createSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('applies verbatim evidence gate in single-prompt mode', async () => {
+    const singlePromptResponse = makeTextResponse(JSON.stringify({
+      issues: [
+        {
+          ...BASE_ISSUE,
+          evidence: { ...BASE_ISSUE.evidence, codeSays: 'THIS DOES NOT EXIST' },
+          confidence: 0.9,
+        },
+      ],
+      positives: [],
+    }));
+
+    const client = makeAnthropicClient([singlePromptResponse]);
+    const codeSources = makeCodeSources('function registerBlockType(name, settings) { return settings; }');
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, 'single-prompt');
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
+
+    expect(result.issues).toHaveLength(0);
+    expect(validator.droppedHallucinations).toBe(1);
+  });
 });
