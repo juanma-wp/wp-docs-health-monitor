@@ -593,4 +593,32 @@ describe('ClaudeValidator — single-prompt mode', () => {
     expect(result.issues).toHaveLength(0);
     expect(result.diagnostics.some(d => d.includes('Pass 1 failed:'))).toBe(true);
   });
+
+  it('drops malformed issues from single-prompt JSON responses', async () => {
+    const singlePromptResponse = makeTextResponse(JSON.stringify({
+      issues: [
+        {
+          severity: 'major',
+          type: 'type-signature',
+          evidence: { docSays: 'doc', codeSays: 'code', codeFile: 'file.js', codeRepo: 'gutenberg' },
+          suggestion: 'Update `registerBlockType` docs',
+          confidence: 0.9,
+        },
+        {
+          severity: 'major',
+          type: 'type-signature',
+          evidence: { docSays: 'doc', codeSays: 'code' },
+          confidence: 0.9,
+        },
+      ],
+      positives: [],
+    }));
+    const client = makeAnthropicClient([singlePromptResponse]);
+    const codeSources = makeCodeSources('code');
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, 'single-prompt');
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
+
+    expect(result.issues).toHaveLength(1);
+  });
 });

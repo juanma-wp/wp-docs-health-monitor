@@ -49,6 +49,16 @@ type FetchCodeInput = {
 
 type ValidatorResponseMode = 'tool-use' | 'single-prompt';
 
+const ISSUE_SEVERITIES = new Set<RawIssue['severity']>(['critical', 'major', 'minor']);
+const ISSUE_TYPES = new Set<RawIssue['type']>([
+  'type-signature',
+  'default-value',
+  'deprecated-api',
+  'broken-example',
+  'nonexistent-name',
+  'required-optional-mismatch',
+]);
+
 // ---------------------------------------------------------------------------
 // System prompt (cached across calls)
 // ---------------------------------------------------------------------------
@@ -474,7 +484,7 @@ Return JSON only with this shape:
 
   private parseReportFindingsFromText(text: string): ReportFindingsInput {
     if (!text) {
-      throw new Error('Single-prompt response was empty');
+      throw new Error('Pass 1 single-prompt validation failed: response was empty');
     }
 
     const fencedJsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
@@ -482,15 +492,42 @@ Return JSON only with this shape:
     const firstBrace = candidate.indexOf('{');
     const lastBrace = candidate.lastIndexOf('}');
     if (firstBrace === -1 || lastBrace === -1 || lastBrace < firstBrace) {
-      throw new Error('Could not find JSON object in single-prompt response');
+      throw new Error('Pass 1 single-prompt validation failed: could not extract JSON from response text');
     }
 
     const maybeJson = candidate.slice(firstBrace, lastBrace + 1);
-    const parsed = JSON.parse(maybeJson) as Partial<ReportFindingsInput>;
+    let parsed: Partial<ReportFindingsInput>;
+    try {
+      parsed = JSON.parse(maybeJson) as Partial<ReportFindingsInput>;
+    } catch (err) {
+      throw new Error(`Pass 1 single-prompt validation failed: invalid JSON response (${(err as Error).message})`);
+    }
+
+    const issues = Array.isArray(parsed.issues)
+      ? parsed.issues.filter((issue): issue is RawIssue => this.isRawIssue(issue))
+      : [];
+
     return {
-      issues:    Array.isArray(parsed.issues) ? parsed.issues as RawIssue[] : [],
+      issues,
       positives: Array.isArray(parsed.positives) ? parsed.positives.filter((p): p is string => typeof p === 'string') : [],
     };
+  }
+
+  private isRawIssue(value: unknown): value is RawIssue {
+    if (!value || typeof value !== 'object') return false;
+    const candidate = value as Partial<RawIssue>;
+    const evidence = candidate.evidence as Partial<RawIssue['evidence']> | undefined;
+    return ISSUE_SEVERITIES.has(candidate.severity as RawIssue['severity'])
+      && ISSUE_TYPES.has(candidate.type as RawIssue['type'])
+      && !!evidence
+      && typeof evidence.docSays === 'string'
+      && typeof evidence.codeSays === 'string'
+      && typeof evidence.codeFile === 'string'
+      && typeof evidence.codeRepo === 'string'
+      && typeof candidate.suggestion === 'string'
+      && typeof candidate.confidence === 'number'
+      && candidate.confidence >= 0
+      && candidate.confidence <= 1;
   }
 
   private async runPass2(
