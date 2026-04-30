@@ -69,28 +69,44 @@ export async function runPipeline(config: Config): Promise<RunResults> {
 
   // Kick off warm-up concurrently with doc fetching — don't await separately.
   // Uses allSettled so a clone failure doesn't abort the pipeline.
-  const warmupPromise = Promise.allSettled(Object.values(codeSources).map(cs => cs.getCommitSha()));
+  console.log(`[pipeline] Fetching docs and warming up ${Object.keys(codeSources).length} code source(s)…`);
+  const startedAt = Date.now();
 
-  const [fetchResults] = await Promise.all([
+  const [fetchResults, warmupResults] = await Promise.all([
     docSource.fetchDocs(),
-    warmupPromise,
+    Promise.allSettled(Object.values(codeSources).map(cs => cs.getCommitSha())),
   ]);
+
+  const warmupOk     = warmupResults.filter(r => r.status === 'fulfilled').length;
+  const warmupFailed = warmupResults.length - warmupOk;
+  console.log(
+    `[pipeline] Warm-up done in ${((Date.now() - startedAt) / 1000).toFixed(1)}s · code sources ready: ${warmupOk}/${warmupResults.length}${warmupFailed > 0 ? ' (some failed — proceeding)' : ''}`,
+  );
 
   const docs   = fetchResults.filter((r): r is Extract<DocFetchResult, { ok: true }>  => r.ok).map(r => r.doc as Doc);
   const failed = fetchResults.filter((r): r is Extract<DocFetchResult, { ok: false }> => !r.ok);
+  console.log(`[pipeline] Fetched ${docs.length} docs · ${failed.length} failed`);
 
   const limit = pLimit(3);
   const docResults: DocResult[] = [];
+  let completedCount = 0;
+  const total = docs.length;
 
   // Process successful docs concurrently (p-limit 3)
-  const docTasks = docs.map(doc =>
+  const docTasks = docs.map((doc, idx) =>
     limit(async (): Promise<DocResult> => {
+      const docNum = idx + 1;
+      const docStart = Date.now();
+      console.log(`[pipeline] [${docNum}/${total}] start ${doc.slug}`);
+
       let codeTiers;
       try {
         codeTiers = mapper.getCodeTiers(doc.slug);
       } catch (err) {
         // MappingError or similar — record per-doc, do not crash the run
         const { healthScore, status } = scoreDoc([]);
+        completedCount++;
+        console.log(`[pipeline] [${docNum}/${total}] done ${doc.slug} in ${((Date.now() - docStart) / 1000).toFixed(1)}s (mapping error · ${completedCount}/${total} complete)`);
         return {
           slug:        doc.slug,
           title:       doc.title,
@@ -107,7 +123,10 @@ export async function runPipeline(config: Config): Promise<RunResults> {
         };
       }
 
-      return validator.validateDoc(doc, codeTiers, codeSources);
+      const result = await validator.validateDoc(doc, codeTiers, codeSources);
+      completedCount++;
+      console.log(`[pipeline] [${docNum}/${total}] done ${doc.slug} in ${((Date.now() - docStart) / 1000).toFixed(1)}s · ${result.issues.length} issue(s) · ${completedCount}/${total} complete`);
+      return result;
     }),
   );
 

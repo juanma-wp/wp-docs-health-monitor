@@ -82,6 +82,9 @@ export class OllamaLLMClient implements LLMClient {
       max_tokens:  maxTokens,
     };
 
+    const startedAt = Date.now();
+    console.log(`[ollama] ${model} → request (${ollamaMessages.length} msg · ${ollamaTools.length} tool(s) · max ${maxTokens})`);
+
     const res = await fetch(`${this.baseUrl}/chat/completions`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -90,12 +93,19 @@ export class OllamaLLMClient implements LLMClient {
 
     if (!res.ok) {
       const text = await res.text().catch(() => '');
+      console.log(`[ollama] ${model} ← HTTP ${res.status} after ${((Date.now() - startedAt) / 1000).toFixed(1)}s`);
       throw new Error(`Ollama request failed (${res.status}): ${text}`);
     }
 
     const data = await res.json() as OllamaResponse;
     const choice = data.choices[0];
-    if (!choice) throw new Error('Ollama returned no choices');
+    if (!choice) {
+      console.log(`[ollama] ${model} ← empty response after ${((Date.now() - startedAt) / 1000).toFixed(1)}s`);
+      throw new Error('Ollama returned no choices');
+    }
+    console.log(
+      `[ollama] ${model} ← ${((Date.now() - startedAt) / 1000).toFixed(1)}s · ${data.usage?.prompt_tokens ?? 0} prompt / ${data.usage?.completion_tokens ?? 0} completion · finish: ${choice.finish_reason}`,
+    );
 
     const rawToolCalls = choice.message.tool_calls ?? [];
     const toolCalls: ToolCall[] = rawToolCalls.map(tc => ({
