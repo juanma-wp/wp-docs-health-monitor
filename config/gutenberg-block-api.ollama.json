@@ -25,7 +25,7 @@
   "validator": {
     "provider": "ollama",
     "baseUrl": "http://localhost:11434/v1",
-    "pass1Model": "qwen2.5-coder:7b",
-    "pass2Model": "qwen3-coder:30b"
+    "pass1Model": "mistral-small3.2:latest",
+    "pass2Model": "mistral-small3.2:latest"
   }
 }
