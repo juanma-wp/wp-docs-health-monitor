@@ -1,0 +1,780 @@
+{
+  "runId": "20260430-200914",
+  "timestamp": "2026-04-30T18:09:14.687Z",
+  "overallHealth": 100,
+  "models": {
+    "pass1": "mistral-nemo:latest",
+    "pass2": "mistral-nemo:latest"
+  },
+  "repoUrls": {
+    "gutenberg": "https://github.com/WordPress/gutenberg",
+    "wordpress-develop": "https://github.com/WordPress/wordpress-develop"
+  },
+  "repoRefs": {
+    "gutenberg": "trunk",
+    "wordpress-develop": "trunk"
+  },
+  "totals": {
+    "docs": 16,
+    "healthy": 16,
+    "needsAttention": 0,
+    "critical": 0,
+    "issues": {
+      "total": 0,
+      "critical": 0,
+      "major": 0,
+      "minor": 0
+    }
+  },
+  "usage": {
+    "inputTokens": 40960,
+    "outputTokens": 5727,
+    "cacheReadTokens": 0,
+    "cacheWriteTokens": 0,
+    "estimatedCostUsd": 0.2088
+  },
+  "docs": [
+    {
+      "slug": "block-annotations",
+      "title": "Annotations",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-annotations/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [],
+      "relatedCode": [],
+      "diagnostics": [
+        "MappingError: no mapping found for slug \"block-annotations\".\nAvailable slugs: block-attributes, block-bindings, block-context, block-deprecation, block-metadata, block-patterns, block-registration, block-supports, block-transforms, block-variations"
+      ],
+      "commitSha": "",
+      "analyzedAt": "2026-04-30T18:00:56.040Z"
+    },
+    {
+      "slug": "block-api-versions",
+      "title": "API Versions",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-api-versions/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [],
+      "relatedCode": [],
+      "diagnostics": [
+        "MappingError: no mapping found for slug \"block-api-versions\".\nAvailable slugs: block-attributes, block-bindings, block-context, block-deprecation, block-metadata, block-patterns, block-registration, block-supports, block-transforms, block-variations"
+      ],
+      "commitSha": "",
+      "analyzedAt": "2026-04-30T18:00:56.041Z"
+    },
+    {
+      "slug": "block-attributes",
+      "title": "Attributes",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-attributes/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/block.json",
+          "tier": "primary",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/parser/get-block-attributes.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/parser/index.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/serializer.tsx",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/registration.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/reducer.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/validation/index.ts",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/factory.ts",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-type.php",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [
+        "Could not read primary file gutenberg:schemas/json/block.json"
+      ],
+      "commitSha": "d1358133ef9463b6985116ae690c4b4698e72e01",
+      "analyzedAt": "2026-04-30T18:03:38.903Z"
+    },
+    {
+      "slug": "block-bindings",
+      "title": "Bindings",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-bindings/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/registration.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-bindings-registry.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/parser/get-block-attributes.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-bindings-source.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/blocks.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/factory.ts",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/hooks/index.js",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block.php",
+          "tier": "context",
+          "includedInAnalysis": false
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "d1358133ef9463b6985116ae690c4b4698e72e01",
+      "analyzedAt": "2026-04-30T18:02:41.435Z"
+    },
+    {
+      "slug": "block-context",
+      "title": "Context",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-context/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/registration.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/components/block-context/index.js",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/parser/index.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/store/selectors.js",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/factory.ts",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block.php",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/actions.ts",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "d1358133ef9463b6985116ae690c4b4698e72e01",
+      "analyzedAt": "2026-04-30T18:01:55.139Z"
+    },
+    {
+      "slug": "block-deprecation",
+      "title": "Deprecation",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-deprecation/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/registration.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/parser/apply-block-deprecated-versions.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/parser/index.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/validation/index.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/serializer.tsx",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/factory.ts",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/reducer.ts",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-type.php",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "d1358133ef9463b6985116ae690c4b4698e72e01",
+      "analyzedAt": "2026-04-30T18:04:57.851Z"
+    },
+    {
+      "slug": "block-edit-save",
+      "title": "Edit and Save",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-edit-save/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [],
+      "relatedCode": [],
+      "diagnostics": [
+        "MappingError: no mapping found for slug \"block-edit-save\".\nAvailable slugs: block-attributes, block-bindings, block-context, block-deprecation, block-metadata, block-patterns, block-registration, block-supports, block-transforms, block-variations"
+      ],
+      "commitSha": "",
+      "analyzedAt": "2026-04-30T18:02:41.436Z"
+    },
+    {
+      "slug": "block-metadata",
+      "title": "Metadata in block.json",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-metadata/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/block.json",
+          "tier": "primary",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "gutenberg",
+          "file": "lib/blocks.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/registration.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/blocks.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-type.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/actions.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/reducer.ts",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/factory.ts",
+          "tier": "context",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-type-registry.php",
+          "tier": "context",
+          "includedInAnalysis": false
+        }
+      ],
+      "diagnostics": [
+        "Could not read primary file gutenberg:schemas/json/block.json"
+      ],
+      "commitSha": "d1358133ef9463b6985116ae690c4b4698e72e01",
+      "analyzedAt": "2026-04-30T18:05:21.797Z"
+    },
+    {
+      "slug": "block-patterns",
+      "title": "Patterns",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-patterns/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/registration.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-patterns-registry.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/actions.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/selectors.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/blocks.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/components/inserter/index.js",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/factory.ts",
+          "tier": "context",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-type-registry.php",
+          "tier": "context",
+          "includedInAnalysis": false
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "d1358133ef9463b6985116ae690c4b4698e72e01",
+      "analyzedAt": "2026-04-30T18:06:01.043Z"
+    },
+    {
+      "slug": "block-registration",
+      "title": "Registration",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-registration/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/registration.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/actions.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-type.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/reducer.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/factory.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/blocks.php",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "lib/blocks.php",
+          "tier": "context",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-type-registry.php",
+          "tier": "context",
+          "includedInAnalysis": false
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "d1358133ef9463b6985116ae690c4b4698e72e01",
+      "analyzedAt": "2026-04-30T18:06:44.916Z"
+    },
+    {
+      "slug": "block-selectors",
+      "title": "Selectors",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-selectors/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [],
+      "relatedCode": [],
+      "diagnostics": [
+        "MappingError: no mapping found for slug \"block-selectors\".\nAvailable slugs: block-attributes, block-bindings, block-context, block-deprecation, block-metadata, block-patterns, block-registration, block-supports, block-transforms, block-variations"
+      ],
+      "commitSha": "",
+      "analyzedAt": "2026-04-30T18:05:21.797Z"
+    },
+    {
+      "slug": "block-styles",
+      "title": "Styles",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-styles/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [],
+      "relatedCode": [],
+      "diagnostics": [
+        "MappingError: no mapping found for slug \"block-styles\".\nAvailable slugs: block-attributes, block-bindings, block-context, block-deprecation, block-metadata, block-patterns, block-registration, block-supports, block-transforms, block-variations"
+      ],
+      "commitSha": "",
+      "analyzedAt": "2026-04-30T18:05:21.797Z"
+    },
+    {
+      "slug": "block-supports",
+      "title": "Supports",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-supports/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/registration.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/hooks/index.js",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/hooks/align.js",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/hooks/color.js",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-supports.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/hooks/typography.js",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/reducer.ts",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/blocks.php",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/hooks/dimensions.js",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "d1358133ef9463b6985116ae690c4b4698e72e01",
+      "analyzedAt": "2026-04-30T18:07:37.252Z"
+    },
+    {
+      "slug": "block-templates",
+      "title": "Templates",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-templates/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [],
+      "relatedCode": [],
+      "diagnostics": [
+        "MappingError: no mapping found for slug \"block-templates\".\nAvailable slugs: block-attributes, block-bindings, block-context, block-deprecation, block-metadata, block-patterns, block-registration, block-supports, block-transforms, block-variations"
+      ],
+      "commitSha": "",
+      "analyzedAt": "2026-04-30T18:06:01.043Z"
+    },
+    {
+      "slug": "block-transforms",
+      "title": "Transforms",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-transforms/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/registration.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/raw-handling/index.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/factory.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/actions.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/selectors.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/components/block-switcher/index.js",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/parser/index.ts",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/serializer.tsx",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "d1358133ef9463b6985116ae690c4b4698e72e01",
+      "analyzedAt": "2026-04-30T18:08:27.791Z"
+    },
+    {
+      "slug": "block-variations",
+      "title": "Variations",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-variations/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/registration.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/actions.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/selectors.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/reducer.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/components/block-variation-picker/index.js",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/factory.ts",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-type.php",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "d1358133ef9463b6985116ae690c4b4698e72e01",
+      "analyzedAt": "2026-04-30T18:09:14.686Z"
+    }
+  ]
+}

@@ -25,7 +25,7 @@
   "validator": {
     "provider": "ollama",
     "baseUrl": "http://localhost:11434/v1",
-    "pass1Model": "mistral-small3.2:latest",
-    "pass2Model": "mistral-small3.2:latest"
+    "pass1Model": "mistral-nemo:latest",
+    "pass2Model": "mistral-nemo:latest"
   }
 }
