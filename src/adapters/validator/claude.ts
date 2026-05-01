@@ -7,6 +7,8 @@ import type { CodeSource } from '../code-source/types.js';
 import type { Validator } from './types.js';
 import { assembleContext, formatContextForClaude } from './context-assembler.js';
 import { formatSymbolsAsText } from '../../extractors/typescript.js';
+import { formatHooksAsText } from '../../extractors/hooks.js';
+import { formatDefaultsAsText } from '../../extractors/defaults.js';
 import { scoreDoc } from '../../health-scorer.js';
 import { fingerprintIssue } from '../../history.js';
 
@@ -46,6 +48,18 @@ type FetchCodeInput = {
   path:      string;
   startLine: number;
   endLine:   number;
+};
+
+export type Pass1Candidate = RawIssue;
+
+export type RunPass1Result = {
+  candidates: Pass1Candidate[];
+  positives:  string[];
+};
+
+export type RunPass1Options = {
+  dropBodies?:  boolean;
+  temperature?: number;
 };
 
 // ---------------------------------------------------------------------------
@@ -280,25 +294,7 @@ export class ClaudeValidator implements Validator {
     }
 
     // Build user message content
-    const codeContext = formatContextForClaude(assembled.fileBlocks);
-    const symbolsText = formatSymbolsAsText(assembled.extractedSymbols);
-    const symbolsSection = symbolsText
-      ? `\n\n---\n\n## Exported API symbols\n\n${symbolsText}`
-      : '';
-    const missingSymbolsHint = assembled.missingSymbols.length > 0
-      ? `\n\n## Potentially removed APIs\n\nThe following identifiers appear in the doc but were not found in any source file. Investigate each as a possible \`nonexistent-name\` issue:\n\n${assembled.missingSymbols.map(s => `- \`${s}\``).join('\n')}`
-      : '';
-    const userContent = `## Documentation: ${doc.title}
-
-URL: ${doc.sourceUrl}
-
-${doc.content}${symbolsSection}
-
----
-
-## Source Code
-
-${codeContext || '(No source files were available for this document.)'}${missingSymbolsHint}`;
+    const userContent = ClaudeValidator.buildUserContent(doc, assembled, {});
 
     // Pass 1: get initial issues and positives
     let pass1Issues: RawIssue[] = [];
@@ -386,10 +382,57 @@ ${codeContext || '(No source files were available for this document.)'}${missing
     };
   }
 
+  // Public helper used by experiment scripts. Builds the same Pass 1 user
+  // message that validateDoc would, optionally dropping the Source Code bulk.
+  static buildUserContent(
+    doc: Doc,
+    assembled: Awaited<ReturnType<typeof assembleContext>>,
+    options: { dropBodies?: boolean } = {},
+  ): string {
+    const codeContext = options.dropBodies
+      ? ''
+      : formatContextForClaude(assembled.fileBlocks);
+    const symbolsText  = formatSymbolsAsText(assembled.extractedSymbols);
+    const hooksText    = formatHooksAsText(assembled.extractedHooks);
+    const defaultsText = formatDefaultsAsText(assembled.extractedDefaults);
+    const symbolsSection = symbolsText
+      ? `\n\n---\n\n## Exported API symbols\n\n${symbolsText}`
+      : '';
+    const hooksSection = hooksText
+      ? `\n\n---\n\n## Hooks and filters\n\nFiring sites for action and filter hooks. Use these to verify hook names referenced in the documentation.\n\n${hooksText}`
+      : '';
+    const defaultsSection = defaultsText
+      ? `\n\n---\n\n## Defaults\n\nDefault-value sites: \`wp_parse_args\` calls in PHP and object-spread merges in JS/TS. Use these to verify documented default values.\n\n${defaultsText}`
+      : '';
+    const missingSymbolsHint = assembled.missingSymbols.length > 0
+      ? `\n\n## Potentially removed APIs\n\nThe following identifiers appear in the doc but were not found in any source file. Investigate each as a possible \`nonexistent-name\` issue:\n\n${assembled.missingSymbols.map(s => `- \`${s}\``).join('\n')}`
+      : '';
+    const sourceCodeBlock = options.dropBodies
+      ? '(Source code bulk omitted — use the structured sections above.)'
+      : (codeContext || '(No source files were available for this document.)');
+    return `## Documentation: ${doc.title}
+
+URL: ${doc.sourceUrl}
+
+${doc.content}${symbolsSection}${hooksSection}${defaultsSection}
+
+---
+
+## Source Code
+
+${sourceCodeBlock}${missingSymbolsHint}`;
+  }
+
   private async runPass1(userContent: string): Promise<ReportFindingsInput> {
+
+  private async runPass1(
+    userContent: string,
+    temperature?: number,
+  ): Promise<ReportFindingsInput> {
     const response = await this.anthropic.messages.create({
       model:      this.pass1Model,
       max_tokens: 4096,
+      ...(temperature !== undefined ? { temperature } : {}),
       system: [
         {
           type:          'text',

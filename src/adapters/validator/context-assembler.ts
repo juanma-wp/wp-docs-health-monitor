@@ -3,9 +3,11 @@ import type { CodeTiers, CodeFile } from '../../types/mapping.js';
 import type { DocResult } from '../../types/results.js';
 import type { CodeSource } from '../code-source/types.js';
 import { extractSymbolsFromFiles } from '../../extractors/typescript.js';
-import type { ExtractedFile } from '../../extractors/types.js';
+import { extractHooksFromFiles } from '../../extractors/hooks.js';
+import { extractDefaultsFromFiles } from '../../extractors/defaults.js';
+import type { ExtractedFile, ExtractedHookFile, ExtractedDefaultFile } from '../../extractors/types.js';
 
-export type { ExtractedFile };
+export type { ExtractedFile, ExtractedHookFile, ExtractedDefaultFile };
 
 const TOKEN_BUDGET = 50_000;
 
@@ -23,6 +25,8 @@ export type AssembledContext = {
   diagnostics: string[];
   missingSymbols: string[];
   extractedSymbols: ExtractedFile[];
+  extractedHooks: ExtractedHookFile[];
+  extractedDefaults: ExtractedDefaultFile[];
 };
 
 function inferLanguage(filePath: string): string {
@@ -135,7 +139,9 @@ export async function assembleContext(
     ...codeTiers.secondary,
     ...codeTiers.context,
   ];
-  const extractedSymbols = await extractSymbolsFromFiles(allMappedFiles, codeSources);
+  const extractedSymbols  = await extractSymbolsFromFiles(allMappedFiles, codeSources);
+  const extractedHooks    = await extractHooksFromFiles(allMappedFiles, codeSources);
+  const extractedDefaults = await extractDefaultsFromFiles(allMappedFiles, codeSources);
 
   const symbols = extractDocSymbols(doc.content);
   const missingSymbols = findMissingSymbols(symbols, fileBlocks);
@@ -147,5 +153,7 @@ export async function assembleContext(
     diagnostics,
     missingSymbols,
     extractedSymbols,
+    extractedHooks,
+    extractedDefaults,
   };
 }

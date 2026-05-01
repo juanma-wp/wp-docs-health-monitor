@@ -12,3 +12,33 @@ export type ExtractedFile = {
   path: string;
   symbols: ExtractedSymbol[];
 };
+
+export type HookKind = 'filter' | 'action';
+
+export type ExtractedHook = {
+  kind: HookKind;
+  name: string;
+  call: string;
+  line: number;
+  source: string;
+};
+
+export type ExtractedHookFile = {
+  repo: string;
+  path: string;
+  hooks: ExtractedHook[];
+};
+
+export type DefaultPattern = 'wp_parse_args' | 'object-spread';
+
+export type ExtractedDefault = {
+  pattern: DefaultPattern;
+  line: number;
+  source: string;
+};
+
+export type ExtractedDefaultFile = {
+  repo: string;
+  path: string;
+  defaults: ExtractedDefault[];
+};
