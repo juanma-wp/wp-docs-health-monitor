@@ -4,6 +4,7 @@ export type ExtractedSymbol = {
   kind: SymbolKind;
   name: string;
   signature: string;
+  docComment?: string;
 };
 
 export type ExtractedFile = {

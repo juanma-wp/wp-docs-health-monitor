@@ -9,6 +9,13 @@ function nodeText(node: ts.Node, source: ts.SourceFile): string {
   return node.getText(source);
 }
 
+function getJsDocText(node: ts.Node, source: ts.SourceFile): string | undefined {
+  const jsDocs = ts.getJSDocCommentsAndTags(node);
+  if (jsDocs.length === 0) return undefined;
+  const text = jsDocs.map(d => d.getText(source)).join('\n').trim();
+  return text || undefined;
+}
+
 function printType(node: ts.TypeNode | undefined, source: ts.SourceFile): string {
   return node ? nodeText(node, source) : 'unknown';
 }
@@ -30,6 +37,9 @@ function extractFromStatement(
   source: ts.SourceFile,
 ): ExtractedSymbol[] {
   const symbols: ExtractedSymbol[] = [];
+  const docComment = getJsDocText(stmt, source);
+  const withDoc = <S extends ExtractedSymbol>(s: S): S =>
+    docComment ? { ...s, docComment } : s;
 
   // export function foo(...) { }
   // export async function foo(...) { }
@@ -37,13 +47,13 @@ function extractFromStatement(
     const name = stmt.name.text;
     const params = printParams(stmt.parameters, source);
     const ret = printType(stmt.type, source);
-    symbols.push({ kind: 'function', name, signature: `${name}(${params}): ${ret}` });
+    symbols.push(withDoc({ kind: 'function', name, signature: `${name}(${params}): ${ret}` }));
     return symbols;
   }
 
   // export class Foo { }
   if (ts.isClassDeclaration(stmt) && stmt.name) {
-    symbols.push({ kind: 'class', name: stmt.name.text, signature: stmt.name.text });
+    symbols.push(withDoc({ kind: 'class', name: stmt.name.text, signature: stmt.name.text }));
     return symbols;
   }
 
@@ -52,7 +62,7 @@ function extractFromStatement(
   if (ts.isTypeAliasDeclaration(stmt)) {
     const name = stmt.name.text;
     const body = nodeText(stmt.type, source);
-    symbols.push({ kind: 'type', name, signature: `${name} = ${body}` });
+    symbols.push(withDoc({ kind: 'type', name, signature: `${name} = ${body}` }));
     return symbols;
   }
 
@@ -73,13 +83,13 @@ function extractFromStatement(
       }
       return null;
     }).filter(Boolean);
-    symbols.push({ kind: 'interface', name, signature: `${name} {\n${members.join('\n')}\n}` });
+    symbols.push(withDoc({ kind: 'interface', name, signature: `${name} {\n${members.join('\n')}\n}` }));
     return symbols;
   }
 
   // export enum Foo { }
   if (ts.isEnumDeclaration(stmt)) {
-    symbols.push({ kind: 'enum', name: stmt.name.text, signature: stmt.name.text });
+    symbols.push(withDoc({ kind: 'enum', name: stmt.name.text, signature: stmt.name.text }));
     return symbols;
   }
 
@@ -94,7 +104,7 @@ function extractFromStatement(
         : decl.initializer
           ? inferLiteralType(decl.initializer, source)
           : 'unknown';
-      symbols.push({ kind: 'const', name, signature: `${name}: ${type}` });
+      symbols.push(withDoc({ kind: 'const', name, signature: `${name}: ${type}` }));
     }
     return symbols;
   }
@@ -104,7 +114,7 @@ function extractFromStatement(
   if (ts.isExportDeclaration(stmt) && stmt.exportClause && ts.isNamedExports(stmt.exportClause)) {
     for (const el of stmt.exportClause.elements) {
       const name = el.name.text;
-      symbols.push({ kind: 'const', name, signature: name });
+      symbols.push(withDoc({ kind: 'const', name, signature: name }));
     }
     return symbols;
   }
@@ -175,7 +185,12 @@ export function formatSymbolsAsText(files: ExtractedFile[]): string {
   return files
     .map(f => {
       const header = `[${f.repo}] ${f.path}`;
-      const lines = f.symbols.map(s => `  ${s.signature}`);
+      const lines = f.symbols.flatMap(s => {
+        const sigLine = `  ${s.signature}`;
+        if (!s.docComment) return [sigLine];
+        const indented = s.docComment.split('\n').map(l => `  ${l}`);
+        return [...indented, sigLine];
+      });
       return [header, ...lines].join('\n');
     })
     .join('\n\n');

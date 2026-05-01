@@ -91,6 +91,54 @@ export interface BlockVariation {
     const symbols = extractSymbolsFromSource(src, 'utils.ts');
     expect(symbols[0].signature).toContain('...args: unknown[]');
   });
+
+  it('captures JSDoc block above an exported function', () => {
+    const src = `
+/**
+ * Registers a new block type.
+ * @param name - The block name.
+ * @returns The registered block.
+ */
+export function registerBlockType(name: string): BlockType {
+  return null as any;
+}
+`;
+    const symbols = extractSymbolsFromSource(src, 'registration.ts');
+    expect(symbols).toHaveLength(1);
+    expect(symbols[0].docComment).toBeDefined();
+    expect(symbols[0].docComment).toContain('Registers a new block type.');
+    expect(symbols[0].docComment).toContain('@param name');
+    expect(symbols[0].docComment).toContain('@returns');
+  });
+
+  it('captures @deprecated tag on an exported const', () => {
+    const src = `
+/**
+ * @deprecated Use newApi instead.
+ */
+export const oldApi: () => void = () => {};
+`;
+    const symbols = extractSymbolsFromSource(src, 'api.ts');
+    expect(symbols[0].docComment).toContain('@deprecated');
+    expect(symbols[0].docComment).toContain('Use newApi instead.');
+  });
+
+  it('leaves docComment undefined when no JSDoc is present', () => {
+    const src = `export function noDoc(): void {}`;
+    const symbols = extractSymbolsFromSource(src, 'foo.ts');
+    expect(symbols[0].docComment).toBeUndefined();
+  });
+
+  it('attaches the same JSDoc to every const in a multi-declaration statement', () => {
+    const src = `
+/** Shared doc. */
+export const A = 1, B = 2;
+`;
+    const symbols = extractSymbolsFromSource(src, 'consts.ts');
+    expect(symbols).toHaveLength(2);
+    expect(symbols[0].docComment).toContain('Shared doc.');
+    expect(symbols[1].docComment).toContain('Shared doc.');
+  });
 });
 
 describe('formatSymbolsAsText', () => {
@@ -123,5 +171,32 @@ describe('formatSymbolsAsText', () => {
     ];
     const text = formatSymbolsAsText(files);
     expect(text).toContain('\n\n');
+  });
+
+  it('renders docComment indented above the signature when present', () => {
+    const files: ExtractedFile[] = [
+      {
+        repo: 'gutenberg',
+        path: 'packages/blocks/src/api/registration.ts',
+        symbols: [
+          {
+            kind: 'function',
+            name: 'registerBlockType',
+            signature: 'registerBlockType(name: string): void',
+            docComment: '/**\n * Registers a block.\n * @deprecated\n */',
+          },
+        ],
+      },
+    ];
+    const text = formatSymbolsAsText(files);
+    const lines = text.split('\n');
+    const sigIdx  = lines.findIndex(l => l.includes('registerBlockType('));
+    const docIdx  = lines.findIndex(l => l.includes('Registers a block.'));
+    const depIdx  = lines.findIndex(l => l.includes('@deprecated'));
+    expect(docIdx).toBeGreaterThan(-1);
+    expect(depIdx).toBeGreaterThan(-1);
+    expect(docIdx).toBeLessThan(sigIdx);
+    expect(depIdx).toBeLessThan(sigIdx);
+    expect(lines[docIdx]?.startsWith('  ')).toBe(true);
   });
 });
