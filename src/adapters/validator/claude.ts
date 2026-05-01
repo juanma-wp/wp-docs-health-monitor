@@ -280,7 +280,7 @@ export class ClaudeValidator implements Validator {
     }
 
     // Build user message content
-    const codeContext = formatContextForClaude(assembled.fileBlocks);
+    const codeContext = formatContextForClaude(assembled.sourceCodeBlocks);
     const symbolsText = formatSymbolsAsText(assembled.extractedSymbols);
     const symbolsSection = symbolsText
       ? `\n\n---\n\n## Exported API symbols\n\n${symbolsText}`

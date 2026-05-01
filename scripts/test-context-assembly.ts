@@ -59,11 +59,11 @@ ${doc.content}${symbolsSection}
 
 ## Source Code
 
-${formatContextForClaude(assembled.fileBlocks) || '(No source files were available for this document.)'}`;
+${formatContextForClaude(assembled.sourceCodeBlocks) || '(No source files were available for this document.)'}`;
 
 console.log(userMessage);
 console.error(`\n--- Stats ---`);
 console.error(`Symbols extracted: ${assembled.extractedSymbols.reduce((n, f) => n + f.symbols.length, 0)} from ${assembled.extractedSymbols.length} file(s)`);
-console.error(`File blocks: ${assembled.fileBlocks.length}`);
+console.error(`Source code files: ${assembled.sourceCodeBlocks.length} of ${assembled.fileBlocks.length} total mapped`);
 console.error(`Estimated tokens: ${assembled.estimatedTokens}`);
 console.error(`Missing symbols: ${assembled.missingSymbols.length}`);

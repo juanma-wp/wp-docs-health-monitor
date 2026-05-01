@@ -18,6 +18,7 @@ type FileBlock = {
 
 export type AssembledContext = {
   fileBlocks: FileBlock[];
+  sourceCodeBlocks: FileBlock[];
   relatedCode: DocResult['relatedCode'];
   estimatedTokens: number;
   diagnostics: string[];
@@ -50,6 +51,16 @@ function inferLanguage(filePath: string): string {
 
 function estimateTokens(content: string): number {
   return Math.ceil(content.length / 4);
+}
+
+// Tests, schemas, and PHP files go into ## Source Code.
+// TS/JS/TSX/JSX implementation files are covered by the symbols section.
+export function isSourceCodeFile(filePath: string): boolean {
+  const ext = filePath.split('.').pop()?.toLowerCase() ?? '';
+  if (ext === 'php') return true;
+  if (ext === 'json') return true;
+  if (/\/tests?\/|\.test\.|\.spec\./.test(filePath)) return true;
+  return false;
 }
 
 // Extract backtick-wrapped identifiers from doc markdown (e.g. `registerBlockType`)
@@ -137,11 +148,14 @@ export async function assembleContext(
   ];
   const extractedSymbols = await extractSymbolsFromFiles(allMappedFiles, codeSources);
 
+  const sourceCodeBlocks = fileBlocks.filter(fb => isSourceCodeFile(fb.path));
+
   const symbols = extractDocSymbols(doc.content);
   const missingSymbols = findMissingSymbols(symbols, fileBlocks);
 
   return {
     fileBlocks,
+    sourceCodeBlocks,
     relatedCode,
     estimatedTokens: cumulativeTokens,
     diagnostics,
