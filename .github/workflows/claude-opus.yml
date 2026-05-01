@@ -28,7 +28,7 @@ jobs:
 
       - name: Run Claude Code (Opus)
         id: claude-opus
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@v1.0.111
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           trigger_phrase: '@claude-opus'

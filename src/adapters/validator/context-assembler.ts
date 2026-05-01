@@ -2,6 +2,10 @@ import type { Doc } from '../doc-source/types.js';
 import type { CodeTiers, CodeFile } from '../../types/mapping.js';
 import type { DocResult } from '../../types/results.js';
 import type { CodeSource } from '../code-source/types.js';
+import { extractSymbolsFromFiles } from '../../extractors/typescript.js';
+import type { ExtractedFile } from '../../extractors/types.js';
+
+export type { ExtractedFile };
 
 const TOKEN_BUDGET = 50_000;
 
@@ -18,6 +22,7 @@ export type AssembledContext = {
   estimatedTokens: number;
   diagnostics: string[];
   missingSymbols: string[];
+  extractedSymbols: ExtractedFile[];
 };
 
 function inferLanguage(filePath: string): string {
@@ -125,6 +130,13 @@ export async function assembleContext(
     }
   }
 
+  const allMappedFiles = [
+    ...codeTiers.primary,
+    ...codeTiers.secondary,
+    ...codeTiers.context,
+  ];
+  const extractedSymbols = await extractSymbolsFromFiles(allMappedFiles, codeSources);
+
   const symbols = extractDocSymbols(doc.content);
   const missingSymbols = findMissingSymbols(symbols, fileBlocks);
 
@@ -134,5 +146,6 @@ export async function assembleContext(
     estimatedTokens: cumulativeTokens,
     diagnostics,
     missingSymbols,
+    extractedSymbols,
   };
 }
