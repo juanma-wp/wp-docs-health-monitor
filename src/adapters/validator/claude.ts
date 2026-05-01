@@ -423,7 +423,22 @@ ${doc.content}${symbolsSection}${hooksSection}${defaultsSection}
 ${sourceCodeBlock}${missingSymbolsHint}`;
   }
 
-  private async runPass1(userContent: string): Promise<ReportFindingsInput> {
+  // Public entrypoint for experiment scripts: runs only Pass 1 and returns
+  // the raw candidates (no verbatim check, no Pass 2). Supports temperature
+  // override and dropBodies for fair extractor-vs-bulk comparisons.
+  async runPass1Only(
+    doc: Doc,
+    codeTiers: CodeTiers,
+    codeSources: Record<string, CodeSource>,
+    options: RunPass1Options = {},
+  ): Promise<RunPass1Result> {
+    const assembled = await assembleContext(doc, codeTiers, codeSources);
+    const userContent = ClaudeValidator.buildUserContent(doc, assembled, {
+      dropBodies: options.dropBodies,
+    });
+    const result = await this.runPass1(userContent, options.temperature);
+    return { candidates: result.issues, positives: result.positives };
+  }
 
   private async runPass1(
     userContent: string,
