@@ -5,7 +5,7 @@ import type { CodeTiers } from '../../types/mapping.js';
 import type { DocResult, Issue } from '../../types/results.js';
 import type { CodeSource } from '../code-source/types.js';
 import type { Validator } from './types.js';
-import { assembleContext, formatContextForClaude } from './context-assembler.js';
+import { assembleContext, formatContextForClaude, isTestFile } from './context-assembler.js';
 import { formatSymbolsAsText } from '../../extractors/typescript.js';
 import { formatHooksAsText } from '../../extractors/hooks.js';
 import { formatDefaultsAsText } from '../../extractors/defaults.js';
@@ -390,9 +390,14 @@ export class ClaudeValidator implements Validator {
     assembled: Awaited<ReturnType<typeof assembleContext>>,
     options: { dropBodies?: boolean } = {},
   ): string {
-    const codeContext = options.dropBodies
-      ? ''
-      : formatContextForClaude(assembled.fileBlocks);
+    // dropBodies omits implementation source code but ALWAYS retains test
+    // files — they are authority #1 in the system prompt and assertion
+    // strings / inline comments often carry drift evidence (e.g. expected
+    // warning messages) that the structured extractors cannot capture.
+    const renderedFileBlocks = options.dropBodies
+      ? assembled.fileBlocks.filter(fb => isTestFile(fb.path))
+      : assembled.fileBlocks;
+    const codeContext = formatContextForClaude(renderedFileBlocks);
     const symbolsText  = formatSymbolsAsText(assembled.extractedSymbols);
     const hooksText    = formatHooksAsText(assembled.extractedHooks);
     const defaultsText = formatDefaultsAsText(assembled.extractedDefaults);
@@ -415,7 +420,9 @@ export class ClaudeValidator implements Validator {
       ? `\n\n## Potentially removed APIs\n\nThe following identifiers appear in the doc but were not found in any source file. Investigate each as a possible \`nonexistent-name\` issue:\n\n${assembled.missingSymbols.map(s => `- \`${s}\``).join('\n')}`
       : '';
     const sourceCodeBlock = options.dropBodies
-      ? '(Source code bulk omitted — use the structured sections above.)'
+      ? (codeContext
+          ? `(Implementation source code omitted — use the structured sections above. Test files are retained below as authority #1.)\n\n${codeContext}`
+          : '(Implementation source code omitted — use the structured sections above. No test files were available.)')
       : (codeContext || '(No source files were available for this document.)');
     return `## Documentation: ${doc.title}
 

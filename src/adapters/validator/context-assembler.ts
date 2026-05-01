@@ -58,6 +58,22 @@ function estimateTokens(content: string): number {
   return Math.ceil(content.length / 4);
 }
 
+// Match files whose path identifies them as tests:
+//   - segments named `test`, `tests`, `__tests__` (e.g. `src/api/test/foo.js`,
+//     `tests/phpunit/foo.php`, `src/__tests__/foo.ts`)
+//   - filenames ending `.test.{js,jsx,ts,tsx}` or `.spec.{js,jsx,ts,tsx}`
+//
+// Used by the dropBodies path so test files (system-prompt authority #1)
+// survive even when the implementation Source Code bulk is omitted.
+export function isTestFile(path: string): boolean {
+  return (
+    /(^|\/)tests?\//i.test(path) ||
+    /(^|\/)__tests__\//.test(path) ||
+    /\.test\.[jt]sx?$/i.test(path) ||
+    /\.spec\.[jt]sx?$/i.test(path)
+  );
+}
+
 // Extract backtick-wrapped identifiers from doc markdown (e.g. `registerBlockType`)
 export function extractDocSymbols(docContent: string): string[] {
   const matches = docContent.matchAll(/`([^`\s][^`]*[^`\s]|[^`\s])`/g);
