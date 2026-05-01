@@ -313,10 +313,19 @@ ${codeContext || '(No source files were available for this document.)'}${missing
       return this.buildDocResult(doc, [], positives, assembled.relatedCode, diagnostics, commitSha);
     }
 
-    // Verbatim check
+    // Verbatim check — both docSays and codeSays must be real quotes
     const verbatimPassed: RawIssue[] = [];
     for (const issue of pass1Issues) {
-      const { codeRepo, codeFile, codeSays } = issue.evidence;
+      const { codeRepo, codeFile, codeSays, docSays } = issue.evidence;
+
+      // docSays must be a verbatim quote from the doc
+      const docNeedle = docSays.trim();
+      if (!doc.content.includes(docNeedle)) {
+        this.droppedHallucinations++;
+        console.warn(`[verbatim-check] dropped issue in ${doc.slug}: docSays "${docSays}" not found in doc content`);
+        continue;
+      }
+
       if (!codeSources[codeRepo]) {
         diagnostics.push(`Unknown repo "${codeRepo}" in issue evidence — dropping`);
         continue;
@@ -328,7 +337,7 @@ ${codeContext || '(No source files were available for this document.)'}${missing
         const isAbsenceIssue = issue.type === 'nonexistent-name';
         if (!isAbsenceIssue && !fileContent.includes(needle)) {
           this.droppedHallucinations++;
-          console.warn(`[verbatim-check] dropped issue in ${doc.slug}: "${codeSays}" not found in ${codeRepo}:${codeFile}`);
+          console.warn(`[verbatim-check] dropped issue in ${doc.slug}: codeSays "${codeSays}" not found in ${codeRepo}:${codeFile}`);
           continue;
         }
         verbatimPassed.push(issue);
