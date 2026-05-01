@@ -6,6 +6,7 @@ import type { DocResult, Issue } from '../../types/results.js';
 import type { CodeSource } from '../code-source/types.js';
 import type { Validator } from './types.js';
 import { assembleContext, formatContextForClaude } from './context-assembler.js';
+import { formatSymbolsAsText } from '../../extractors/typescript.js';
 import { scoreDoc } from '../../health-scorer.js';
 import { fingerprintIssue } from '../../history.js';
 
@@ -280,6 +281,10 @@ export class ClaudeValidator implements Validator {
 
     // Build user message content
     const codeContext = formatContextForClaude(assembled.fileBlocks);
+    const symbolsText = formatSymbolsAsText(assembled.extractedSymbols);
+    const symbolsSection = symbolsText
+      ? `\n\n---\n\n## Exported API symbols\n\n${symbolsText}`
+      : '';
     const missingSymbolsHint = assembled.missingSymbols.length > 0
       ? `\n\n## Potentially removed APIs\n\nThe following identifiers appear in the doc but were not found in any source file. Investigate each as a possible \`nonexistent-name\` issue:\n\n${assembled.missingSymbols.map(s => `- \`${s}\``).join('\n')}`
       : '';
@@ -287,7 +292,7 @@ export class ClaudeValidator implements Validator {
 
 URL: ${doc.sourceUrl}
 
-${doc.content}
+${doc.content}${symbolsSection}
 
 ---
 
