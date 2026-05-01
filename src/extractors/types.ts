@@ -42,3 +42,10 @@ export type ExtractedDefaultFile = {
   path: string;
   defaults: ExtractedDefault[];
 };
+
+export type ExtractedSchema = {
+  repo: string;
+  path: string;
+  content: string;
+  truncated: boolean;
+};

@@ -9,6 +9,7 @@ import { assembleContext, formatContextForClaude } from './context-assembler.js'
 import { formatSymbolsAsText } from '../../extractors/typescript.js';
 import { formatHooksAsText } from '../../extractors/hooks.js';
 import { formatDefaultsAsText } from '../../extractors/defaults.js';
+import { formatSchemasAsText } from '../../extractors/schemas.js';
 import { scoreDoc } from '../../health-scorer.js';
 import { fingerprintIssue } from '../../history.js';
 
@@ -395,6 +396,7 @@ export class ClaudeValidator implements Validator {
     const symbolsText  = formatSymbolsAsText(assembled.extractedSymbols);
     const hooksText    = formatHooksAsText(assembled.extractedHooks);
     const defaultsText = formatDefaultsAsText(assembled.extractedDefaults);
+    const schemasText  = formatSchemasAsText(assembled.extractedSchemas);
     const symbolsSection = symbolsText
       ? `\n\n---\n\n## Exported API symbols\n\n${symbolsText}`
       : '';
@@ -403,6 +405,11 @@ export class ClaudeValidator implements Validator {
       : '';
     const defaultsSection = defaultsText
       ? `\n\n---\n\n## Defaults\n\nDefault-value sites: \`wp_parse_args\` calls in PHP and object-spread merges in JS/TS. Use these to verify documented default values.\n\n${defaultsText}`
+      : '';
+    // Schemas survive `dropBodies`: JSON files are authority #5 and small,
+    // worth keeping when the Source Code bulk is omitted.
+    const schemasSection = schemasText
+      ? `\n\n---\n\n## Schemas\n\nJSON schema files. Authoritative for property names and allowed enum values. Confirm field requirements against TypeScript or PHP source rather than the schema's \`required\` array.\n\n${schemasText}`
       : '';
     const missingSymbolsHint = assembled.missingSymbols.length > 0
       ? `\n\n## Potentially removed APIs\n\nThe following identifiers appear in the doc but were not found in any source file. Investigate each as a possible \`nonexistent-name\` issue:\n\n${assembled.missingSymbols.map(s => `- \`${s}\``).join('\n')}`
@@ -414,7 +421,7 @@ export class ClaudeValidator implements Validator {
 
 URL: ${doc.sourceUrl}
 
-${doc.content}${symbolsSection}${hooksSection}${defaultsSection}
+${doc.content}${symbolsSection}${hooksSection}${defaultsSection}${schemasSection}
 
 ---
 

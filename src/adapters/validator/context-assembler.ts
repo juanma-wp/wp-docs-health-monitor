@@ -5,9 +5,10 @@ import type { CodeSource } from '../code-source/types.js';
 import { extractSymbolsFromFiles } from '../../extractors/typescript.js';
 import { extractHooksFromFiles } from '../../extractors/hooks.js';
 import { extractDefaultsFromFiles } from '../../extractors/defaults.js';
-import type { ExtractedFile, ExtractedHookFile, ExtractedDefaultFile } from '../../extractors/types.js';
+import { extractSchemasFromFiles, isSchemaFile } from '../../extractors/schemas.js';
+import type { ExtractedFile, ExtractedHookFile, ExtractedDefaultFile, ExtractedSchema } from '../../extractors/types.js';
 
-export type { ExtractedFile, ExtractedHookFile, ExtractedDefaultFile };
+export type { ExtractedFile, ExtractedHookFile, ExtractedDefaultFile, ExtractedSchema };
 
 const TOKEN_BUDGET = 50_000;
 
@@ -27,6 +28,7 @@ export type AssembledContext = {
   extractedSymbols: ExtractedFile[];
   extractedHooks: ExtractedHookFile[];
   extractedDefaults: ExtractedDefaultFile[];
+  extractedSchemas: ExtractedSchema[];
 };
 
 function inferLanguage(filePath: string): string {
@@ -100,6 +102,14 @@ export async function assembleContext(
 
   for (const { name: tierName, files } of tiers) {
     for (const file of files) {
+      // Schema files (.json) are surfaced through the dedicated Schemas
+      // section, not the Source Code bulk. Record as included in analysis
+      // and skip the fileBlocks/budget path.
+      if (isSchemaFile(file.path)) {
+        relatedCode.push({ repo: file.repo, file: file.path, tier: tierName, includedInAnalysis: true });
+        continue;
+      }
+
       // If budget is already exceeded for non-primary tiers, mark as excluded
       if (budgetExceeded && tierName !== 'primary') {
         relatedCode.push({ repo: file.repo, file: file.path, tier: tierName, includedInAnalysis: false });
@@ -142,6 +152,7 @@ export async function assembleContext(
   const extractedSymbols  = await extractSymbolsFromFiles(allMappedFiles, codeSources);
   const extractedHooks    = await extractHooksFromFiles(allMappedFiles, codeSources);
   const extractedDefaults = await extractDefaultsFromFiles(allMappedFiles, codeSources);
+  const extractedSchemas  = await extractSchemasFromFiles(allMappedFiles, codeSources);
 
   const symbols = extractDocSymbols(doc.content);
   const missingSymbols = findMissingSymbols(symbols, fileBlocks);
@@ -155,5 +166,6 @@ export async function assembleContext(
     extractedSymbols,
     extractedHooks,
     extractedDefaults,
+    extractedSchemas,
   };
 }
