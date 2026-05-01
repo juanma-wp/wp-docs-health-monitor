@@ -61,7 +61,8 @@
               "type": "integer"
             },
             "notMapped": {
-              "type": "integer"
+              "type": "integer",
+              "default": 0
             },
             "issues": {
               "type": "object",
@@ -93,7 +94,6 @@
             "healthy",
             "needsAttention",
             "critical",
-            "notMapped",
             "issues"
           ],
           "additionalProperties": false

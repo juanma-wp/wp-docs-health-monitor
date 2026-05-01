@@ -70,7 +70,7 @@ export const RunResultsSchema = z.object({
     healthy:        z.number().int(),
     needsAttention: z.number().int(),
     critical:       z.number().int(),
-    notMapped:      z.number().int(),
+    notMapped:      z.number().int().default(0),
     issues: z.object({
       total:    z.number().int(),
       critical: z.number().int(),
