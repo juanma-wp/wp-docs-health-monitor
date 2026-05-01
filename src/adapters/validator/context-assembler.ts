@@ -3,6 +3,7 @@ import type { CodeTiers, CodeFile } from '../../types/mapping.js';
 import type { DocResult } from '../../types/results.js';
 import type { CodeSource } from '../code-source/types.js';
 import { extractSymbolsFromFiles } from '../../extractors/typescript.js';
+import { extractPhpSymbolsFromFiles } from '../../extractors/php.js';
 import { extractHooksFromFiles } from '../../extractors/hooks.js';
 import { extractDefaultsFromFiles } from '../../extractors/defaults.js';
 import { extractSchemasFromFiles, isSchemaFile } from '../../extractors/schemas.js';
@@ -165,7 +166,9 @@ export async function assembleContext(
     ...codeTiers.secondary,
     ...codeTiers.context,
   ];
-  const extractedSymbols  = await extractSymbolsFromFiles(allMappedFiles, codeSources);
+  const tsSymbols  = await extractSymbolsFromFiles(allMappedFiles, codeSources);
+  const phpSymbols = await extractPhpSymbolsFromFiles(allMappedFiles, codeSources);
+  const extractedSymbols = [...tsSymbols, ...phpSymbols];
   const extractedHooks    = await extractHooksFromFiles(allMappedFiles, codeSources);
   const extractedDefaults = await extractDefaultsFromFiles(allMappedFiles, codeSources);
   const extractedSchemas  = await extractSchemasFromFiles(allMappedFiles, codeSources);
