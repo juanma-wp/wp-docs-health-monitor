@@ -1,5 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { extractDocSymbols, findMissingSymbols, isTestFile } from '../context-assembler.js';
+import { extractDocSymbols, findMissingSymbols, isTestFile, TOKEN_BUDGET } from '../context-assembler.js';
+
+describe('TOKEN_BUDGET', () => {
+  // Pinned because the budget is the lever for the "spend on context"
+  // rule in CLAUDE.md. Drops below 200K should be a deliberate change
+  // visible in a PR diff, not an accidental revert during refactoring.
+  it('is sized for 1M-context models, not the older 50K constraint', () => {
+    expect(TOKEN_BUDGET).toBeGreaterThanOrEqual(200_000);
+  });
+});
 
 describe('extractDocSymbols', () => {
   it('extracts backtick-wrapped identifiers from doc content', () => {

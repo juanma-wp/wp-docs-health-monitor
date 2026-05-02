@@ -11,7 +11,14 @@ import type { ExtractedFile, ExtractedHookFile, ExtractedDefaultFile, ExtractedS
 
 export type { ExtractedFile, ExtractedHookFile, ExtractedDefaultFile, ExtractedSchema };
 
-const TOKEN_BUDGET = 50_000;
+// Budget for the source-code bulk passed to Pass 1. Primary-tier files
+// always go in; secondary/context files stop being added once the
+// cumulative estimate would exceed this. With 1M-context Sonnet 4.6
+// and Opus 4.7, 200K leaves comfortable room for the system prompt
+// (~2.5K), per-doc user prompt (~5–20K), structured extractor sections
+// (~5–30K), and Pass 2 fetch_code rounds. Aligned with CLAUDE.md
+// "spend on context" — a wider budget surfaces more drift candidates.
+export const TOKEN_BUDGET = 200_000;
 
 type FileBlock = {
   repo: string;
