@@ -1,6 +1,7 @@
 import type { CodeFile } from '../types/mapping.js';
 import type { CodeSource } from '../adapters/code-source/types.js';
 import type { ExtractedDefault, ExtractedDefaultFile, DefaultPattern } from './types.js';
+import { lineNumberAt } from './utils.js';
 
 export type { ExtractedDefault, ExtractedDefaultFile, DefaultPattern } from './types.js';
 
@@ -9,14 +10,6 @@ const JS_EXTS  = new Set(['js', 'jsx', 'ts', 'tsx']);
 
 const OBJECT_SPREAD_MAX_CHARS = 600;
 const PRECEDING_LINES_FOR_DECL = 6;
-
-function lineNumberAt(content: string, index: number): number {
-  let line = 1;
-  for (let i = 0; i < index; i++) {
-    if (content.charCodeAt(i) === 10) line++;
-  }
-  return line;
-}
 
 function walkToMatchingClose(
   content: string,

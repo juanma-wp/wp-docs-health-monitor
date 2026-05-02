@@ -70,18 +70,31 @@ function estimateTokens(content: string): number {
 export function isTestFile(path: string): boolean {
   return (
     /(^|\/)tests?\//i.test(path) ||
-    /(^|\/)__tests__\//.test(path) ||
+    /(^|\/)__tests__\//i.test(path) ||
     /\.test\.[jt]sx?$/i.test(path) ||
     /\.spec\.[jt]sx?$/i.test(path)
   );
 }
 
-// Extract backtick-wrapped identifiers from doc markdown (e.g. `registerBlockType`)
+// Backticked tokens that are JS / PHP primitive type names or literal values.
+// These appear constantly in WordPress docs (e.g. ``Type: `string` ``, ``Default: `null` ``)
+// and are NEVER actual exported identifiers. Excluding them halves the noise
+// in `missingSymbols` without affecting real `nonexistent-name` detection.
+const PRIMITIVE_LITERALS_DENYLIST = new Set([
+  'true', 'false', 'null', 'undefined', 'void',
+  'string', 'boolean', 'number', 'integer', 'object', 'array', 'function',
+]);
+
+// Extract backtick-wrapped identifiers from doc markdown (e.g. `registerBlockType`).
+// Skips primitive type names and literal values to keep the missingSymbols hint
+// focused on real candidate identifiers.
 export function extractDocSymbols(docContent: string): string[] {
   const matches = docContent.matchAll(/`([^`\s][^`]*[^`\s]|[^`\s])`/g);
   const seen = new Set<string>();
   for (const [, symbol] of matches) {
-    if (symbol) seen.add(symbol);
+    if (!symbol) continue;
+    if (PRIMITIVE_LITERALS_DENYLIST.has(symbol)) continue;
+    seen.add(symbol);
   }
   return [...seen];
 }

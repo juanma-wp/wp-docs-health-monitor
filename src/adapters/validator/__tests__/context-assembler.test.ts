@@ -23,6 +23,19 @@ describe('extractDocSymbols', () => {
     expect(symbols).not.toContain('');
     expect(symbols).toContain('valid');
   });
+
+  it('ignores primitive type names and literals (denylist)', () => {
+    const content =
+      'Type `string`, `boolean`, or `number`. Default: `null`. Returns `true` or `false`. Use `registerBlockType`.';
+    const symbols = extractDocSymbols(content);
+    expect(symbols).toContain('registerBlockType');
+    expect(symbols).not.toContain('string');
+    expect(symbols).not.toContain('boolean');
+    expect(symbols).not.toContain('number');
+    expect(symbols).not.toContain('null');
+    expect(symbols).not.toContain('true');
+    expect(symbols).not.toContain('false');
+  });
 });
 
 describe('findMissingSymbols', () => {
@@ -64,6 +77,11 @@ describe('isTestFile', () => {
   it('matches the /__tests__/ Jest-style directory', () => {
     expect(isTestFile('src/__tests__/foo.ts')).toBe(true);
     expect(isTestFile('packages/blocks/__tests__/foo.tsx')).toBe(true);
+  });
+
+  it('matches /__tests__/ case-insensitively', () => {
+    expect(isTestFile('src/__TESTS__/foo.ts')).toBe(true);
+    expect(isTestFile('src/__Tests__/foo.ts')).toBe(true);
   });
 
   it('matches *.test.{js,jsx,ts,tsx} filenames', () => {

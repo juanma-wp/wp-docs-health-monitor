@@ -1,6 +1,7 @@
 import type { CodeFile } from '../types/mapping.js';
 import type { CodeSource } from '../adapters/code-source/types.js';
 import type { ExtractedHook, ExtractedHookFile, HookKind } from './types.js';
+import { lineNumberAt } from './utils.js';
 
 export type { ExtractedHook, ExtractedHookFile, HookKind } from './types.js';
 
@@ -13,14 +14,6 @@ const JS_EXTS  = new Set(['js', 'jsx', 'ts', 'tsx']);
 function callKind(call: string): HookKind {
   if (call.startsWith('apply_filters') || call === 'applyFilters') return 'filter';
   return 'action';
-}
-
-function lineNumberAt(content: string, index: number): number {
-  let line = 1;
-  for (let i = 0; i < index; i++) {
-    if (content.charCodeAt(i) === 10) line++;
-  }
-  return line;
 }
 
 function extractLine(content: string, index: number): string {
