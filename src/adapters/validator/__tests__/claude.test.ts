@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Mock } from 'vitest';
 
 import type Anthropic from '@anthropic-ai/sdk';
-import { ClaudeValidator, isWeakSuggestion, isSelfRejected } from '../claude.js';
+import { ClaudeValidator, isWeakSuggestion, isSelfRejected, normalizeForVerbatim } from '../claude.js';
 import type { Doc } from '../../doc-source/types.js';
 import type { CodeTiers } from '../../../types/mapping.js';
 import type { CodeSource } from '../../code-source/types.js';
@@ -289,6 +289,91 @@ describe('ClaudeValidator — verbatim check', () => {
     expect(result.issues).toHaveLength(1);
     expect(result.issues[0].type).toBe('nonexistent-name');
     expect(validator.droppedHallucinations).toBe(0);
+  });
+
+  it('keeps an issue where docSays differs from doc content only in whitespace', async () => {
+    // The doc has a multi-line bullet list with newlines + indentation;
+    // the model paraphrases it as a single-line smooth quote. Pre-fix
+    // this dropped silently — the smoke-test failure mode on
+    // `block-attributes` (type/source allowed-values lists).
+    const docWithBullets =
+      '# Block Attributes\n\nThe `type` field MUST be one of the following:\n\n  - `null`\n  - `boolean`\n  - `object`\n';
+    const docSays = 'The `type` field MUST be one of the following: - `null` - `boolean` - `object`';
+    const fileContent = 'function registerBlockType(name, settings) {}';
+    const codeSays = 'function registerBlockType(name, settings)';
+
+    const pass1Response = makeReportFindingsResponse([
+      { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, docSays, codeSays } },
+    ], []);
+    const pass2Response = makeReportFindingsResponse([
+      { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, docSays, codeSays }, confidence: 0.9 },
+    ], []);
+
+    const client = makeAnthropicClient([pass1Response, pass2Response]);
+    const codeSources = makeCodeSources(fileContent);
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const result = await validator.validateDoc(
+      makeDoc({ content: docWithBullets }),
+      makeCodeTiers(),
+      codeSources,
+    );
+
+    expect(result.issues).toHaveLength(1);
+    expect(validator.droppedHallucinations).toBe(0);
+  });
+
+  it('keeps an issue where codeSays differs from file content only in whitespace', async () => {
+    // File has indented code; model quotes it without leading indent.
+    const fileContent =
+      'function registerBlockType(\n  name,\n  settings,\n) {\n  return settings;\n}';
+    const codeSays = 'function registerBlockType( name, settings, )';
+
+    const pass1Response = makeReportFindingsResponse([
+      { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays } },
+    ], []);
+    const pass2Response = makeReportFindingsResponse([
+      { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays }, confidence: 0.9 },
+    ], []);
+
+    const client = makeAnthropicClient([pass1Response, pass2Response]);
+    const codeSources = makeCodeSources(fileContent);
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
+
+    expect(result.issues).toHaveLength(1);
+    expect(validator.droppedHallucinations).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// normalizeForVerbatim — unit tests
+// ---------------------------------------------------------------------------
+
+describe('normalizeForVerbatim', () => {
+  it('collapses runs of whitespace to a single space', () => {
+    expect(normalizeForVerbatim('foo    bar')).toBe('foo bar');
+    expect(normalizeForVerbatim('foo\n\n  bar')).toBe('foo bar');
+    expect(normalizeForVerbatim('foo\tbar')).toBe('foo bar');
+  });
+
+  it('trims leading and trailing whitespace', () => {
+    expect(normalizeForVerbatim('  foo bar  ')).toBe('foo bar');
+    expect(normalizeForVerbatim('\nfoo\n')).toBe('foo');
+  });
+
+  it('does not strip comment-continuation characters', () => {
+    // PHPDoc `*` and similar are language-specific and intentionally NOT
+    // normalised here — would belong in per-site config if needed.
+    expect(normalizeForVerbatim('* foo\n * bar')).toBe('* foo * bar');
+    expect(normalizeForVerbatim('# foo\n# bar')).toBe('# foo # bar');
+  });
+
+  it('preserves substring detection across line breaks', () => {
+    const haystack = normalizeForVerbatim('one\n  - two\n  - three\n  - four');
+    const needle = normalizeForVerbatim('two - three - four');
+    expect(haystack.includes(needle)).toBe(true);
   });
 });
 

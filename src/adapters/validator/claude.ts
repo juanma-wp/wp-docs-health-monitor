@@ -270,6 +270,23 @@ export function isSelfRejected(suggestion: string): boolean {
   return SELF_REJECTION_PATTERNS.some(re => re.test(suggestion.trim()));
 }
 
+// Whitespace-tolerant normalisation for verbatim substring comparison.
+//
+// Models paraphrase multi-line content (bullet lists, indented blocks,
+// PHPDoc/JSDoc continuations) into a smooth quotable form — single
+// spaces, no line breaks, trimmed. The doc/file has the same characters
+// but with CRLF/LF, indentation, multiple spaces between bullets, etc.
+// A byte-exact `.includes()` drops these legitimate quotes (observed in
+// the smoke test on `block-attributes` and earlier on `block-patterns`).
+//
+// Generic by design: collapses runs of whitespace to a single space and
+// trims. Does NOT strip comment-continuation characters (`*` for
+// PHPDoc, `#` for Python, `///` for Rust); those are language-specific
+// concerns that belong in per-site configuration if and when needed.
+export function normalizeForVerbatim(s: string): string {
+  return s.replace(/\s+/g, ' ').trim();
+}
+
 export function isWeakSuggestion(suggestion: string): boolean {
   if (!suggestion) return true;
   const trimmed = suggestion.trim();
@@ -352,14 +369,17 @@ export class ClaudeValidator implements Validator {
       return this.buildDocResult(doc, [], positives, assembled.relatedCode, diagnostics, commitSha);
     }
 
-    // Verbatim check — both docSays and codeSays must be real quotes
+    // Verbatim check — both docSays and codeSays must be real quotes.
+    // Comparison is whitespace-tolerant (see normalizeForVerbatim) so
+    // multi-line bullet lists and continuation-line content survive.
     const verbatimPassed: RawIssue[] = [];
+    const normalizedDoc = normalizeForVerbatim(doc.content);
+    const normalizedFileCache = new Map<string, string>();
     for (const issue of pass1Issues) {
       const { codeRepo, codeFile, codeSays, docSays } = issue.evidence;
 
       // docSays must be a verbatim quote from the doc
-      const docNeedle = docSays.trim();
-      if (!doc.content.includes(docNeedle)) {
+      if (!normalizedDoc.includes(normalizeForVerbatim(docSays))) {
         this.droppedHallucinations++;
         console.warn(`[verbatim-check] dropped issue in ${doc.slug}: docSays "${docSays}" not found in doc content`);
         continue;
@@ -370,11 +390,15 @@ export class ClaudeValidator implements Validator {
         continue;
       }
       try {
-        const fileContent = await codeSources[codeRepo].readFile(codeFile);
-        const needle = codeSays.trim();
+        const cacheKey = `${codeRepo}:${codeFile}`;
+        let normalizedFile = normalizedFileCache.get(cacheKey);
+        if (normalizedFile === undefined) {
+          normalizedFile = normalizeForVerbatim(await codeSources[codeRepo].readFile(codeFile));
+          normalizedFileCache.set(cacheKey, normalizedFile);
+        }
         // nonexistent-name evidence is absence — there is no quote to find in the file
         const isAbsenceIssue = issue.type === 'nonexistent-name';
-        if (!isAbsenceIssue && !fileContent.includes(needle)) {
+        if (!isAbsenceIssue && !normalizedFile.includes(normalizeForVerbatim(codeSays))) {
           this.droppedHallucinations++;
           console.warn(`[verbatim-check] dropped issue in ${doc.slug}: codeSays "${codeSays}" not found in ${codeRepo}:${codeFile}`);
           continue;
