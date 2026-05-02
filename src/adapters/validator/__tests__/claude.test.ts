@@ -363,6 +363,19 @@ describe('normalizeForVerbatim', () => {
     expect(normalizeForVerbatim('\nfoo\n')).toBe('foo');
   });
 
+  it('strips Markdown link syntax', () => {
+    // Bare inline link
+    expect(normalizeForVerbatim('see [the docs](https://example.com)')).toBe('see the docs');
+    // Image link with alt text
+    expect(normalizeForVerbatim('![alt text](image.png)')).toBe('alt text');
+    // Link with title attribute
+    expect(normalizeForVerbatim('[text](url "title")')).toBe('text');
+    // Relative path with anchor (the block-attributes case)
+    expect(
+      normalizeForVerbatim("data is stored in the block's [comment delimiter](/docs/explanations.md#data)."),
+    ).toBe("data is stored in the block's comment delimiter.");
+  });
+
   it('does not strip comment-continuation characters', () => {
     // PHPDoc `*` and similar are language-specific and intentionally NOT
     // normalised here — would belong in per-site config if needed.
@@ -370,9 +383,29 @@ describe('normalizeForVerbatim', () => {
     expect(normalizeForVerbatim('# foo\n# bar')).toBe('# foo # bar');
   });
 
+  it('does not strip bold/italic emphasis or inline code', () => {
+    // Stripping emphasis would mangle identifiers like `__experimental`.
+    // Stripping backticks would erase the structural distinction between
+    // identifiers and prose. Both are deliberately preserved.
+    expect(normalizeForVerbatim('**bold** _italic_ ~~strike~~')).toBe('**bold** _italic_ ~~strike~~');
+    expect(normalizeForVerbatim('use `registerBlockType()` here')).toBe('use `registerBlockType()` here');
+    expect(normalizeForVerbatim('the `__experimentalFoo` API')).toBe('the `__experimentalFoo` API');
+  });
+
   it('preserves substring detection across line breaks', () => {
     const haystack = normalizeForVerbatim('one\n  - two\n  - three\n  - four');
     const needle = normalizeForVerbatim('two - three - four');
+    expect(haystack.includes(needle)).toBe(true);
+  });
+
+  it('preserves substring detection across Markdown link rendering', () => {
+    // The block-attributes regression: doc has `[comment delimiter](url)`,
+    // model paraphrases as plain `comment delimiter`. After normalisation
+    // both sides should match.
+    const haystack = normalizeForVerbatim(
+      "stored in the block's [comment delimiter](/docs/key-concepts.md#data).",
+    );
+    const needle = normalizeForVerbatim("stored in the block's comment delimiter.");
     expect(haystack.includes(needle)).toBe(true);
   });
 });

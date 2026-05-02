@@ -270,21 +270,40 @@ export function isSelfRejected(suggestion: string): boolean {
   return SELF_REJECTION_PATTERNS.some(re => re.test(suggestion.trim()));
 }
 
-// Whitespace-tolerant normalisation for verbatim substring comparison.
+// Tolerant normalisation for verbatim substring comparison.
 //
-// Models paraphrase multi-line content (bullet lists, indented blocks,
-// PHPDoc/JSDoc continuations) into a smooth quotable form — single
-// spaces, no line breaks, trimmed. The doc/file has the same characters
-// but with CRLF/LF, indentation, multiple spaces between bullets, etc.
-// A byte-exact `.includes()` drops these legitimate quotes (observed in
-// the smoke test on `block-attributes` and earlier on `block-patterns`).
+// Models paraphrase content rather than quote it byte-for-byte:
+//   1. Multi-line content (bullet lists, indented blocks, continuation
+//      lines) gets flattened to a smooth quotable form — single spaces,
+//      no line breaks.
+//   2. Markdown link syntax `[text](url)` gets rendered to plain `text`
+//      (the model writes what it visually parses, not the raw markup).
 //
-// Generic by design: collapses runs of whitespace to a single space and
-// trims. Does NOT strip comment-continuation characters (`*` for
-// PHPDoc, `#` for Python, `///` for Rust); those are language-specific
-// concerns that belong in per-site configuration if and when needed.
+// Both have produced silent drops on real docs (block-attributes
+// `source` enum lists, block-patterns `filePath` PHPDoc evidence).
+// A byte-exact `.includes()` would treat these as hallucinations even
+// though the meaningful content is identical.
+//
+// Generic by design — applies to any Markdown-based docs site:
+//   - Whitespace collapse: universal across docs/codebases.
+//   - Markdown link stripping: universal across Markdown-based docs.
+//
+// Intentionally OUT OF SCOPE:
+//   - Comment-continuation characters (`*` PHPDoc, `#` Python, `///`
+//     Rust) — language-specific; per-site configuration territory.
+//   - Bold/italic emphasis markers (`**foo**`, `__foo__`) — risk of
+//     false-merging identifiers like `__experimental`. Add only with
+//     evidence.
+//   - Inline code backticks (`` `foo` ``) — structural marker that
+//     distinguishes identifiers from prose; preserve.
 export function normalizeForVerbatim(s: string): string {
-  return s.replace(/\s+/g, ' ').trim();
+  return s
+    // Strip Markdown link syntax: [text](url) → text. Works for inline
+    // links and image alt text; ignores nested-bracket edge cases.
+    .replace(/!?\[([^\]]+)\]\([^)]*\)/g, '$1')
+    // Collapse runs of whitespace to a single space.
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 export function isWeakSuggestion(suggestion: string): boolean {
