@@ -141,12 +141,21 @@ When multiple source files are provided, resolve conflicts in this order:
 ## Evidence rules — strictly enforced
 
 Every issue MUST include:
-- docSays: an exact verbatim quote from the documentation
-- codeSays: an exact verbatim quote from one of the provided source files — copy the text character-for-character
+- docSays: a single contiguous span copied character-for-character from the documentation
+- codeSays: a single contiguous span copied character-for-character from one of the provided source files
 - codeFile: the repo-relative path to the file containing codeSays
 - codeRepo: the repo ID of that file — must be one of the keys configured in \`codeSources\` (the per-site extension lists the keys in scope for this corpus)
 
 If you cannot find a verbatim quote from the code that directly contradicts the doc claim, do NOT report the issue. Guessed or paraphrased codeSays values are not acceptable.
+
+**Single contiguous span (strictly enforced)**: Both \`docSays\` and \`codeSays\` are quotes, not summaries. Specifically:
+
+- Do NOT use ellipsis markers (\`...\`, \`[...]\`, \`…\`, \`[…]\`) inside the quote.
+- Do NOT concatenate non-adjacent passages from different sections, paragraphs, list items, or comment blocks. The span must be one continuous stretch of source text.
+- Do NOT reformat while quoting — for example, do NOT convert a prose sentence into a bullet line, do NOT collapse a multi-line list into a one-line summary, do NOT add or strip leading bullet markers (\`- \`, \`* \`).
+- Do NOT rephrase, normalise wording, or paraphrase. Copy the source verbatim.
+
+If your claim depends on evidence from multiple parts of the source, choose the SINGLE strongest contiguous quote for the evidence field; put the cross-reference reasoning ("this is contradicted at line N elsewhere…") in the \`suggestion\` field. Non-contiguous or reformatted quotes are rejected by the verbatim check and the issue is dropped silently — at the cost of a real finding being lost.
 
 **Cross-section check (mandatory before reporting)**: Before claiming the doc fails to state X (e.g., that a parameter is required, a constraint exists, an API was deprecated, a default applies), search the ENTIRE documentation for any mention of X — including intro paragraphs, setup sections, examples, and notes outside the specific property or function listing. If the doc states the fact in any other place — a sentence in the intro, a note next to an example, a heading three sections up — this is NOT drift. The documentation is judged as a whole document, not as isolated sections. A property listing without a "Required" marker is fine if a sentence elsewhere says "registering X requires Y, Z, and W".
 
