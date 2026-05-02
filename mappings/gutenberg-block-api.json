@@ -1,20 +1,17 @@
 {
   "block-metadata": {
     "primary": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/test/registration.js" },
       { "repo": "gutenberg", "path": "schemas/json/block.json" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.ts" }
+      { "repo": "gutenberg", "path": "packages/blocks/src/types.ts" },
+      { "repo": "wordpress-develop", "path": "src/wp-includes/class-wp-block-type.php" }
     ],
     "secondary": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/types.ts" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/test/registration.js" },
       { "repo": "gutenberg", "path": "lib/blocks.php" },
-      { "repo": "wordpress-develop", "path": "src/wp-includes/blocks.php" },
-      { "repo": "wordpress-develop", "path": "src/wp-includes/class-wp-block-type.php" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/store/actions.ts" }
+      { "repo": "wordpress-develop", "path": "src/wp-includes/blocks.php" }
     ],
     "context": [
-      { "repo": "gutenberg", "path": "packages/blocks/src/store/reducer.ts" },
-      { "repo": "gutenberg", "path": "packages/blocks/src/api/factory.ts" },
+      { "repo": "gutenberg", "path": "packages/blocks/src/api/registration.ts" },
       { "repo": "wordpress-develop", "path": "src/wp-includes/class-wp-block-type-registry.php" }
     ]
   },
