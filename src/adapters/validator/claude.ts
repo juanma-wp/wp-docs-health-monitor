@@ -82,8 +82,8 @@ Your job: read a documentation page and its mapped source code, then identify sp
 
 ## What does NOT count as drift — do not report these
 
-- Teaching simplifications: intentional omission of edge cases or complexity for clarity
-- Undocumented optional parameters, unless their absence would cause a reader's code to fail
+- Teaching simplifications when the simplified usage is correct and complete on its own (e.g., a doc shows a basic call signature without listing every internal generic parameter). DO report when a function has materially different overloads or usage modes that the doc fails to mention — readers may miss meaningful capabilities.
+- Undocumented optional parameters that are minor tweaks of an existing pattern. DO report when the undocumented parameter or property is a meaningful API addition: it has an \`@since\` tag indicating a recent version, it is an alternative way to use the API (e.g. \`filePath\` as an alternative to \`content\`), or it unlocks a new behavior class. These omissions hide real features from readers.
 - Style, grammar, or typos
 - Broken external links
 - If the documented behavior is a strict subset of actual behavior AND following the doc would not cause a developer's code to fail or produce a surprise, it is not drift
@@ -119,6 +119,10 @@ Every issue MUST include:
 - codeRepo: the repo ID of that file (e.g. "gutenberg" or "wordpress-develop")
 
 If you cannot find a verbatim quote from the code that directly contradicts the doc claim, do NOT report the issue. Guessed or paraphrased codeSays values are not acceptable.
+
+**Cross-section check (mandatory before reporting)**: Before claiming the doc fails to state X (e.g., that a parameter is required, a constraint exists, an API was deprecated, a default applies), search the ENTIRE documentation for any mention of X — including intro paragraphs, setup sections, examples, and notes outside the specific property or function listing. If the doc states the fact in any other place — a sentence in the intro, a note next to an example, a heading three sections up — this is NOT drift. The documentation is judged as a whole document, not as isolated sections. A property listing without a "Required" marker is fine if a sentence elsewhere says "registering X requires Y, Z, and W".
+
+**Direct contradiction requirement**: The codeSays quote must contradict the docSays claim directly and visibly. If demonstrating the contradiction requires extrapolation about behaviors, scenarios, or chained executions not literally shown in the codeSays text itself, do NOT report. Use \`fetch_code\` in Pass 2 to gather more evidence instead. The contradiction must be readable in the quoted text, not inferred from it.
 
 ## Suggestions — must be specific and structured
 
