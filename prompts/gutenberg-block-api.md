@@ -1,9 +1,27 @@
 These rules apply when validating the Gutenberg Block API Reference documentation. They encode learnings from manual review against this corpus.
 
+You are validating WordPress Block Editor documentation. The codebase backing it lives across two repos.
+
+### Repos in scope
+
+The `codeSources` configured for this corpus are:
+
+- `gutenberg` — the Gutenberg plugin (`packages/blocks/`, `packages/block-editor/`, `packages/blocks/src/api/`, …).
+- `wordpress-develop` — WordPress core (`src/wp-includes/`, `tests/phpunit/tests/blocks/`, schema files at `src/wp-includes/block-bindings/`, etc.).
+
+Every issue's `codeRepo` field must be exactly one of these two keys.
+
 ### Known internal / reserved identifiers — do not flag as missing from docs
 
 - `reusable` block category — used exclusively by `core/block` (the Reusable Block block itself). It is intentionally omitted from the public category list. Do not report it as missing.
 - Identifiers starting with `__experimental`, `__unstable`, or `_unstable` are not part of the public API. Do not flag them as undocumented or as drift.
+- Naming pattern in this corpus: doc text often uses the public name (e.g. `BlockVariationPicker`) while code exports the prefixed alias (`__experimentalBlockVariationPicker`). When the doc prose conveys experimental nature, this is not drift.
+
+### Type-label conventions in this corpus
+
+Doc prose in the Block API reference frequently uses generic type labels (`Object`, `Object[]`, `Array`) where the code exports a specific named type — e.g. `BlockVariation`, `BlockEditorSelectors`, `WPBlockType`. Both refer to the same shape; the developer's code does not break. Do not report these as drift.
+
+Schema files in `schemas/json/` (e.g. `block.json`, `theme.json`) elevate beyond the base prompt's "JSON schemas: property names + enums only" rule — see the dedicated section below.
 
 ### Short-circuit evaluation — verify before reporting
 
