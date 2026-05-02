@@ -11,6 +11,12 @@ export type ManifestEntry = z.infer<typeof ManifestEntrySchema>;
 export const CodeFileSchema = z.object({
   repo: z.string(),  // must match a key in config.codeSources — validated at pipeline startup
   path: z.string(),  // repo-relative file path
+  // Optional inclusive line range (1-indexed). When present, the Source Code
+  // bulk for this file is sliced to [start, end] instead of including the
+  // whole file. Symbol/hook/default extractors still parse the full file.
+  lines: z.tuple([z.number().int().positive(), z.number().int().positive()])
+    .refine(([s, e]) => s <= e, { message: 'lines: start must be <= end' })
+    .optional(),
 });
 export type CodeFile = z.infer<typeof CodeFileSchema>;
 

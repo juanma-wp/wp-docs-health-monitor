@@ -18,6 +18,7 @@ type FileBlock = {
   path: string;
   content: string;
   tier: 'primary' | 'secondary' | 'context';
+  lines?: [number, number];
 };
 
 export type AssembledContext = {
@@ -95,7 +96,8 @@ export function formatContextForClaude(fileBlocks: FileBlock[]): string {
   return fileBlocks
     .map(fb => {
       const lang = inferLanguage(fb.path);
-      return `### [${fb.repo}] ${fb.path}\n\`\`\`${lang}\n${fb.content}\n\`\`\``;
+      const range = fb.lines ? `  (lines ${fb.lines[0]}-${fb.lines[1]})` : '';
+      return `### [${fb.repo}] ${fb.path}${range}\n\`\`\`${lang}\n${fb.content}\n\`\`\``;
     })
     .join('\n\n');
 }
@@ -135,7 +137,9 @@ export async function assembleContext(
 
       let content: string;
       try {
-        content = await codeSources[file.repo].readFile(file.path);
+        content = file.lines
+          ? await codeSources[file.repo].readFile(file.path, file.lines[0], file.lines[1])
+          : await codeSources[file.repo].readFile(file.path);
       } catch (err) {
         const msg = `Could not read ${tierName} file ${file.repo}:${file.path}`;
         diagnostics.push(msg);
@@ -156,7 +160,13 @@ export async function assembleContext(
       }
 
       cumulativeTokens += fileTokens;
-      fileBlocks.push({ repo: file.repo, path: file.path, content, tier: tierName });
+      fileBlocks.push({
+        repo: file.repo,
+        path: file.path,
+        content,
+        tier: tierName,
+        ...(file.lines ? { lines: file.lines } : {}),
+      });
       relatedCode.push({ repo: file.repo, file: file.path, tier: tierName, includedInAnalysis: true });
     }
   }
