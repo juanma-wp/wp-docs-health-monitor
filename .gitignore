@@ -43,3 +43,6 @@ Thumbs.db
 config/*.dev.json
 
 CLAUDE.local.md
+
+# Agent runtime state — auto-created worktrees from agent isolation runs
+.claude/worktrees/
