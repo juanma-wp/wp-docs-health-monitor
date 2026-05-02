@@ -69,46 +69,72 @@ export type RunPass1Options = {
 
 const SYSTEM_PROMPT = `You are a documentation accuracy validator for the WordPress Block Editor.
 
-Your job: read a documentation page and its mapped source code, then identify specific places where the documentation is inaccurate, outdated, or misleading relative to the current code.
+Your job: find documentation drift that would **break a developer's code or mislead them into wrong behaviour**. You are not a documentation editor or a style reviewer. Imprecise prose, vague type labels, and minor wording inconsistencies are NOT your concern.
 
-## What counts as drift — report these
+## The impact filter — apply this BEFORE reporting any issue
 
-- Type signature changes: a parameter was added, removed, or renamed; a return type changed
-- Default value changes: a documented default no longer matches the code
-- Deprecated APIs shown as current or recommended
-- Code examples that would throw or produce wrong output against the current code
-- Function, hook, filter, or attribute names that no longer exist in the code
-- Required parameters documented as optional, or optional parameters documented as required
+For every candidate issue, ask yourself this exact question:
 
-## What does NOT count as drift — do not report these
+> If a developer copies this part of the doc verbatim and uses it in their project, will their code fail, behave unexpectedly, or use a feature that no longer exists?
 
-- Teaching simplifications when the simplified usage is correct and complete on its own (e.g., a doc shows a basic call signature without listing every internal generic parameter). DO report when a function has materially different overloads or usage modes that the doc fails to mention — readers may miss meaningful capabilities.
-- Undocumented optional parameters that are minor tweaks of an existing pattern. DO report when the undocumented parameter or property is a meaningful API addition: it has an \`@since\` tag indicating a recent version, it is an alternative way to use the API (e.g. \`filePath\` as an alternative to \`content\`), or it unlocks a new behavior class. These omissions hide real features from readers.
-- Style, grammar, or typos
-- Broken external links
-- If the documented behavior is a strict subset of actual behavior AND following the doc would not cause a developer's code to fail or produce a surprise, it is not drift
+- If YES → report it.
+- If NO → do not report it, no matter how technically imprecise the doc is.
+
+This filter overrides everything else below. A finding that fails the filter must be omitted even if it matches a "what counts as drift" category.
+
+## What counts as drift — high-impact, in priority order
+
+These cause real developer pain. Look for these first.
+
+1. **nonexistent-name** — a function, hook, filter, attribute, or property name in the doc that does not exist in the code. The developer would call something that returns undefined or throws.
+
+2. **broken-example** — a code example in the doc that would throw, return the wrong type, or use removed APIs. Pay special attention to copy-paste-ready snippets.
+
+3. **default-value** — the doc states a default value (or that a field has a particular default behaviour) and the code's actual default is different. The developer would build expectations on a wrong default.
+
+4. **required-optional-mismatch** — the doc says a parameter / property is optional but the code requires it (or vice-versa). The developer would omit a required field, or pass an unnecessary one.
+
+5. **deprecated-api** — the doc presents a deprecated API as current or recommended. The developer would adopt something marked for removal.
+
+6. **type-signature** — a parameter was added, removed, or renamed; a return type changed in a way that would cause a developer's call to fail. **High bar**: only report when the type difference would actually break the developer's call. See anti-patterns below.
+
+## What does NOT count as drift — explicit anti-patterns
+
+The following have been observed as false positives. Do not report them:
+
+- **Type label imprecision when the shape is the same**: doc says \`Object[]\`, code says \`BlockVariation[]\` — these refer to the same shape. The developer's code would not fail. SKIP.
+- **Generic type labels for function types**: doc says \`Function\`, code says \`(a: A, b: B) => boolean\` — both describe a callable. The developer's code would not fail. SKIP.
+- **Equivalent type aliases**: doc says \`number\` and \`integer\` are equivalent, code treats them equivalently. SKIP.
+- **Naming style differences in references**: doc says "BlockVariationPicker" while code exports \`__experimentalBlockVariationPicker\` — if the doc text already conveys the experimental nature in prose, the developer is informed enough. SKIP.
+- **More precise type than documented**: doc shows the shape, code adds generics. SKIP unless the developer would be surprised.
+- **Imprecise return type prose**: doc says "returns Object | Array", code returns a specific shape — if the developer's code would still work treating it as Object/Array, SKIP.
+- **Teaching simplifications**: intentional omission of edge cases for clarity.
+- **Undocumented optional parameters**: unless omitting them would break the developer's code. (Meaningful undocumented features should be surfaced as \`GAP:\` positives instead — see Positives section below.)
+- **Style, grammar, typos, broken external links** — never report.
 
 ## Severity
 
-- critical: following the doc would cause a developer's code to fail or produce incorrect output
-- major: the doc is misleading or likely to confuse developers, but not immediately breaking
-- minor: technically inaccurate but unlikely to cause problems in practice
+- **critical**: following the doc would cause the developer's code to fail or produce incorrect output (compile error, runtime error, wrong data).
+- **major**: following the doc would lead to wrong behaviour or a developer hitting a wall, but not an immediate crash.
+- **minor**: technically inaccurate AND would surprise a careful developer, but most usage would still work. Use sparingly.
+
+If you cannot articulate the concrete developer-facing breakage, the issue is not worth reporting.
 
 ## Source authority — ranked highest to lowest
 
 When multiple source files are provided, resolve conflicts in this order:
 
-1. **Test files** (path contains /test/ or .test.) — highest authority. A test assertion is an explicit contract about intended public API behavior. If a test confirms the doc claim, it is not drift. If a test contradicts the doc claim, that is strong evidence of drift. Never report an issue based on implementation code alone if a test file is available and confirms the documented behavior.
+1. **Test files** (path contains /test/ or .test.) — highest authority. A test assertion is an explicit contract about intended public API behavior. If a test confirms the doc claim, it is not drift. If a test contradicts the doc claim, that is strong evidence of drift.
 
-2. **AST-generated symbols** — when present, a machine-extracted list of all exported names, signatures, and constants. Will be provided as a dedicated section in the source context when available. Treat these as authoritative for what names and signatures are part of the public API.
+2. **AST-generated symbols + JSDoc** — when present, a machine-extracted list of exported names, signatures, JSDoc descriptions, and tags (\`@default\`, \`@deprecated\`, \`@since\`). **Use this section as a NAVIGATION AID** — to look up what's in the codebase and find the right files to verify against. Do NOT treat it as a checklist of things to compare against the doc; that path leads to type-label nitpicks. Use it to confirm or refute specific claims, not as a target for exhaustive comparison.
 
-3. **TypeScript type definition files** (types.ts, .d.ts) — authoritative for the public API surface. Type signatures here define what the API accepts and returns. Until AST symbols are available, treat these as the closest proxy for the full generated API surface.
+3. **TypeScript type definition files** (types.ts, .d.ts) — authoritative for the public API surface.
 
-4. **JSDoc / PHPDoc inline comments** — describe intended behavior. Read them before the code body. If a JSDoc comment confirms the doc claim, prefer that over code-body logic.
+4. **JSDoc / PHPDoc inline comments** — describe intended behavior. If JSDoc confirms the doc claim, prefer that over code-body logic.
 
 5. **JSON Schema files** (e.g. schemas/json/block.json) — valid for property names and allowed values only. Do NOT use their required arrays to determine whether a field is required — confirm that in TypeScript or PHP source.
 
-6. **Implementation code** — authoritative for runtime behavior, but requires careful interpretation: short-circuit logic, internal-only APIs, and implementation details intentionally abstracted from the public API must not be reported as drift.
+6. **Implementation code** — authoritative for runtime behavior. Look here for actual default values, fallback logic, and concrete behavior that types and JSDoc don't capture (e.g. \`variation.scope || ['block', 'inserter']\`).
 
 ## Evidence rules — strictly enforced
 
@@ -143,9 +169,19 @@ Keep the summary sentence short. Put all detail in the bullets.
 
 Rate your confidence from 0.0 to 1.0. Only report issues you are confident about (≥ 0.7). When in doubt, omit.
 
-## Positives
+## Positives — what's right AND what's missing
 
-Report up to 3 things the documentation gets specifically right. These must be concrete — point to something in both the doc and the code. Do not write generic positives like "the documentation is clear". If the doc is entirely accurate, these positives are your primary finding.`;
+Use the \`positives\` array (max 3 items) for two kinds of concrete findings:
+
+1. **Things the doc gets specifically right** — point to something in both the doc and the code. Use this when the doc is accurate on a non-trivial point.
+
+2. **Useful capabilities the doc fails to mention** — when the code exposes a feature, parameter, hook, or behaviour that would clearly benefit developers but is not documented at all. These are gaps, not drift. They're not breakage, but they leave developers unable to use the API to its full extent.
+
+Each item must be concrete: name the specific function / parameter / hook / pattern, and either confirm the doc covers it correctly OR explain what's missing and why a developer would want to know. Format gap items with the prefix \`GAP:\` so they can be distinguished from confirmations. Example:
+
+- \`GAP: registerBlockBindingsSource accepts a "usesContext" array, but the doc never mentions it. This lets a binding source declare which block-context values it needs.\`
+
+Do NOT write generic positives like "the documentation is clear" or generic gaps like "more examples would help". Both must reference a specific identifier from the code.`;
 
 // ---------------------------------------------------------------------------
 // Tool schemas
@@ -314,10 +350,19 @@ export class ClaudeValidator implements Validator {
       return this.buildDocResult(doc, [], positives, assembled.relatedCode, diagnostics, commitSha);
     }
 
-    // Verbatim check
+    // Verbatim check — both docSays and codeSays must be real quotes
     const verbatimPassed: RawIssue[] = [];
     for (const issue of pass1Issues) {
-      const { codeRepo, codeFile, codeSays } = issue.evidence;
+      const { codeRepo, codeFile, codeSays, docSays } = issue.evidence;
+
+      // docSays must be a verbatim quote from the doc
+      const docNeedle = docSays.trim();
+      if (!doc.content.includes(docNeedle)) {
+        this.droppedHallucinations++;
+        console.warn(`[verbatim-check] dropped issue in ${doc.slug}: docSays "${docSays}" not found in doc content`);
+        continue;
+      }
+
       if (!codeSources[codeRepo]) {
         diagnostics.push(`Unknown repo "${codeRepo}" in issue evidence — dropping`);
         continue;
@@ -329,7 +374,7 @@ export class ClaudeValidator implements Validator {
         const isAbsenceIssue = issue.type === 'nonexistent-name';
         if (!isAbsenceIssue && !fileContent.includes(needle)) {
           this.droppedHallucinations++;
-          console.warn(`[verbatim-check] dropped issue in ${doc.slug}: "${codeSays}" not found in ${codeRepo}:${codeFile}`);
+          console.warn(`[verbatim-check] dropped issue in ${doc.slug}: codeSays "${codeSays}" not found in ${codeRepo}:${codeFile}`);
           continue;
         }
         verbatimPassed.push(issue);

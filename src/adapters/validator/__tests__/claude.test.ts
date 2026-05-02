@@ -207,6 +207,55 @@ describe('ClaudeValidator — verbatim check', () => {
     expect(validator.droppedHallucinations).toBe(0);
   });
 
+  it('drops an issue where docSays is NOT a substring of the doc content', async () => {
+    const pass1Response = makeReportFindingsResponse([
+      {
+        ...BASE_ISSUE,
+        evidence: {
+          ...BASE_ISSUE.evidence,
+          docSays: 'THIS QUOTE NEVER APPEARS IN THE DOC',
+        },
+      },
+    ], []);
+
+    // Pass 2 should never run for this issue
+    const pass2Response = makeReportFindingsResponse([], []);
+
+    const client = makeAnthropicClient([pass1Response, pass2Response]);
+    const codeSources = makeCodeSources();
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
+
+    expect(result.issues).toHaveLength(0);
+    expect(validator.droppedHallucinations).toBe(1);
+  });
+
+  it('drops a hallucinated docSays even on a nonexistent-name issue', async () => {
+    // Absence-of-code is allowed for nonexistent-name, but the doc quote must still be real
+    const pass1Response = makeReportFindingsResponse([
+      {
+        ...BASE_ISSUE,
+        type: 'nonexistent-name',
+        evidence: {
+          ...BASE_ISSUE.evidence,
+          docSays: 'INVENTED DOC QUOTE',
+          codeSays: 'somethingMissing',
+        },
+      },
+    ], []);
+
+    const pass2Response = makeReportFindingsResponse([], []);
+    const client = makeAnthropicClient([pass1Response, pass2Response]);
+    const codeSources = makeCodeSources();
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
+
+    expect(result.issues).toHaveLength(0);
+    expect(validator.droppedHallucinations).toBe(1);
+  });
+
   it('passes a nonexistent-name issue through even when codeSays is not in the file', async () => {
     // The API named in codeSays genuinely does not exist in the file — that IS the finding
     const pass1Response = makeReportFindingsResponse([

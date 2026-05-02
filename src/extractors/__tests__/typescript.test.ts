@@ -31,7 +31,7 @@ export function external(): void {}
     expect(symbols[0].name).toBe('external');
   });
 
-  it('extracts exported interface with properties and methods', () => {
+  it('extracts exported interface with structured members', () => {
     const src = `
 export interface BlockVariation {
   title: string;
@@ -43,8 +43,11 @@ export interface BlockVariation {
     expect(symbols).toHaveLength(1);
     expect(symbols[0].kind).toBe('interface');
     expect(symbols[0].name).toBe('BlockVariation');
-    expect(symbols[0].signature).toContain('title: string');
-    expect(symbols[0].signature).toContain('scope?: BlockVariationScope[]');
+    expect(symbols[0].signature).toBe('BlockVariation');
+    expect(symbols[0].members).toHaveLength(3);
+    expect(symbols[0].members?.[0].signature).toBe('title: string');
+    expect(symbols[0].members?.[1].signature).toBe('scope?: BlockVariationScope[]');
+    expect(symbols[0].members?.[2].signature).toContain('isActive(blockAttributes: Record<string, unknown>): boolean');
   });
 
   it('extracts exported type alias', () => {
@@ -92,12 +95,10 @@ export interface BlockVariation {
     expect(symbols[0].signature).toContain('...args: unknown[]');
   });
 
-  it('captures JSDoc block above an exported function', () => {
+  it('captures JSDoc description above an exported function', () => {
     const src = `
 /**
  * Registers a new block type.
- * @param name - The block name.
- * @returns The registered block.
  */
 export function registerBlockType(name: string): BlockType {
   return null as any;
@@ -105,28 +106,13 @@ export function registerBlockType(name: string): BlockType {
 `;
     const symbols = extractSymbolsFromSource(src, 'registration.ts');
     expect(symbols).toHaveLength(1);
-    expect(symbols[0].docComment).toBeDefined();
-    expect(symbols[0].docComment).toContain('Registers a new block type.');
-    expect(symbols[0].docComment).toContain('@param name');
-    expect(symbols[0].docComment).toContain('@returns');
+    expect(symbols[0].jsdoc?.description).toBe('Registers a new block type.');
   });
 
-  it('captures @deprecated tag on an exported const', () => {
-    const src = `
-/**
- * @deprecated Use newApi instead.
- */
-export const oldApi: () => void = () => {};
-`;
-    const symbols = extractSymbolsFromSource(src, 'api.ts');
-    expect(symbols[0].docComment).toContain('@deprecated');
-    expect(symbols[0].docComment).toContain('Use newApi instead.');
-  });
-
-  it('leaves docComment undefined when no JSDoc is present', () => {
+  it('leaves jsdoc undefined when no JSDoc is present', () => {
     const src = `export function noDoc(): void {}`;
     const symbols = extractSymbolsFromSource(src, 'foo.ts');
-    expect(symbols[0].docComment).toBeUndefined();
+    expect(symbols[0].jsdoc).toBeUndefined();
   });
 
   it('attaches the same JSDoc to every const in a multi-declaration statement', () => {
@@ -136,8 +122,98 @@ export const A = 1, B = 2;
 `;
     const symbols = extractSymbolsFromSource(src, 'consts.ts');
     expect(symbols).toHaveLength(2);
-    expect(symbols[0].docComment).toContain('Shared doc.');
-    expect(symbols[1].docComment).toContain('Shared doc.');
+    expect(symbols[0].jsdoc?.description).toBe('Shared doc.');
+    expect(symbols[1].jsdoc?.description).toBe('Shared doc.');
+  });
+});
+
+describe('extractSymbolsFromSource — JSDoc capture', () => {
+  it('captures @deprecated tag on a function', () => {
+    const src = `
+/**
+ * Registers a new block.
+ * @deprecated Use registerBlockTypeFromMetadata instead
+ */
+export function registerBlockType(name: string): void {}
+`;
+    const symbols = extractSymbolsFromSource(src, 'registration.ts');
+    expect(symbols[0].jsdoc).toBeDefined();
+    expect(symbols[0].jsdoc?.description).toBe('Registers a new block.');
+    expect(symbols[0].jsdoc?.deprecated).toBe('Use registerBlockTypeFromMetadata instead');
+  });
+
+  it('captures bare @deprecated marker (empty value)', () => {
+    const src = `
+/**
+ * @deprecated
+ */
+export function oldFn(): void {}
+`;
+    const symbols = extractSymbolsFromSource(src, 'foo.ts');
+    expect(symbols[0].jsdoc?.deprecated).toBe('');
+  });
+
+  it('captures prose description on a type alias', () => {
+    const src = `
+/**
+ * The icon for a block — can be a string, a React element, or a component.
+ */
+export type Icon = string | ReactElement | ComponentType;
+`;
+    const symbols = extractSymbolsFromSource(src, 'types.ts');
+    expect(symbols[0].jsdoc?.description).toBe(
+      'The icon for a block — can be a string, a React element, or a component.'
+    );
+  });
+
+  it('captures @default and description on interface members', () => {
+    const src = `
+export interface BlockVariation {
+  /**
+   * The unique and machine-readable name.
+   */
+  name: string;
+  /**
+   * The list of scopes where the variation is applicable.
+   * @default ['block', 'inserter']
+   */
+  scope?: BlockVariationScope[];
+  /**
+   * @since 5.9.0
+   */
+  isDefault?: boolean;
+}
+`;
+    const symbols = extractSymbolsFromSource(src, 'types.ts');
+    expect(symbols[0].members).toHaveLength(3);
+
+    expect(symbols[0].members?.[0].jsdoc?.description).toBe('The unique and machine-readable name.');
+
+    expect(symbols[0].members?.[1].jsdoc?.description).toBe(
+      'The list of scopes where the variation is applicable.'
+    );
+    expect(symbols[0].members?.[1].jsdoc?.default).toBe("['block', 'inserter']");
+
+    expect(symbols[0].members?.[2].jsdoc?.since).toBe('5.9.0');
+  });
+
+  it('leaves jsdoc undefined for symbols with no JSDoc comment', () => {
+    const src = `export function plain(): void {}`;
+    const symbols = extractSymbolsFromSource(src, 'plain.ts');
+    expect(symbols[0].jsdoc).toBeUndefined();
+  });
+
+  it('handles interface with mixed member JSDoc presence', () => {
+    const src = `
+export interface Mixed {
+  /** Documented. */
+  a: string;
+  b: number;
+}
+`;
+    const symbols = extractSymbolsFromSource(src, 'mixed.ts');
+    expect(symbols[0].members?.[0].jsdoc?.description).toBe('Documented.');
+    expect(symbols[0].members?.[1].jsdoc).toBeUndefined();
   });
 });
 
@@ -173,30 +249,82 @@ describe('formatSymbolsAsText', () => {
     expect(text).toContain('\n\n');
   });
 
-  it('renders docComment indented above the signature when present', () => {
+  it('renders JSDoc description and @default below a top-level symbol', () => {
     const files: ExtractedFile[] = [
       {
         repo: 'gutenberg',
-        path: 'packages/blocks/src/api/registration.ts',
+        path: 'foo.ts',
         symbols: [
           {
             kind: 'function',
-            name: 'registerBlockType',
-            signature: 'registerBlockType(name: string): void',
-            docComment: '/**\n * Registers a block.\n * @deprecated\n */',
+            name: 'foo',
+            signature: 'foo(): void',
+            jsdoc: { description: 'Does the foo thing.', deprecated: 'Use bar' },
+          },
+        ],
+      },
+    ];
+
+    const text = formatSymbolsAsText(files);
+    expect(text).toContain('  foo(): void');
+    expect(text).toContain('    Does the foo thing.');
+    expect(text).toContain('    @deprecated Use bar');
+  });
+
+  it('renders interface members with their JSDoc indented under the member', () => {
+    const files: ExtractedFile[] = [
+      {
+        repo: 'gutenberg',
+        path: 'types.ts',
+        symbols: [
+          {
+            kind: 'interface',
+            name: 'BlockVariation',
+            signature: 'BlockVariation',
+            members: [
+              {
+                name: 'scope',
+                signature: 'scope?: BlockVariationScope[]',
+                jsdoc: {
+                  description: 'The list of scopes where the variation is applicable.',
+                  default: "['block', 'inserter']",
+                },
+              },
+              { name: 'title', signature: 'title: string' },
+            ],
+          },
+        ],
+      },
+    ];
+
+    const text = formatSymbolsAsText(files);
+    expect(text).toContain('  BlockVariation {');
+    expect(text).toContain('    scope?: BlockVariationScope[]');
+    expect(text).toContain('      The list of scopes where the variation is applicable.');
+    expect(text).toContain("      @default ['block', 'inserter']");
+    expect(text).toContain('    title: string');
+    expect(text).toContain('  }');
+  });
+
+  it('falls back to raw docComment when jsdoc is absent (PHP extractor compat)', () => {
+    const files: ExtractedFile[] = [
+      {
+        repo: 'wordpress-develop',
+        path: 'wp-includes/blocks.php',
+        symbols: [
+          {
+            kind: 'function',
+            name: 'register_block_type',
+            signature: 'register_block_type(string $name): WP_Block_Type|false',
+            docComment: '/**\n * Registers a block type.\n * @deprecated\n */',
           },
         ],
       },
     ];
     const text = formatSymbolsAsText(files);
-    const lines = text.split('\n');
-    const sigIdx  = lines.findIndex(l => l.includes('registerBlockType('));
-    const docIdx  = lines.findIndex(l => l.includes('Registers a block.'));
-    const depIdx  = lines.findIndex(l => l.includes('@deprecated'));
-    expect(docIdx).toBeGreaterThan(-1);
-    expect(depIdx).toBeGreaterThan(-1);
-    expect(docIdx).toBeLessThan(sigIdx);
-    expect(depIdx).toBeLessThan(sigIdx);
-    expect(lines[docIdx]?.startsWith('  ')).toBe(true);
+    expect(text).toContain('  register_block_type(');
+    expect(text).toContain('    /**');
+    expect(text).toContain('     * Registers a block type.');
+    expect(text).toContain('     * @deprecated');
   });
 });
