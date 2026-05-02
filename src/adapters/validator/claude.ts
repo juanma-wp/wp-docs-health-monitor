@@ -535,6 +535,39 @@ ${sourceCodeBlock}${missingSymbolsHint}`;
 
     for (const block of response.content) {
       if (block.type === 'tool_use' && block.name === 'report_findings') {
+        // TEMP DIAGNOSTIC: capture Pass 1 raw shape when DUMP_PASS1=1
+        // Used to investigate the block-patterns "1787 malformed evidence" event.
+        // Remove after the structural fix lands.
+        if (process.env.DUMP_PASS1) {
+          const inp = block.input as Record<string, unknown> | undefined;
+          const issues = inp?.issues as unknown;
+          const issuesType = Array.isArray(issues) ? 'array' : typeof issues;
+          const issuesLen = Array.isArray(issues)
+            ? issues.length
+            : (typeof issues === 'string' ? issues.length : 'n/a');
+          console.warn(
+            `[pass1-dump] stop_reason=${response.stop_reason} issuesType=${issuesType} length=${issuesLen} outTok=${response.usage.output_tokens}`,
+          );
+          try {
+            const fs = await import('fs');
+            const path = await import('path');
+            const dir = '/tmp/wp-docs-pass1-dump';
+            fs.mkdirSync(dir, { recursive: true });
+            const ts = Date.now();
+            fs.writeFileSync(
+              path.join(dir, `pass1-${ts}.json`),
+              JSON.stringify({
+                stop_reason: response.stop_reason,
+                usage:       response.usage,
+                inputType:   typeof block.input,
+                inputIsArray: Array.isArray(block.input),
+                input:       block.input,
+              }, null, 2),
+            );
+          } catch {
+            // ignore — diagnostic only
+          }
+        }
         return block.input as ReportFindingsInput;
       }
     }
