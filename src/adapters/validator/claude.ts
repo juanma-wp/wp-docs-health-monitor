@@ -189,7 +189,14 @@ Do NOT write generic positives like "the documentation is clear" or generic gaps
 // Tool schemas
 // ---------------------------------------------------------------------------
 
-const REPORT_FINDINGS_TOOL: Anthropic.Tool = {
+// Cap on issues per doc per Pass 1. Encoded on the tool schema rather
+// than in the prompt: structural caps belong with the schema, prose
+// caps drift. The 1,787-malformed-evidence event on `block-patterns`
+// (run 20260502-124630) showed what happens when a degenerate output
+// has no schema-level brake.
+export const PASS1_MAX_ISSUES = 10;
+
+export const REPORT_FINDINGS_TOOL: Anthropic.Tool = {
   name: 'report_findings',
   description: 'Report all drift issues and positives found in the documentation.',
   input_schema: {
@@ -198,6 +205,7 @@ const REPORT_FINDINGS_TOOL: Anthropic.Tool = {
     properties: {
       issues: {
         type: 'array',
+        maxItems: PASS1_MAX_ISSUES,
         items: {
           type: 'object',
           required: ['severity', 'type', 'evidence', 'suggestion', 'confidence'],
@@ -554,7 +562,10 @@ ${sourceCodeBlock}${missingSymbolsHint}`;
   ): Promise<ReportFindingsInput> {
     const response = await this.anthropic.messages.create({
       model:      this.pass1Model,
-      max_tokens: 4096,
+      // 8192 sized for up to PASS1_MAX_ISSUES issues × structured
+      // suggestion (~500 tokens each) + positives + slack. 4096 was
+      // tight on multi-issue docs and contributed to truncation.
+      max_tokens: 8192,
       ...(temperature !== undefined ? { temperature } : {}),
       system: [
         {

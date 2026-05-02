@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Mock } from 'vitest';
 
 import type Anthropic from '@anthropic-ai/sdk';
-import { ClaudeValidator, isWeakSuggestion, isSelfRejected, normalizeForVerbatim } from '../claude.js';
+import { ClaudeValidator, isWeakSuggestion, isSelfRejected, normalizeForVerbatim, REPORT_FINDINGS_TOOL, PASS1_MAX_ISSUES } from '../claude.js';
 import type { Doc } from '../../doc-source/types.js';
 import type { CodeTiers } from '../../../types/mapping.js';
 import type { CodeSource } from '../../code-source/types.js';
@@ -350,6 +350,34 @@ describe('ClaudeValidator — verbatim check', () => {
 // ---------------------------------------------------------------------------
 // normalizeForVerbatim — unit tests
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// REPORT_FINDINGS_TOOL — schema-level caps
+// ---------------------------------------------------------------------------
+
+describe('REPORT_FINDINGS_TOOL schema', () => {
+  // Pinned because the cap is structural — encoded on the tool schema
+  // rather than in the system prompt. Any future schema rewrite must
+  // preserve it; otherwise we re-open the 1,787-malformed-evidence
+  // failure mode that this PR was designed to prevent.
+  it('caps issues array at PASS1_MAX_ISSUES via schema maxItems', () => {
+    const schema = REPORT_FINDINGS_TOOL.input_schema as {
+      properties: {
+        issues:    { maxItems?: number };
+        positives: { maxItems?: number };
+      };
+    };
+    expect(schema.properties.issues.maxItems).toBe(PASS1_MAX_ISSUES);
+    expect(PASS1_MAX_ISSUES).toBe(10);
+  });
+
+  it('keeps positives capped at 3 (unchanged)', () => {
+    const schema = REPORT_FINDINGS_TOOL.input_schema as {
+      properties: { positives: { maxItems?: number } };
+    };
+    expect(schema.properties.positives.maxItems).toBe(3);
+  });
+});
 
 describe('normalizeForVerbatim', () => {
   it('collapses runs of whitespace to a single space', () => {
