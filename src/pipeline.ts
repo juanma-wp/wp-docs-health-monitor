@@ -121,7 +121,27 @@ export async function runPipeline(config: Config, options: RunPipelineOptions = 
         };
       }
 
-      return validator.validateDoc(doc, codeTiers, codeSources);
+      try {
+        return await validator.validateDoc(doc, codeTiers, codeSources);
+      } catch (err) {
+        // A validator throw must not abort the whole run — emit a critical
+        // DocResult with the error in diagnostics so the run still completes.
+        console.warn(`[pipeline] validator failed for ${doc.slug}: ${String(err)}`);
+        return {
+          slug:        doc.slug,
+          title:       doc.title,
+          parent:      doc.parent,
+          sourceUrl:   doc.sourceUrl,
+          healthScore: 0,
+          status:      'critical' as const,
+          issues:      [],
+          positives:   [],
+          relatedCode: [],
+          diagnostics: [`Validator failed: ${(err as Error).message ?? String(err)}`],
+          commitSha:   '',
+          analyzedAt:  new Date().toISOString(),
+        };
+      }
     }),
   );
 
