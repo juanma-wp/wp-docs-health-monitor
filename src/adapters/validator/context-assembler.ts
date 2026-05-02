@@ -3,9 +3,13 @@ import type { CodeTiers, CodeFile } from '../../types/mapping.js';
 import type { DocResult } from '../../types/results.js';
 import type { CodeSource } from '../code-source/types.js';
 import { extractSymbolsFromFiles } from '../../extractors/typescript.js';
-import type { ExtractedFile } from '../../extractors/types.js';
+import { extractPhpSymbolsFromFiles } from '../../extractors/php.js';
+import { extractHooksFromFiles } from '../../extractors/hooks.js';
+import { extractDefaultsFromFiles } from '../../extractors/defaults.js';
+import { extractSchemasFromFiles, isSchemaFile } from '../../extractors/schemas.js';
+import type { ExtractedFile, ExtractedHookFile, ExtractedDefaultFile, ExtractedSchema } from '../../extractors/types.js';
 
-export type { ExtractedFile };
+export type { ExtractedFile, ExtractedHookFile, ExtractedDefaultFile, ExtractedSchema };
 
 const TOKEN_BUDGET = 50_000;
 
@@ -14,6 +18,7 @@ type FileBlock = {
   path: string;
   content: string;
   tier: 'primary' | 'secondary' | 'context';
+  lines?: [number, number];
 };
 
 export type AssembledContext = {
@@ -23,6 +28,9 @@ export type AssembledContext = {
   diagnostics: string[];
   missingSymbols: string[];
   extractedSymbols: ExtractedFile[];
+  extractedHooks: ExtractedHookFile[];
+  extractedDefaults: ExtractedDefaultFile[];
+  extractedSchemas: ExtractedSchema[];
 };
 
 function inferLanguage(filePath: string): string {
@@ -52,12 +60,41 @@ function estimateTokens(content: string): number {
   return Math.ceil(content.length / 4);
 }
 
-// Extract backtick-wrapped identifiers from doc markdown (e.g. `registerBlockType`)
+// Match files whose path identifies them as tests:
+//   - segments named `test`, `tests`, `__tests__` (e.g. `src/api/test/foo.js`,
+//     `tests/phpunit/foo.php`, `src/__tests__/foo.ts`)
+//   - filenames ending `.test.{js,jsx,ts,tsx}` or `.spec.{js,jsx,ts,tsx}`
+//
+// Used by the dropBodies path so test files (system-prompt authority #1)
+// survive even when the implementation Source Code bulk is omitted.
+export function isTestFile(path: string): boolean {
+  return (
+    /(^|\/)tests?\//i.test(path) ||
+    /(^|\/)__tests__\//i.test(path) ||
+    /\.test\.[jt]sx?$/i.test(path) ||
+    /\.spec\.[jt]sx?$/i.test(path)
+  );
+}
+
+// Backticked tokens that are JS / PHP primitive type names or literal values.
+// These appear constantly in WordPress docs (e.g. ``Type: `string` ``, ``Default: `null` ``)
+// and are NEVER actual exported identifiers. Excluding them halves the noise
+// in `missingSymbols` without affecting real `nonexistent-name` detection.
+const PRIMITIVE_LITERALS_DENYLIST = new Set([
+  'true', 'false', 'null', 'undefined', 'void',
+  'string', 'boolean', 'number', 'integer', 'object', 'array', 'function',
+]);
+
+// Extract backtick-wrapped identifiers from doc markdown (e.g. `registerBlockType`).
+// Skips primitive type names and literal values to keep the missingSymbols hint
+// focused on real candidate identifiers.
 export function extractDocSymbols(docContent: string): string[] {
   const matches = docContent.matchAll(/`([^`\s][^`]*[^`\s]|[^`\s])`/g);
   const seen = new Set<string>();
   for (const [, symbol] of matches) {
-    if (symbol) seen.add(symbol);
+    if (!symbol) continue;
+    if (PRIMITIVE_LITERALS_DENYLIST.has(symbol)) continue;
+    seen.add(symbol);
   }
   return [...seen];
 }
@@ -72,7 +109,8 @@ export function formatContextForClaude(fileBlocks: FileBlock[]): string {
   return fileBlocks
     .map(fb => {
       const lang = inferLanguage(fb.path);
-      return `### [${fb.repo}] ${fb.path}\n\`\`\`${lang}\n${fb.content}\n\`\`\``;
+      const range = fb.lines ? `  (lines ${fb.lines[0]}-${fb.lines[1]})` : '';
+      return `### [${fb.repo}] ${fb.path}${range}\n\`\`\`${lang}\n${fb.content}\n\`\`\``;
     })
     .join('\n\n');
 }
@@ -96,6 +134,14 @@ export async function assembleContext(
 
   for (const { name: tierName, files } of tiers) {
     for (const file of files) {
+      // Schema files (.json) are surfaced through the dedicated Schemas
+      // section, not the Source Code bulk. Record as included in analysis
+      // and skip the fileBlocks/budget path.
+      if (isSchemaFile(file.path)) {
+        relatedCode.push({ repo: file.repo, file: file.path, tier: tierName, includedInAnalysis: true });
+        continue;
+      }
+
       // If budget is already exceeded for non-primary tiers, mark as excluded
       if (budgetExceeded && tierName !== 'primary') {
         relatedCode.push({ repo: file.repo, file: file.path, tier: tierName, includedInAnalysis: false });
@@ -104,7 +150,9 @@ export async function assembleContext(
 
       let content: string;
       try {
-        content = await codeSources[file.repo].readFile(file.path);
+        content = file.lines
+          ? await codeSources[file.repo].readFile(file.path, file.lines[0], file.lines[1])
+          : await codeSources[file.repo].readFile(file.path);
       } catch (err) {
         const msg = `Could not read ${tierName} file ${file.repo}:${file.path}`;
         diagnostics.push(msg);
@@ -125,7 +173,13 @@ export async function assembleContext(
       }
 
       cumulativeTokens += fileTokens;
-      fileBlocks.push({ repo: file.repo, path: file.path, content, tier: tierName });
+      fileBlocks.push({
+        repo: file.repo,
+        path: file.path,
+        content,
+        tier: tierName,
+        ...(file.lines ? { lines: file.lines } : {}),
+      });
       relatedCode.push({ repo: file.repo, file: file.path, tier: tierName, includedInAnalysis: true });
     }
   }
@@ -135,7 +189,12 @@ export async function assembleContext(
     ...codeTiers.secondary,
     ...codeTiers.context,
   ];
-  const extractedSymbols = await extractSymbolsFromFiles(allMappedFiles, codeSources);
+  const tsSymbols  = await extractSymbolsFromFiles(allMappedFiles, codeSources);
+  const phpSymbols = await extractPhpSymbolsFromFiles(allMappedFiles, codeSources);
+  const extractedSymbols = [...tsSymbols, ...phpSymbols];
+  const extractedHooks    = await extractHooksFromFiles(allMappedFiles, codeSources);
+  const extractedDefaults = await extractDefaultsFromFiles(allMappedFiles, codeSources);
+  const extractedSchemas  = await extractSchemasFromFiles(allMappedFiles, codeSources);
 
   const symbols = extractDocSymbols(doc.content);
   const missingSymbols = findMissingSymbols(symbols, fileBlocks);
@@ -147,5 +206,8 @@ export async function assembleContext(
     diagnostics,
     missingSymbols,
     extractedSymbols,
+    extractedHooks,
+    extractedDefaults,
+    extractedSchemas,
   };
 }

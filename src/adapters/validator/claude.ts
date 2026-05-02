@@ -5,8 +5,11 @@ import type { CodeTiers } from '../../types/mapping.js';
 import type { DocResult, Issue } from '../../types/results.js';
 import type { CodeSource } from '../code-source/types.js';
 import type { Validator } from './types.js';
-import { assembleContext, formatContextForClaude } from './context-assembler.js';
+import { assembleContext, formatContextForClaude, isTestFile } from './context-assembler.js';
 import { formatSymbolsAsText } from '../../extractors/typescript.js';
+import { formatHooksAsText } from '../../extractors/hooks.js';
+import { formatDefaultsAsText } from '../../extractors/defaults.js';
+import { formatSchemasAsText } from '../../extractors/schemas.js';
 import { scoreDoc } from '../../health-scorer.js';
 import { fingerprintIssue } from '../../history.js';
 
@@ -46,6 +49,18 @@ type FetchCodeInput = {
   path:      string;
   startLine: number;
   endLine:   number;
+};
+
+export type Pass1Candidate = RawIssue;
+
+export type RunPass1Result = {
+  candidates: Pass1Candidate[];
+  positives:  string[];
+};
+
+export type RunPass1Options = {
+  dropBodies?:  boolean;
+  temperature?: number;
 };
 
 // ---------------------------------------------------------------------------
@@ -94,7 +109,7 @@ The following have been observed as false positives. Do not report them:
 - **More precise type than documented**: doc shows the shape, code adds generics. SKIP unless the developer would be surprised.
 - **Imprecise return type prose**: doc says "returns Object | Array", code returns a specific shape — if the developer's code would still work treating it as Object/Array, SKIP.
 - **Teaching simplifications**: intentional omission of edge cases for clarity.
-- **Undocumented optional parameters**: unless omitting them would break the developer's code.
+- **Undocumented optional parameters**: unless omitting them would break the developer's code. (Meaningful undocumented features should be surfaced as \`GAP:\` positives instead — see Positives section below.)
 - **Style, grammar, typos, broken external links** — never report.
 
 ## Severity
@@ -130,6 +145,10 @@ Every issue MUST include:
 - codeRepo: the repo ID of that file (e.g. "gutenberg" or "wordpress-develop")
 
 If you cannot find a verbatim quote from the code that directly contradicts the doc claim, do NOT report the issue. Guessed or paraphrased codeSays values are not acceptable.
+
+**Cross-section check (mandatory before reporting)**: Before claiming the doc fails to state X (e.g., that a parameter is required, a constraint exists, an API was deprecated, a default applies), search the ENTIRE documentation for any mention of X — including intro paragraphs, setup sections, examples, and notes outside the specific property or function listing. If the doc states the fact in any other place — a sentence in the intro, a note next to an example, a heading three sections up — this is NOT drift. The documentation is judged as a whole document, not as isolated sections. A property listing without a "Required" marker is fine if a sentence elsewhere says "registering X requires Y, Z, and W".
+
+**Direct contradiction requirement**: The codeSays quote must contradict the docSays claim directly and visibly. If demonstrating the contradiction requires extrapolation about behaviors, scenarios, or chained executions not literally shown in the codeSays text itself, do NOT report. Use \`fetch_code\` in Pass 2 to gather more evidence instead. The contradiction must be readable in the quoted text, not inferred from it.
 
 ## Suggestions — must be specific and structured
 
@@ -316,25 +335,7 @@ export class ClaudeValidator implements Validator {
     }
 
     // Build user message content
-    const codeContext = formatContextForClaude(assembled.fileBlocks);
-    const symbolsText = formatSymbolsAsText(assembled.extractedSymbols);
-    const symbolsSection = symbolsText
-      ? `\n\n---\n\n## Exported API symbols\n\n${symbolsText}`
-      : '';
-    const missingSymbolsHint = assembled.missingSymbols.length > 0
-      ? `\n\n## Potentially removed APIs\n\nThe following identifiers appear in the doc but were not found in any source file. Investigate each as a possible \`nonexistent-name\` issue:\n\n${assembled.missingSymbols.map(s => `- \`${s}\``).join('\n')}`
-      : '';
-    const userContent = `## Documentation: ${doc.title}
-
-URL: ${doc.sourceUrl}
-
-${doc.content}${symbolsSection}
-
----
-
-## Source Code
-
-${codeContext || '(No source files were available for this document.)'}${missingSymbolsHint}`;
+    const userContent = ClaudeValidator.buildUserContent(doc, assembled, {});
 
     // Pass 1: get initial issues and positives
     let pass1Issues: RawIssue[] = [];
@@ -431,10 +432,85 @@ ${codeContext || '(No source files were available for this document.)'}${missing
     };
   }
 
-  private async runPass1(userContent: string): Promise<ReportFindingsInput> {
+  // Public helper used by experiment scripts. Builds the same Pass 1 user
+  // message that validateDoc would, optionally dropping the Source Code bulk.
+  static buildUserContent(
+    doc: Doc,
+    assembled: Awaited<ReturnType<typeof assembleContext>>,
+    options: { dropBodies?: boolean } = {},
+  ): string {
+    // dropBodies omits implementation source code but ALWAYS retains test
+    // files — they are authority #1 in the system prompt and assertion
+    // strings / inline comments often carry drift evidence (e.g. expected
+    // warning messages) that the structured extractors cannot capture.
+    const renderedFileBlocks = options.dropBodies
+      ? assembled.fileBlocks.filter(fb => isTestFile(fb.path))
+      : assembled.fileBlocks;
+    const codeContext = formatContextForClaude(renderedFileBlocks);
+    const symbolsText  = formatSymbolsAsText(assembled.extractedSymbols);
+    const hooksText    = formatHooksAsText(assembled.extractedHooks);
+    const defaultsText = formatDefaultsAsText(assembled.extractedDefaults);
+    const schemasText  = formatSchemasAsText(assembled.extractedSchemas);
+    const symbolsSection = symbolsText
+      ? `\n\n---\n\n## Exported API symbols\n\n${symbolsText}`
+      : '';
+    const hooksSection = hooksText
+      ? `\n\n---\n\n## Hooks and filters\n\nFiring sites for action and filter hooks. Use these to verify hook names referenced in the documentation.\n\n${hooksText}`
+      : '';
+    const defaultsSection = defaultsText
+      ? `\n\n---\n\n## Defaults\n\nDefault-value sites: \`wp_parse_args\` calls in PHP and object-spread merges in JS/TS. Use these to verify documented default values.\n\n${defaultsText}`
+      : '';
+    // Schemas survive `dropBodies`: JSON files are authority #5 and small,
+    // worth keeping when the Source Code bulk is omitted.
+    const schemasSection = schemasText
+      ? `\n\n---\n\n## Schemas\n\nJSON schema files. Authoritative for property names and allowed enum values. Confirm field requirements against TypeScript or PHP source rather than the schema's \`required\` array.\n\n${schemasText}`
+      : '';
+    const missingSymbolsHint = assembled.missingSymbols.length > 0
+      ? `\n\n## Potentially removed APIs\n\nThe following identifiers appear in the doc but were not found in any source file. Investigate each as a possible \`nonexistent-name\` issue:\n\n${assembled.missingSymbols.map(s => `- \`${s}\``).join('\n')}`
+      : '';
+    const sourceCodeBlock = options.dropBodies
+      ? (codeContext
+          ? `(Implementation source code omitted — use the structured sections above. Test files are retained below as authority #1.)\n\n${codeContext}`
+          : '(Implementation source code omitted — use the structured sections above. No test files were available.)')
+      : (codeContext || '(No source files were available for this document.)');
+    return `## Documentation: ${doc.title}
+
+URL: ${doc.sourceUrl}
+
+${doc.content}${symbolsSection}${hooksSection}${defaultsSection}${schemasSection}
+
+---
+
+## Source Code
+
+${sourceCodeBlock}${missingSymbolsHint}`;
+  }
+
+  // Public entrypoint for experiment scripts: runs only Pass 1 and returns
+  // the raw candidates (no verbatim check, no Pass 2). Supports temperature
+  // override and dropBodies for fair extractor-vs-bulk comparisons.
+  async runPass1Only(
+    doc: Doc,
+    codeTiers: CodeTiers,
+    codeSources: Record<string, CodeSource>,
+    options: RunPass1Options = {},
+  ): Promise<RunPass1Result> {
+    const assembled = await assembleContext(doc, codeTiers, codeSources);
+    const userContent = ClaudeValidator.buildUserContent(doc, assembled, {
+      dropBodies: options.dropBodies,
+    });
+    const result = await this.runPass1(userContent, options.temperature);
+    return { candidates: result.issues, positives: result.positives };
+  }
+
+  private async runPass1(
+    userContent: string,
+    temperature?: number,
+  ): Promise<ReportFindingsInput> {
     const response = await this.anthropic.messages.create({
       model:      this.pass1Model,
       max_tokens: 4096,
+      ...(temperature !== undefined ? { temperature } : {}),
       system: [
         {
           type:          'text',

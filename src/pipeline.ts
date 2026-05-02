@@ -61,7 +61,11 @@ function logCostSummary(docResults: DocResult[], usage: RunUsage): void {
   );
 }
 
-export async function runPipeline(config: Config): Promise<RunResults> {
+export type RunPipelineOptions = {
+  slugs?: string[];
+};
+
+export async function runPipeline(config: Config, options: RunPipelineOptions = {}): Promise<RunResults> {
   const docSource   = createDocSource(config);
   const codeSources = createCodeSources(config);
   const mapper      = createDocCodeMapper(config, codeSources);
@@ -76,8 +80,19 @@ export async function runPipeline(config: Config): Promise<RunResults> {
     warmupPromise,
   ]);
 
-  const docs   = fetchResults.filter((r): r is Extract<DocFetchResult, { ok: true }>  => r.ok).map(r => r.doc as Doc);
-  const failed = fetchResults.filter((r): r is Extract<DocFetchResult, { ok: false }> => !r.ok);
+  const slugFilter = options.slugs && options.slugs.length > 0 ? new Set(options.slugs) : null;
+
+  const allOk    = fetchResults.filter((r): r is Extract<DocFetchResult, { ok: true }>  => r.ok).map(r => r.doc as Doc);
+  const allFailed = fetchResults.filter((r): r is Extract<DocFetchResult, { ok: false }> => !r.ok);
+
+  const docs   = slugFilter ? allOk.filter(d => slugFilter.has(d.slug)) : allOk;
+  const failed = slugFilter ? allFailed.filter(f => slugFilter.has(f.slug)) : allFailed;
+
+  if (slugFilter && docs.length === 0 && failed.length === 0) {
+    const requested = [...slugFilter].join(', ');
+    const available = allOk.map(d => d.slug).slice(0, 20).join(', ');
+    console.warn(`[pipeline] No docs matched slug filter (${requested}). First available slugs: ${available}`);
+  }
 
   const limit = pLimit(3);
   const docResults: DocResult[] = [];

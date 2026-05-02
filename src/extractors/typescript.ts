@@ -204,9 +204,10 @@ function extractFromStatement(
   // export { foo, bar } or export { foo as bar } from '...'
   // These are re-exports — we note the name but can't resolve the signature here.
   if (ts.isExportDeclaration(stmt) && stmt.exportClause && ts.isNamedExports(stmt.exportClause)) {
+    const jsdoc = extractJSDoc(stmt);
     for (const el of stmt.exportClause.elements) {
       const name = el.name.text;
-      symbols.push({ kind: 'const', name, signature: name });
+      symbols.push({ kind: 'const', name, signature: name, jsdoc });
     }
     return symbols;
   }
@@ -283,6 +284,13 @@ function formatJSDocLines(jsdoc: JSDocInfo | undefined, indent: string): string[
   return lines;
 }
 
+// Renders raw doc-comment text (e.g. PHPDoc /** */ blocks emitted verbatim
+// by the PHP extractor) when a symbol has only `docComment` and no
+// structured `jsdoc`. The lines are indented at the given prefix.
+function formatRawDocCommentLines(docComment: string, indent: string): string[] {
+  return docComment.split('\n').map(l => `${indent}${l}`);
+}
+
 export function formatSymbolsAsText(files: ExtractedFile[]): string {
   if (files.length === 0) return '';
 
@@ -302,7 +310,12 @@ export function formatSymbolsAsText(files: ExtractedFile[]): string {
           lines.push('  }');
         } else {
           lines.push(`  ${sym.signature}`);
-          lines.push(...formatJSDocLines(sym.jsdoc, '    '));
+          if (sym.jsdoc) {
+            lines.push(...formatJSDocLines(sym.jsdoc, '    '));
+          } else if (sym.docComment) {
+            // Fallback for extractors that emit raw doc comments (PHP).
+            lines.push(...formatRawDocCommentLines(sym.docComment, '    '));
+          }
         }
       }
 

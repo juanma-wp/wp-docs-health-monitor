@@ -17,12 +17,54 @@ export type ExtractedSymbol = {
   kind: SymbolKind;
   name: string;
   signature: string;
+  // Structured JSDoc (TypeScript extractor). Preferred for richer rendering.
   jsdoc?: JSDocInfo;
   members?: ExtractedMember[];
+  // Raw doc comment text (PHP extractor and any extractor that emits the
+  // original /** */ block verbatim). Renderer falls back to this when
+  // `jsdoc` is absent.
+  docComment?: string;
 };
 
 export type ExtractedFile = {
   repo: string;
   path: string;
   symbols: ExtractedSymbol[];
+};
+
+export type HookKind = 'filter' | 'action';
+
+export type ExtractedHook = {
+  kind: HookKind;
+  name: string;
+  call: string;
+  line: number;
+  source: string;
+};
+
+export type ExtractedHookFile = {
+  repo: string;
+  path: string;
+  hooks: ExtractedHook[];
+};
+
+export type DefaultPattern = 'wp_parse_args' | 'object-spread';
+
+export type ExtractedDefault = {
+  pattern: DefaultPattern;
+  line: number;
+  source: string;
+};
+
+export type ExtractedDefaultFile = {
+  repo: string;
+  path: string;
+  defaults: ExtractedDefault[];
+};
+
+export type ExtractedSchema = {
+  repo: string;
+  path: string;
+  content: string;
+  truncated: boolean;
 };

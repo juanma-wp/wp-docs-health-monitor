@@ -94,6 +94,37 @@ export interface BlockVariation {
     const symbols = extractSymbolsFromSource(src, 'utils.ts');
     expect(symbols[0].signature).toContain('...args: unknown[]');
   });
+
+  it('captures JSDoc description above an exported function', () => {
+    const src = `
+/**
+ * Registers a new block type.
+ */
+export function registerBlockType(name: string): BlockType {
+  return null as any;
+}
+`;
+    const symbols = extractSymbolsFromSource(src, 'registration.ts');
+    expect(symbols).toHaveLength(1);
+    expect(symbols[0].jsdoc?.description).toBe('Registers a new block type.');
+  });
+
+  it('leaves jsdoc undefined when no JSDoc is present', () => {
+    const src = `export function noDoc(): void {}`;
+    const symbols = extractSymbolsFromSource(src, 'foo.ts');
+    expect(symbols[0].jsdoc).toBeUndefined();
+  });
+
+  it('attaches the same JSDoc to every const in a multi-declaration statement', () => {
+    const src = `
+/** Shared doc. */
+export const A = 1, B = 2;
+`;
+    const symbols = extractSymbolsFromSource(src, 'consts.ts');
+    expect(symbols).toHaveLength(2);
+    expect(symbols[0].jsdoc?.description).toBe('Shared doc.');
+    expect(symbols[1].jsdoc?.description).toBe('Shared doc.');
+  });
 });
 
 describe('extractSymbolsFromSource — JSDoc capture', () => {
@@ -273,5 +304,27 @@ describe('formatSymbolsAsText', () => {
     expect(text).toContain("      @default ['block', 'inserter']");
     expect(text).toContain('    title: string');
     expect(text).toContain('  }');
+  });
+
+  it('falls back to raw docComment when jsdoc is absent (PHP extractor compat)', () => {
+    const files: ExtractedFile[] = [
+      {
+        repo: 'wordpress-develop',
+        path: 'wp-includes/blocks.php',
+        symbols: [
+          {
+            kind: 'function',
+            name: 'register_block_type',
+            signature: 'register_block_type(string $name): WP_Block_Type|false',
+            docComment: '/**\n * Registers a block type.\n * @deprecated\n */',
+          },
+        ],
+      },
+    ];
+    const text = formatSymbolsAsText(files);
+    expect(text).toContain('  register_block_type(');
+    expect(text).toContain('    /**');
+    expect(text).toContain('     * Registers a block type.');
+    expect(text).toContain('     * @deprecated');
   });
 });
