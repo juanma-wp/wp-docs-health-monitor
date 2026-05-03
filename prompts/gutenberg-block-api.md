@@ -11,29 +11,20 @@ The `codeSources` configured for this corpus are:
 
 Every issue's `codeRepo` field must be exactly one of these two keys.
 
+### Source authority — corpus specifics
+
+The base prompt's "How to read the input" section is claim-type-keyed but language-neutral. The conventions below name the actual file kinds, tag conventions, and idioms in this corpus. Apply them on top of the per-section authority notes the model sees inline above each structured section.
+
+- **Surface contract** (signatures, parameter names, public types): TypeScript declaration files (`*.d.ts`) and dedicated `types.ts` files in `gutenberg` packages are the authoritative public-API surface. Prefer them over inferred shapes from JS implementations.
+- **Lifecycle and intent** (deprecated, since-version, internal-only): the `## Exported API symbols` section surfaces JSDoc and PHPDoc tags directly. `@deprecated`, `@since`, `@default`, and `@internal` tags carry the same authority as the surrounding code body for these claim types. Prefer the tag text over re-deriving intent from naming.
+- **Runtime defaults from fallback expressions**: the `## Defaults` section captures direct default-value sites (`wp_parse_args` calls in PHP, object-spread merges in JS/TS). Defaults built from short-circuit fallbacks — `value || fallback`, `value ?? fallback`, `value !== undefined ? value : fallback` — may not appear in that section. When the doc states a default and the structured section is silent, scan Source Code for these idioms before reporting. **Critical gate**: report `default-value` drift only when the fallback's *value* itself differs from the documented default. If the doc says "Defaults to `[a, b]`" and the runtime code is `value || ['a', 'b']`, the doc is correct — that fallback CONFIRMS the documented default. Do NOT report drift just because a default is computed via a fallback expression rather than declared as a literal in a type/parameter; the developer-facing behaviour is what matters. This rule trumps any contradicting JSDoc/PHPDoc prose: when JSDoc says one thing and the runtime fallback agrees with the doc, the runtime wins.
+- **Tests as strong corroborating evidence**: this corpus has well-curated test suites (`packages/*/src/**/test/`, `packages/*/src/**/__tests__/`, `*.test.{js,ts,jsx,tsx}`, `tests/phpunit/tests/blocks/*.php`). When a test directly covers the doc claim, treat its outcome as strong evidence — a failing assertion is strong drift signal; a passing test corroborates that one slice of behaviour. Tests do NOT certify the doc's broader generalisations.
+- **Schema authority elevation**: schemas under `schemas/json/` (notably `block.json`, `theme.json`) are elevated above the base prompt's "JSON schemas: property names + enums only" rule for THIS corpus. They are themselves the documented contract for the corresponding configuration files — see the dedicated section below.
+
 ### Known internal / reserved identifiers — do not flag as missing from docs
 
 - `reusable` block category — used exclusively by `core/block` (the Reusable Block block itself). It is intentionally omitted from the public category list. Do not report it as missing.
 - Identifiers starting with `__experimental`, `__unstable`, or `_unstable` are not part of the public API. Do not flag them as undocumented or as drift.
-- Naming pattern in this corpus: doc text often uses the public name (e.g. `BlockVariationPicker`) while code exports the prefixed alias (`__experimentalBlockVariationPicker`). When the doc prose conveys experimental nature, this is not drift.
-
-### Type-label conventions in this corpus
-
-Doc prose in the Block API reference frequently uses generic type labels (`Object`, `Object[]`, `Array`) where the code exports a specific named type — e.g. `BlockVariation`, `BlockEditorSelectors`, `WPBlockType`. Both refer to the same shape; the developer's code does not break. Do not report these as drift.
-
-Schema files in `schemas/json/` (e.g. `block.json`, `theme.json`) elevate beyond the base prompt's "JSON schemas: property names + enums only" rule — see the dedicated section below.
-
-### Short-circuit evaluation — verify before reporting
-
-Before reporting that a function "is not called" or "is always called" based on a conditional, verify the full boolean expression including short-circuit behaviour.
-
-Example: `if (block.isValid && !isEligible(...))` — when `block.isValid` is `false`, JavaScript short-circuits and `isEligible` is never evaluated. The function is NOT called. The doc claim "isEligible is not called when previous saves' results were invalid" is consistent with this code: `block.isValid === false` IS the runtime state that results from a prior invalid save. Do not report rephrase-style suggestions when the doc claim is factually correct under the actual runtime semantics — even if the terminology differs from the code's own variable names.
-
-### PHP `_doing_it_wrong()` and required fields
-
-A PHP `_doing_it_wrong()` call signals that a field is required at runtime, but does not on its own justify reporting a doc as drift. Apply the cross-section check from the base prompt: if the requirement is stated anywhere in the doc — intro paragraph, setup section, an example, a note, or another property listing — the documentation is correct. Only flag as drift if the requirement is genuinely absent from the entire doc.
-
-Example: in `block-bindings`, the property table lists `label` without a "Required" marker, but an earlier sentence states "Registering a source requires defining at least `name`, a `label` and a `callback` function". Not drift.
 
 ### JSON schemas in `schemas/json/`
 
@@ -50,10 +41,6 @@ These schemas (`block.json`, `theme.json`, etc.) ARE the documented contract for
 
 - Property name/case differences when the schema and the doc both refer to the same canonical name in different parts of the same file.
 - Schema `description` field rephrasing of doc text.
-
-### Deprecated functions
-
-Only report a deprecated function as drift if the documentation explicitly names and recommends that deprecated function by name. If the deprecated function does not appear anywhere in the documentation text, do not report it — even if it appears in the same file or module as something the doc does reference.
 
 ### Examples of drift in this corpus
 
@@ -73,7 +60,7 @@ Only report a deprecated function as drift if the documentation explicitly names
 
 - **Wording differences without factual error**: doc says "isEligible is not called when previous saves' results were invalid"; code shows `if (block.isValid && !isEligible(...)) continue`. Different terminology for the same state. The doc is correct; do not report a rephrase suggestion as drift.
 
-- **Property table without "Required" marker when the requirement is stated elsewhere**: see the `label` example under "PHP `_doing_it_wrong()`" above. The doc as a whole is correct.
+- **Property table without "Required" marker when the requirement is stated elsewhere**: in `block-bindings`, the property table lists `label` without a "Required" marker, but an earlier sentence states "Registering a source requires defining at least `name`, a `label` and a `callback` function". The doc as a whole is correct — apply the cross-section check before reporting.
 
 - **Generic type listings like `Function|string[]`**: when the doc says `Function` and the code uses `(args) => boolean`, the doc IS correct (any function works at runtime). Reporting is allowed only if the parameter signature is materially needed for correct usage — for example, if the function is called with specific arguments the user must use to compute the return value (then it becomes a meaningful API gap, not a teaching simplification).
 
