@@ -200,11 +200,12 @@ export function isSelfRejected(suggestion: string): boolean {
 //     evidence.
 //   - Inline code backticks (`` `foo` ``) — structural marker that
 //     distinguishes identifiers from prose; preserve.
-//   - Bullet markers (`- `, `* `) — handled in verbatimIncludes as a
+//   - Bullet markers (`- `) — handled in verbatimIncludes as a
 //     second-chance strategy rather than here, because stripping them
 //     from both sides of the base normaliser would break the existing
 //     match where whitespace-collapse already turns multi-line bullet
 //     content into inline ` - ` separators that the model retains.
+//     (Only `- ` is handled; `* ` bullet style is not stripped.)
 export function normalizeForVerbatim(s: string): string {
   return s
     // Strip Markdown link syntax: [text](url) → text. Works for inline
@@ -217,6 +218,9 @@ export function normalizeForVerbatim(s: string): string {
 
 // Verbatim substring check with two additional fallback strategies.
 //
+// Contract: `haystack` must already be normalizeForVerbatim'd.
+// `needle` is normalized internally.
+//
 // Strategy 2 — bullet-stripped match:
 //   Models sometimes prefix each quoted line with `- ` when the doc
 //   section is a bullet list. After normalizeForVerbatim these appear
@@ -225,11 +229,20 @@ export function normalizeForVerbatim(s: string): string {
 //   without touching the base normaliser (which needs those ` - `
 //   separators intact for the inverse case where the model collapses
 //   multi-line bullets into a single inline-dashed phrase).
+//   The haystack is stripped symmetrically so that whitespace-collapsed
+//   bullet items (`- a - b - c`) can match stripped needle `a b c`.
+//   The guard `nStripped !== n` ensures this path only activates when
+//   the needle itself contains a `- ` bullet pattern, bounding the
+//   risk of spurious matches from stripping legitimate inline dashes.
+//   Remove when: the model reliably omits bullet reformatting of prose
+//   quotes.
 //
 // Strategy 3 — single backtick identifier fallback:
 //   Docs sometimes omit the backticks around a property name in prose
 //   even when the model correctly quotes it as `identifier`. Allow a
 //   single-token backtick-wrapped needle to match the plain-text form.
+//   Remove when: the model reliably matches the doc's backtick
+//   convention when quoting identifiers.
 export function verbatimIncludes(haystack: string, needle: string): boolean {
   const n = normalizeForVerbatim(needle);
 
