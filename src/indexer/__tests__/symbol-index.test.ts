@@ -25,8 +25,9 @@ function makeIndex(
   repoId: string,
   symbols: Record<string, string[]>,
   hooks: Record<string, string[]> = {},
+  files: string[] = [],
 ): SymbolIndex {
-  return { repoId, commitSha: 'sha', builtAt: '2025-01-01T00:00:00Z', symbols, hooks };
+  return { repoId, commitSha: 'sha', builtAt: '2025-01-01T00:00:00Z', files, symbols, hooks };
 }
 
 // --- buildSymbolIndex ---
@@ -101,6 +102,46 @@ describe('buildSymbolIndex', () => {
     expect(typeof index.builtAt).toBe('string');
   });
 
+  it('populates files with the full repo file list', async () => {
+    const source = makeSource({
+      'src/a.ts': 'export const a = 1;',
+      'README.md': '# Docs',
+    });
+    const index = await buildSymbolIndex('my-repo', source, { cacheDir: null });
+
+    expect(index.files).toContain('src/a.ts');
+    expect(index.files).toContain('README.md');
+  });
+
+  it('skips __tests__ directory paths', async () => {
+    const source = makeSource({
+      'src/__tests__/registration.test.ts': 'export function registerBlockType() {}',
+      'src/registration.ts': 'export function registerBlockType() {}',
+    });
+
+    const index = await buildSymbolIndex('test-repo', source, { cacheDir: null });
+
+    // The test file symbol should not appear; only the production file
+    const paths = index.symbols['registerBlockType'] ?? [];
+    expect(paths).not.toContain('src/__tests__/registration.test.ts');
+    expect(paths).toContain('src/registration.ts');
+  });
+
+  it('skips *.test.ts and *.spec.ts files', async () => {
+    const source = makeSource({
+      'src/utils.test.ts': 'export function helperFn() {}',
+      'src/utils.spec.ts': 'export function helperFn() {}',
+      'src/utils.ts': 'export function helperFn() {}',
+    });
+
+    const index = await buildSymbolIndex('test-repo', source, { cacheDir: null });
+
+    const paths = index.symbols['helperFn'] ?? [];
+    expect(paths).not.toContain('src/utils.test.ts');
+    expect(paths).not.toContain('src/utils.spec.ts');
+    expect(paths).toContain('src/utils.ts');
+  });
+
   it('uses disk cache on second call with same sha', async () => {
     const { mkdtempSync } = await import('fs');
     const { tmpdir } = await import('os');
@@ -114,6 +155,24 @@ describe('buildSymbolIndex', () => {
     // Both runs must produce the same result
     expect(second.symbols).toEqual(first.symbols);
     expect(second.builtAt).toBe(first.builtAt); // identical timestamp proves cache was used
+  });
+
+  it('treats a cache file missing required fields as a miss', async () => {
+    const { mkdtempSync, writeFileSync } = await import('fs');
+    const { tmpdir } = await import('os');
+    const { join } = await import('path');
+    const cacheDir = mkdtempSync(`${tmpdir()}/symbol-index-test-stale-`);
+
+    // Write a stale cache file that lacks the `files` field (simulates old format)
+    const staleCache = { repoId: 'stale-repo', commitSha: 'test-sha-001', builtAt: '2024-01-01T00:00:00Z', symbols: {}, hooks: {} };
+    writeFileSync(join(cacheDir, 'stale-repo-test-sha-001.json'), JSON.stringify(staleCache));
+
+    const source = makeSource({ 'src/a.ts': 'export function alpha() {}' });
+    const index = await buildSymbolIndex('stale-repo', source, { cacheDir });
+
+    // Should have rebuilt (not used stale cache) so files field is present
+    expect(index.files).toContain('src/a.ts');
+    expect(index.symbols['alpha']).toEqual(['src/a.ts']);
   });
 });
 

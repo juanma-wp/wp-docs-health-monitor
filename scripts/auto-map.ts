@@ -15,7 +15,7 @@
  *   --write           Write result directly into the project mapping file
  */
 
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
 import { loadConfig } from '../src/config/loader.js';
 import { createCodeSources } from '../src/adapters/index.js';
@@ -119,7 +119,7 @@ async function main() {
     });
 
     process.stderr.write('done\n');
-    allFilesByRepo[repoId] = await cs.listDir('.');
+    allFilesByRepo[repoId] = indexes[repoId].files;
   }
 
   // 4. Score all files by how many doc symbols they define or fire
@@ -165,12 +165,15 @@ async function main() {
 
   if (write) {
     let existing: Record<string, unknown> = {};
-    try {
+    if (existsSync(config.mappingPath)) {
       existing = MappingSchema.parse(
         JSON.parse(readFileSync(config.mappingPath, 'utf-8')),
       );
-    } catch {
-      // mapping file may not exist yet; start fresh
+    }
+    if (slug in existing) {
+      process.stderr.write(
+        `\nWarning: mapping for "${slug}" already exists and will be overwritten.\n`,
+      );
     }
     const merged = { ...existing, ...output };
     writeFileSync(config.mappingPath, JSON.stringify(merged, null, 2) + '\n');

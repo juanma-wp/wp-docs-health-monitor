@@ -10,6 +10,8 @@ export type SymbolIndex = {
   repoId: string;
   commitSha: string;
   builtAt: string;
+  // all files found in the repo (unfiltered by extension)
+  files: string[];
   // exported symbol name → file paths that define it
   symbols: Record<string, string[]>;
   // hook name → file paths that fire it
@@ -27,7 +29,14 @@ const INDEXABLE_EXTS = new Set(['ts', 'tsx', 'js', 'jsx', 'php']);
 
 // Build artifacts and generated output are not authoritative sources.
 // node_modules/.git/vendor are already excluded by GitCloneSource.listDir.
-const SKIP_PATTERNS = [/(^|\/)build\//, /(^|\/)dist\//, /(^|\/)coverage\//];
+const SKIP_PATTERNS = [
+  /(^|\/)build\//,
+  /(^|\/)dist\//,
+  /(^|\/)coverage\//,
+  /(^|\/)__tests__\//,
+  /(^|\/)[^/]+\.test\.[jt]sx?$/,
+  /(^|\/)[^/]+\.spec\.[jt]sx?$/,
+];
 
 function shouldSkip(path: string): boolean {
   return SKIP_PATTERNS.some(p => p.test(path));
@@ -41,7 +50,10 @@ function loadCached(cacheDir: string, repoId: string, sha: string): SymbolIndex 
   const p = cachePath(cacheDir, repoId, sha);
   if (!existsSync(p)) return null;
   try {
-    return JSON.parse(readFileSync(p, 'utf-8')) as SymbolIndex;
+    const raw = JSON.parse(readFileSync(p, 'utf-8')) as Partial<SymbolIndex>;
+    // Treat caches written by older versions (missing fields) as a miss.
+    if (!raw.symbols || !raw.hooks || !raw.files) return null;
+    return raw as SymbolIndex;
   } catch {
     return null;
   }
@@ -121,6 +133,7 @@ export async function buildSymbolIndex(
     repoId,
     commitSha,
     builtAt: new Date().toISOString(),
+    files: allFiles,
     symbols,
     hooks,
   };
