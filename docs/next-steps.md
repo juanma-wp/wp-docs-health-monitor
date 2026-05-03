@@ -1,6 +1,6 @@
 # Next steps — working plan
 
-**Pairs with**: [docs/week-3.md](./week-3.md) (the strategic assessment that motivates the priorities here).
+**Pairs with**: [docs/week-3.md](./week-3.md) (the strategic assessment that motivates the priorities here) and [docs/second-site-experiment.md](./second-site-experiment.md) (the proposed pivot — Priorities 3 and 4 are deferred until Priority 5's generality test runs).
 **Status snapshot**: 2026-05-03 PM. [PR #62](https://github.com/juanma-wp/wp-docs-health-monitor/pull/62) (verbatim recall strategies) is open at time of writing — held back deliberately until Priority 2 validates the direction (see Priority 1 § Outcome and Priority 2). Latest run on the PR #62 branch: `out/data/runs/20260503-202431` — 1 critical, 3 major, 0 minor, health 96. Earlier same-day baseline (main): `out/data/runs/20260503-100333` — 1 critical, 3 major, 3 minor, health 96. Steps A–C of the prompt reframe + steps 1+2 of the per-site reduction are merged. Few-shot examples verified load-bearing (`out/data/runs/20260503-095032`). Architectural work (task #14, language packs) parked.
 
 This doc is a **working plan**, not a contract. Update as reality shifts. Each section is sized to be picked up cold by a future session.
@@ -23,11 +23,13 @@ In order:
 
 1. **Verbatim recall** (task #16) — strategies in PR #62 (open) but acceptance criterion was off-target. Whether to merge depends on Priority 2's outcome (see § Outcome).
 2. **Evidence-shape rules in common prompt** — fix the dominant remaining failure mode: the model puts the *answer* in `docSays`/`codeSays` slots instead of verifiable doc/code text. Surfaced by Priority 1 work.
-3. **Doc-fix patch generation** — make findings actionable as PRs.
-4. **History-aware reporting** — make the dashboard a trend tool, not a snapshot.
-5. **Second site** — validate the architecture by running on a non-Gutenberg corpus.
+3. **Second site** (was Priority 5 — promoted) — validate the architecture by running on a non-Gutenberg-block-API corpus. Theme.json reference picked. See [docs/second-site-experiment.md](./second-site-experiment.md) for full design and rationale. **This is the next-actionable priority** once Priority 2's PR lands.
+4. *(Deferred)* **Doc-fix patch generation** — make findings actionable as PRs. Was Priority 3; deferred until Priority 3's generality test resolves.
+5. *(Deferred)* **History-aware reporting** — make the dashboard a trend tool. Was Priority 4; deferred for the same reason.
 
-Until 2–4 land, do not invest in language packs, config auto-injection (task #14), or further prompt cleanup. The Gutenberg extension at 67 lines is cheap enough.
+Rationale for the reorder: three weeks of work has been one corpus. The information value of running on a second corpus is currently higher than the marginal value of features layered on top of an unvalidated foundation. Deferred items (4, 5) are not cancelled — they wait until we know whether the architecture generalises.
+
+Until 2–3 land, do not invest in language packs, config auto-injection (task #14), or further prompt cleanup. The Gutenberg extension at 75 lines is cheap enough.
 
 ---
 
