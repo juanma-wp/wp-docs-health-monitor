@@ -389,9 +389,9 @@ export class ClaudeValidator implements Validator {
     options: { dropBodies?: boolean } = {},
   ): string {
     // dropBodies omits implementation source code but ALWAYS retains test
-    // files — they are authority #1 in the system prompt and assertion
-    // strings / inline comments often carry drift evidence (e.g. expected
-    // warning messages) that the structured extractors cannot capture.
+    // files — assertion strings and inline comments often carry drift
+    // evidence (e.g. expected error messages, expected outputs) that the
+    // structured extractors cannot capture.
     const renderedFileBlocks = options.dropBodies
       ? assembled.fileBlocks.filter(fb => isTestFile(fb.path))
       : assembled.fileBlocks;
@@ -400,28 +400,38 @@ export class ClaudeValidator implements Validator {
     const hooksText    = formatHooksAsText(assembled.extractedHooks);
     const defaultsText = formatDefaultsAsText(assembled.extractedDefaults);
     const schemasText  = formatSchemasAsText(assembled.extractedSchemas);
+    // Each structured section carries its own authority note inline — the
+    // system prompt's "How to read the input" section tells the model to
+    // read these notes before using the section's content. Keep the notes
+    // claim-type-keyed (what is this section AUTHORITATIVE FOR? what is it
+    // NOT?) rather than restating a global ranking.
     const symbolsSection = symbolsText
-      ? `\n\n---\n\n## Exported API symbols\n\n${symbolsText}`
+      ? `\n\n---\n\n## Exported API symbols\n\nMachine-extracted from the source AST: exported names, signatures, and the documentation tags attached to them. Authoritative for: which symbols exist (this is the canonical export list), their signatures, and the lifecycle/intent tags surfaced here. NOT authoritative for runtime behaviour or descriptive prose — verify those in Source Code. Use this section to confirm or refute specific claims you already have in mind, not as a checklist to walk against the doc.\n\n${symbolsText}`
       : '';
     const hooksSection = hooksText
-      ? `\n\n---\n\n## Hooks and filters\n\nFiring sites for action and filter hooks. Use these to verify hook names referenced in the documentation.\n\n${hooksText}`
+      ? `\n\n---\n\n## Hooks and filters\n\nFiring sites for action and filter hooks. Authoritative for: which hook names exist and where they fire. Use to verify hook names referenced in the documentation.\n\n${hooksText}`
       : '';
     const defaultsSection = defaultsText
-      ? `\n\n---\n\n## Defaults\n\nDefault-value sites: \`wp_parse_args\` calls in PHP and object-spread merges in JS/TS. Use these to verify documented default values.\n\n${defaultsText}`
+      ? `\n\n---\n\n## Defaults\n\nExtracted default-value sites (e.g. \`wp_parse_args\` calls, object-spread merges). Authoritative for: documented default-value claims when a literal default is visible here. If a documented default is built from a fallback expression (\`value ?? X\`, \`value || X\`) or computed, cross-reference Source Code — runtime behaviour wins.\n\n${defaultsText}`
       : '';
-    // Schemas survive `dropBodies`: JSON files are authority #5 and small,
-    // worth keeping when the Source Code bulk is omitted.
+    // Schemas survive `dropBodies`: JSON files are small and load-bearing
+    // for property/enum claims, worth keeping when Source Code is omitted.
     const schemasSection = schemasText
-      ? `\n\n---\n\n## Schemas\n\nJSON schema files. Authoritative for property names and allowed enum values. Confirm field requirements against TypeScript or PHP source rather than the schema's \`required\` array.\n\n${schemasText}`
+      ? `\n\n---\n\n## Schemas\n\nJSON schema files. Authoritative for: property names and allowed enum values. NOT a sole source for whether a field is required — confirm "required" claims against the implementation language rather than the schema's \`required\` array, unless the per-site extension elevates schema authority.\n\n${schemasText}`
       : '';
     const missingSymbolsHint = assembled.missingSymbols.length > 0
       ? `\n\n## Potentially removed APIs\n\nThe following identifiers appear in the doc but were not found in any source file. Investigate each as a possible \`nonexistent-name\` issue:\n\n${assembled.missingSymbols.map(s => `- \`${s}\``).join('\n')}`
       : '';
+    // The dropBodies experiment seam ships only test files (assertions
+    // carry drift evidence — expected error messages, expected outputs —
+    // that the structured extractors cannot capture). Keep the model
+    // oriented when the implementation bulk is missing.
     const sourceCodeBlock = options.dropBodies
       ? (codeContext
-          ? `(Implementation source code omitted — use the structured sections above. Test files are retained below as authority #1.)\n\n${codeContext}`
-          : '(Implementation source code omitted — use the structured sections above. No test files were available.)')
+          ? `(Implementation source code omitted for this run — only test files are included below. Use the structured sections above for surface-contract claims.)\n\n${codeContext}`
+          : '(Implementation source code omitted for this run, and no test files were available. Rely on the structured sections above.)')
       : (codeContext || '(No source files were available for this document.)');
+    const sourceCodeAuthorityNote = 'Authoritative for: runtime behaviour, default values built from fallback expressions, branching logic, error paths — anything not captured by the structured sections above. Test files (when present, identified by path or filename convention) are corroborating evidence: a failing assertion against the doc claim is strong drift signal; a passing test only confirms the case it tests.';
     return `## Documentation: ${doc.title}
 
 URL: ${doc.sourceUrl}
@@ -431,6 +441,8 @@ ${doc.content}${symbolsSection}${hooksSection}${defaultsSection}${schemasSection
 ---
 
 ## Source Code
+
+${sourceCodeAuthorityNote}
 
 ${sourceCodeBlock}${missingSymbolsHint}`;
   }

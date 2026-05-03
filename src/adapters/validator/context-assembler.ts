@@ -72,8 +72,10 @@ function estimateTokens(content: string): number {
 //     `tests/phpunit/foo.php`, `src/__tests__/foo.ts`)
 //   - filenames ending `.test.{js,jsx,ts,tsx}` or `.spec.{js,jsx,ts,tsx}`
 //
-// Used by the dropBodies path so test files (system-prompt authority #1)
-// survive even when the implementation Source Code bulk is omitted.
+// Used by the dropBodies path so test files survive even when the
+// implementation Source Code bulk is omitted — their assertion strings
+// and inline comments often carry drift evidence the structured
+// extractors cannot capture.
 export function isTestFile(path: string): boolean {
   return (
     /(^|\/)tests?\//i.test(path) ||

@@ -53,21 +53,23 @@ The following have been observed as false positives. Do not report them:
 
 If you cannot articulate the concrete developer-facing breakage, the issue is not worth reporting.
 
-## Source authority — ranked highest to lowest
+## How to read the input — choose the right source for the claim
 
-When multiple source files are provided, resolve conflicts in this order:
+The documentation is followed by zero or more **structured sections** (extracted symbols, hooks, defaults, schemas, etc.), then a **Source Code** block containing raw files. Each structured section carries an **authority note** immediately under its header — read the note before using the section. The note states what kinds of claim that section is authoritative for and what it is NOT.
 
-1. **Test files** (path contains /test/ or .test.) — highest authority. A test assertion is an explicit contract about intended public API behavior. If a test confirms the doc claim, it is not drift. If a test contradicts the doc claim, that is strong evidence of drift.
+Different claim types have different authoritative sources. Match the claim, then pick the source:
 
-2. **AST-generated symbols + JSDoc** — when present, a machine-extracted list of exported names, signatures, JSDoc descriptions, and tags (`@default`, `@deprecated`, `@since`). **Use this section as a NAVIGATION AID** — to look up what's in the codebase and find the right files to verify against. Do NOT treat it as a checklist of things to compare against the doc; that path leads to type-label nitpicks. Use it to confirm or refute specific claims, not as a target for exhaustive comparison.
+- **Existence** ("does identifier X exist as a public name?") — extracted-symbol sections, when present, are the canonical export list. A name absent from the symbols section *and* absent from the Source Code block is strong nonexistent-name evidence.
+- **Surface contract** (signatures, parameter names, public types) — extracted symbols and dedicated type/interface definition files, when present, win.
+- **Runtime behaviour** (defaults from fallback expressions, branching logic, error paths, what actually happens at execution time) — Source Code wins. Type annotations and inline doc comments can be stale; the code that runs cannot.
+- **Validation rules** (allowed values, enums, shape) — schema files, when present, for property names and enum values. Do NOT treat schema `required` arrays as the sole source for whether a field is required; confirm in the implementation language unless an authority note or the per-site extension elevates schema authority.
+- **Lifecycle and intent** (deprecated, since-version, internal-only) — dedicated tags surfaced in the extracted-symbols section, when present.
 
-3. **TypeScript type definition files** (types.ts, .d.ts) — authoritative for the public API surface.
+**When sources conflict:** prefer whichever the relevant section's authority note designates. If two structured sections both apply, the one whose note best matches the claim type wins. **Tests** (when present in the Source Code block, identified by path or filename convention) are corroborating evidence: a failing assertion against the doc claim is strong drift signal; a passing test only confirms the case it tests, not the doc's broader generalisation.
 
-4. **JSDoc / PHPDoc inline comments** — describe intended behavior. If JSDoc confirms the doc claim, prefer that over code-body logic.
+**Use the extracted-symbols section as a NAVIGATION AID, not a checklist.** Do not walk every symbol comparing its prose description to the doc — that path leads to type-label nitpicks (already listed in the anti-patterns above). Use the section to confirm or refute specific claims you already have in mind from reading the doc.
 
-5. **JSON Schema files** — valid for property names and allowed values only. Do NOT use their `required` arrays as the sole source for whether a field is required — confirm that in the implementation language (TypeScript, PHP, Python, etc.) unless the per-site extension elevates schema authority.
-
-6. **Implementation code** — authoritative for runtime behavior. Look here for actual default values, fallback logic, and concrete behavior that types and JSDoc don't capture (e.g. fallback expressions of the form `value.field || defaultValue`).
+The per-site prompt extension may declare additional authorities, override these defaults, or name specific source kinds and conventions for its corpus (filename patterns, language-specific tag conventions, audit verdicts). When this section and the extension conflict, the extension wins.
 
 ## Evidence rules — strictly enforced
 
