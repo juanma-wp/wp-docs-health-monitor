@@ -1,7 +1,7 @@
 # Next steps — working plan
 
 **Pairs with**: [docs/week-3.md](./week-3.md) (the strategic assessment that motivates the priorities here).
-**Status snapshot**: 2026-05-03, on `main`. Current run baseline: `out/data/runs/20260503-100333` — 1 critical, 3 major, 3 minor, health 96. Steps A–C of the prompt reframe + steps 1+2 of the per-site reduction are merged. Few-shot examples verified load-bearing (`out/data/runs/20260503-095032`). Architectural work (task #14, language packs) parked.
+**Status snapshot**: 2026-05-03 PM. [PR #62](https://github.com/juanma-wp/wp-docs-health-monitor/pull/62) (verbatim recall strategies) is open at time of writing — held back deliberately until Priority 2 validates the direction (see Priority 1 § Outcome and Priority 2). Latest run on the PR #62 branch: `out/data/runs/20260503-202431` — 1 critical, 3 major, 0 minor, health 96. Earlier same-day baseline (main): `out/data/runs/20260503-100333` — 1 critical, 3 major, 3 minor, health 96. Steps A–C of the prompt reframe + steps 1+2 of the per-site reduction are merged. Few-shot examples verified load-bearing (`out/data/runs/20260503-095032`). Architectural work (task #14, language packs) parked.
 
 This doc is a **working plan**, not a contract. Update as reality shifts. Each section is sized to be picked up cold by a future session.
 
@@ -21,51 +21,88 @@ This doc is a **working plan**, not a contract. Update as reality shifts. Each s
 
 In order:
 
-1. **Verbatim recall** (task #16) — recover signal already being thrown away.
-2. **Doc-fix patch generation** — make findings actionable as PRs.
-3. **History-aware reporting** — make the dashboard a trend tool, not a snapshot.
-4. **Second site** — validate the architecture by running on a non-Gutenberg corpus.
+1. **Verbatim recall** (task #16) — strategies in PR #62 (open) but acceptance criterion was off-target. Whether to merge depends on Priority 2's outcome (see § Outcome).
+2. **Evidence-shape rules in common prompt** — fix the dominant remaining failure mode: the model puts the *answer* in `docSays`/`codeSays` slots instead of verifiable doc/code text. Surfaced by Priority 1 work.
+3. **Doc-fix patch generation** — make findings actionable as PRs.
+4. **History-aware reporting** — make the dashboard a trend tool, not a snapshot.
+5. **Second site** — validate the architecture by running on a non-Gutenberg corpus.
 
-Until 1–3 land, do not invest in language packs, config auto-injection (task #14), or further prompt cleanup. The Gutenberg extension at 67 lines is cheap enough.
+Until 2–4 land, do not invest in language packs, config auto-injection (task #14), or further prompt cleanup. The Gutenberg extension at 67 lines is cheap enough.
 
 ---
 
-## Priority 1 — Verbatim recall (task #16)
+## Priority 1 — Verbatim recall (task #16) — scaffolding shipped, acceptance unmet
 
-**Goal**: stop verbatim normalisation from silently dropping legitimate Pass-1 findings.
+**Status**: [PR #62](https://github.com/juanma-wp/wp-docs-health-monitor/pull/62) (open at time of writing) introduces three strategies in `verbatimIncludes` (`src/adapters/validator/claude.ts`):
 
-**Why**: every run drops 4–7 candidates that are real TPs. Three canonical TPs (`apiVersion` required-vs-optional, `filePath` undocumented, broken arrow function in `block-transforms`) appear at Pass 1 with high confidence and are killed by formatting noise. CLAUDE.md's "Comparison layers must tolerate authoring-format noise" rule already calls this out as the right thing to fix.
+1. Direct normalised substring match (pre-existing).
+2. Bullet-marker stripping on both sides — recovers cases where the model prefixes each quoted line with `- ` even when the doc is contiguous prose.
+3. Single-token backtick fallback — `` `identifier` `` matches plain `identifier` in the haystack.
+
+Plus `[verbatim-check][high-conf:N]` log tagging when conf ≥ 0.9.
+
+**Outcome — what the post-#62 run actually shows** (`out/data/runs/20260503-202431` vs baseline `20260503-100333`):
+
+| | baseline | post-#62 |
+|---|---|---|
+| critical | 1 | 1 |
+| major | 3 | 3 |
+| minor | 3 | 0 |
+
+We did not gain the canonical TPs the original criterion predicted (`apiVersion`, `filePath`, broken-arrow, shadowColor). We **lost** three minor findings — Pass-1 sampling variance, not the PR's fault.
+
+**Why the prediction was wrong** — diagnosed from the Pass-1 dumps for the three high-conf drops that survived #62:
+
+| Drop | Type | Cause | Right home for the fix |
+|---|---|---|---|
+| `` `filePath` `` (block-patterns, 0.97) | `nonexistent-name` | `docSays` slot held the *missing* identifier, not a doc quote. The doc legitimately doesn't contain `filePath`. Strategy 3 falls through to `haystack.includes('filePath')` and correctly returns false. | **Common prompt** — `docSays` shape rule for `nonexistent-name`. See Priority 2. |
+| `BlockConfiguration` type def (block-registration, 0.75) | `type-signature` | Concatenated chunks across non-contiguous source lines. Drop is correct per existing design ("Concatenated quotes — leave dropping"). | None — drop is correct. |
+| `schema = { span: { children: { '#text': {} } } };` (block-transforms, 0.97) | `broken-example` | `codeSays` slot held fabricated code. Verified: `packages/blocks/src/api/raw-handling/index.ts` is 87 lines and contains zero of the tokens "schema", "span", "#text". Pure hallucination. | **Common prompt** — `codeSays` shape rule for `broken-example`. See Priority 2. |
+
+**Lesson**: verbatim normalisation tightness was not the dominant failure mode. The dominant failure mode was **the model populating `docSays`/`codeSays` slots with the answer (the missing thing, the corrected code) instead of with verifiable doc/code text**. The verbatim-check correctly catches that and drops it; the fix is upstream in the prompt, not the comparison layer.
+
+**Strategies 1–3 still earn their keep** — they will fire when their patterns appear in future runs. Don't revert them. But the acceptance criterion ("≥3 canonical TPs surface") was the wrong measurement.
+
+**What this also tells us about the test plan**: any future verbatim-layer change needs an acceptance criterion grounded in the *specific drop pattern being addressed*, not in "canonical TPs surface" — sampling variance and upstream prompt issues both confound that signal.
+
+**Action**: hold PR #62 open. Work on Priority 2 first off `main` for clean attribution. If Priority 2 produces measurable positive impact (one of the canonical TPs surfaces), merge #62 afterwards on its own merits — its strategies will fire when their patterns appear, even if this run didn't exercise them.
+
+---
+
+## Priority 2 — Evidence-shape rules in common prompt
+
+**Goal**: stop the model from filling `evidence.docSays` / `evidence.codeSays` with the answer (the missing identifier, the proposed correct code) when the slot is supposed to hold verifiable doc/code text. Surface the legitimate findings underneath without losing the verbatim-check's hallucination guard.
+
+**Why**: this is the dominant remaining cause of high-conf drops in the post-#62 run (2 of the 3 surviving drops, both at conf 0.97). Both findings are real signal — `filePath` truly is undocumented; the `block-transforms` arrow-function example truly is broken JS — but the model expresses that signal by putting the answer in the evidence slot, where the verbatim-check correctly rejects it as unverifiable.
+
+This rule is fully generic across corpora and languages: any docs/code pair has these two failure modes. **Common prompt** is the right home (CLAUDE.md "layered home, broadest first" — layer 1).
 
 **Start here**:
-- `src/adapters/validator/claude.ts` — find `normaliseForVerbatim` (search the file for the function or the comment block "Tolerant normalisation for verbatim substring comparison").
-- `out/data/runs/20260503-100333` and the most recent `[verbatim-check] dropped issue ...` log lines from that run's stderr — these are the patterns to fix.
+- `src/adapters/validator/prompts/system.md` — the common prompt. Look for the existing evidence-shape rules (`docSays` / `codeSays` definitions, "verify before reporting").
+- The two dropped issues from `/tmp/wp-docs-pass1-dump/pass1-1777836147435.json` (issue 1, `filePath`) and `pass1-1777836224212.json` (issue 0, `schema = { span: ... }`) are the canonical reproducers.
 
-**Patterns to handle (verified across multiple runs)**:
+**Two specific shape rules to add**:
 
-| Pattern | Example | Right fix |
-|---|---|---|
-| Bullet-list reformatting | doc: "Optional. Property: `apiVersion`" → model returns "- Optional / - Property: `apiVersion`" | strip leading `- ` / `* ` markers from BOTH sides when comparing |
-| Single-token quote | docSays: `` `filePath` `` | allow ≥1-token contiguous quotes; do not reject as "too short" |
-| Hallucinated codeSays | model writes plausible code that doesn't exist | **leave dropping** — this is correct behaviour |
-| Concatenated quotes | TS type def + descriptive comment glued | **leave dropping** — non-contiguous, correct to reject |
-| Doc-summary as docSays | "`X` property is not listed in the properties table" | **leave dropping** — that's a description not a quote; fix in prompt instead |
+1. **For `nonexistent-name` where the missing thing is in code-not-doc**: `docSays` must quote the doc context that frames the absence (the property table heading, the surrounding paragraph, the API signature line) — *not* the missing identifier. If the doc literally has no relevant context, `docSays` should be empty and the model should rely on the absence-claim shape (the `isAbsenceIssue` flag already exists in `claude.ts` and skips the codeSays-verbatim check for this drift type; an analogous mechanism is not needed for docSays — the prompt rule alone should be enough).
+2. **For `broken-example` where the doc snippet is syntactically wrong**: `codeSays` must either (a) be empty (the doc is broken on its face — no comparison code is needed), or (b) point to a real working example in the codebase with exact verbatim quote. Never fabricate "what the code should say."
 
 **Sub-tasks**:
-1. Read `normaliseForVerbatim`; understand current tolerances (whitespace collapse, markdown link stripping).
-2. Extend with: bullet-marker stripping (both sides), single-token quote allowance.
-3. Add structured logging when a verbatim drop happens with conf ≥ 0.9 — that's a "we may be losing signal" signal.
-4. Add unit tests pinning each new tolerance (and pinning the things that should still drop).
-5. Run `op run --env-file=.env -- npm run analyze -- --config config/gutenberg-block-api.json --output ./out` and verify at least 3 of {`apiVersion`, `filePath`, broken-arrow, shadowColor} make it to the final output.
+1. Re-read `src/adapters/validator/prompts/system.md` evidence section and drift-type definitions to find the right insertion point.
+2. Draft the two rules with one positive example and one negative example each (the `filePath` and `schema` cases above are perfect counter-examples).
+3. Run `DUMP_PASS1=1 op run --env-file=.env -- npm run analyze -- --config config/gutenberg-block-api.json --output ./out` and inspect the new dumps for `block-patterns` and `block-transforms`.
+4. **Acceptance check**: in the new dumps, `filePath`'s `docSays` either anchors on real doc text (e.g. the properties-table header) or is empty; `block-transforms`'s `codeSays` either points to a real example or is empty.
 
-**Acceptance**: ≥3 previously-killed canonical TPs surface in the final results AND no new false positives appear (compare against `20260503-100333`).
+**Acceptance**: at least one of the two canonical TPs (`filePath` undocumented, `block-transforms` broken arrow) surfaces in the final dashboard for `out/data/runs/<new>` with verifiable evidence.
 
 **Risks**:
-- Over-eager bullet stripping could match across non-bullet content. Pin with tests.
-- Changing the verbatim layer is a downstream change, NOT a prompt change. Don't simultaneously edit the prompt — confounds attribution.
+- Tightening evidence-shape rules can suppress legitimate findings if the model interprets "must quote real text" as "skip the finding when uncertain." Counter with explicit instruction: "if you cannot fill the evidence slot with verifiable text, leave it empty and rely on the absence claim — do not fabricate."
+- Pass-1 sampling variance. Run twice before declaring acceptance reached.
+
+**Removable when**: a stronger Pass-1 model (or a future common-prompt rewrite) makes these failure modes vanish. This is upstream/prompt work, not a heuristic post-filter, so it does not count against the "scaffolding" budget in CLAUDE.md.
 
 ---
 
-## Priority 2 — Doc-fix patch generation
+## Priority 3 — Doc-fix patch generation
 
 **Goal**: for each confirmed finding, generate a corrected doc passage that a maintainer can review and merge as a PR.
 
@@ -99,7 +136,7 @@ Until 1–3 land, do not invest in language packs, config auto-injection (task #
 
 ---
 
-## Priority 3 — History-aware reporting
+## Priority 4 — History-aware reporting
 
 **Goal**: surface, per finding: when it was first seen, how long it has persisted, whether it is new today vs stable for weeks.
 
@@ -127,7 +164,7 @@ Until 1–3 land, do not invest in language packs, config auto-injection (task #
 
 ---
 
-## Priority 4 — Second site (do not start until 1–3 land)
+## Priority 5 — Second site (do not start until 1–4 land)
 
 **Goal**: validate the per-site abstraction by running on a corpus other than Gutenberg.
 
@@ -163,9 +200,9 @@ Until 1–3 land, do not invest in language packs, config auto-injection (task #
 
 What it would do: move "Repos in scope" / `internalPrefixes` / `documentedSchemas` from prose to config schema fields, with auto-injection in `buildPrompt`.
 
-**Why parked**: the value lands when a second site exists. Doing it now means abstracting against one example. Per the week-3 assessment: do this *with* the second-site work (priority 4), not ahead of it.
+**Why parked**: the value lands when a second site exists. Doing it now means abstracting against one example. Per the week-3 assessment: do this *with* the second-site work (priority 5), not ahead of it.
 
-**Unpark when**: priority 4 is in flight AND the second site's prompt extension would re-duplicate these same prose patterns. Then it's no longer speculative — it's removing real duplication.
+**Unpark when**: priority 5 is in flight AND the second site's prompt extension would re-duplicate these same prose patterns. Then it's no longer speculative — it's removing real duplication.
 
 ---
 
@@ -173,10 +210,10 @@ What it would do: move "Repos in scope" / `internalPrefixes` / `documentedSchema
 
 These should be answered before sinking another week into any direction:
 
-1. **Is `out/data/history.json` actually being read anywhere?** If yes, priority 3 may be smaller than it looks. If no, it's larger.
-2. **Is there a real timeline for site #2?** If it's "this month," priority 4 jumps. If it's "someday," it stays last.
-3. **Cost ceiling.** $5 per 16-doc run, scaling linearly. At what corpus size does this stop being acceptable, and is doc-fix patch generation (priority 2) the lever that justifies the cost?
-4. **Who reviews the dashboard today?** If it's just the project author, the trust problem is mostly self-knowledge. If it's a maintainer team, history-aware reporting (priority 3) gets more urgent.
+1. **Is `out/data/history.json` actually being read anywhere?** If yes, priority 4 may be smaller than it looks. If no, it's larger.
+2. **Is there a real timeline for site #2?** If it's "this month," priority 5 jumps. If it's "someday," it stays last.
+3. **Cost ceiling.** $5 per 16-doc run, scaling linearly. At what corpus size does this stop being acceptable, and is doc-fix patch generation (priority 3) the lever that justifies the cost?
+4. **Who reviews the dashboard today?** If it's just the project author, the trust problem is mostly self-knowledge. If it's a maintainer team, history-aware reporting (priority 4) gets more urgent.
 
 ---
 
@@ -184,7 +221,13 @@ These should be answered before sinking another week into any direction:
 
 - Strategic assessment: [docs/week-3.md](./week-3.md)
 - Pipeline discipline: [CLAUDE.md](../CLAUDE.md) — the layered home model is the source of truth for "where does this rule belong?"
-- Most recent baseline run: `out/data/runs/20260503-100333`
+- Latest run (post-#62): `out/data/runs/20260503-202431` — 1 critical, 3 major, 0 minor, health 96.
+- Earlier same-day baseline: `out/data/runs/20260503-100333` — 1 critical, 3 major, 3 minor, health 96.
+- PR #62 (Priority 1 strategies): https://github.com/juanma-wp/wp-docs-health-monitor/pull/62 — open at time of writing.
+- Pass-1 dumps for the three high-conf drops diagnosed in Priority 1 § Outcome:
+  - `filePath` (issue 1): `/tmp/wp-docs-pass1-dump/pass1-1777836147435.json`
+  - `BlockConfiguration` (issue 0): `/tmp/wp-docs-pass1-dump/pass1-1777836187006.json`
+  - `schema = { span: ... }` (issue 0): `/tmp/wp-docs-pass1-dump/pass1-1777836224212.json`
 - Few-shot necessity test: `out/data/runs/20260503-095032` (examples removed) vs `20260503-091051` (with examples) — the proof that few-shot examples are load-bearing.
 - Common prompt: `src/adapters/validator/prompts/system.md`
 - Gutenberg extension: `prompts/gutenberg-block-api.md` (67 lines, examples included)
