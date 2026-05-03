@@ -55,7 +55,7 @@ When you discover a class of false positive or missed bug, the rule needs a home
 
 3. **Config field + auto-injection** — declarative knowledge that varies across sites but should not be prose. If you find yourself writing prose like "in this corpus, identifiers starting with X are internal" or "schemas at path Y are the documented contract," that is a config field, not a prompt rule. Existing examples: `codeSources`. Planned: `internalPrefixes`, `documentedSchemas`. The assembler injects the rule text from the structured config at prompt-build time.
 
-4. **Site-specific extension** (`prompts/<site>.md`) — genuinely one-corpus-only knowledge. Single-symbol carve-outs (e.g. `core/block` reusable category), per-corpus authority overrides not expressible as config flags, and the TP/FP example list earned from real reviews on this corpus.
+4. **Site-specific extension** (`prompts/<site>.md`) — genuinely one-corpus-only knowledge. Single-symbol carve-outs (e.g. `core/block` reusable category), per-corpus authority overrides not expressible as config flags, and the TP/FP example list earned from real reviews on this corpus. Examples that calibrate generic common-prompt rules to concrete corpus failure modes are part of how those rules fire reliably — verify with a controlled run before removing.
 
 **Default discipline**: before writing to a site extension, articulate in one sentence why the rule cannot live in layers 1, 2, or 3. If you cannot, the rule belongs higher up. The same applies in reverse: if you find a rule sitting in a site extension that fits a broader layer, promote it.
 
