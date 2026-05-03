@@ -11,6 +11,16 @@ The `codeSources` configured for this corpus are:
 
 Every issue's `codeRepo` field must be exactly one of these two keys.
 
+### Source authority — corpus specifics
+
+The base prompt's "How to read the input" section is claim-type-keyed but language-neutral. The conventions below name the actual file kinds, tag conventions, and idioms in this corpus. Apply them on top of the per-section authority notes the model sees inline above each structured section.
+
+- **Surface contract** (signatures, parameter names, public types): TypeScript declaration files (`*.d.ts`) and dedicated `types.ts` files in `gutenberg` packages are the authoritative public-API surface. Prefer them over inferred shapes from JS implementations.
+- **Lifecycle and intent** (deprecated, since-version, internal-only): the `## Exported API symbols` section surfaces JSDoc and PHPDoc tags directly. `@deprecated`, `@since`, `@default`, and `@internal` tags carry the same authority as the surrounding code body for these claim types. Prefer the tag text over re-deriving intent from naming.
+- **Runtime defaults from fallback expressions**: the `## Defaults` section captures direct default-value sites (`wp_parse_args` calls in PHP, object-spread merges in JS/TS). Defaults built from short-circuit fallbacks — `value || fallback`, `value ?? fallback`, `value !== undefined ? value : fallback` — may not appear in that section. When the doc states a default and the structured section is silent, scan Source Code for these idioms before reporting.
+- **Tests as strong corroborating evidence**: this corpus has well-curated test suites (`packages/*/src/**/test/`, `packages/*/src/**/__tests__/`, `*.test.{js,ts,jsx,tsx}`, `tests/phpunit/tests/blocks/*.php`). When a test directly covers the doc claim, treat its outcome as strong evidence — a failing assertion is strong drift signal; a passing test corroborates that one slice of behaviour. Tests do NOT certify the doc's broader generalisations.
+- **Schema authority elevation**: schemas under `schemas/json/` (notably `block.json`, `theme.json`) are elevated above the base prompt's "JSON schemas: property names + enums only" rule for THIS corpus. They are themselves the documented contract for the corresponding configuration files — see the dedicated section below.
+
 ### Known internal / reserved identifiers — do not flag as missing from docs
 
 - `reusable` block category — used exclusively by `core/block` (the Reusable Block block itself). It is intentionally omitted from the public category list. Do not report it as missing.
@@ -20,8 +30,6 @@ Every issue's `codeRepo` field must be exactly one of these two keys.
 ### Type-label conventions in this corpus
 
 Doc prose in the Block API reference frequently uses generic type labels (`Object`, `Object[]`, `Array`) where the code exports a specific named type — e.g. `BlockVariation`, `BlockEditorSelectors`, `WPBlockType`. Both refer to the same shape; the developer's code does not break. Do not report these as drift.
-
-Schema files in `schemas/json/` (e.g. `block.json`, `theme.json`) elevate beyond the base prompt's "JSON schemas: property names + enums only" rule — see the dedicated section below.
 
 ### Short-circuit evaluation — verify before reporting
 

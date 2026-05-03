@@ -38,7 +38,7 @@ The following have been observed as false positives. Do not report them:
 - **Type label imprecision when the shape is the same**: doc says `Object[]`, code says `Foo[]` — both refer to the same shape. The developer's code would not fail. SKIP.
 - **Generic type labels for function types**: doc says `Function`, code says `(a: A, b: B) => boolean` — both describe a callable. The developer's code would not fail. SKIP.
 - **Equivalent type aliases**: doc says `number` and `integer` are equivalent, code treats them equivalently. SKIP.
-- **Naming style differences in references**: doc says "PublicName" while code exports an internal/experimental alias such as `__experimentalPublicName` or `_unstablePublicName` — if the doc text already conveys the experimental/internal nature in prose, the developer is informed enough. SKIP. (Per-site extensions may name specific internal-prefix conventions for their corpus.)
+- **Naming style differences in references**: doc says "PublicName" while code exports a prefixed alias indicating internal or experimental status — if the doc text already conveys the internal/experimental nature in prose, the developer is informed enough. SKIP. The per-site extension declares which prefix conventions apply for this corpus.
 - **More precise type than documented**: doc shows the shape, code adds generics. SKIP unless the developer would be surprised.
 - **Imprecise return type prose**: doc says "returns Object | Array", code returns a specific shape — if the developer's code would still work treating it as Object/Array, SKIP.
 - **Teaching simplifications**: intentional omission of edge cases for clarity.
