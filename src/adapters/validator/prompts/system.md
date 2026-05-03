@@ -27,7 +27,7 @@ These cause real developer pain. Look for these first.
 
 4. **required-optional-mismatch** — the doc says a parameter / property is optional but the code requires it (or vice-versa). The developer would omit a required field, or pass an unnecessary one.
 
-5. **deprecated-api** — the doc presents a deprecated API as current or recommended. The developer would adopt something marked for removal.
+5. **deprecated-api** — the doc presents a deprecated API as current or recommended. The developer would adopt something marked for removal. **Only report when the documentation explicitly names the deprecated function or symbol.** If a deprecated symbol exists in the same file or module as something the doc references but the doc never names the deprecated symbol itself, the doc is not endorsing it — do not report.
 
 6. **type-signature** — a parameter was added, removed, or renamed; a return type changed in a way that would cause a developer's call to fail. **High bar**: only report when the type difference would actually break the developer's call. See anti-patterns below.
 
@@ -93,6 +93,8 @@ If your claim depends on evidence from multiple parts of the source, choose the 
 **Cross-section check (mandatory before reporting)**: Before claiming the doc fails to state X (e.g., that a parameter is required, a constraint exists, an API was deprecated, a default applies), search the ENTIRE documentation for any mention of X — including intro paragraphs, setup sections, examples, and notes outside the specific property or function listing. If the doc states the fact in any other place — a sentence in the intro, a note next to an example, a heading three sections up — this is NOT drift. The documentation is judged as a whole document, not as isolated sections. A property listing without a "Required" marker is fine if a sentence elsewhere says "registering X requires Y, Z, and W".
 
 **Direct contradiction requirement**: The codeSays quote must contradict the docSays claim directly and visibly. If demonstrating the contradiction requires extrapolation about behaviors, scenarios, or chained executions not literally shown in the codeSays text itself, do NOT report. Use `fetch_code` in Pass 2 to gather more evidence instead. The contradiction must be readable in the quoted text, not inferred from it.
+
+**Verify runtime semantics including short-circuit evaluation (mandatory before reporting)**: before reporting that a function "is not called" or "is always called" based on a conditional, verify the full boolean expression. Languages with short-circuit operators (`&&`, `||`, `??`, `and`, `or`) skip evaluation when the result is determined by the left operand — `if (a && b())` does NOT call `b()` when `a` is false. If the doc claim is consistent with the actual runtime behaviour under short-circuit semantics — even when the doc's wording uses different terminology than the code's variable names — this is not drift. Do not report rephrase-style suggestions when the doc claim is factually correct under the runtime semantics.
 
 ## Suggestions — must be specific and structured
 

@@ -45,14 +45,29 @@ This project is a **generic** docs-vs-code drift validator. Each site plugs in i
 
 That generality dictates how the validator stack (`src/adapters/validator/`, `src/extractors/`, `SYSTEM_PROMPT`) evolves.
 
-### Common prompt vs. site-specific prompt
+### Where a new rule belongs — layered home, broadest first
 
-When you discover a class of false positive or missed bug, the first question is *where the rule belongs*:
+When you discover a class of false positive or missed bug, the rule needs a home. Walk these layers in order and pick the **broadest** one the rule honestly fits — not the narrowest. Adding to a site extension is a positive choice, not a fallback.
 
-- **Site-specific prompt extension** (default home for new rules): examples, edge cases, authority overrides, naming conventions, framework-specific anti-patterns, concrete audit verdicts from one site. Anything that names a specific identifier, file, package, framework, language, or version belongs here.
-- **Common `SYSTEM_PROMPT`** (high bar): only what generalises across *every* docs/codebase pair — the impact filter, severity rubric, evidence rules, the source-authority concept (without naming specific source kinds), output format. If a rule wouldn't apply equally well to a validator built on any other docs and codebase, it does not belong in the common gate.
+1. **Common `SYSTEM_PROMPT`** (`src/adapters/validator/prompts/system.md`) — every site benefits. Rules that apply to *every* docs/codebase pair regardless of language, framework, or corpus: the impact filter, severity rubric, evidence rules, claim-type-keyed authority guidance, drift-type definitions and their generic refinements, "verify before reporting" rules (cross-section check, short-circuit evaluation, direct contradiction), prose-quote constraints. If a rule names a specific identifier, file convention, package, framework, language, or version, it does NOT belong here.
 
-Default when uncertain: site-specific extension. Re-promote to the common prompt only after the same rule has proven necessary across two or more sites.
+2. **Language pack** (`prompts/lang-<lang>.md`, e.g. `lang-jsts.md`, `lang-php.md`) — any site using that language benefits. Conventions that apply to *any* corpus written in a particular ecosystem: JS/TS test path globs, JSDoc/PHPDoc tag conventions, fallback-expression idioms (`value || X`, `value ?? X`), `*.d.ts` as surface contract, PHP `_doing_it_wrong()` semantics. A rule that would be true for *any* JS/TS (or PHP, or Python, …) corpus belongs here, not in a site extension. Sites declare which packs apply via `validator.languagePacks` in config.
+
+3. **Config field + auto-injection** — declarative knowledge that varies across sites but should not be prose. If you find yourself writing prose like "in this corpus, identifiers starting with X are internal" or "schemas at path Y are the documented contract," that is a config field, not a prompt rule. Existing examples: `codeSources`. Planned: `internalPrefixes`, `documentedSchemas`. The assembler injects the rule text from the structured config at prompt-build time.
+
+4. **Site-specific extension** (`prompts/<site>.md`) — genuinely one-corpus-only knowledge. Single-symbol carve-outs (e.g. `core/block` reusable category), per-corpus authority overrides not expressible as config flags, and the TP/FP example list earned from real reviews on this corpus.
+
+**Default discipline**: before writing to a site extension, articulate in one sentence why the rule cannot live in layers 1, 2, or 3. If you cannot, the rule belongs higher up. The same applies in reverse: if you find a rule sitting in a site extension that fits a broader layer, promote it.
+
+When the same rule turns up across multiple sites' extensions, that is a signal to promote up the stack. But the more common failure mode is the opposite — a rule was written in a site extension when it should have lived elsewhere. Be willing to relocate; the layers are not write-once.
+
+#### Examples (calibration)
+
+- "Type-label imprecision is not drift" — **common** (every doc/code pair has type prose vs concrete types).
+- "Tests under `__tests__/` and `*.test.{js,ts}` are corroborating evidence" — **language pack** (true for any JS/TS corpus).
+- "Identifiers starting with `__experimental` are internal" — **config** (`internalPrefixes: [...]`); the *rule* "internal-prefixed names are not drift" is **common**.
+- "The `core/block` block uses the `reusable` category" — **site extension** (single-symbol carve-out, no broader pattern).
+- "`schemas/json/block.json` IS the documented contract" — **site extension** (a per-corpus declaration; the *mechanism* of schema-authority elevation is **config** + auto-injection).
 
 ### Spend on context and model, not on guards
 
@@ -88,6 +103,6 @@ Verbatim and substring checks (e.g. the post-Pass-1 `codeSays` / `docSays` verif
 Every change to `src/adapters/validator/`, `SYSTEM_PROMPT`, or `src/extractors/` should answer in the PR description:
 
 1. The bad shape that motivates the change, with a reproducer command and observed output.
-2. Whether the rule belongs in the **common** prompt or a **site-specific** extension, and why.
+2. **Where the rule lives, and why it can't live higher.** Walk the layers from "Where a new rule belongs": common, language pack, config field, site extension. Pick the broadest layer it honestly fits and state in one sentence why the next-broader layer doesn't fit. A new rule landing in a site extension must justify why it isn't config-derivable or language-pack material.
 3. If it adds a heuristic post-processing layer: what change (prompt, context, or model) would later let it be removed.
 4. The expected outcome, expressed as something measurable through the `runPass1Only` experiment seam (`claude.ts:507`).
