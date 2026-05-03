@@ -1,4 +1,14 @@
-export type SymbolKind = 'function' | 'type' | 'interface' | 'const' | 'class' | 'enum';
+export type SymbolKind =
+  | 'function'
+  | 'type'
+  | 'interface'
+  | 'const'
+  | 'class'
+  | 'enum'
+  // Schema-derived names: properties, $defs/definitions, enum string values
+  // emitted by the JSON-schema extractor. Indexed for relevance scoring; not
+  // rendered as exported API surface.
+  | 'schema-property';
 
 export type JSDocInfo = {
   description?: string;

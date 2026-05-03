@@ -21,13 +21,40 @@ function makeSource(files: Record<string, string>): CodeSource {
   };
 }
 
+// Test helper. Computes IDF from the supplied occurrences using a generous
+// default indexedFileCount so per-symbol IDF stays positive in the small
+// fixtures these tests use.
 function makeIndex(
   repoId: string,
   symbols: Record<string, string[]>,
   hooks: Record<string, string[]> = {},
   files: string[] = [],
+  indexedFileCount?: number,
 ): SymbolIndex {
-  return { repoId, commitSha: 'sha', builtAt: '2025-01-01T00:00:00Z', files, symbols, hooks };
+  const allOccurrencePaths = new Set<string>([
+    ...Object.values(symbols).flat(),
+    ...Object.values(hooks).flat(),
+    ...files,
+  ]);
+  const total = indexedFileCount ?? Math.max(allOccurrencePaths.size, 8);
+  const idfFor = (m: Record<string, string[]>): Record<string, number> => {
+    const out: Record<string, number> = {};
+    for (const [name, paths] of Object.entries(m)) {
+      out[name] = Math.max(0, Math.log((total + 1) / (paths.length + 1)));
+    }
+    return out;
+  };
+  return {
+    repoId,
+    commitSha: 'sha',
+    builtAt: '2025-01-01T00:00:00Z',
+    files,
+    symbols,
+    hooks,
+    symbolIdf: idfFor(symbols),
+    hookIdf: idfFor(hooks),
+    indexedFileCount: total,
+  };
 }
 
 // --- buildSymbolIndex ---
@@ -163,16 +190,57 @@ describe('buildSymbolIndex', () => {
     const { join } = await import('path');
     const cacheDir = mkdtempSync(`${tmpdir()}/symbol-index-test-stale-`);
 
-    // Write a stale cache file that lacks the `files` field (simulates old format)
-    const staleCache = { repoId: 'stale-repo', commitSha: 'test-sha-001', builtAt: '2024-01-01T00:00:00Z', symbols: {}, hooks: {} };
-    writeFileSync(join(cacheDir, 'stale-repo-test-sha-001.json'), JSON.stringify(staleCache));
+    // Write a stale cache file under the current versioned filename, missing
+    // the symbolIdf / indexedFileCount fields the new schema requires.
+    const staleCache = {
+      repoId:    'stale-repo',
+      commitSha: 'test-sha-001',
+      builtAt:   '2024-01-01T00:00:00Z',
+      files:     ['src/a.ts'],
+      symbols:   { alpha: ['src/a.ts'] },
+      hooks:     {},
+    };
+    writeFileSync(
+      join(cacheDir, 'stale-repo-test-sha-001-v2.json'),
+      JSON.stringify(staleCache),
+    );
 
     const source = makeSource({ 'src/a.ts': 'export function alpha() {}' });
     const index = await buildSymbolIndex('stale-repo', source, { cacheDir });
 
-    // Should have rebuilt (not used stale cache) so files field is present
-    expect(index.files).toContain('src/a.ts');
+    // Should have rebuilt (not used stale cache) so the new fields are present
+    expect(index.symbolIdf['alpha']).toBeGreaterThanOrEqual(0);
+    expect(typeof index.indexedFileCount).toBe('number');
     expect(index.symbols['alpha']).toEqual(['src/a.ts']);
+  });
+
+  it('indexes JSON schema files under schemas/ but skips other JSON files', async () => {
+    const source = makeSource({
+      'schemas/json/block.json': JSON.stringify({
+        properties: {
+          apiVersion: { type: 'integer' },
+          attributes: {
+            type: 'object',
+            properties: { source: { enum: ['attribute', 'text'] } },
+          },
+        },
+      }),
+      'package.json':            '{"name":"x","scripts":{"build":"tsc"}}',
+      'tsconfig.json':           '{"compilerOptions":{"strict":true}}',
+      'src/main.ts':             'export const main = 1;',
+    });
+
+    const index = await buildSymbolIndex('test-repo', source, { cacheDir: null });
+
+    // Schema properties are indexed, with their file path
+    expect(index.symbols['apiVersion']).toEqual(['schemas/json/block.json']);
+    expect(index.symbols['attributes']).toContain('schemas/json/block.json');
+    expect(index.symbols['source']).toContain('schemas/json/block.json');
+    // Enum string values are indexed too
+    expect(index.symbols['attribute']).toContain('schemas/json/block.json');
+    // package.json / tsconfig.json should be skipped (not in schemas/)
+    expect(index.symbols['build']).toBeUndefined();
+    expect(index.symbols['compilerOptions']).toBeUndefined();
   });
 });
 
@@ -192,13 +260,15 @@ describe('scoreFilesAcrossRepos', () => {
     }),
   };
 
-  it('scores files by symbol match count', () => {
+  it('ranks files higher when they match more doc symbols', () => {
     const scores = scoreFilesAcrossRepos(['registerBlockType', 'getBlockType'], indexes);
 
     const top = scores[0];
     expect(top.path).toBe('packages/blocks/src/registration.js');
-    // registerBlockType + getBlockType = 2 symbol matches
-    expect(top.score).toBe(2);
+    expect(top.score).toBeGreaterThan(0);
+    if (scores.length > 1) {
+      expect(top.score).toBeGreaterThan(scores[1].score);
+    }
   });
 
   it('includes matched symbol names in result', () => {
@@ -245,6 +315,90 @@ describe('scoreFilesAcrossRepos', () => {
     for (let i = 1; i < scores.length; i++) {
       expect(scores[i].score).toBeLessThanOrEqual(scores[i - 1].score);
     }
+  });
+
+  it('boosts schema files over implementation files for the same symbol', () => {
+    const idx = {
+      gutenberg: makeIndex(
+        'gutenberg',
+        {
+          color: [
+            'schemas/json/theme.json',
+            'packages/components/src/color-picker/index.js',
+          ],
+        },
+      ),
+    };
+    const scores = scoreFilesAcrossRepos(['color'], idx);
+    expect(scores[0].path).toBe('schemas/json/theme.json');
+    expect(scores[0].score).toBeGreaterThan(scores[1].score);
+  });
+
+  it('demotes story files vs equivalent implementation files', () => {
+    const idx = {
+      gutenberg: makeIndex(
+        'gutenberg',
+        {
+          name: [
+            'packages/blocks/src/api/registration.ts',
+            'packages/components/src/menu/stories/index.story.tsx',
+          ],
+        },
+      ),
+    };
+    const scores = scoreFilesAcrossRepos(['name'], idx);
+    expect(scores[0].path).toBe('packages/blocks/src/api/registration.ts');
+    expect(scores[1].path).toBe('packages/components/src/menu/stories/index.story.tsx');
+    expect(scores[0].score).toBeGreaterThan(scores[1].score * 5);
+  });
+
+  it('boosts types.ts and *.d.ts for surface contracts', () => {
+    const idx = {
+      gutenberg: makeIndex(
+        'gutenberg',
+        {
+          BlockConfiguration: [
+            'packages/blocks/src/types.ts',
+            'packages/blocks/src/api/registration.ts',
+          ],
+          ComponentProps: [
+            'packages/components/src/index.d.ts',
+            'packages/components/src/component.ts',
+          ],
+        },
+      ),
+    };
+    const typesScore = scoreFilesAcrossRepos(['BlockConfiguration'], idx)
+      .find(s => s.path.endsWith('types.ts'))!;
+    const regScore = scoreFilesAcrossRepos(['BlockConfiguration'], idx)
+      .find(s => s.path.endsWith('registration.ts'))!;
+    expect(typesScore.score).toBeGreaterThan(regScore.score);
+
+    const dtsScore = scoreFilesAcrossRepos(['ComponentProps'], idx)
+      .find(s => s.path.endsWith('.d.ts'))!;
+    const componentScore = scoreFilesAcrossRepos(['ComponentProps'], idx)
+      .find(s => s.path.endsWith('component.ts'))!;
+    expect(dtsScore.score).toBeGreaterThan(componentScore.score);
+  });
+
+  it('weights rare symbols higher than common ones (IDF)', () => {
+    // commonSymbol appears in many files; rareSymbol in one. Per IDF, the
+    // single file matching rareSymbol should outscore any single file that
+    // only matches commonSymbol.
+    const fileList = Array.from({ length: 50 }, (_, i) => `packages/x/src/file-${i}.ts`);
+    const symbols: Record<string, string[]> = {
+      commonSymbol: fileList,
+      rareSymbol:   ['packages/x/src/special.ts'],
+    };
+    const idx = {
+      gutenberg: makeIndex('gutenberg', symbols, {}, [], 100),
+    };
+
+    const scores = scoreFilesAcrossRepos(['commonSymbol', 'rareSymbol'], idx);
+
+    const rareScore = scores.find(s => s.path === 'packages/x/src/special.ts')!;
+    const commonScores = scores.filter(s => s.path.startsWith('packages/x/src/file-'));
+    expect(rareScore.score).toBeGreaterThan(commonScores[0].score);
   });
 });
 
