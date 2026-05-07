@@ -1,6 +1,6 @@
 # Next steps — working plan
 
-**Pairs with**: [docs/week-3.md](./week-3.md) (the strategic assessment that motivates the priorities here) and [docs/second-site-experiment.md](./second-site-experiment.md) (the proposed pivot — Priorities 3 and 4 are deferred until Priority 5's generality test runs).
+**Pairs with**: [docs/second-site-experiment.md](./second-site-experiment.md) (the proposed pivot — Priorities 3 and 4 are deferred until Priority 5's generality test runs).
 **Status snapshot**: 2026-05-03 PM. [PR #62](https://github.com/juanma-wp/wp-docs-health-monitor/pull/62) (verbatim recall strategies) is open at time of writing — held back deliberately until Priority 2 validates the direction (see Priority 1 § Outcome and Priority 2). Latest run on the PR #62 branch: `out/data/runs/20260503-202431` — 1 critical, 3 major, 0 minor, health 96. Earlier same-day baseline (main): `out/data/runs/20260503-100333` — 1 critical, 3 major, 3 minor, health 96. Steps A–C of the prompt reframe + steps 1+2 of the per-site reduction are merged. Few-shot examples verified load-bearing (`out/data/runs/20260503-095032`). Architectural work (task #14, language packs) parked.
 
 This doc is a **working plan**, not a contract. Update as reality shifts. Each section is sized to be picked up cold by a future session.
@@ -221,7 +221,6 @@ These should be answered before sinking another week into any direction:
 
 ## References
 
-- Strategic assessment: [docs/week-3.md](./week-3.md)
 - Pipeline discipline: [CLAUDE.md](../CLAUDE.md) — the layered home model is the source of truth for "where does this rule belong?"
 - Latest run (post-#62): `out/data/runs/20260503-202431` — 1 critical, 3 major, 0 minor, health 96.
 - Earlier same-day baseline: `out/data/runs/20260503-100333` — 1 critical, 3 major, 3 minor, health 96.

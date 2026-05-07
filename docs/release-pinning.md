@@ -1,6 +1,6 @@
 # Release Pinning — Which Code Version Counts as Ground Truth
 
-Back to [PLAN.md](../PLAN.md) · Architecture in [architecture.md](./architecture.md) · Schedule in [timeline.md](./timeline.md).
+Back to [PLAN.md](../PLAN.md) · Architecture in [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 When the Validator compares a doc claim against "the code," it needs to answer: *which* code? Trunk, the latest released plugin, or the snapshot that ships inside a specific WordPress core version? The answer changes what verdicts the tool produces, so it belongs in the design before the pipeline is wired at scale.
 
@@ -42,7 +42,7 @@ A verdict of "this doc is accurate" is only meaningful **relative to a target ti
 
 ## Why trunk is the wrong default
 
-The Phase 1 `git-clone` `CodeSource` in `architecture.md` does a shallow clone without specifying a ref, which resolves to the default branch (`trunk`). This hasn't surfaced as a bug yet because the Week-1 PoC target is the Block API Reference — a historically stable surface where trunk and the latest release are effectively identical. At scale (150 Handbook docs, including newer / more experimental APIs), trunk-vs-release divergence will start producing false verdicts in both directions.
+The Phase 1 `git-clone` `CodeSource` in `ARCHITECTURE.md` does a shallow clone without specifying a ref, which resolves to the default branch (`trunk`). This hasn't surfaced as a bug yet because the Week-1 PoC target is the Block API Reference — a historically stable surface where trunk and the latest release are effectively identical. At scale (150 Handbook docs, including newer / more experimental APIs), trunk-vs-release divergence will start producing false verdicts in both directions.
 
 ## Proposed solution
 
@@ -59,7 +59,7 @@ Resolve "latest stable release" dynamically at run time via the GitHub API:
 GET https://api.github.com/repos/WordPress/gutenberg/releases/latest
 ```
 
-This endpoint auto-filters prereleases / release candidates — no extra filtering logic needed. The resolved tag is recorded on each `DocResult` alongside the commit SHA; the plumbing already exists (see `architecture.md` § Code Ingestion — commit SHA on `DocResult`).
+This endpoint auto-filters prereleases / release candidates — no extra filtering logic needed. The resolved tag is recorded on each `DocResult` alongside the commit SHA; the plumbing already exists (see `ARCHITECTURE.md` § Code Ingestion — commit SHA on `DocResult`).
 
 ## Implementation footprint
 
@@ -67,7 +67,7 @@ Small — this is a config + resolver change, not a new pipeline stage.
 
 1. **Tag resolver** (~5 lines): pre-run step that hits `releases/latest` and returns the tag name.
 2. **Config field on `git-clone`**: `ref: string` — accepts a branch, tag, or SHA. Default becomes `"latest-release"` (a sentinel the resolver handles) rather than `"trunk"`.
-3. **New drift type in the Validator**: *"API referenced in doc does not exist in the released code at target ref."* Complements the existing *"name no longer exists"* drift type in `architecture.md` § What counts as drift.
+3. **New drift type in the Validator**: *"API referenced in doc does not exist in the released code at target ref."* Complements the existing *"name no longer exists"* drift type in `ARCHITECTURE.md` § What counts as drift.
 4. **`DocResult` field**: `codeRef: { tag, sha }` — records what was analyzed against, for dashboard display and reproducibility.
 
 ## PoC scope decision
@@ -75,7 +75,7 @@ Small — this is a config + resolver change, not a new pipeline stage.
 **Defer to Phase 2.** Rationale:
 
 - Week-1 PoC analyzes 10 Block API Reference docs (`block.json`, `register_block_type`, attributes, supports). These APIs are rock-stable across years of releases. Trunk vs. latest release tag will produce effectively identical verdicts on this set.
-- The Week-1 schedule (`timeline.md`) is already ambitious: full pipeline + dashboard + public deploy in 7 days.
+- The Week-1 schedule was already ambitious: full pipeline + dashboard + public deploy in 7 days.
 - The change is small when it lands, but **one more moving part** during Phase 0 validation gate tuning has real cost.
 - Revisit during **P2-M3** (150-doc pipeline) — that's when newer / experimental APIs enter the analyzed set and trunk-vs-release divergence starts producing false verdicts.
 

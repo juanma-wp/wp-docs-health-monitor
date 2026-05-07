@@ -15,11 +15,11 @@ Node 20+ required. ESM throughout (`"type": "module"`); intra-package imports us
 
 ## Architecture
 
-Read these in order when orienting: `PLAN.md` (phases + decisions) → `docs/prd.md` (requirements + user stories) → `docs/architecture.md` (why decisions were made, including the locked-contract / adapter-pattern rationale) → `AGENTS.md` (role-scoped reviewing/implementation, including hard boundaries) → `src/pipeline.ts` (the wire-up).
+Read these in order when orienting: `PLAN.md` (phases + decisions) → `docs/PRD.md` (requirements + user stories) → `docs/ARCHITECTURE.md` (why decisions were made, including the locked-contract / adapter-pattern rationale) → `AGENTS.md` (role-scoped reviewing/implementation, including hard boundaries) → `src/pipeline.ts` (the wire-up).
 
 ### Project stance — non-obvious things you can't infer from the code
 
-These are conventions and invariants that surprise readers and aren't carried by the code alone. Everything else (contract layout, adapter wiring, current adapter list, role boundaries) lives in `docs/architecture.md` and `AGENTS.md` — go there, don't restate it here.
+These are conventions and invariants that surprise readers and aren't carried by the code alone. Everything else (contract layout, adapter wiring, current adapter list, role boundaries) lives in `docs/ARCHITECTURE.md` and `AGENTS.md` — go there, don't restate it here.
 
 - **Pipeline error-handling stance.** `runPipeline` always produces a valid `RunResults`. Failed fetches and mapping errors become per-doc `diagnostics` entries with `status: 'critical'` — never uncaught exceptions. Tests pin this: `src/types/__tests__/schemas.test.ts` (`runPipeline` block) and `src/adapters/doc-source/__tests__/manifest-url.test.ts` (error-handling block).
 - **`src/types/` is locked.** Zod schemas are the source of truth; TypeScript types are derived. `examples/mock-results.json` must round-trip `RunResultsSchema.parse()`. `examples/results.schema.json` is generated — never edit by hand; re-run `npm run gen:schema`.

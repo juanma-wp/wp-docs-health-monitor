@@ -1,6 +1,6 @@
 # PRD: WP Docs Health Monitor
 
-Reading order: [PLAN.md](../PLAN.md) (phases) → this file (requirements) → [docs/architecture.md](./architecture.md) (why decisions were made).
+Reading order: [PLAN.md](../PLAN.md) (phases) → this file (requirements) → [docs/ARCHITECTURE.md](./ARCHITECTURE.md) (why decisions were made).
 
 ---
 

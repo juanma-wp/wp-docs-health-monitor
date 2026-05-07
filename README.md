@@ -110,8 +110,7 @@ The override is deep-merged into the base config — only the keys you specify a
 ## Architecture
 
 - **[`PLAN.md`](./PLAN.md)** — overview, scope, out-of-scope, open questions.
-- **[`docs/architecture.md`](./docs/architecture.md)** — schemas, mapping format, tech stack.
-- **[`docs/backlog.md`](./docs/backlog.md)** — issue breakdown and milestones.
+- **[`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)** — schemas, mapping format, tech stack.
 
 ## Getting started
 
@@ -256,7 +255,7 @@ Save it as `scripts/run-mine.ts` and run with `npx tsx scripts/run-mine.ts`. A p
 | 51-test suite covering adapters, schemas, and error paths | Static HTML dashboard |
 | Mapping-bootstrap helper via Claude | CLI entry point, GitHub Action |
 
-See [`docs/backlog.md`](./docs/backlog.md) for what's queued and who owns it.
+See [`docs/next-steps.md`](./docs/next-steps.md) for the current working plan.
 
 ## License
 

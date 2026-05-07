@@ -1,6 +1,6 @@
 # Architecture
 
-Back to [PLAN.md](../PLAN.md) · Issues in [backlog.md](./backlog.md) · Schedule in [timeline.md](./timeline.md).
+Back to [PLAN.md](../PLAN.md).
 
 Technical decisions, patterns, and the rationale behind them. Not a file map — for that, read the source. This document explains *why* the system is built the way it is and what to reach for when building each part.
 

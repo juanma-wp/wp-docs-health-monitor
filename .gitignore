@@ -46,3 +46,4 @@ CLAUDE.local.md
 
 # Agent runtime state — auto-created worktrees from agent isolation runs
 .claude/worktrees/
+.claude/skills/

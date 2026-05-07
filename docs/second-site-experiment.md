@@ -1,7 +1,7 @@
 # Second-site experiment — the test we have not yet run
 
 **Status**: planned, not started. 2026-05-03.
-**Pairs with**: [docs/next-steps.md](./next-steps.md) (where this is logged as Priority 5) and [docs/week-3.md](./week-3.md) (the prior strategic assessment, which this revises).
+**Pairs with**: [docs/next-steps.md](./next-steps.md) (where this is logged as Priority 5).
 
 **Dependency**: [PR #60](https://github.com/juanma-wp/wp-docs-health-monitor/pull/60) (AI-free auto-mapping via `scripts/auto-map.ts`) should be merged before this experiment starts. Constructing five theme-json mappings by hand or via `bootstrap-mapping.ts` (which needs API calls) is the most expensive part of setup; auto-map collapses it to one shell command per doc with no API spend. Order of operations: land Priority 2 PR → review and merge PR #60 → start this experiment.
 
@@ -140,7 +140,7 @@ $30 hard cap (≈ 15 runs at theme.json's expected ~$2/run). If we're spending m
 **If the experiment fails:**
 - The pivot to "WP docs health monitor for Gutenberg + theme.json + REST handbook" is the honest reframe. Not a downgrade — it's a focused product.
 - Priority 4 (history-aware reporting) becomes more valuable, not less, because per-corpus polish matters more than breadth.
-- Architectural work in [docs/architecture.md](./architecture.md) gets a "limited generality" caveat that future contributors should see before assuming portability.
+- Architectural work in [docs/ARCHITECTURE.md](./ARCHITECTURE.md) gets a "limited generality" caveat that future contributors should see before assuming portability.
 - Priority 3 (doc-fix patches) still makes sense, but scoped to what we know works.
 
 Both outcomes are useful. The point of running the experiment is to know.
@@ -159,8 +159,7 @@ Both outcomes are useful. The point of running the experiment is to know.
 ## References
 
 - Working plan: [docs/next-steps.md](./next-steps.md) — Priority 5 lives here.
-- Strategic context: [docs/week-3.md](./week-3.md).
-- Architectural rationale: [docs/architecture.md](./architecture.md).
+- Architectural rationale: [docs/ARCHITECTURE.md](./ARCHITECTURE.md).
 - Layered home model: [CLAUDE.md](../CLAUDE.md) — what belongs in common vs. language pack vs. config vs. extension.
 - Existing site config to template from: `config/gutenberg-block-api.json`, `mappings/gutenberg-block-api.json`, `prompts/gutenberg-block-api.md`.
 - Theme.json schema: `tmp/gutenberg-trunk/schemas/json/theme.json` (in cloned repo).
