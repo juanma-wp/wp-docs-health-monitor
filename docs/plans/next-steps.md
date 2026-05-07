@@ -1,6 +1,6 @@
 # Next steps — working plan
 
-**Pairs with**: [docs/second-site-experiment.md](./second-site-experiment.md) (the proposed pivot — Priorities 3 and 4 are deferred until Priority 5's generality test runs).
+**Pairs with**: [second-site-experiment.md](./second-site-experiment.md) (the proposed pivot — Priorities 3 and 4 are deferred until Priority 5's generality test runs).
 **Status snapshot**: 2026-05-03 PM. [PR #62](https://github.com/juanma-wp/wp-docs-health-monitor/pull/62) (verbatim recall strategies) is open at time of writing — held back deliberately until Priority 2 validates the direction (see Priority 1 § Outcome and Priority 2). Latest run on the PR #62 branch: `out/data/runs/20260503-202431` — 1 critical, 3 major, 0 minor, health 96. Earlier same-day baseline (main): `out/data/runs/20260503-100333` — 1 critical, 3 major, 3 minor, health 96. Steps A–C of the prompt reframe + steps 1+2 of the per-site reduction are merged. Few-shot examples verified load-bearing (`out/data/runs/20260503-095032`). Architectural work (task #14, language packs) parked.
 
 This doc is a **working plan**, not a contract. Update as reality shifts. Each section is sized to be picked up cold by a future session.
@@ -23,7 +23,7 @@ In order:
 
 1. **Verbatim recall** (task #16) — strategies in PR #62 (open) but acceptance criterion was off-target. Whether to merge depends on Priority 2's outcome (see § Outcome).
 2. **Evidence-shape rules in common prompt** — fix the dominant remaining failure mode: the model puts the *answer* in `docSays`/`codeSays` slots instead of verifiable doc/code text. Surfaced by Priority 1 work.
-3. **Second site** (was Priority 5 — promoted) — validate the architecture by running on a non-Gutenberg-block-API corpus. Theme.json reference picked. See [docs/second-site-experiment.md](./second-site-experiment.md) for full design and rationale. **This is the next-actionable priority** once Priority 2's PR lands.
+3. **Second site** (was Priority 5 — promoted) — validate the architecture by running on a non-Gutenberg-block-API corpus. Theme.json reference picked. See [second-site-experiment.md](./second-site-experiment.md) for full design and rationale. **This is the next-actionable priority** once Priority 2's PR lands.
 4. *(Deferred)* **Doc-fix patch generation** — make findings actionable as PRs. Was Priority 3; deferred until Priority 3's generality test resolves.
 5. *(Deferred)* **History-aware reporting** — make the dashboard a trend tool. Was Priority 4; deferred for the same reason.
 
@@ -221,7 +221,7 @@ These should be answered before sinking another week into any direction:
 
 ## References
 
-- Pipeline discipline: [CLAUDE.md](../CLAUDE.md) — the layered home model is the source of truth for "where does this rule belong?"
+- Pipeline discipline: [CLAUDE.md](../../CLAUDE.md) — the layered home model is the source of truth for "where does this rule belong?"
 - Latest run (post-#62): `out/data/runs/20260503-202431` — 1 critical, 3 major, 0 minor, health 96.
 - Earlier same-day baseline: `out/data/runs/20260503-100333` — 1 critical, 3 major, 3 minor, health 96.
 - PR #62 (Priority 1 strategies): https://github.com/juanma-wp/wp-docs-health-monitor/pull/62 — open at time of writing.

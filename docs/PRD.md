@@ -261,4 +261,4 @@ the last doc edit would produce false positives.
 
 Phase 1 validates against `trunk`, which contains unreleased Gutenberg code. This is
 a known limitation. Phase 2 pins to the latest stable Gutenberg release tag. See
-[docs/release-pinning.md](./release-pinning.md).
+[docs/design/release-pinning.md](./design/release-pinning.md).

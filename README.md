@@ -255,7 +255,7 @@ Save it as `scripts/run-mine.ts` and run with `npx tsx scripts/run-mine.ts`. A p
 | 51-test suite covering adapters, schemas, and error paths | Static HTML dashboard |
 | Mapping-bootstrap helper via Claude | CLI entry point, GitHub Action |
 
-See [`docs/next-steps.md`](./docs/next-steps.md) for the current working plan.
+See [`docs/plans/next-steps.md`](./docs/plans/next-steps.md) for the current working plan.
 
 ## License
 

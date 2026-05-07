@@ -1,7 +1,7 @@
 # Second-site experiment — the test we have not yet run
 
 **Status**: planned, not started. 2026-05-03.
-**Pairs with**: [docs/next-steps.md](./next-steps.md) (where this is logged as Priority 5).
+**Pairs with**: [next-steps.md](./next-steps.md) (where this is logged as Priority 5).
 
 **Dependency**: [PR #60](https://github.com/juanma-wp/wp-docs-health-monitor/pull/60) (AI-free auto-mapping via `scripts/auto-map.ts`) should be merged before this experiment starts. Constructing five theme-json mappings by hand or via `bootstrap-mapping.ts` (which needs API calls) is the most expensive part of setup; auto-map collapses it to one shell command per doc with no API spend. Order of operations: land Priority 2 PR → review and merge PR #60 → start this experiment.
 
@@ -45,7 +45,7 @@ The Gutenberg extension is at 75 lines today. The hypothesis the second-site tes
 
 **The expensive question:** how much extension does a new corpus actually need to produce useful signal?
 
-Per [docs/next-steps.md](./next-steps.md) Priority 5 acceptance:
+Per [next-steps.md](./next-steps.md) Priority 5 acceptance:
 
 - **Extension stays < 40 lines** → architecture is sound, the common prompt is doing most of the work.
 - **Extension lands around Gutenberg's ~75 lines** → mixed signal; depends what those lines contain (TP/FP lists are fine; structural overrides are concerning).
@@ -140,7 +140,7 @@ $30 hard cap (≈ 15 runs at theme.json's expected ~$2/run). If we're spending m
 **If the experiment fails:**
 - The pivot to "WP docs health monitor for Gutenberg + theme.json + REST handbook" is the honest reframe. Not a downgrade — it's a focused product.
 - Priority 4 (history-aware reporting) becomes more valuable, not less, because per-corpus polish matters more than breadth.
-- Architectural work in [docs/ARCHITECTURE.md](./ARCHITECTURE.md) gets a "limited generality" caveat that future contributors should see before assuming portability.
+- Architectural work in [docs/ARCHITECTURE.md](../ARCHITECTURE.md) gets a "limited generality" caveat that future contributors should see before assuming portability.
 - Priority 3 (doc-fix patches) still makes sense, but scoped to what we know works.
 
 Both outcomes are useful. The point of running the experiment is to know.
@@ -151,16 +151,16 @@ Both outcomes are useful. The point of running the experiment is to know.
 
 1. **Mapping construction**: PR #60 (`scripts/auto-map.ts`) is the preferred path — see § Artifacts to create. Question becomes: do we trust auto-map's output cold, or hand-review each doc's tiers before running the analyzer? Recommendation: hand-review on this first non-Gutenberg run because auto-map's behaviour on theme.json is itself unvalidated.
 2. **Implementation file scope**: does theme.json processing live primarily in Gutenberg (`lib/class-wp-theme-json*.php`) or in WP core (`src/wp-includes/class-wp-theme-json*.php`)? Both? Establish authority order in the mapping.
-3. **Schema authority elevation**: should `schemas/json/theme.json` be elevated to "documented contract" status the way block.json is in the Gutenberg extension? Likely yes — but that's a per-site config flag, not a prompt rule. (Note: per [CLAUDE.md](../CLAUDE.md), schema authority is layer 3 territory — a config field, not extension prose. May need to introduce that field if not already present.)
+3. **Schema authority elevation**: should `schemas/json/theme.json` be elevated to "documented contract" status the way block.json is in the Gutenberg extension? Likely yes — but that's a per-site config flag, not a prompt rule. (Note: per [CLAUDE.md](../../CLAUDE.md), schema authority is layer 3 territory — a config field, not extension prose. May need to introduce that field if not already present.)
 4. **Versioned docs**: theme-json-v1 and theme-json-v2 are *historical* references for older schema versions. The current code only implements V3. How do we tell the validator "for this doc, the canonical contract is the V1/V2 schema, not the current `theme.json`"? Decide whether to (a) skip historical docs, (b) point the mapping at git tags, or (c) accept that drift is inherent and report it as such.
 
 ---
 
 ## References
 
-- Working plan: [docs/next-steps.md](./next-steps.md) — Priority 5 lives here.
-- Architectural rationale: [docs/ARCHITECTURE.md](./ARCHITECTURE.md).
-- Layered home model: [CLAUDE.md](../CLAUDE.md) — what belongs in common vs. language pack vs. config vs. extension.
+- Working plan: [next-steps.md](./next-steps.md) — Priority 5 lives here.
+- Architectural rationale: [docs/ARCHITECTURE.md](../ARCHITECTURE.md).
+- Layered home model: [CLAUDE.md](../../CLAUDE.md) — what belongs in common vs. language pack vs. config vs. extension.
 - Existing site config to template from: `config/gutenberg-block-api.json`, `mappings/gutenberg-block-api.json`, `prompts/gutenberg-block-api.md`.
 - Theme.json schema: `tmp/gutenberg-trunk/schemas/json/theme.json` (in cloned repo).
 - Theme.json doc set surfaced from `tmp/gutenberg-trunk/docs/manifest.json`: 5 entries under `parent=theme-json-reference`.

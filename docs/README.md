@@ -16,18 +16,18 @@ After that, jump to whichever section below matches your task.
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** — stack, adapter pattern, locked contracts, validator design, results storage, risks.
 - **[GLOSSARY.md](./GLOSSARY.md)** — load-bearing terms (`Doc`, `CodeTiers`, `Issue`, `RunResults`, `Claim Type`, …). Edit inline as terms sharpen.
 
-## Operational reference — the *how*
+## Operational reference — the *how* — `reference/`
 
-- **[checks.md](./checks.md)** — every drift type the validator runs (`type-signature`, `default-value`, `deprecated-api`, `broken-example`, `nonexistent-name`, `required-optional-mismatch`), with severity and real examples.
-- **[mapping-guidelines.md](./mapping-guidelines.md)** — building entries in `mappings/`: source authority order, tier assignment, schema-as-contract guidance.
+- **[reference/checks.md](./reference/checks.md)** — every drift type the validator runs (`type-signature`, `default-value`, `deprecated-api`, `broken-example`, `nonexistent-name`, `required-optional-mismatch`), with severity and real examples.
+- **[reference/mapping-guidelines.md](./reference/mapping-guidelines.md)** — building entries in `mappings/`: source authority order, tier assignment, schema-as-contract guidance.
 
-## Active plans — the *what's next*
+## Active plans — the *what's next* — `plans/`
 
 > Each plan carries its own status-snapshot date in its header. Treat anything older than ~2 weeks as suspect — re-check against `out/data/runs/<latest>` and the latest commits before acting on it.
 
-- **[next-steps.md](./next-steps.md)** — *snapshot 2026-05-03.* Current working priority list. Start a session here.
-- **[second-site-experiment.md](./second-site-experiment.md)** — *snapshot 2026-05-03.* Design and acceptance criteria for the theme.json second-site test (Priority 5).
+- **[plans/next-steps.md](./plans/next-steps.md)** — *snapshot 2026-05-03.* Current working priority list. Start a session here.
+- **[plans/second-site-experiment.md](./plans/second-site-experiment.md)** — *snapshot 2026-05-03.* Design and acceptance criteria for the theme.json second-site test (Priority 5).
 
-## Design notes — *deferred*
+## Design notes — *deferred* — `design/`
 
-- **[release-pinning.md](./release-pinning.md)** — pin code to released tags rather than `trunk`. Deferred to Phase 2.
+- **[design/release-pinning.md](./design/release-pinning.md)** — pin code to released tags rather than `trunk`. Deferred to Phase 2.

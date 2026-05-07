@@ -1,6 +1,6 @@
 # Release Pinning — Which Code Version Counts as Ground Truth
 
-Back to [PLAN.md](../PLAN.md) · Architecture in [ARCHITECTURE.md](./ARCHITECTURE.md).
+Back to [PLAN.md](../../PLAN.md) · Architecture in [ARCHITECTURE.md](../ARCHITECTURE.md).
 
 When the Validator compares a doc claim against "the code," it needs to answer: *which* code? Trunk, the latest released plugin, or the snapshot that ships inside a specific WordPress core version? The answer changes what verdicts the tool produces, so it belongs in the design before the pipeline is wired at scale.
 
