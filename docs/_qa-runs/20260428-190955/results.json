@@ -1,0 +1,1018 @@
+{
+  "runId": "20260428-190955",
+  "timestamp": "2026-04-28T18:09:55.450Z",
+  "overallHealth": 98,
+  "models": {
+    "pass1": "claude-sonnet-4-6",
+    "pass2": "claude-sonnet-4-6"
+  },
+  "repoUrls": {
+    "gutenberg": "https://github.com/WordPress/gutenberg",
+    "wordpress-develop": "https://github.com/WordPress/wordpress-develop"
+  },
+  "repoRefs": {
+    "gutenberg": "trunk",
+    "wordpress-develop": "trunk"
+  },
+  "totals": {
+    "docs": 16,
+    "healthy": 16,
+    "needsAttention": 0,
+    "critical": 0,
+    "issues": {
+      "total": 6,
+      "critical": 0,
+      "major": 3,
+      "minor": 3
+    }
+  },
+  "usage": {
+    "inputTokens": 993588,
+    "outputTokens": 37097,
+    "cacheReadTokens": 923564,
+    "cacheWriteTokens": 63769,
+    "estimatedCostUsd": 4.0534
+  },
+  "docs": [
+    {
+      "slug": "block-annotations",
+      "title": "Annotations",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-annotations/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [],
+      "relatedCode": [],
+      "diagnostics": [
+        "MappingError: no mapping found for slug \"block-annotations\".\nAvailable slugs: block-attributes, block-bindings, block-context, block-deprecation, block-metadata, block-patterns, block-registration, block-supports, block-transforms, block-variations"
+      ],
+      "commitSha": "",
+      "analyzedAt": "2026-04-28T18:04:41.900Z"
+    },
+    {
+      "slug": "block-api-versions",
+      "title": "API Versions",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-api-versions/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [],
+      "relatedCode": [],
+      "diagnostics": [
+        "MappingError: no mapping found for slug \"block-api-versions\".\nAvailable slugs: block-attributes, block-bindings, block-context, block-deprecation, block-metadata, block-patterns, block-registration, block-supports, block-transforms, block-variations"
+      ],
+      "commitSha": "",
+      "analyzedAt": "2026-04-28T18:04:41.902Z"
+    },
+    {
+      "slug": "block-attributes",
+      "title": "Attributes",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-attributes/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The documentation correctly identifies `meta` as a deprecated source and points readers to EntityProvider and related hook APIs as the recommended alternative, which matches the code's `schemas/json/block.json` description of the `meta` field.",
+        "The documentation accurately describes how boolean attribute sources work — that the mere presence of an attribute (like `disabled`) should be inferred as `true` — which matches the `toBooleanAttributeMatcher` implementation in `get-block-attributes.ts` that returns `true` when the underlying matcher returns any non-undefined value.",
+        "The documentation correctly describes the `role` property values `content` and `local`, matching both the JSON schema enum `[\"content\", \"local\"]` and the `getCommentAttributes` function in `serializer.tsx` which checks `attributeSchema.role === 'local'` to skip serialization."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/parser/test/get-block-attributes.js",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/block.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/parser/get-block-attributes.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/types.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/parser/index.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/serializer.tsx",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/registration.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/reducer.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block.php",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/validation/index.ts",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/factory.ts",
+          "tier": "context",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-type.php",
+          "tier": "context",
+          "includedInAnalysis": false
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-04-28T18:05:56.478Z"
+    },
+    {
+      "slug": "block-bindings",
+      "title": "Bindings",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-bindings/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The documentation correctly identifies all three required `args` properties for server-side `register_block_bindings_source()`: `label`, `get_value_callback`, and `uses_context` — matching the `$allowed_source_properties` array in `WP_Block_Bindings_Registry` and the validation logic in the PHP registry class.",
+        "The documentation accurately describes `unregisterBlockBindingsSource`, `getBlockBindingsSources`, and `getBlockBindingsSource` as functions exported from `@wordpress/blocks` with correct signatures and since-version annotations (6.7.0), matching the TypeScript source in `registration.ts`.",
+        "The documentation correctly states that the `label` parameter is optional in JavaScript registration when already defined on the server ('In case it was defined already on the server, the server label will be overridden by this one'), which aligns with the `BlockBindingsSource` TypeScript interface where `label?: string` is marked optional."
+      ],
+      "relatedCode": [
+        {
+          "repo": "wordpress-develop",
+          "file": "tests/phpunit/tests/block-bindings/wpBlockBindingsRegistry.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/registration.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-bindings-registry.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/types.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/parser/get-block-attributes.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-bindings-source.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/blocks.php",
+          "tier": "secondary",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/factory.ts",
+          "tier": "secondary",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/hooks/index.js",
+          "tier": "context",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block.php",
+          "tier": "context",
+          "includedInAnalysis": false
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "a95dd0e0351a9fb2ef124ea1b8be63bf6887b946",
+      "analyzedAt": "2026-04-28T18:06:28.295Z"
+    },
+    {
+      "slug": "block-context",
+      "title": "Context",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-context/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The documentation correctly states that `usesContext` is defined as an array of context name strings, which matches `usesContext?: string[]` in `packages/blocks/src/types.ts`.",
+        "The documentation accurately describes that `providesContext` is an object mapping context names to block attribute names, consistent with `providesContext?: Record< string, keyof Attributes >` in `packages/blocks/src/types.ts`.",
+        "The PHP example correctly shows `$block->context['my-plugin/recordId']` accessed from the third argument of `render_callback`, which aligns with the WordPress block rendering API conventions documented throughout the codebase."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/test/registration.js",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/registration.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/components/block-context/index.js",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/types.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/parser/index.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/store/selectors.js",
+          "tier": "secondary",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/factory.ts",
+          "tier": "secondary",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block.php",
+          "tier": "secondary",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/actions.ts",
+          "tier": "context",
+          "includedInAnalysis": false
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-04-28T18:05:13.721Z"
+    },
+    {
+      "slug": "block-deprecation",
+      "title": "Deprecation",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-deprecation/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The documentation correctly describes the `migrate` function signature — taking `attributes` and `innerBlocks` as parameters and returning either new attributes or a tuple — which matches the TypeScript type `migrate?: (attributes: OldAttributes, innerBlocks: Block[]) => NewAttributes | [NewAttributes, Block[]]` in `packages/blocks/src/types.ts`.",
+        "The documentation accurately states that deprecations are skipped entirely (including `migrate`) when the deprecated `save` function does not produce a valid block, which is confirmed by the implementation in `apply-block-deprecated-versions.ts` where the `if (!isValid) { continue; }` check precedes the `migrate` call.",
+        "The documentation's description of `isEligible` as opt-in for valid blocks — 'A deprecation will be tried if the current state of a parsed block is invalid, or if the deprecation defines an `isEligible` function that returns true' — is confirmed by the test 'should allow opt-in eligibility of valid block' and the implementation's `stubFalse` default for `isEligible` in `apply-block-deprecated-versions.ts`."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/parser/test/apply-block-deprecated-versions.js",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/registration.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/parser/apply-block-deprecated-versions.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/types.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/parser/index.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/validation/index.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/serializer.tsx",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/factory.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/reducer.ts",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-type.php",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-04-28T18:06:18.815Z"
+    },
+    {
+      "slug": "block-edit-save",
+      "title": "Edit and Save",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-edit-save/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [],
+      "relatedCode": [],
+      "diagnostics": [
+        "MappingError: no mapping found for slug \"block-edit-save\".\nAvailable slugs: block-attributes, block-bindings, block-context, block-deprecation, block-metadata, block-patterns, block-registration, block-supports, block-transforms, block-variations"
+      ],
+      "commitSha": "",
+      "analyzedAt": "2026-04-28T18:05:56.478Z"
+    },
+    {
+      "slug": "block-metadata",
+      "title": "Metadata in block.json",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-metadata/",
+      "healthScore": 98,
+      "status": "healthy",
+      "issues": [
+        {
+          "severity": "minor",
+          "type": "type-signature",
+          "evidence": {
+            "docSays": "A block name can only contain lowercase alphanumeric characters and dashes, and must begin with a letter.",
+            "codeSays": "if ( ! /^[a-z][a-z0-9-]*\\/[a-z][a-z0-9-]*$/.test( name ) ) {",
+            "codeFile": "packages/blocks/src/api/registration.ts",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Update the Block Name description note to clarify that both segments of the namespace/block-name must individually begin with a letter.\n- Change the sentence \"A block name can only contain lowercase alphanumeric characters and dashes, and must begin with a letter.\" to: \"A block name can only contain lowercase alphanumeric characters and dashes, and both the namespace portion and the block-name portion must each begin with a letter (e.g., `my-plugin/my-block`; `my-plugin/4-block` is invalid).\"\n- The enforced regex `^[a-z][a-z0-9-]*/[a-z][a-z0-9-]*$` requires `[a-z]` as the first character of *each* segment, not just the overall string; the test case \"should reject blocks not starting with a letter\" confirms `my-plugin/4-fancy-block` is rejected.",
+          "confidence": 0.88,
+          "fingerprint": "d240fde6ba624a3e"
+        }
+      ],
+      "positives": [
+        "The documentation correctly lists the default values for block type properties (attributes: `{}`, usesContext: `[]`, keywords: `[]`, providesContext: `{}`, styles: `[]`, supports: `{}`) which is confirmed by the test file's `defaultBlockSettings` expectations showing these exact defaults on registered blocks.",
+        "The documentation accurately describes the `registerBlockType` function's ability to accept either a metadata object (from block.json) or a string block name as the first argument, which is confirmed by the TypeScript overloads in `packages/blocks/src/api/registration.ts`.",
+        "The documentation correctly states that `variations` can accept either an array of variation objects or a file path string (e.g. `file:./variations.php`), which is confirmed by the JSON schema's `oneOf` definition that allows either a string type or an array type for the `variations` property."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/test/registration.js",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/block.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/registration.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/types.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "lib/blocks.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/blocks.php",
+          "tier": "secondary",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-type.php",
+          "tier": "secondary",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/actions.ts",
+          "tier": "secondary",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/reducer.ts",
+          "tier": "context",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/factory.ts",
+          "tier": "context",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-type-registry.php",
+          "tier": "context",
+          "includedInAnalysis": false
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-04-28T18:07:51.350Z"
+    },
+    {
+      "slug": "block-patterns",
+      "title": "Patterns",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-patterns/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The documentation correctly identifies `title` as required and confirms it must be a human-readable string — the PHP registry code enforces this with `_doing_it_wrong` and the test file `test_missing_title` / `test_invalid_non_string_title` both confirm this contract.",
+        "The documentation accurately describes `inserter` as an optional boolean that defaults to `true` to show the pattern in the inserter, matching the PHPDoc: `@type bool $inserter Optional. Determines whether the pattern is visible in inserter... Default true.`",
+        "The documentation correctly states that `register_block_pattern()` should be called from a handler attached to the `init` hook, which aligns with the registry's own tracking of patterns registered outside `init` via `registered_patterns_outside_init`."
+      ],
+      "relatedCode": [
+        {
+          "repo": "wordpress-develop",
+          "file": "tests/phpunit/tests/blocks/wpBlockPatternsRegistry.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/registration.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-patterns-registry.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/types.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/actions.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/selectors.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/blocks.php",
+          "tier": "secondary",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/factory.ts",
+          "tier": "secondary",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/components/inserter/index.js",
+          "tier": "context",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-type-registry.php",
+          "tier": "context",
+          "includedInAnalysis": false
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "a95dd0e0351a9fb2ef124ea1b8be63bf6887b946",
+      "analyzedAt": "2026-04-28T18:07:02.164Z"
+    },
+    {
+      "slug": "block-registration",
+      "title": "Registration",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-registration/",
+      "healthScore": 91,
+      "status": "healthy",
+      "issues": [
+        {
+          "severity": "major",
+          "type": "broken-example",
+          "evidence": {
+            "docSays": "A block name can only contain lowercase alphanumeric characters and dashes, and must begin with a letter.",
+            "codeSays": "if ( ! /^[a-z][a-z0-9-]*\\/[a-z][a-z0-9-]*$/.test( name ) ) {\n\t\twarning(\n\t\t\t'Block names must contain a namespace prefix, include only lowercase alphanumeric characters or dashes, and start with a letter. Example: my-plugin/my-custom-block'\n\t\t);",
+            "codeFile": "packages/blocks/src/api/registration.ts",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Update the block name validation description to make clear that block names require a `namespace/block-name` structure where both segments independently must start with a letter and contain only lowercase alphanumeric characters or dashes.\n- Change the note from 'A block name can only contain lowercase alphanumeric characters and dashes, and must begin with a letter.' to: 'A block name must follow the format `namespace/block-name`, where both the namespace and block-name segments contain only lowercase alphanumeric characters or dashes, and each segment must begin with a letter (e.g., `my-plugin/my-custom-block`).'\n- Align with the runtime warning message in `packages/blocks/src/api/registration.ts`: \"Block names must contain a namespace prefix, include only lowercase alphanumeric characters or dashes, and start with a letter. Example: my-plugin/my-custom-block\"",
+          "confidence": 0.9,
+          "fingerprint": "af27476f43dfa868"
+        },
+        {
+          "severity": "minor",
+          "type": "type-signature",
+          "evidence": {
+            "docSays": "#### variations (optional)\\n\\n-   **Type:** `Object[]`",
+            "codeSays": "variations?: BlockVariation< Attributes >[];",
+            "codeFile": "packages/blocks/src/types.ts",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Update the `variations` type annotation in the block variations documentation.\n- Change the documented type from `Object[]` to `BlockVariation[]` to reflect the actual TypeScript interface `BlockVariation<Attributes>[]` used in `BlockType` in `packages/blocks/src/types.ts`\n- Optionally link to or describe the `BlockVariation` interface so developers know what properties are expected",
+          "confidence": 0.9,
+          "fingerprint": "e79c911fcd807622"
+        }
+      ],
+      "positives": [
+        "The documentation accurately describes the `blockHooks` allowed position values (`before`, `after`, `firstChild`, `lastChild`), which matches the test file demonstrating `'core/verse': 'before'`, `'core/spacer': 'after'`, `'core/column': 'firstChild'`, `'core/group': 'lastChild'`.",
+        "The documentation correctly states that `registerBlockCollection` takes a `namespace` string and a settings object with `title` (string) and optional `icon`, which precisely matches the TypeScript signature `registerBlockCollection(namespace: string, { title, icon }: { title: string; icon?: Icon })`.",
+        "The documentation accurately lists the six core block categories (`text`, `media`, `design`, `widgets`, `theme`, `embed`), which matches `DEFAULT_CATEGORIES` in the reducer, excluding the intentionally undocumented `reusable` category."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/test/registration.js",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/types.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/registration.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/actions.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-type.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/reducer.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/factory.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/blocks.php",
+          "tier": "secondary",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "gutenberg",
+          "file": "lib/blocks.php",
+          "tier": "context",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-type-registry.php",
+          "tier": "context",
+          "includedInAnalysis": false
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-04-28T18:07:54.516Z"
+    },
+    {
+      "slug": "block-selectors",
+      "title": "Selectors",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-selectors/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [],
+      "relatedCode": [],
+      "diagnostics": [
+        "MappingError: no mapping found for slug \"block-selectors\".\nAvailable slugs: block-attributes, block-bindings, block-context, block-deprecation, block-metadata, block-patterns, block-registration, block-supports, block-transforms, block-variations"
+      ],
+      "commitSha": "",
+      "analyzedAt": "2026-04-28T18:07:02.164Z"
+    },
+    {
+      "slug": "block-styles",
+      "title": "Styles",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-styles/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [],
+      "relatedCode": [],
+      "diagnostics": [
+        "MappingError: no mapping found for slug \"block-styles\".\nAvailable slugs: block-attributes, block-bindings, block-context, block-deprecation, block-metadata, block-patterns, block-registration, block-supports, block-transforms, block-variations"
+      ],
+      "commitSha": "",
+      "analyzedAt": "2026-04-28T18:07:02.164Z"
+    },
+    {
+      "slug": "block-supports",
+      "title": "Supports",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-supports/",
+      "healthScore": 93,
+      "status": "healthy",
+      "issues": [
+        {
+          "severity": "major",
+          "type": "nonexistent-name",
+          "evidence": {
+            "docSays": "When the block declares support for `color.gradient`, the attributes definition is extended to include two new attributes: `gradient` and `style`",
+            "codeSays": "!! colorSupport.gradients",
+            "codeFile": "packages/block-editor/src/hooks/color.js",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Correct the support key name from `color.gradient` to `color.gradients` in the gradient attributes section.\n- Change every occurrence of `color.gradient` (when referring to the gradient support flag) to `color.gradients` to match the actual runtime check `colorSupport.gradients` in `hasGradientSupport()`.\n- Note: `colorSupport.gradient` (singular, no 's') does appear in `hasColorSupport()` as a different, broader check; the key that gates the `gradient` attribute and gradient-related CSS classes is `colorSupport.gradients` (plural).",
+          "confidence": 0.92,
+          "fingerprint": "0efcd0de1a2c7b61"
+        }
+      ],
+      "positives": [
+        "The `color` subproperties and their defaults are accurately documented: `background` and `text` default to `true` while `gradients`, `link`, `button`, `heading`, and `enableContrastChecker` defaults all match what is defined in `ColorProps` in `packages/blocks/src/types.ts`.",
+        "The `BlockSupports` TypeScript interface in `packages/blocks/src/types.ts` confirms the documented boolean/object types for `interactivity`, `layout`, `spacing`, `typography`, `position`, `dimensions`, `filter`, and `background` — all matching the documentation.",
+        "The `get_block_wrapper_attributes()` PHP function signature with its optional `$extra_attributes = array()` parameter is correctly documented as having no required parameters, matching the implementation in `src/wp-includes/class-wp-block-supports.php`."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/test/registration.js",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/types.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/registration.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/hooks/index.js",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/hooks/color.js",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/hooks/align.js",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-supports.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/blocks.php",
+          "tier": "secondary",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/hooks/typography.js",
+          "tier": "context",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/hooks/dimensions.js",
+          "tier": "context",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/reducer.ts",
+          "tier": "context",
+          "includedInAnalysis": false
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-04-28T18:08:11.090Z"
+    },
+    {
+      "slug": "block-templates",
+      "title": "Templates",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-templates/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [],
+      "relatedCode": [],
+      "diagnostics": [
+        "MappingError: no mapping found for slug \"block-templates\".\nAvailable slugs: block-attributes, block-bindings, block-context, block-deprecation, block-metadata, block-patterns, block-registration, block-supports, block-transforms, block-variations"
+      ],
+      "commitSha": "",
+      "analyzedAt": "2026-04-28T18:07:51.350Z"
+    },
+    {
+      "slug": "block-transforms",
+      "title": "Transforms",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-transforms/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The documentation correctly describes `isMultiBlock` behavior: when true, the `transform` function receives an array of each selected block's attributes and an array of inner blocks — this is confirmed by the test cases in `factory.js` (e.g., `blocksAttributes.map(...)` and `blocksInnerBlocks[i]`).",
+        "The documentation accurately states that `priority` defaults to `10` and that lower values take precedence, which is consistent with the `findTransform` implementation in `factory.ts` that uses `createHooks()` and passes `candidate.priority` to `addFilter`.",
+        "The documented list of transform types — `block`, `enter`, `files`, `prefix`, `raw`, `shortcode` — exactly matches the TypeScript union type `'block' | 'enter' | 'files' | 'prefix' | 'raw' | 'shortcode'` in `packages/blocks/src/types.ts`."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/test/factory.js",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/types.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/registration.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/raw-handling/index.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/factory.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/actions.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/selectors.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/components/block-switcher/index.js",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/parser/index.ts",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/serializer.tsx",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-04-28T18:08:43.509Z"
+    },
+    {
+      "slug": "block-variations",
+      "title": "Variations",
+      "parent": "block-api",
+      "sourceUrl": "https://developer.wordpress.org/block-editor/reference-guides/block-api/block-variations/",
+      "healthScore": 91,
+      "status": "healthy",
+      "issues": [
+        {
+          "severity": "major",
+          "type": "default-value",
+          "evidence": {
+            "docSays": "scope` (optional, type `WPBlockVariationScope[]`) - Defaults to `block` and `inserter`.",
+            "codeSays": "// For backward compatibility reasons, variation's scope defaults to\n\t\t\t// `block` and `inserter` when not set.\n\t\t\treturn ( variation.scope || [ 'block', 'inserter' ] ).includes(\n\t\t\t\tscope\n\t\t\t);",
+            "codeFile": "packages/blocks/src/store/selectors.ts",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Update the `scope` field description in the variations table to clarify the runtime fallback behavior.\n- Change the description from 'Defaults to `block` and `inserter`' to something like: 'When not provided, the variation is treated as belonging to the `block` and `inserter` scopes for filtering purposes (backward-compatibility fallback). The property itself is not assigned a default value on the variation object.'\n- Also note that the TypeScript definition in `packages/blocks/src/types.ts` (JSDoc on `scope`) says: 'When not provided, it assumes all available scopes' — the docs and TypeScript JSDoc conflict with each other. The TypeScript JSDoc should also be corrected to say `block` and `inserter` (not all scopes, since `transform` is excluded from the fallback).",
+          "confidence": 0.8,
+          "fingerprint": "95fb95095f2decfa"
+        },
+        {
+          "severity": "minor",
+          "type": "required-optional-mismatch",
+          "evidence": {
+            "docSays": "`title` (optional, type `string`) – A human-readable variation title.",
+            "codeSays": "title: string;",
+            "codeFile": "packages/blocks/src/types.ts",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Update the `title` field description in the Block Variations documentation to remove the 'optional' qualifier.\n- Change '`title` (optional, type `string`)' to '`title` (type `string`)' to reflect that the `BlockVariation` TypeScript interface declares `title: string;` without a `?` modifier, making it a required field.",
+          "confidence": 0.95,
+          "fingerprint": "0856f5374529f31a"
+        }
+      ],
+      "positives": [
+        "The documentation correctly describes that `isActive` with a string array uses specificity (length of the array) to resolve multiple matches, which is confirmed by both the test file ('should return the active variation using the match with the highest specificity') and the implementation in `selectors.ts` (`if ( isMatch && definedAttributesLength > maxMatchedAttributes )`).",
+        "The documentation accurately states that nested object paths in `isActive` arrays (e.g. `query.postType`) are supported since WordPress 6.6.0, which is confirmed by the test 'should support nested attribute paths in the isActive array' and the `getValueFromObjectPath` usage in `selectors.ts`.",
+        "The documentation correctly identifies the `get_block_type_variations` PHP filter hook name and its two parameters (`$variations` and `$block_type`), matching the `apply_filters( 'get_block_type_variations', $this->variations, $this )` call in `class-wp-block-type.php`."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/test/selectors.js",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/types.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/selectors.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/registration.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/actions.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/reducer.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/components/block-variation-picker/index.js",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/factory.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-type.php",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-04-28T18:09:55.450Z"
+    }
+  ]
+}
