@@ -122,7 +122,15 @@ Evidence-backed claim that the doc gets something right. Capped at 3 per doc to 
 
 ### Status
 
-Derived from score: `healthy` (≥85) / `needs-attention` (60–84) / `critical` (<60). Plus `not-mapped` (no mapping entry → `healthScore: null`, doc excluded from the run average).
+Derived from score: `healthy` (≥85) / `needs-attention` (60–84) / `critical` (<60). Plus three non-scoring statuses, all with `healthScore: null` and all excluded from the run average:
+
+- `not-mapped` — no mapping entry exists for this slug.
+- `under-mapped` — a mapping entry exists, but the auto-mapper's confidence floor produced **zero `primary` files**. The validator has no authoritative source to compare the doc against, so any score it produced would be misleading. Distinct from `not-mapped` because the slug *is* known to the pipeline; the gap is in canonical-source identification, not in mapping presence.
+- `analysis-failed` — Pass 1 (or Pass 2's setup) threw, so the validator never produced findings. The cause is captured in the doc's `Diagnostic` and rendered alongside the missing score on the dashboard. Replaces the silent-green that older versions emitted when `runPass1` raised. Distinct from the score-bearing `critical` status, which means "we ran the analysis and the result is bad" — `analysis-failed` means "we never got to check."
+
+These three coverage / failure statuses look similar on the dashboard (no score, badge instead of bucket) but have distinct operational meanings:
+- `under-mapped` rate climbing at scale can indicate either a genuine authority gap (the corpus has no canonical file for this concept) or an auto-map recall miss (the canonical file exists but wasn't surfaced). Investigation is per-slug.
+- `analysis-failed` is a reliability signal, not a quality signal. A persistent `analysis-failed` on the same slug suggests the doc reliably tickles a model bug or extractor edge case; a transient one (rate limits, 5xx) is operational noise.
 
 ### Diagnostic
 
@@ -130,7 +138,7 @@ Per-doc caveat string. Used when assessment has known limits (missing file, fetc
 
 ### Overall Health
 
-Average `healthScore` across docs whose `status !== 'not-mapped'`.
+Average `healthScore` across docs whose status is none of `not-mapped` / `under-mapped` / `analysis-failed`. All three carry `healthScore: null` and are excluded from the denominator — only docs the validator could actually assess contribute to the overall number. Their counts surface separately as coverage / reliability metrics, not as part of the health score.
 
 ---
 
@@ -205,3 +213,41 @@ Append-only `data/history.json` on `gh-pages`, indexing every run for trend rend
 ### Stretch / Phase 2
 
 Explicit "later" buckets in `PLAN.md`. The `symbol-search` mapper, the `wordpress-rest` DocSource, the change detector, and release-ref pinning all live here.
+
+---
+
+## Scaling vocabulary
+
+These terms describe the gates and instrumentation introduced when the pipeline moves from one configured Site (Gutenberg block-API, 16 docs) toward whole-handbook depth and multi-site breadth.
+
+### Precision Sample
+
+Manually-triaged subset of a Run's findings used to verify thermometer calibration. One row per sampled Issue: `fingerprint, slug, severity, type, verdict (TP/FP), notes`. Captured under `docs/_qa-runs/<date>-precision/` matching the convention used for [#76](https://github.com/juanma-wp/wp-docs-health-monitor/issues/76)'s acceptance smoke. Verdict is human-only — there is no way to automate "is this real drift?" without already knowing the answer.
+
+### Precision Gate
+
+Threshold the Precision Sample must clear before a scale-up step (e.g. before adding a second Site). The gate is keyed off the severities operators actually act on:
+
+- **≥ 80 %** of sampled `critical` + `major` Issues must be true positives.
+- `minor` precision is tracked and reported alongside, but **not gating** — minor findings are systematically more borderline and fold a different signal.
+
+The gate fires once per major scale-up, not weekly. Ad-hoc triage notes during normal operation do not constitute a Precision Sample.
+
+### Recall Floor / Known-Positives Fixture
+
+Hand-curated list of confirmed real drifts the validator must continue to catch as the pipeline evolves. Lives alongside the Precision Sample artifact. Setup cost is a few hours; runtime cost is "the validator should re-find these every run." Catches the silent failure mode where a prompt change improves Precision by under-firing — Precision climbs to 100 % because the validator stopped flagging anything subtle.
+
+The depth-done gate adds: validator catches ≥ 80 % of known-positive fixtures on the current run.
+
+### Uncovered Rate
+
+Share of Mapped slugs whose Status is `under-mapped` after a Run (i.e. the auto-mapper found no `primary` files clearing the confidence floor). Surfaced on the dashboard as a coverage metric, separate from Overall Health. Climbing Uncovered Rate at scale is the signal that the corpus is structurally hard to validate (authority gap) or that the auto-map needs more recall (recall gap) — the two are not distinguishable from the rate alone.
+
+### Depth vs Breadth
+
+Two orthogonal axes for scaling the pipeline:
+
+- **Depth** — more docs from the same Site (e.g. dropping the `parentSlug` filter so the validator covers the whole Block Editor Handbook, not just block-API).
+- **Breadth** — more Sites (e.g. adding the Plugin Handbook or Theme Handbook as additional configured docs-and-code pairs).
+
+Discipline: depth before breadth. At depth, the question is "does the approach generalise within one corpus we understand?" At breadth, "does the same plumbing fit a corpus we don't?" The first risk is bigger. A Site reaches "depth-done" when the Precision Gate, Recall Floor, and the Uncovered/Jitter instrumentation have produced a passing reading on a full-corpus Run.
