@@ -1,12 +1,13 @@
 /**
- * AuditWriter — persists the AI re-ranker's per-file rationale, confidence,
- * and dropped-with-reason into a committed audit file alongside the canonical
- * mapping, and renders the same information to stdout for `--explain`.
+ * AuditWriter — persists the AI re-ranker's per-file rationale (and confidence
+ * for kept files) into a committed audit file alongside the canonical mapping,
+ * and renders the same information to stdout for `--explain`.
  *
  * The audit file lives at `mappings/<site>.audit.json` and is keyed by slug,
  * mirroring the canonical mapping's structure. Each slug entry carries the
  * full `RerankResult` (primary / secondary / context with rationale +
- * confidence per kept file, plus a parallel `dropped` array with reason).
+ * confidence per kept file, plus a parallel `dropped` array of files with
+ * rationale describing the noise pattern that disqualified them).
  *
  * The audit is treated as **generated** — a top-level `_comment` field on the
  * file warns against hand-editing and directs readers to re-run auto-map.
@@ -61,8 +62,8 @@ export class AuditWriter {
   }
 
   /**
-   * Render rationale per kept file and reason per dropped file as a string
-   * for `--explain` stdout. Iteration order is fixed (primary → secondary →
+   * Render the rationale per file (kept and dropped) as a string for
+   * `--explain` stdout. Iteration order is fixed (primary → secondary →
    * context → dropped) so output is stable across runs on identical input.
    */
   formatExplain(result: RerankResult): string {
@@ -80,7 +81,7 @@ export class AuditWriter {
       lines.push('Dropped files:');
       for (const f of result.dropped) {
         lines.push(`  ${f.repo}:${f.path}`);
-        lines.push(`    reason: ${f.reason}`);
+        lines.push(`    rationale: ${f.rationale}`);
       }
     }
 

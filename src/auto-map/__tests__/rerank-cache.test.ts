@@ -32,7 +32,7 @@ const SAMPLE_RESULT: RerankResult = {
     { repo: 'gutenberg', path: 'packages/blocks/src/api/utils.ts', rationale: 'helpers', confidence: 0.7 },
   ],
   dropped: [
-    { repo: 'gutenberg', path: 'packages/deprecated/src/index.ts', reason: 'unrelated logger named `deprecated`' },
+    { repo: 'gutenberg', path: 'packages/deprecated/src/index.ts', rationale: 'unrelated logger named `deprecated`' },
   ],
 };
 

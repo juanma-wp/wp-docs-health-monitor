@@ -23,7 +23,10 @@ import {
 } from './rerank.js';
 
 // Bump when the on-disk envelope or the RerankResult shape changes.
-export const RERANK_CACHE_VERSION = 1;
+// v2: dropped files carry `rationale` (was `reason`) — matches the model's
+// reliable output and removes the kept/dropped field-name split that caused
+// every fresh run to fail schema validation.
+export const RERANK_CACHE_VERSION = 2;
 
 export type RerankCacheKeyInput = {
   docContent: string;

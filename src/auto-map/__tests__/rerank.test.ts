@@ -52,12 +52,12 @@ function makeCandidate(repo: string, path: string, score: number, matchedSymbols
 // ---------------------------------------------------------------------------
 
 describe('RerankResultSchema', () => {
-  it('accepts well-formed result with rationale + confidence per kept file and reason per dropped', () => {
+  it('accepts well-formed result with rationale + confidence per kept file and rationale per dropped', () => {
     const ok = RerankResultSchema.safeParse({
       primary:   [{ repo: 'r', path: 'a.ts', rationale: 'r', confidence: 0.9 }],
       secondary: [],
       context:   [],
-      dropped:   [{ repo: 'r', path: 'b.ts', reason: 'noisy' }],
+      dropped:   [{ repo: 'r', path: 'b.ts', rationale: 'noisy' }],
     });
     expect(ok.success).toBe(true);
   });
@@ -117,7 +117,7 @@ describe('Reranker — happy path', () => {
         { repo: 'gutenberg', path: 'packages/blocks/src/api/utils.ts', rationale: 'helpers', confidence: 0.75 },
       ],
       dropped: [
-        { repo: 'gutenberg', path: 'packages/deprecated/src/index.ts', reason: 'unrelated logger named `deprecated`' },
+        { repo: 'gutenberg', path: 'packages/deprecated/src/index.ts', rationale: 'unrelated logger named `deprecated`' },
       ],
     };
     const client = makeAnthropicClient([makeToolUseResponse(toolInput)]);
@@ -134,7 +134,7 @@ describe('Reranker — happy path', () => {
 
     expect(result).not.toBeNull();
     expect(result?.primary[0].path).toBe('packages/blocks/src/api/registration.js');
-    expect(result?.dropped[0].reason).toMatch(/deprecated/);
+    expect(result?.dropped[0].rationale).toMatch(/deprecated/);
   });
 });
 

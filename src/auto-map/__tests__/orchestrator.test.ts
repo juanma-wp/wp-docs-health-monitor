@@ -116,8 +116,8 @@ describe('orchestrator — rerank on, mocked LLM', () => {
       ],
       // The deprecated FP (issue #72 acceptance) is dropped, not in primary.
       dropped: [
-        { repo: 'gutenberg', path: 'packages/deprecated/src/index.ts', reason: 'unrelated logger named `deprecated`' },
-        { repo: 'gutenberg', path: 'schemas/json/theme.json',          reason: 'cross-schema property collision (`name`)' },
+        { repo: 'gutenberg', path: 'packages/deprecated/src/index.ts', rationale: 'unrelated logger named `deprecated`' },
+        { repo: 'gutenberg', path: 'schemas/json/theme.json',          rationale: 'cross-schema property collision (`name`)' },
       ],
     };
     const client = makeAnthropicClient([makeToolUseResponse(toolInput)]);
@@ -155,7 +155,7 @@ describe('orchestrator — cache hit skips the LLM call', () => {
       primary:   [{ repo: 'gutenberg', path: 'packages/blocks/src/api/registration.js', rationale: 'canonical impl', confidence: 0.95 }],
       secondary: [{ repo: 'gutenberg', path: 'packages/blocks/src/api/parser.js',       rationale: 'parser',         confidence: 0.85 }],
       context:   [{ repo: 'gutenberg', path: 'packages/blocks/src/api/utils.ts',        rationale: 'helpers',        confidence: 0.75 }],
-      dropped:   [{ repo: 'gutenberg', path: 'packages/deprecated/src/index.ts',        reason:    'unrelated logger named `deprecated`' }],
+      dropped:   [{ repo: 'gutenberg', path: 'packages/deprecated/src/index.ts',        rationale: 'unrelated logger named `deprecated`' }],
     };
     const client = makeAnthropicClient([makeToolUseResponse(toolInput)]);
     const createSpy = client.messages.create as ReturnType<typeof vi.fn>;
@@ -293,7 +293,7 @@ describe('orchestrator + AuditWriter wiring (smoke)', () => {
       { repo: 'gutenberg', path: 'packages/blocks/src/api/utils.ts', rationale: 'helpers', confidence: 0.75 },
     ],
     dropped: [
-      { repo: 'gutenberg', path: 'packages/deprecated/src/index.ts', reason: 'unrelated logger named `deprecated`' },
+      { repo: 'gutenberg', path: 'packages/deprecated/src/index.ts', rationale: 'unrelated logger named `deprecated`' },
     ],
   };
 
@@ -355,7 +355,7 @@ describe('orchestrator + AuditWriter wiring (smoke)', () => {
     errSpy.mockRestore();
   });
 
-  it('--explain renders rationale per kept file and reason per dropped file', async () => {
+  it('--explain renders rationale per file (kept and dropped)', async () => {
     const client = makeAnthropicClient([makeToolUseResponse(TOOL_INPUT)]);
     const reranker = new Reranker('claude-sonnet-4-6', client);
 

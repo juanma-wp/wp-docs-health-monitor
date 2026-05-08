@@ -26,8 +26,8 @@ const RESULT_A: RerankResult = {
     { repo: 'gutenberg', path: 'packages/blocks/src/api/utils.ts', rationale: 'helpers', confidence: 0.75 },
   ],
   dropped: [
-    { repo: 'gutenberg', path: 'packages/deprecated/src/index.ts', reason: 'unrelated logger named `deprecated`' },
-    { repo: 'gutenberg', path: 'schemas/json/theme.json',          reason: 'cross-schema property collision (`name`)' },
+    { repo: 'gutenberg', path: 'packages/deprecated/src/index.ts', rationale: 'unrelated logger named `deprecated`' },
+    { repo: 'gutenberg', path: 'schemas/json/theme.json',          rationale: 'cross-schema property collision (`name`)' },
   ],
 };
 
@@ -170,7 +170,7 @@ describe('AuditWriter.writeAudit', () => {
 // ---------------------------------------------------------------------------
 
 describe('AuditWriter.formatExplain', () => {
-  it('includes rationale per kept file and reason per dropped file', () => {
+  it('includes rationale per file (kept and dropped)', () => {
     const writer = new AuditWriter();
     const out = writer.formatExplain(RESULT_A);
 
@@ -178,7 +178,7 @@ describe('AuditWriter.formatExplain', () => {
     expect(out).toContain('canonical impl');
     expect(out).toContain('parser');
     expect(out).toContain('helpers');
-    // Reasons (dropped files)
+    // Rationales (dropped files)
     expect(out).toContain('unrelated logger named `deprecated`');
     expect(out).toContain('cross-schema property collision (`name`)');
   });
