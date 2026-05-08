@@ -31,6 +31,8 @@ npm run analyze -- --config config/gutenberg-block-api.json --output ./out
 op run -- npm run analyze -- --config config/gutenberg-block-api.json --output ./out
 ```
 
+**Optional:** set `GITHUB_TOKEN` to authenticate the `manifest-url` DocSource's GitHub Commits API calls (used to populate each doc's `lastModified` field). Without it you'll hit the 60/hr anonymous rate limit after ~50 docs.
+
 ## Usage
 
 ### Run against live docs (requires config + API key)
@@ -107,60 +109,6 @@ Each config file supports a local `.dev.json` override loaded automatically when
 
 The override is deep-merged into the base config — only the keys you specify are replaced. This is the recommended way to use cheaper models during development. See `config/gutenberg-block-api.json` for all available settings.
 
-## Architecture
-
-- **[`PLAN.md`](./PLAN.md)** — overview, scope, out-of-scope, open questions.
-- **[`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)** — schemas, mapping format, tech stack.
-
-## Getting started
-
-### Requirements
-
-- **Node.js 20+** (ESM + native `fetch`).
-- **Git** (the `git-clone` `CodeSource` shells out via `simple-git`).
-- Roughly 1 GB free disk for the Gutenberg + wordpress-develop shallow clones the smoke run produces under `tmp/`.
-
-### Install
-
-```bash
-git clone https://github.com/juanma-wp/wp-docs-health-monitor.git
-cd wp-docs-health-monitor
-npm install
-```
-
-### Verify the install
-
-```bash
-npm run typecheck   # tsc --noEmit
-npm test            # vitest run
-```
-
-Both should exit clean. The test suite includes a GitCloneSource test that initialises a local git repo under `tmp/` — `git` must be on PATH.
-
-### Run the ingestion pipeline end-to-end
-
-The bundled config targets the Gutenberg Block API Reference (10 docs).
-
-```bash
-npx tsx scripts/verify-ingestion.ts
-```
-
-What this does:
-
-1. Loads `config/gutenberg-block-api.json` and validates it against the config schema.
-2. Fetches the Gutenberg `manifest.json`, filters to entries where `parent === "block-api"`, and fetches each doc's raw markdown — held in memory only, nothing written to disk.
-3. Resolves each doc slug against `mappings/gutenberg-block-api.json` and prints the mapped code files.
-4. Prints `Docs fetched: 16` and `Failed: 6` (the "Failed" count includes docs whose mapping slug is missing — harmless while the mapping is still being curated).
-
-The `git-clone` code sources (`tmp/`) are **not** triggered by this script — repos are shallow-cloned on first use once the validator is implemented. Re-runs reuse the cached clones — expect ~30s the first time, ~1s after. To start fresh, delete `tmp/`.
-
-### Optional environment variables
-
-| Variable | Used by | Purpose |
-|---|---|---|
-| `GITHUB_TOKEN` | `manifest-url` DocSource | Authenticates GitHub Commits API calls for each doc's `lastModified` field. Without it you'll hit the 60/hr anonymous rate limit after ~50 docs. |
-| `ANTHROPIC_API_KEY` | `scripts/bootstrap-mapping.ts` | Required for the mapping-bootstrap helper (see below). Not needed for the core pipeline until the validator lands. |
-
 ## Customising for your own docs
 
 To monitor a different WordPress doc site or doc section, you supply two JSON files:
@@ -221,41 +169,9 @@ npx tsx scripts/bootstrap-mapping.ts <slug> --config config/your-site.json
 
 Run it once per slug, paste the suggested JSON into your mapping file, then sanity-check that every referenced file exists in the repo.
 
-### Run your custom config
+## For contributors
 
-The `verify-ingestion.ts` script currently hard-codes `config/gutenberg-block-api.json`. To run against your own config, either edit that path or write a thin wrapper:
-
-```ts
-import { loadConfig } from './src/config/loader.js';
-import { runPipeline } from './src/pipeline.js';
-
-const config = await loadConfig('config/your-site.json');
-const results = await runPipeline(config);
-console.log(JSON.stringify(results, null, 2));
-```
-
-Save it as `scripts/run-mine.ts` and run with `npx tsx scripts/run-mine.ts`. A proper CLI entry point is on the backlog.
-
-## Development
-
-- `npm run test:watch` — Vitest watch mode.
-- `npx vitest run <path>` — run a single test file. Add `-t "<name>"` to match a single `it`.
-- `npm run gen:schema` — regenerate `examples/results.schema.json` from the Zod schemas in `src/types/results.ts`. Run after any schema change.
-- `CLAUDE.md` — orientation for Claude Code / Claude Agent SDK sessions working in this repo.
-- `AGENTS.md` — role definitions (Backend Engineer, Frontend Engineer, QA Engineer) used when invoking `@claude` on a PR. Roles have hard scope boundaries; read before assigning reviews.
-
-## What works today vs. what doesn't
-
-| Works | Not yet |
-|---|---|
-| `manifest-url` DocSource (fetch + metrics + frontmatter) | `wordpress-rest`, `fs-walk`, `a8c-context` DocSources |
-| `git-clone` CodeSource (with commit-SHA caching) | `symbol-search` DocCodeMapper |
-| `manual-map` DocCodeMapper (with cross-validation) | Drift Validator (the Claude pipeline) |
-| Full pipeline producing schema-valid `RunResults` | Health scoring (current results are stubs with `healthScore: 0`) |
-| 51-test suite covering adapters, schemas, and error paths | Static HTML dashboard |
-| Mapping-bootstrap helper via Claude | CLI entry point, GitHub Action |
-
-See [`docs/plans/next-steps.md`](./docs/plans/next-steps.md) for the current working plan.
+See [`DEVELOPMENT.md`](./DEVELOPMENT.md) for local setup, development commands, the smoke-test pipeline, the Ralph autonomous workflow, and project status.
 
 ## License
 

@@ -46,4 +46,14 @@ CLAUDE.local.md
 
 # Agent runtime state — auto-created worktrees from agent isolation runs
 .claude/worktrees/
-.claude/skills/
+.claude/skills/*
+!.claude/skills/triage/
+!.claude/skills/grill-me/
+!.claude/skills/grill-with-docs/
+
+# Sandcastle runtime state (logs, worktrees, sessions, local env)
+.sandcastle/.env
+.sandcastle/worktrees/
+.sandcastle/logs/
+.sandcastle/sessions/
+.sandcastle/.cache/

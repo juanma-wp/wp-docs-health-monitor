@@ -39,6 +39,20 @@ These are conventions and invariants that surprise readers and aren't carried by
 - `scripts/verify-ingestion.ts` — end-to-end smoke test of the ingestion pipeline.
 - `scripts/gen-schema.ts` — regenerates `examples/results.schema.json` from Zod.
 
+## Autonomous workflow (Ralph) — pre-confirmation scope
+
+`./ralph/afk.sh` runs Claude Code autonomously inside a Sandcastle Docker sandbox to clear an issue queue. While that loop is running, the agent has narrow blanket pre-confirmation to:
+
+- push branches matching `ralph/**`
+- open PRs from those branches against `main`, with a *How to test* section in the body
+- post a **single** PR-link comment on a source issue *that carries both* `assignee:$RALPH_ASSIGNEE` *and* `label:ready-for-agent` (the `/triage` skill's AFK-ready state)
+
+Ralph **never** merges PRs and **never** closes issues. The human pulls the branch, runs the *How to test* steps, and merges manually; the merge auto-closes the issue via `Closes #<n>`.
+
+Any issue or PR not matching that exact pair (assignee `$RALPH_ASSIGNEE` from `.env` AND label `ready-for-agent`) still requires manual confirmation. Direct pushes to `main` remain forbidden — every change lands through a human-merged PR.
+
+See [`DEVELOPMENT.md`](./DEVELOPMENT.md#autonomous-workflow-ralph) for setup (prerequisites, `.env` keys, three entry points).
+
 ## Validator pipeline discipline
 
 This project is a **generic** docs-vs-code drift validator. Each site plugs in its own config, mappings, and per-site prompt extension (`config.validator.promptExtension`, wired into `SYSTEM_PROMPT` at `claude.ts:313-315`). The pipeline must remain useful for any docs/codebase pair.

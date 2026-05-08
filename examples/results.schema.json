@@ -33,6 +33,22 @@
           ],
           "additionalProperties": false
         },
+        "sampling": {
+          "type": "object",
+          "properties": {
+            "temperature": {
+              "type": "number",
+              "default": 0
+            },
+            "samples": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          "additionalProperties": false,
+          "default": {}
+        },
         "repoUrls": {
           "type": "object",
           "additionalProperties": {
