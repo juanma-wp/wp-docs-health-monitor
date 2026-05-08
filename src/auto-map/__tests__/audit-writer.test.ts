@@ -3,7 +3,13 @@ import { mkdtempSync, readFileSync, writeFileSync, existsSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 
-import { AuditWriter, MappingAuditSchema, AUDIT_WARNING } from '../audit-writer.js';
+import {
+  AuditWriter,
+  MappingAuditSchema,
+  AUDIT_WARNING,
+  FLAGGED_CONFIDENCE_THRESHOLD,
+  NO_FLAGGED_SENTINEL,
+} from '../audit-writer.js';
 import type { RerankResult } from '../rerank.js';
 
 // ---------------------------------------------------------------------------
@@ -218,5 +224,132 @@ describe('AuditWriter.formatExplain', () => {
     const writer = new AuditWriter();
     const out = writer.formatExplain(RESULT_B);
     expect(out).not.toMatch(/dropped/i);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// formatFlagged — flagged-subset stdout renderer (slice D, --review)
+// ---------------------------------------------------------------------------
+
+describe('AuditWriter.formatFlagged', () => {
+  // Pin the threshold value itself so a future refactor can't silently change
+  // the contract the CLI exposes via --review.
+  it('uses 0.7 as the flagged-confidence threshold', () => {
+    expect(FLAGGED_CONFIDENCE_THRESHOLD).toBe(0.7);
+  });
+
+  it('returns the literal sentinel string when no kept file is below the threshold', () => {
+    const writer = new AuditWriter();
+    // RESULT_A's confidences are 0.95, 0.85, 0.75 — all >= 0.7.
+    const out = writer.formatFlagged(RESULT_A);
+    expect(out).toBe(NO_FLAGGED_SENTINEL);
+    expect(out).toBe('(no flagged entries — confidence ≥ 0.7 across all kept files)');
+  });
+
+  it('includes only files with confidence < 0.7, with tier + confidence + rationale', () => {
+    const writer = new AuditWriter();
+    const result: RerankResult = {
+      primary: [
+        { repo: 'g', path: 'kept-high.js', rationale: 'canonical', confidence: 0.95 },
+      ],
+      secondary: [
+        { repo: 'g', path: 'flagged-low.js', rationale: 'maybe related', confidence: 0.55 },
+      ],
+      context: [
+        { repo: 'g', path: 'kept-mid.js', rationale: 'helpers', confidence: 0.8 },
+      ],
+      dropped: [],
+    };
+
+    const out = writer.formatFlagged(result);
+
+    // Flagged file is present with all three pieces of info
+    expect(out).toContain('flagged-low.js');
+    expect(out).toContain('secondary');
+    expect(out).toContain('0.55');
+    expect(out).toContain('maybe related');
+    expect(out).toContain('g:flagged-low.js');
+
+    // Non-flagged files are NOT printed
+    expect(out).not.toContain('kept-high.js');
+    expect(out).not.toContain('canonical');
+    expect(out).not.toContain('kept-mid.js');
+    expect(out).not.toContain('helpers');
+
+    // Not the sentinel
+    expect(out).not.toBe(NO_FLAGGED_SENTINEL);
+  });
+
+  it('treats confidence === 0.7 as NOT flagged (boundary: file at 0.7 is kept)', () => {
+    const writer = new AuditWriter();
+    const result: RerankResult = {
+      primary:   [{ repo: 'g', path: 'boundary.js', rationale: 'on-boundary', confidence: 0.7 }],
+      secondary: [],
+      context:   [],
+      dropped:   [],
+    };
+    const out = writer.formatFlagged(result);
+    expect(out).toBe(NO_FLAGGED_SENTINEL);
+    expect(out).not.toContain('boundary.js');
+  });
+
+  it('treats confidence === 0.69 as flagged (boundary: file just below 0.7 is flagged)', () => {
+    const writer = new AuditWriter();
+    const result: RerankResult = {
+      primary:   [{ repo: 'g', path: 'just-below.js', rationale: 'tip-the-scale', confidence: 0.69 }],
+      secondary: [],
+      context:   [],
+      dropped:   [],
+    };
+    const out = writer.formatFlagged(result);
+    expect(out).not.toBe(NO_FLAGGED_SENTINEL);
+    expect(out).toContain('just-below.js');
+    expect(out).toContain('0.69');
+    expect(out).toContain('tip-the-scale');
+  });
+
+  it('does NOT mention dropped files (dropped is not "kept and flagged")', () => {
+    const writer = new AuditWriter();
+    const result: RerankResult = {
+      primary:   [{ repo: 'g', path: 'flagged.js', rationale: 'flag me', confidence: 0.5 }],
+      secondary: [],
+      context:   [],
+      dropped:   [
+        { repo: 'g', path: 'noise.js', reason: 'English-word collision' },
+      ],
+    };
+    const out = writer.formatFlagged(result);
+    expect(out).toContain('flagged.js');
+    // Dropped files belong to formatExplain, not formatFlagged.
+    expect(out).not.toContain('noise.js');
+    expect(out).not.toContain('English-word collision');
+  });
+
+  it('renders flagged kept files in fixed (primary → secondary → context) order', () => {
+    const writer = new AuditWriter();
+    const result: RerankResult = {
+      primary:   [{ repo: 'g', path: 'p-flagged.js', rationale: 'pr',  confidence: 0.6 }],
+      secondary: [{ repo: 'g', path: 's-flagged.js', rationale: 'sr',  confidence: 0.6 }],
+      context:   [{ repo: 'g', path: 'c-flagged.js', rationale: 'cr',  confidence: 0.6 }],
+      dropped:   [],
+    };
+    const out = writer.formatFlagged(result);
+    const idxP = out.indexOf('p-flagged.js');
+    const idxS = out.indexOf('s-flagged.js');
+    const idxC = out.indexOf('c-flagged.js');
+    expect(idxP).toBeGreaterThan(-1);
+    expect(idxS).toBeGreaterThan(idxP);
+    expect(idxC).toBeGreaterThan(idxS);
+  });
+
+  it('produces identical output for identical input (deterministic)', () => {
+    const writer = new AuditWriter();
+    const result: RerankResult = {
+      primary:   [{ repo: 'g', path: 'a.js', rationale: 'r', confidence: 0.5 }],
+      secondary: [{ repo: 'g', path: 'b.js', rationale: 'r', confidence: 0.6 }],
+      context:   [],
+      dropped:   [],
+    };
+    expect(writer.formatFlagged(result)).toBe(writer.formatFlagged(result));
   });
 });
