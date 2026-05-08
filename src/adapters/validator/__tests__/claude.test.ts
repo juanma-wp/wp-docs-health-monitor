@@ -731,3 +731,219 @@ describe('ClaudeValidator — Pass 2 fetch_code tool', () => {
     );
   });
 });
+
+// ---------------------------------------------------------------------------
+// ClaudeValidator — temperature plumbing (issue #56)
+// ---------------------------------------------------------------------------
+
+describe('ClaudeValidator — temperature plumbing', () => {
+  it('passes the configured temperature on every messages.create call (Pass 1, Pass 2, retry)', async () => {
+    const fileContent = 'function registerBlockType(name, settings) {}';
+    const codeSays = 'function registerBlockType(name, settings)';
+
+    const pass1Response = makeReportFindingsResponse([
+      { ...BASE_ISSUE, severity: 'critical', evidence: { ...BASE_ISSUE.evidence, codeSays } },
+    ], []);
+    // Pass 2 returns a weak suggestion → triggers a retry (third call).
+    const pass2WeakResponse = makeReportFindingsResponse([
+      {
+        ...BASE_ISSUE,
+        severity:   'critical',
+        evidence:   { ...BASE_ISSUE.evidence, codeSays },
+        confidence: 0.8,
+        suggestion: 'fix the description',
+      },
+    ], []);
+    const retryResponse = makeReportFindingsResponse([
+      {
+        ...BASE_ISSUE,
+        severity:   'critical',
+        evidence:   { ...BASE_ISSUE.evidence, codeSays },
+        confidence: 0.8,
+        suggestion: 'Update `registerBlockType` to document the new `metadata` overload',
+      },
+    ], []);
+
+    const client = makeAnthropicClient([pass1Response, pass2WeakResponse, retryResponse]);
+    const createSpy = client.messages.create as Mock;
+    const codeSources = makeCodeSources(fileContent);
+
+    const validator = new ClaudeValidator(
+      'claude-sonnet-4-6',
+      'claude-sonnet-4-6',
+      client,
+      undefined,
+      { temperature: 0 },
+    );
+    await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
+
+    expect(createSpy).toHaveBeenCalledTimes(3);
+    for (const call of createSpy.mock.calls) {
+      expect(call[0]).toMatchObject({ temperature: 0 });
+    }
+  });
+
+  it('defaults temperature to 0 when no option is provided', async () => {
+    const fileContent = 'function registerBlockType(name, settings) {}';
+    const codeSays = 'function registerBlockType(name, settings)';
+
+    const pass1Response = makeReportFindingsResponse([
+      { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays } },
+    ], []);
+    const pass2Response = makeReportFindingsResponse([
+      { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays }, confidence: 0.9 },
+    ], []);
+
+    const client = makeAnthropicClient([pass1Response, pass2Response]);
+    const createSpy = client.messages.create as Mock;
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    await validator.validateDoc(makeDoc(), makeCodeTiers(), makeCodeSources(fileContent));
+
+    expect(createSpy.mock.calls.length).toBeGreaterThan(0);
+    for (const call of createSpy.mock.calls) {
+      expect(call[0].temperature).toBe(0);
+    }
+  });
+
+  it('honours a non-zero temperature when explicitly configured', async () => {
+    const pass1Response = makeReportFindingsResponse([], []);
+    const client = makeAnthropicClient([pass1Response]);
+    const createSpy = client.messages.create as Mock;
+
+    const validator = new ClaudeValidator(
+      'claude-sonnet-4-6',
+      'claude-sonnet-4-6',
+      client,
+      undefined,
+      { temperature: 0.7 },
+    );
+    await validator.validateDoc(makeDoc(), makeCodeTiers(), makeCodeSources());
+
+    expect(createSpy.mock.calls[0][0].temperature).toBe(0.7);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// ClaudeValidator — N-sample Pass 1 with fingerprint dedup (issue #56)
+// ---------------------------------------------------------------------------
+
+describe('ClaudeValidator — N-sample Pass 1', () => {
+  it('runs Pass 1 N times when samples > 1 and unions candidates by fingerprint', async () => {
+    const fileContent = 'function registerBlockType(name, settings) {}';
+    const codeSays = 'function registerBlockType(name, settings)';
+
+    // Sample 1 returns issue A (type-signature) only.
+    const pass1Sample1 = makeReportFindingsResponse([
+      { ...BASE_ISSUE, type: 'type-signature', evidence: { ...BASE_ISSUE.evidence, codeSays } },
+    ], ['Doc accurately describes the API']);
+
+    // Sample 2 returns issue A again (same type+codeFile+codeRepo → same fingerprint)
+    // PLUS a different issue B (deprecated-api → different fingerprint).
+    const pass1Sample2 = makeReportFindingsResponse([
+      { ...BASE_ISSUE, type: 'type-signature', evidence: { ...BASE_ISSUE.evidence, codeSays } },
+      {
+        ...BASE_ISSUE,
+        type:     'deprecated-api',
+        evidence: { ...BASE_ISSUE.evidence, codeSays, docSays: 'The `name` parameter is required.' },
+      },
+    ], ['Doc accurately describes the API']);
+
+    // Sample 3 returns nothing new.
+    const pass1Sample3 = makeReportFindingsResponse([], []);
+
+    // Each unique candidate must be verified at most once by Pass 2 → 2 calls.
+    const pass2A = makeReportFindingsResponse([
+      {
+        ...BASE_ISSUE,
+        type:       'type-signature',
+        evidence:   { ...BASE_ISSUE.evidence, codeSays },
+        confidence: 0.9,
+        suggestion: 'Update `registerBlockType` to document the new `metadata` overload',
+      },
+    ], []);
+    const pass2B = makeReportFindingsResponse([
+      {
+        ...BASE_ISSUE,
+        type:       'deprecated-api',
+        evidence:   { ...BASE_ISSUE.evidence, codeSays },
+        confidence: 0.9,
+        suggestion: 'Mark `registerBlockType` deprecated in favour of `wp.blocks.register`',
+      },
+    ], []);
+
+    const client = makeAnthropicClient([pass1Sample1, pass1Sample2, pass1Sample3, pass2A, pass2B]);
+    const createSpy = client.messages.create as Mock;
+
+    const validator = new ClaudeValidator(
+      'claude-sonnet-4-6',
+      'claude-sonnet-4-6',
+      client,
+      undefined,
+      { samples: 3 },
+    );
+    const result = await validator.validateDoc(
+      makeDoc(),
+      makeCodeTiers(),
+      makeCodeSources(fileContent),
+    );
+
+    // 3 Pass-1 calls + 2 Pass-2 calls (one per unique candidate, not per sample sighting).
+    expect(createSpy).toHaveBeenCalledTimes(5);
+    // Both unique findings survive.
+    expect(result.issues).toHaveLength(2);
+    const types = result.issues.map(i => i.type).sort();
+    expect(types).toEqual(['deprecated-api', 'type-signature']);
+  });
+
+  it('still produces a valid DocResult when one Pass-1 sample throws', async () => {
+    const fileContent = 'function registerBlockType(name, settings) {}';
+    const codeSays = 'function registerBlockType(name, settings)';
+
+    const goodPass1 = makeReportFindingsResponse([
+      { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays } },
+    ], []);
+    const pass2Response = makeReportFindingsResponse([
+      { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays }, confidence: 0.9 },
+    ], []);
+
+    let callCount = 0;
+    const client = {
+      messages: {
+        create: vi.fn(async () => {
+          callCount++;
+          if (callCount === 1) throw new Error('transient API error');
+          if (callCount === 2) return goodPass1;
+          return pass2Response;
+        }),
+      },
+    } as unknown as Anthropic;
+
+    const validator = new ClaudeValidator(
+      'claude-sonnet-4-6',
+      'claude-sonnet-4-6',
+      client,
+      undefined,
+      { samples: 2 },
+    );
+    const result = await validator.validateDoc(
+      makeDoc(),
+      makeCodeTiers(),
+      makeCodeSources(fileContent),
+    );
+
+    // The surviving sample's findings are kept; the failed sample is reported in diagnostics.
+    expect(result.issues).toHaveLength(1);
+    expect(result.diagnostics.some(d => /Pass 1 sample 1\/2 failed/.test(d))).toBe(true);
+  });
+
+  it('rejects samples < 1 at construction time', () => {
+    const client = makeAnthropicClient([makeReportFindingsResponse([], [])]);
+    expect(
+      () =>
+        new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, {
+          samples: 0,
+        }),
+    ).toThrow(/samples must be an integer >= 1/);
+  });
+});
