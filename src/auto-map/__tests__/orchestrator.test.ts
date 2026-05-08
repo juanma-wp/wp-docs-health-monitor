@@ -7,7 +7,7 @@ import type Anthropic from '@anthropic-ai/sdk';
 import { buildTiersForSlug, auditPathFor } from '../orchestrator.js';
 import { Reranker } from '../rerank.js';
 import { RerankCache } from '../rerank-cache.js';
-import { AuditWriter, MappingAuditSchema } from '../audit-writer.js';
+import { AuditWriter, MappingAuditSchema, NO_FLAGGED_SENTINEL } from '../audit-writer.js';
 import type { ScoredFile } from '../../indexer/symbol-index.js';
 
 // ---------------------------------------------------------------------------
@@ -384,5 +384,93 @@ describe('orchestrator + AuditWriter wiring (smoke)', () => {
     );
     // Falls back to suffix append for non-.json paths
     expect(auditPathFor('mappings/site')).toBe('mappings/site.audit.json');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Smoke: --review wiring (slice D) — orchestrator + AuditWriter compose to
+// (a) write mapping + audit and (b) emit only the flagged subset to stdout.
+// ---------------------------------------------------------------------------
+
+describe('orchestrator + AuditWriter wiring (--review smoke)', () => {
+  // A canned mock LLM response containing exactly one flagged (confidence
+  // < 0.7) and one non-flagged (confidence >= 0.7) entry, plus one dropped
+  // file. Mirrors the acceptance-criterion fixture from the issue body.
+  const REVIEW_TOOL_INPUT = {
+    primary: [
+      { repo: 'gutenberg', path: 'packages/blocks/src/api/registration.js', rationale: 'canonical impl', confidence: 0.95 },
+    ],
+    secondary: [
+      { repo: 'gutenberg', path: 'packages/blocks/src/api/parser.js', rationale: 'might be the parser, not 100% sure', confidence: 0.55 },
+    ],
+    context: [],
+    dropped: [
+      { repo: 'gutenberg', path: 'packages/deprecated/src/index.ts', reason: 'unrelated logger named `deprecated`' },
+    ],
+  };
+
+  it('writes both mapping + audit AND produces flagged-only stdout under --review', async () => {
+    const client = makeAnthropicClient([makeToolUseResponse(REVIEW_TOOL_INPUT)]);
+    const reranker = new Reranker('claude-sonnet-4-6', client);
+
+    const { tiers, rerankResult } = await buildTiersForSlug({
+      docContent:     '# block-metadata',
+      slug:           'block-metadata',
+      scored:         SCORED,
+      allFilesByRepo: ALL_FILES,
+      reranker,
+    });
+
+    // Tiers were assembled from rerank — both kept files are present.
+    expect(tiers.primary).toEqual([{ repo: 'gutenberg', path: 'packages/blocks/src/api/registration.js' }]);
+    expect(tiers.secondary).toEqual([{ repo: 'gutenberg', path: 'packages/blocks/src/api/parser.js' }]);
+
+    // Caller guard: rerank produced a non-null result, so the audit can be written.
+    expect(rerankResult).not.toBeNull();
+    if (!rerankResult) return;
+
+    // (1) Audit is written when --review implies --write and rerank ran.
+    const dir = mkdtempSync(join(tmpdir(), 'orch-review-'));
+    const auditPath = auditPathFor(join(dir, 'site.json'));
+    const writer = new AuditWriter();
+    writer.writeAudit(auditPath, 'block-metadata', rerankResult);
+    expect(existsSync(auditPath)).toBe(true);
+    const parsedAudit = MappingAuditSchema.parse(JSON.parse(readFileSync(auditPath, 'utf-8')));
+    expect(parsedAudit.audits['block-metadata']).toEqual(rerankResult);
+
+    // (2) formatFlagged emits ONLY the flagged subset (parser.js at 0.55).
+    const flagged = writer.formatFlagged(rerankResult);
+    expect(flagged).not.toBe(NO_FLAGGED_SENTINEL);
+    expect(flagged).toContain('parser.js');
+    expect(flagged).toContain('0.55');
+    expect(flagged).toContain('might be the parser');
+    // Non-flagged kept file (registration.js at 0.95) is NOT in flagged output.
+    expect(flagged).not.toContain('registration.js');
+    expect(flagged).not.toContain('canonical impl');
+    // Dropped files are not part of the flagged subset (they belong to --explain).
+    expect(flagged).not.toContain('packages/deprecated/src/index.ts');
+  });
+
+  it('emits the literal sentinel string when no kept file is below the threshold', async () => {
+    const allHighConfidence = {
+      primary:   [{ repo: 'gutenberg', path: 'packages/blocks/src/api/registration.js', rationale: 'canonical', confidence: 0.95 }],
+      secondary: [{ repo: 'gutenberg', path: 'packages/blocks/src/api/parser.js',       rationale: 'parser',    confidence: 0.85 }],
+      context:   [{ repo: 'gutenberg', path: 'packages/blocks/src/api/utils.ts',        rationale: 'helpers',   confidence: 0.75 }],
+      dropped:   [],
+    };
+    const client = makeAnthropicClient([makeToolUseResponse(allHighConfidence)]);
+    const reranker = new Reranker('claude-sonnet-4-6', client);
+
+    const { rerankResult } = await buildTiersForSlug({
+      docContent:     '# block-metadata',
+      slug:           'block-metadata',
+      scored:         SCORED,
+      allFilesByRepo: ALL_FILES,
+      reranker,
+    });
+    expect(rerankResult).not.toBeNull();
+    if (!rerankResult) return;
+
+    expect(new AuditWriter().formatFlagged(rerankResult)).toBe(NO_FLAGGED_SENTINEL);
   });
 });

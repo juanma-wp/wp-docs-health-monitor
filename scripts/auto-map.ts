@@ -3,7 +3,7 @@
  * (optional) AI re-ranker.
  *
  * Usage:
- *   npx tsx scripts/auto-map.ts <slug> [--config <path>] [--write] [--no-rerank] [--explain]
+ *   npx tsx scripts/auto-map.ts <slug> [--config <path>] [--write] [--no-rerank] [--explain] [--review]
  *
  * Builds a symbol index of all configured repos (cached by commit SHA),
  * cross-references the symbols named in the doc, and proposes a CodeTiers
@@ -17,6 +17,11 @@
  *   --write           Write the canonical mapping AND the audit file (when re-rank ran)
  *   --no-rerank       Skip the AI re-ranker (lexical-only output, no audit)
  *   --explain         Print rationale per kept file and reason per dropped file to stdout
+ *   --review          Write mapping + audit AND emit only the flagged subset
+ *                     (confidence < 0.7) to stdout for the human-review loop.
+ *                     Implies --write. Mutually exclusive with --no-rerank.
+ *                     Composes with --explain: both renderers run (explain
+ *                     first, then flagged subset).
  */
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
@@ -36,12 +41,13 @@ import { RerankCache } from '../src/auto-map/rerank-cache.js';
 import { buildTiersForSlug, auditPathFor } from '../src/auto-map/orchestrator.js';
 import { AuditWriter } from '../src/auto-map/audit-writer.js';
 
-function parseArgs(argv: string[]): {
+export function parseArgs(argv: string[]): {
   slug: string;
   configPath: string;
   write: boolean;
   rerank: boolean;
   explain: boolean;
+  review: boolean;
 } {
   const args = argv.slice(2);
   let slug = '';
@@ -49,6 +55,7 @@ function parseArgs(argv: string[]): {
   let write = false;
   let rerank = true;
   let explain = false;
+  let review = false;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--config' && args[i + 1]) {
@@ -60,21 +67,37 @@ function parseArgs(argv: string[]): {
       rerank = false;
     } else if (args[i] === '--explain') {
       explain = true;
+    } else if (args[i] === '--review') {
+      review = true;
     } else if (!slug && !args[i].startsWith('--')) {
       slug = args[i];
     }
   }
 
   if (!slug) {
-    console.error('Usage: npx tsx scripts/auto-map.ts <slug> [--config <path>] [--write] [--no-rerank] [--explain]');
+    console.error('Usage: npx tsx scripts/auto-map.ts <slug> [--config <path>] [--write] [--no-rerank] [--explain] [--review]');
     process.exit(1);
   }
 
-  return { slug, configPath, write, rerank, explain };
+  // --review needs the audit (rationale + confidence per kept file) which
+  // only the AI re-ranker produces. --no-rerank means no audit, so the
+  // combination is rejected up-front rather than producing empty output.
+  if (review && !rerank) {
+    console.error(
+      'Error: --review cannot be used with --no-rerank. The flagged subset is derived from re-rank confidence; --no-rerank produces no audit. Drop one of the two flags.',
+    );
+    process.exit(2);
+  }
+
+  // --review implies --write (the human-review loop lands the auto-mapping
+  // immediately and surfaces the flagged subset on top).
+  if (review) write = true;
+
+  return { slug, configPath, write, rerank, explain, review };
 }
 
 async function main() {
-  const { slug, configPath, write, rerank, explain } = parseArgs(process.argv);
+  const { slug, configPath, write, rerank, explain, review } = parseArgs(process.argv);
   const config = await loadConfig(configPath);
 
   // 1. Fetch manifest and locate the entry for this slug
@@ -232,6 +255,22 @@ async function main() {
     console.error(
       `\nReview the above and merge into ${config.mappingPath}, or re-run with --write`,
     );
+  }
+
+  // --review: surface the flagged subset (kept files with confidence < 0.7)
+  // on stdout for the human-review loop. Mapping + audit have already been
+  // written above (--review implies --write). If re-rank failed at runtime
+  // (rerankResult === null), the mapping write fell back to lexical-only
+  // and there is no audit material to flag — say so on stderr instead of
+  // printing an empty/confusing flagged section.
+  if (review) {
+    if (rerankResult) {
+      console.log('\n' + auditWriter.formatFlagged(rerankResult));
+    } else {
+      console.error(
+        '\n--review: no flagged subset to print (re-rank failed; mapping written from lexical-only fallback).',
+      );
+    }
   }
 }
 
