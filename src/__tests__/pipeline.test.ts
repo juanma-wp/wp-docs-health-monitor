@@ -87,6 +87,7 @@ vi.mock('../adapters/index.js', () => ({
 // Import AFTER vi.mock so the mock is active.
 const { runPipeline } = await import('../pipeline.js');
 const { RunResultsSchema } = await import('../types/results.js');
+const { ConfigSchema } = await import('../config/schema.js');
 
 const minimalConfig: Config = {
   project: { name: 'Test' },
@@ -126,5 +127,36 @@ describe('runPipeline — validator failure isolation', () => {
 
     // Run-level shape must still be a valid RunResults
     expect(() => RunResultsSchema.parse(result)).not.toThrow();
+  });
+});
+
+describe('runPipeline — validator sampling metadata', () => {
+  it('surfaces config.validator.temperature and samples in result.sampling', async () => {
+    const config: Config = {
+      ...minimalConfig,
+      validator: { ...minimalConfig.validator, temperature: 0.7, samples: 3 },
+    };
+
+    const result = await runPipeline(config);
+
+    expect(result.sampling).toEqual({ temperature: 0.7, samples: 3 });
+  });
+
+  it('reflects schema defaults (temperature: 0, samples: 1) when omitted from the raw config', async () => {
+    // Round-trip through ConfigSchema.parse so defaults are applied the same
+    // way they are when the CLI loads a config file that omits these fields.
+    const parsed = ConfigSchema.parse({
+      project:     minimalConfig.project,
+      docSource:   minimalConfig.docSource,
+      codeSources: minimalConfig.codeSources,
+      mappingPath: minimalConfig.mappingPath,
+      outputDir:   minimalConfig.outputDir,
+      validator:   { type: 'claude' },  // intentionally omit temperature & samples
+      pricing:     minimalConfig.pricing,
+    });
+
+    const result = await runPipeline(parsed);
+
+    expect(result.sampling).toEqual({ temperature: 0, samples: 1 });
   });
 });
