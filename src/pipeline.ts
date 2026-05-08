@@ -8,7 +8,7 @@ import type { RunResults, DocResult } from './types/results.js';
 import type { DocFetchResult, Doc } from './adapters/doc-source/types.js';
 import { createDocSource, createCodeSources, createDocCodeMapper, createValidator } from './adapters/index.js';
 import type { CostAccumulator } from './adapters/validator/claude.js';
-import type { RunUsage, RunModels } from './types/results.js';
+import type { RunUsage, RunModels, RunSampling } from './types/results.js';
 
 function formatRunId(date: Date): string {
   const pad = (n: number, len = 2) => String(n).padStart(len, '0');
@@ -193,6 +193,11 @@ export async function runPipeline(config: Config, options: RunPipelineOptions = 
     pass2: config.validator.pass2Model,
   };
 
+  const sampling: RunSampling = {
+    temperature: config.validator.temperature,
+    samples:     config.validator.samples,
+  };
+
   const repoUrls: Record<string, string> = {};
   const repoRefs: Record<string, string> = {};
   for (const [id, cs] of Object.entries(config.codeSources)) {
@@ -205,6 +210,7 @@ export async function runPipeline(config: Config, options: RunPipelineOptions = 
     timestamp:     now.toISOString(),
     overallHealth,
     models,
+    sampling,
     repoUrls,
     repoRefs,
     totals,

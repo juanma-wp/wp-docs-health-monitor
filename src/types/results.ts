@@ -49,6 +49,12 @@ export const RunModelsSchema = z.object({
 });
 export type RunModels = z.infer<typeof RunModelsSchema>;
 
+export const RunSamplingSchema = z.object({
+  temperature: z.number().finite().default(0),
+  samples:     z.number().int().min(1).default(1),
+});
+export type RunSampling = z.infer<typeof RunSamplingSchema>;
+
 export const RunUsageSchema = z.object({
   inputTokens:      z.number().int(),
   outputTokens:     z.number().int(),
@@ -63,6 +69,7 @@ export const RunResultsSchema = z.object({
   timestamp:     z.string().datetime(),
   overallHealth: z.number().min(0).max(100),
   models:        RunModelsSchema,
+  sampling:      RunSamplingSchema.default({}),
   repoUrls:      z.record(z.string(), z.string()),   // repoId → GitHub base URL (no trailing slash)
   repoRefs:      z.record(z.string(), z.string()),   // repoId → branch or tag ref (e.g. "trunk")
   totals: z.object({

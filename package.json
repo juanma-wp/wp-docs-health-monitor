@@ -10,7 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "gen:schema": "tsx scripts/gen-schema.ts",
-    "analyze": "tsx src/cli.ts"
+    "analyze": "tsx --env-file=.env src/cli.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.0",
@@ -27,6 +27,7 @@
     "zod-to-json-schema": "^3.23.0"
   },
   "devDependencies": {
+    "@ai-hero/sandcastle": "^0.5.10",
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",

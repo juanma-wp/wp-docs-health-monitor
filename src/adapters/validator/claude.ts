@@ -292,21 +292,46 @@ export type CostAccumulator = {
 // ClaudeValidator
 // ---------------------------------------------------------------------------
 
+export type ClaudeValidatorOptions = {
+  // Sampling temperature for all three messages.create call sites
+  // (Pass 1, Pass 2 agentic loop, weak-suggestion retry). Default 0 ⇒
+  // deterministic runs.
+  temperature?: number;
+  // Number of Pass 1 samples per doc. samples > 1 trades cost for recall:
+  // candidates are unioned across samples by fingerprint before the
+  // verbatim check / Pass 2, so each unique candidate is verified once.
+  samples?: number;
+};
+
 export class ClaudeValidator implements Validator {
   private readonly pass1Model: string;
   private readonly pass2Model: string;
   private readonly anthropic: Anthropic;
   private readonly systemPrompt: string;
+  private readonly temperature: number;
+  private readonly samples: number;
   readonly costAccumulator: CostAccumulator = { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheCreationTokens: 0 };
   droppedHallucinations = 0;
 
-  constructor(pass1Model: string, pass2Model: string, anthropic: Anthropic, promptExtension?: string) {
+  constructor(
+    pass1Model: string,
+    pass2Model: string,
+    anthropic: Anthropic,
+    promptExtension?: string,
+    options: ClaudeValidatorOptions = {},
+  ) {
     this.pass1Model = pass1Model;
     this.pass2Model = pass2Model;
     this.anthropic = anthropic;
     this.systemPrompt = promptExtension?.trim()
       ? `${SYSTEM_PROMPT}\n\n## Site-specific rules\n\n${promptExtension}`
       : SYSTEM_PROMPT;
+    this.temperature = options.temperature ?? 0;
+    const requestedSamples = options.samples ?? 1;
+    if (!Number.isInteger(requestedSamples) || requestedSamples < 1) {
+      throw new Error(`ClaudeValidator: samples must be an integer >= 1 (got ${requestedSamples})`);
+    }
+    this.samples = requestedSamples;
   }
 
   async validateDoc(
@@ -331,17 +356,56 @@ export class ClaudeValidator implements Validator {
     // Build user message content
     const userContent = ClaudeValidator.buildUserContent(doc, assembled, {});
 
-    // Pass 1: get initial issues and positives
+    // Pass 1: get initial issues and positives. When `samples > 1` we run
+    // Pass 1 N times and union candidates by `fingerprintIssue` *before*
+    // the verbatim check / Pass 2 — each unique candidate is verified once.
+    // Trades cost for recall (issue #56). With samples=1 the path collapses
+    // to the historical single-call shape and is byte-identical to it.
     let pass1Issues: RawIssue[] = [];
     let positives: string[] = [];
 
-    try {
-      const pass1Result = await this.runPass1(userContent);
-      pass1Issues = pass1Result.issues;
-      positives = pass1Result.positives.slice(0, 3);
-    } catch (err) {
-      diagnostics.push(`Pass 1 failed: ${String(err)}`);
-      return this.buildDocResult(doc, [], positives, assembled.relatedCode, diagnostics, commitSha);
+    if (this.samples === 1) {
+      try {
+        const pass1Result = await this.runPass1(userContent);
+        pass1Issues = pass1Result.issues;
+        positives = pass1Result.positives.slice(0, 3);
+      } catch (err) {
+        diagnostics.push(`Pass 1 failed: ${String(err)}`);
+        return this.buildDocResult(doc, [], positives, assembled.relatedCode, diagnostics, commitSha);
+      }
+    } else {
+      const seenFingerprints = new Set<string>();
+      const aggregatedPositives: string[] = [];
+      let succeededSamples = 0;
+      for (let i = 0; i < this.samples; i++) {
+        let pass1Result: ReportFindingsInput;
+        try {
+          pass1Result = await this.runPass1(userContent);
+        } catch (err) {
+          diagnostics.push(`Pass 1 sample ${i + 1}/${this.samples} failed: ${String(err)}`);
+          continue;
+        }
+        succeededSamples++;
+        for (const candidate of pass1Result.issues) {
+          const fp = fingerprintIssue(
+            doc.slug,
+            candidate.type,
+            candidate.evidence.codeRepo,
+            candidate.evidence.codeFile,
+          );
+          if (!seenFingerprints.has(fp)) {
+            seenFingerprints.add(fp);
+            pass1Issues.push(candidate);
+          }
+        }
+        for (const p of pass1Result.positives) {
+          if (!aggregatedPositives.includes(p)) aggregatedPositives.push(p);
+        }
+      }
+      if (succeededSamples === 0) {
+        return this.buildDocResult(doc, [], [], assembled.relatedCode, diagnostics, commitSha);
+      }
+      positives = aggregatedPositives.slice(0, 3);
     }
 
     // Verbatim check — both docSays and codeSays must be real quotes.
@@ -522,15 +586,18 @@ ${sourceCodeBlock}${missingSymbolsHint}`;
 
   private async runPass1(
     userContent: string,
-    temperature?: number,
+    temperatureOverride?: number,
   ): Promise<ReportFindingsInput> {
+    // Per-call override (used by `runPass1Only` experiments) wins over the
+    // instance default (set from config.validator.temperature, default 0).
+    const temperature = temperatureOverride ?? this.temperature;
     const response = await this.anthropic.messages.create({
       model:      this.pass1Model,
       // 8192 sized for up to PASS1_MAX_ISSUES issues × structured
       // suggestion (~500 tokens each) + positives + slack. 4096 was
       // tight on multi-issue docs and contributed to truncation.
       max_tokens: 8192,
-      ...(temperature !== undefined ? { temperature } : {}),
+      temperature,
       system: [
         {
           type:          'text',
@@ -616,8 +683,9 @@ ${JSON.stringify(candidate, null, 2)}`,
     // Agentic loop: allow Claude to call fetch_code before report_findings
     for (let turn = 0; turn < 10; turn++) {
       const response = await this.anthropic.messages.create({
-        model:      this.pass2Model,
-        max_tokens: 2048,
+        model:       this.pass2Model,
+        max_tokens:  2048,
+        temperature: this.temperature,
         system: [
           {
             type:          'text',
@@ -733,8 +801,9 @@ ${JSON.stringify(candidate, null, 2)}`,
     ];
 
     const response = await this.anthropic.messages.create({
-      model:      this.pass2Model,
-      max_tokens: 1024,
+      model:       this.pass2Model,
+      max_tokens:  1024,
+      temperature: this.temperature,
       system: [
         {
           type:          'text',

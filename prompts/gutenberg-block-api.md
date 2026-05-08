@@ -65,3 +65,11 @@ These schemas (`block.json`, `theme.json`, etc.) ARE the documented contract for
 - **Generic type listings like `Function|string[]`**: when the doc says `Function` and the code uses `(args) => boolean`, the doc IS correct (any function works at runtime). Reporting is allowed only if the parameter signature is materially needed for correct usage — for example, if the function is called with specific arguments the user must use to compute the return value (then it becomes a meaningful API gap, not a teaching simplification).
 
 - **Internal `__experimental` / `__unstable` symbols** that the doc does not mention. These are deliberately undocumented.
+
+#### Evidence-shape calibration for the recurring TPs above
+
+The common prompt's "Evidence-slot shape" rule applied to the corpus-specific TPs:
+
+- **`filePath` undocumented** (`nonexistent-name`): `codeSays` quotes the PHPDoc tag from `WP_Block_Patterns_Registry` (`@type string $filePath ...`); `docSays` quotes the doc's documented-peer listing (e.g. the row that introduces `content` or the properties table header) — never the bare token `` `filePath` ``, which is the answer rather than a doc quote.
+
+- **Broken JS arrow-function example** (`broken-example`): `docSays` is the verbatim broken snippet from the doc; `codeSays` is `""` — the snippet is broken on its own face (labeled statement instead of returned object), so no comparison line in `raw-handling/index.ts` is needed. The parentheses fix goes in `suggestion`.

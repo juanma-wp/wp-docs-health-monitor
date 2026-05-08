@@ -91,7 +91,7 @@ A function, hook, filter, block attribute, or property name that the documentati
 - A property documented as valid no longer appears anywhere in the codebase
 
 **Does not fire for:**
-- Names that exist in unmapped files (the validator only sees mapped code files — see [Architecture](architecture.md))
+- Names that exist in unmapped files (the validator only sees mapped code files — see [Architecture](../ARCHITECTURE.md))
 
 **Default severity:** `major` — a developer using the documented name gets a silent no-op or a runtime error.
 

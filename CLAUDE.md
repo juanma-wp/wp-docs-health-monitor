@@ -15,11 +15,11 @@ Node 20+ required. ESM throughout (`"type": "module"`); intra-package imports us
 
 ## Architecture
 
-Read these in order when orienting: `PLAN.md` (phases + decisions) → `docs/prd.md` (requirements + user stories) → `docs/architecture.md` (why decisions were made, including the locked-contract / adapter-pattern rationale) → `AGENTS.md` (role-scoped reviewing/implementation, including hard boundaries) → `src/pipeline.ts` (the wire-up).
+Read these in order when orienting: `PLAN.md` (phases + decisions) → `docs/PRD.md` (requirements + user stories) → `docs/ARCHITECTURE.md` (why decisions were made, including the locked-contract / adapter-pattern rationale) → `AGENTS.md` (role-scoped reviewing/implementation, including hard boundaries) → `src/pipeline.ts` (the wire-up).
 
 ### Project stance — non-obvious things you can't infer from the code
 
-These are conventions and invariants that surprise readers and aren't carried by the code alone. Everything else (contract layout, adapter wiring, current adapter list, role boundaries) lives in `docs/architecture.md` and `AGENTS.md` — go there, don't restate it here.
+These are conventions and invariants that surprise readers and aren't carried by the code alone. Everything else (contract layout, adapter wiring, current adapter list, role boundaries) lives in `docs/ARCHITECTURE.md` and `AGENTS.md` — go there, don't restate it here.
 
 - **Pipeline error-handling stance.** `runPipeline` always produces a valid `RunResults`. Failed fetches and mapping errors become per-doc `diagnostics` entries with `status: 'critical'` — never uncaught exceptions. Tests pin this: `src/types/__tests__/schemas.test.ts` (`runPipeline` block) and `src/adapters/doc-source/__tests__/manifest-url.test.ts` (error-handling block).
 - **`src/types/` is locked.** Zod schemas are the source of truth; TypeScript types are derived. `examples/mock-results.json` must round-trip `RunResultsSchema.parse()`. `examples/results.schema.json` is generated — never edit by hand; re-run `npm run gen:schema`.
@@ -38,6 +38,27 @@ These are conventions and invariants that surprise readers and aren't carried by
 - `scripts/bootstrap-mapping.ts` — dev-time accelerator for generating mappings via Claude.
 - `scripts/verify-ingestion.ts` — end-to-end smoke test of the ingestion pipeline.
 - `scripts/gen-schema.ts` — regenerates `examples/results.schema.json` from Zod.
+
+## Autonomous workflow (Ralph) — pre-confirmation scope
+
+`./ralph/afk.sh` runs Claude Code autonomously inside a Sandcastle Docker sandbox to clear an issue queue. While that loop is running, the agent has narrow blanket pre-confirmation to:
+
+- push branches matching `ralph/**`
+- open PRs from those branches against `main`, with a *How to test* section in the body
+- post a **single** PR-link comment on a source issue *that carries both* `assignee:$RALPH_ASSIGNEE` *and* `label:ready-for-agent` (the `/triage` skill's AFK-ready state)
+
+Ralph requests auto-merge (`gh pr merge --auto --squash`) on every PR it opens. **GitHub auto-merges only when both required status checks pass**:
+
+- `ci` — `npm run typecheck` + `npm test` (`.github/workflows/ci.yml`).
+- `path-gate` — diff confined to a narrow allowlist (`.github/workflows/path-gate.yml`). The gate only enforces on PRs whose head branch starts with `ralph/`; human and external PRs pass straight through. Ralph PRs touching anything outside the allowlist (validator core, `src/types/`, prompts, configs, CI itself, package metadata) **fail this check** and bounce to manual review — they will not auto-merge.
+
+This means narrowly-scoped Ralph PRs land autonomously, scope-drifted Ralph PRs bounce, and human PRs are unaffected. Ralph never closes issues — the merge auto-closes via `Closes #<n>` in the PR body.
+
+To widen Ralph's allowlist (when a new module joins Ralph's scope), edit `ALLOWLIST_PATTERN` in `.github/workflows/path-gate.yml` from a non-`ralph/` branch (the gate is a no-op for those, so the change merges through normal review).
+
+Any issue or PR not matching the exact pair (assignee `$RALPH_ASSIGNEE` from `.env` AND label `ready-for-agent`) still requires manual confirmation. Direct pushes to `main` remain forbidden; branch protection enforces this. Human PRs go through normal review and merge.
+
+See [`DEVELOPMENT.md`](./DEVELOPMENT.md#autonomous-workflow-ralph) for setup (prerequisites, `.env` keys, three entry points).
 
 ## Validator pipeline discipline
 

@@ -1,6 +1,6 @@
 # Architecture
 
-Back to [PLAN.md](../PLAN.md) · Issues in [backlog.md](./backlog.md) · Schedule in [timeline.md](./timeline.md).
+Back to [PLAN.md](../PLAN.md).
 
 Technical decisions, patterns, and the rationale behind them. Not a file map — for that, read the source. This document explains *why* the system is built the way it is and what to reach for when building each part.
 
@@ -92,7 +92,7 @@ A mock fixture (`examples/mock-results.json`) exercises every schema and unblock
 
 **Key decision — commit SHA on `DocResult`:** the SHA of the code repo at analysis time is stored on every `DocResult`. This enables the change detector (deferred to Stretch): next run compares current SHA to stored SHA and skips docs whose mapped code hasn't changed.
 
-**Open design issue — `trunk` as default ref:** the Phase 1 `git-clone` implementation clones without specifying a ref, resolving to `trunk`. `trunk` contains unreleased code that no end user runs, so a doc correctly describing released behavior can be flagged against unreleased refactors, and a doc describing unreleased APIs can be flagged as *healthy* when no plugin user can use them yet. Small implementation footprint; Phase 2 scope. See [release-pinning.md](./release-pinning.md) for the proposed fix and deferral rationale.
+**Open design issue — `trunk` as default ref:** the Phase 1 `git-clone` implementation clones without specifying a ref, resolving to `trunk`. `trunk` contains unreleased code that no end user runs, so a doc correctly describing released behavior can be flagged against unreleased refactors, and a doc describing unreleased APIs can be flagged as *healthy* when no plugin user can use them yet. Small implementation footprint; Phase 2 scope. See [release-pinning.md](./design/release-pinning.md) for the proposed fix and deferral rationale.
 
 ---
 
