@@ -1,0 +1,1730 @@
+{
+  "_comment": "GENERATED FILE — do not hand-edit. Re-run scripts/auto-map.ts to regenerate.",
+  "version": 1,
+  "audits": {
+    "block-annotations": {
+      "primary": [],
+      "secondary": [],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Matched on `content`, `selector`, `block`, `rich-text` — the block schema defines structural properties referenced in the annotations doc (selector, rich-text), but is not the annotations implementation itself.",
+          "confidence": 0.55
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/components/rich-text/native/index.native.js",
+          "rationale": "Matched on `RichText` — the RichText component is the integration point for text annotations described in the doc, providing surrounding context.",
+          "confidence": 0.52
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Single-token English match — `block` is a generic JSON schema property, not related to block annotations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Single-token English match — `block` is a generic JSON schema property, not related to block annotations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/components/grid/utils.js",
+          "rationale": "Single-token English match — `range` is a generic identifier in a grid utility, not the annotation range concept."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/flex/styles.ts",
+          "rationale": "Single-token English match — `block` is a CSS display value in a flex styles file, unrelated to block annotations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/text/styles.ts",
+          "rationale": "Single-token English match — `block` is a CSS display value in a text styles file, unrelated to block annotations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/toggle-group-control/toggle-group-control/styles.ts",
+          "rationale": "Single-token English match — `block` is a CSS display value in a toggle-group styles file, unrelated to block annotations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/menu/stories/index.story.tsx",
+          "rationale": "Fixtures/stories file with single-token match on `value` — not related to block annotations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/admin-ui/src/page/stories/index.story.tsx",
+          "rationale": "Fixtures/stories file with single-token match on `content` — not related to block annotations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/card/stories/index.story.tsx",
+          "rationale": "Fixtures/stories file with single-token match on `content` — not related to block annotations."
+        }
+      ]
+    },
+    "block-api-versions": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Matched on `apiVersion` — this is the canonical JSON schema defining the block API, including the `apiVersion` field that is the central subject of this doc.",
+          "confidence": 0.92
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/components/block-list/use-block-props/index.js",
+          "rationale": "Matched on `useBlockProps` — this is the canonical implementation of the `useBlockProps()` hook described as required in API Version 2.",
+          "confidence": 0.85
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/components/block-list/use-block-props/index.native.js",
+          "rationale": "Matched on `useBlockProps` — native counterpart of the `useBlockProps()` hook implementation relevant to API Version 2 description.",
+          "confidence": 0.75
+        }
+      ],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-heading/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-item/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-panel/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/audio/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/button/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/buttons/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/code/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/column/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/columns/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/cover/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/details/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/embed/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/file/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form-input/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form-submission-notification/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form-submit-button/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/freeform/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/group/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/heading/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/home-link/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/html/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/image/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/list-item/save.js",
+          "rationale": "Single generic token match (`save`) — one of many block save files, not related to API version definitions."
+        }
+      ]
+    },
+    "block-attributes": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Matched on `attributes`, `type`, `enum`, `source`, `query`, `attribute`, `text` — this is the canonical JSON schema defining block attributes structure, directly authoritative for this doc.",
+          "confidence": 0.97
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/blocks/src/api/matchers.ts",
+          "rationale": "Matched on `html` — this is the hpq-based attribute source matcher implementation (html, text, attribute, query sources) referenced in the doc.",
+          "confidence": 0.82
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/post.php",
+          "rationale": "Matched on `register_post_meta` — directly implements the `register_post_meta` PHP function documented in the meta source section.",
+          "confidence": 0.78
+        }
+      ],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/editor/src/store/selectors.js",
+          "rationale": "Matched on `isEditedPostDirty` — referenced in the doc's meta source considerations section regarding dirty post state from type mismatches.",
+          "confidence": 0.62
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Cross-schema property collision — matched on generic tokens (`url`, `title`, `size`, `text`, `src`, `width`, `button`) that are common theme.json properties, not block attributes schema."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Single-token match on `src` — generic property name, unrelated to block attributes."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/components/rich-text/native/index.native.js",
+          "rationale": "Single-token match on `RichText` — only tangentially mentioned in doc as a typical user of `html` source; not about block attributes definition."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/class-wpdb.php",
+          "rationale": "Single-token English match — `query` matches the database query class, not the block attribute `query` source."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/general-template.php",
+          "rationale": "Single-token English match — `disabled` matches a generic template helper, not the block attribute `disabled` boolean example."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/text/styles/text-mixins.native.js",
+          "rationale": "Single-token match on `text` — native text style mixins, unrelated to block attribute `text` source."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-heading/save.js",
+          "rationale": "Single-token match on `save` — one of many block save functions; not about block attributes definition."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-item/save.js",
+          "rationale": "Single-token match on `save` — generic block save file, not about block attributes."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-panel/save.js",
+          "rationale": "Single-token match on `save` — generic block save file, not about block attributes."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion/save.js",
+          "rationale": "Single-token match on `save` — generic block save file, not about block attributes."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/audio/save.js",
+          "rationale": "Single-token match on `save` — generic block save file, not about block attributes."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/button/save.js",
+          "rationale": "Single-token match on `save` — generic block save file, not about block attributes."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/buttons/save.js",
+          "rationale": "Single-token match on `save` — generic block save file, not about block attributes."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/code/save.js",
+          "rationale": "Single-token match on `save` — generic block save file, not about block attributes."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/column/save.js",
+          "rationale": "Single-token match on `save` — generic block save file, not about block attributes."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/columns/save.js",
+          "rationale": "Single-token match on `save` — generic block save file, not about block attributes."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination/save.js",
+          "rationale": "Single-token match on `save` — generic block save file, not about block attributes."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments/save.js",
+          "rationale": "Single-token match on `save` — generic block save file, not about block attributes."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/cover/save.js",
+          "rationale": "Single-token match on `save` — generic block save file, not about block attributes."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/details/save.js",
+          "rationale": "Single-token match on `save` — generic block save file, not about block attributes."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/embed/save.js",
+          "rationale": "Single-token match on `save` — generic block save file, not about block attributes."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/file/save.js",
+          "rationale": "Single-token match on `save` — generic block save file, not about block attributes."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form-input/save.js",
+          "rationale": "Single-token match on `save` — generic block save file, not about block attributes."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form-submission-notification/save.js",
+          "rationale": "Single-token match on `save` — generic block save file, not about block attributes."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form-submit-button/save.js",
+          "rationale": "Single-token match on `save` — generic block save file, not about block attributes."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form/save.js",
+          "rationale": "Single-token match on `save` — generic block save file, not about block attributes."
+        }
+      ]
+    },
+    "block-context": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Matched on `providesContext` and `usesContext` — the canonical JSON schema defining both block context properties documented on this page.",
+          "confidence": 0.97
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/blocks/src/api/registration.ts",
+          "rationale": "Matched on `registerBlockType` — the canonical registration API where `providesContext` and `usesContext` settings are processed and validated.",
+          "confidence": 0.88
+        }
+      ],
+      "secondary": [],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/keyboard-shortcuts/src/context.ts",
+          "rationale": "Matched only on the generic token `context` — a React context file for keyboard shortcuts, not block context; kept at context tier only because path-convention suggests it demonstrates React Context usage pattern.",
+          "confidence": 0.52
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/components/block-edit/edit.native.js",
+          "rationale": "Single-token English match — `Edit` is a generic component name, not related to block context."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-heading/edit.js",
+          "rationale": "Single-token English match — `Edit` is a generic component name in an unrelated accordion block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-item/edit.js",
+          "rationale": "Single-token English match — `Edit` is a generic component name in an unrelated accordion block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-panel/edit.js",
+          "rationale": "Single-token English match — `Edit` is a generic component name in an unrelated accordion block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion/edit.js",
+          "rationale": "Single-token English match — `Edit` is a generic component name in an unrelated accordion block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/avatar/edit.js",
+          "rationale": "Single-token English match — `Edit` is a generic component name in an unrelated avatar block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-avatar/edit.js",
+          "rationale": "Single-token English match — `Edit` is a generic component name in an unrelated comment block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-name/edit.js",
+          "rationale": "Single-token English match — `Edit` is a generic component name in an unrelated comment block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-content/edit.js",
+          "rationale": "Single-token English match — `Edit` is a generic component name in an unrelated comment block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-date/edit.js",
+          "rationale": "Single-token English match — `Edit` is a generic component name in an unrelated comment block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-edit-link/edit.js",
+          "rationale": "Single-token English match — `Edit` is a generic component name in an unrelated comment block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-title/edit.js",
+          "rationale": "Single-token English match — `Edit` is a generic component name in an unrelated comments block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/list/edit.js",
+          "rationale": "Single-token English match — `Edit` is a generic component name in an unrelated list block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/post-comment/edit.js",
+          "rationale": "Single-token English match — `Edit` is a generic component name in an unrelated post-comment block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/tab-panel/edit.js",
+          "rationale": "Single-token English match — `Edit` is a generic component name in an unrelated tab-panel block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/tab-panels/edit.js",
+          "rationale": "Single-token English match — `Edit` is a generic component name in an unrelated tab-panels block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/widgets/src/blocks/legacy-widget/edit/index.js",
+          "rationale": "Single-token English match — `Edit` is a generic component name in an unrelated legacy-widget block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/widgets/src/blocks/widget-group/edit.js",
+          "rationale": "Single-token English match — `Edit` is a generic component name in an unrelated widget-group block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-heading/save.js",
+          "rationale": "Single-token English match — `save` is a generic block function name in an unrelated accordion block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-item/save.js",
+          "rationale": "Single-token English match — `save` is a generic block function name in an unrelated accordion block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-panel/save.js",
+          "rationale": "Single-token English match — `save` is a generic block function name in an unrelated accordion block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion/save.js",
+          "rationale": "Single-token English match — `save` is a generic block function name in an unrelated accordion block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/audio/save.js",
+          "rationale": "Single-token English match — `save` is a generic block function name in an unrelated audio block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/button/save.js",
+          "rationale": "Single-token English match — `save` is a generic block function name in an unrelated button block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/buttons/save.js",
+          "rationale": "Single-token English match — `save` is a generic block function name in an unrelated buttons block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/code/save.js",
+          "rationale": "Single-token English match — `save` is a generic block function name in an unrelated code block."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/column/save.js",
+          "rationale": "Single-token English match — `save` is a generic block function name in an unrelated column block."
+        }
+      ]
+    },
+    "block-deprecation": {
+      "primary": [],
+      "secondary": [],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Matched on `attributes`, `supports`, `innerBlocks` — the canonical block schema that defines the shape of properties referenced throughout the deprecation API doc.",
+          "confidence": 0.6
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/deprecated/src/index.ts",
+          "rationale": "Matched on `deprecated` — this is the `@wordpress/deprecated` utility package, which is a general-purpose deprecation logger, not the block deprecation API itself.",
+          "confidence": 0.55
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Single-token English match — `text` is a generic theme.json color/typography property, unrelated to block deprecation."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/editor/src/components/deprecated.js",
+          "rationale": "Single-token match on `InnerBlocks` — this is a deprecated editor component wrapper, not the block deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/text/styles/text-mixins.native.js",
+          "rationale": "Single-token English match — `text` is a native styling utility, entirely unrelated to block deprecation."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-heading/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-item/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-panel/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/audio/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/button/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/buttons/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/code/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/column/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/columns/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/cover/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/details/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/embed/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/file/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form-input/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form-submission-notification/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form-submit-button/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/freeform/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/group/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/heading/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/home-link/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/html/save.js",
+          "rationale": "Single-token match on `save` only — generic block save function, not related to the deprecation API."
+        }
+      ]
+    },
+    "block-edit-save": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/components/block-list/use-block-props/index.js",
+          "rationale": "Matched on `useBlockProps` — the canonical implementation of the hook that is central to both the `edit` and `save` block wrapper props sections of this doc.",
+          "confidence": 0.92
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/components/block-list/use-block-props/index.native.js",
+          "rationale": "Matched on `useBlockProps` — the React Native implementation of the same hook, corroborating the primary file.",
+          "confidence": 0.78
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Matched on `attributes`, `content`, and `innerBlocks` — the canonical JSON schema for block registration, which defines the `attributes` and `innerBlocks` properties documented in the edit/save API.",
+          "confidence": 0.75
+        }
+      ],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/button/save.js",
+          "rationale": "Matched on `save` — a concrete block-library example of a `save` function, useful as a real-world reference for the doc's save section.",
+          "confidence": 0.55
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/cover/save.js",
+          "rationale": "Matched on `save` — another concrete block-library save implementation providing context for the doc's save section.",
+          "confidence": 0.52
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/columns/save.js",
+          "rationale": "Matched on `save` — a block-library save example that uses innerBlocks, relevant to the innerBlocks section of the doc.",
+          "confidence": 0.52
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Single-token match on `select` — unrelated to block edit/save; theme.json schema is about theme configuration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/interactivity/src/utils.ts",
+          "rationale": "Single-token match on `useEffect` — this is the interactivity API utility, not related to block edit/save functions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/data-controls/src/index.ts",
+          "rationale": "Single-token match on `select` — data-controls package is unrelated to block edit/save API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/data/src/select.ts",
+          "rationale": "Single-token match on `select` — data store selector utility, not related to block edit/save functions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-heading/save.js",
+          "rationale": "Single-token match on `save` — individual block save file; generic identifier match, not canonical for the edit/save API doc."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-item/save.js",
+          "rationale": "Single-token match on `save` — individual block save file; generic identifier match, not canonical for the edit/save API doc."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-panel/save.js",
+          "rationale": "Single-token match on `save` — individual block save file; generic identifier match, not canonical for the edit/save API doc."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion/save.js",
+          "rationale": "Single-token match on `save` — individual block save file; generic identifier match, not canonical for the edit/save API doc."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/audio/save.js",
+          "rationale": "Single-token match on `save` — individual block save file; generic identifier match, not canonical for the edit/save API doc."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/buttons/save.js",
+          "rationale": "Single-token match on `save` — individual block save file; generic identifier match, not canonical for the edit/save API doc."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/code/save.js",
+          "rationale": "Single-token match on `save` — individual block save file; generic identifier match, not canonical for the edit/save API doc."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/column/save.js",
+          "rationale": "Single-token match on `save` — individual block save file; generic identifier match, not canonical for the edit/save API doc."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination/save.js",
+          "rationale": "Single-token match on `save` — individual block save file; generic identifier match, not canonical for the edit/save API doc."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments/save.js",
+          "rationale": "Single-token match on `save` — individual block save file; generic identifier match, not canonical for the edit/save API doc."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/details/save.js",
+          "rationale": "Single-token match on `save` — individual block save file; generic identifier match, not canonical for the edit/save API doc."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/embed/save.js",
+          "rationale": "Single-token match on `save` — individual block save file; generic identifier match, not canonical for the edit/save API doc."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/file/save.js",
+          "rationale": "Single-token match on `save` — individual block save file; generic identifier match, not canonical for the edit/save API doc."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form-input/save.js",
+          "rationale": "Single-token match on `save` — individual block save file; generic identifier match, not canonical for the edit/save API doc."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form-submission-notification/save.js",
+          "rationale": "Single-token match on `save` — individual block save file; generic identifier match, not canonical for the edit/save API doc."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form-submit-button/save.js",
+          "rationale": "Single-token match on `save` — individual block save file; generic identifier match, not canonical for the edit/save API doc."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form/save.js",
+          "rationale": "Single-token match on `save` — individual block save file; generic identifier match, not canonical for the edit/save API doc."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/freeform/save.js",
+          "rationale": "Single-token match on `save` — individual block save file; generic identifier match, not canonical for the edit/save API doc."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/group/save.js",
+          "rationale": "Single-token match on `save` — individual block save file; generic identifier match, not canonical for the edit/save API doc."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/heading/save.js",
+          "rationale": "Single-token match on `save` — individual block save file; generic identifier match, not canonical for the edit/save API doc."
+        }
+      ]
+    },
+    "block-metadata": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Canonical JSON schema for block.json metadata file — matched on apiVersion, name, title, category, parent, ancestor, style, script; this IS the schema the doc describes.",
+          "confidence": 0.99
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/blocks/src/api/registration.ts",
+          "rationale": "Matched on registerBlockType — the JS API used to register blocks with block.json metadata as described in the doc.",
+          "confidence": 0.85
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/blocks.php",
+          "rationale": "Matched on register_block_type — the PHP server-side registration function central to block.json processing described in the doc.",
+          "confidence": 0.85
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/functions.wp-scripts.php",
+          "rationale": "Matched on wp_register_script — directly referenced in the doc as the function used to register script assets defined in block.json.",
+          "confidence": 0.75
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/functions.wp-styles.php",
+          "rationale": "Matched on wp_register_style — directly referenced in the doc as the function used to register style assets defined in block.json.",
+          "confidence": 0.75
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/script-modules.php",
+          "rationale": "Matched on wp_register_script_module — directly referenced in the doc for viewScriptModule asset registration.",
+          "confidence": 0.75
+        }
+      ],
+      "context": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/class-wp-block.php",
+          "rationale": "Matched on WP_Block — the block instance class exposed as $block variable in render.php files, referenced in the doc's Render section.",
+          "confidence": 0.65
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/i18n/src/default-i18n.ts",
+          "rationale": "Matched on __ and _x — the i18n functions used for block.json field translation described in the Internationalization section.",
+          "confidence": 0.6
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/l10n.php",
+          "rationale": "Matched on __ and _x — PHP i18n functions used when register_block_type processes translatable block.json fields.",
+          "confidence": 0.6
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Cross-schema collision — matches on generic properties (style, name, title, description, version, styles, variations) shared with theme.json schema, not block.json metadata."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/deprecated/src/index.ts",
+          "rationale": "Single-token English match — `deprecated` matches a JS utility logger/helper, not the block deprecation API described in the doc."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/wp-env.json",
+          "rationale": "Single-token match on `core` — wp-env configuration schema, unrelated to block.json metadata."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Single generic token match on `name` — font collection schema, unrelated to block metadata."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-admin/includes/noop.php",
+          "rationale": "Single-token match on __ and _x — noop stubs for i18n functions, not related to block.json processing."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/dataviews/src/field-types/utils/render-default.tsx",
+          "rationale": "Single-token match on `render` — DataViews utility unrelated to block.json render property."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/number-control/styles/number-control-styles.ts",
+          "rationale": "Single-token match on `styles` — UI component styles file, unrelated to block.json styles property."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form-input/icons.js",
+          "rationale": "Single-token match on `icon` — icon asset file for a specific block, not related to block.json metadata spec."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form/icons.js",
+          "rationale": "Single-token match on `icon` — icon asset file for a specific block, not related to block.json metadata spec."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/embed/icons.js",
+          "rationale": "Single-token match on `version` — icon asset file for embed block, unrelated to block.json metadata."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-heading/save.js",
+          "rationale": "Single-token match on `save` — individual block save function, not related to block.json metadata spec."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-item/save.js",
+          "rationale": "Single-token match on `save` — individual block save function, not related to block.json metadata spec."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-panel/save.js",
+          "rationale": "Single-token match on `save` — individual block save function, not related to block.json metadata spec."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion/save.js",
+          "rationale": "Single-token match on `save` — individual block save function, not related to block.json metadata spec."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/audio/save.js",
+          "rationale": "Single-token match on `save` — individual block save function, not related to block.json metadata spec."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/button/save.js",
+          "rationale": "Single-token match on `save` — individual block save function, not related to block.json metadata spec."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/buttons/save.js",
+          "rationale": "Single-token match on `save` — individual block save function, not related to block.json metadata spec."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/code/save.js",
+          "rationale": "Single-token match on `save` — individual block save function, not related to block.json metadata spec."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/column/save.js",
+          "rationale": "Single-token match on `save` — individual block save function, not related to block.json metadata spec."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/columns/save.js",
+          "rationale": "Single-token match on `save` — individual block save function, not related to block.json metadata spec."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination/save.js",
+          "rationale": "Single-token match on `save` — individual block save function, not related to block.json metadata spec."
+        }
+      ]
+    },
+    "block-patterns": {
+      "primary": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/block-patterns.php",
+          "rationale": "Matched on `register_block_pattern`, `unregister_block_pattern`, `register_block_pattern_category`, `unregister_block_pattern_category` — the canonical PHP implementation of all four functions documented on this page.",
+          "confidence": 0.98
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/blocks/src/store/reducer.ts",
+          "rationale": "Matched on `categories` and `blockTypes` — likely manages block pattern state including categories and block type associations in the JS store.",
+          "confidence": 0.72
+        }
+      ],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Matched on `title`, `content`, `description`, `keywords`, `viewportWidth`, `name`, `inserter`, `source` — these are block schema properties that overlap with block pattern properties, providing schema context for pattern content structure.",
+          "confidence": 0.55
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Cross-schema property collision — matched on generic properties (`title`, `description`, `blockTypes`, `name`, `postTypes`) shared with theme.json schema, not block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Cross-schema property collision — matched only on generic `categories` and `name` properties from an unrelated font collection schema."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/rss.php",
+          "rationale": "Single-token English match — matched only on `init`, a generic WordPress hook name unrelated to block patterns."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-settings.php",
+          "rationale": "Single-token English match — matched only on `init`, a generic WordPress hook name unrelated to block patterns."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/customize/selective-refresh-ajax.php",
+          "rationale": "Single-token English match — matched only on `init`, a generic WordPress hook name unrelated to block patterns."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/customize/widgets.php",
+          "rationale": "Single-token English match — matched only on `init`, a generic WordPress hook name unrelated to block patterns."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/query/vars.php",
+          "rationale": "Single-token English match — matched only on `init`, a generic WordPress hook name unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-heading/index.js",
+          "rationale": "Single-token English match — matched only on `init`, a generic identifier unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-item/index.js",
+          "rationale": "Single-token English match — matched only on `init`, a generic identifier unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-panel/index.js",
+          "rationale": "Single-token English match — matched only on `init`, a generic identifier unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion/index.js",
+          "rationale": "Single-token English match — matched only on `init`, a generic identifier unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/archives/index.js",
+          "rationale": "Single-token English match — matched only on `init`, a generic identifier unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/audio/index.js",
+          "rationale": "Single-token English match — matched only on `init`, a generic identifier unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/avatar/index.js",
+          "rationale": "Single-token English match — matched only on `init`, a generic identifier unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/block/index.js",
+          "rationale": "Single-token English match — matched only on `init`, a generic identifier unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/breadcrumbs/index.js",
+          "rationale": "Single-token English match — matched only on `init`, a generic identifier unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/button/index.js",
+          "rationale": "Single-token English match — matched only on `init`, a generic identifier unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/buttons/index.js",
+          "rationale": "Single-token English match — matched only on `init`, a generic identifier unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/calendar/index.js",
+          "rationale": "Single-token English match — matched only on `init`, a generic identifier unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/categories/index.js",
+          "rationale": "Single-token English match — matched only on `init`, a generic identifier unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/code/index.js",
+          "rationale": "Single-token English match — matched only on `init`, a generic identifier unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/column/index.js",
+          "rationale": "Single-token English match — matched only on `init`, a generic identifier unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/columns/index.js",
+          "rationale": "Single-token English match — matched only on `init`, a generic identifier unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-avatar/index.js",
+          "rationale": "Single-token English match — matched only on `init`, a generic identifier unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-name/index.js",
+          "rationale": "Single-token English match — matched only on `init`, a generic identifier unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-content/index.js",
+          "rationale": "Single-token English match — matched only on `init`, a generic identifier unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-date/index.js",
+          "rationale": "Single-token English match — matched only on `init`, a generic identifier unrelated to block patterns."
+        }
+      ]
+    },
+    "block-registration": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/blocks/src/api/registration.ts",
+          "rationale": "Matched on `registerBlockType` and `registerBlockCollection` — the canonical implementation of the block registration API documented on this page.",
+          "confidence": 0.98
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Matched on `name`, `example`, `innerBlocks`, `viewportWidth`, `supports`, `parent`, `ancestor` — the canonical JSON schema defining block configuration properties described throughout the doc.",
+          "confidence": 0.85
+        }
+      ],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Cross-schema property collision — matched only on generic `name` and `title` properties shared across many schemas, not related to block registration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Single-token generic match — matched only on `name`, a property common to all schemas, unrelated to block registration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/editor/src/components/deprecated.js",
+          "rationale": "Single-token English match — matched on `InnerBlocks` as a deprecated component reference, not the block registration API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/format-library/src/image/index.js",
+          "rationale": "Single-token English match — matched on `image` as a format library entry, not related to block registration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form-input/icons.js",
+          "rationale": "Single-token match on `icon` in an icons file for a specific block, not related to the block registration API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form/icons.js",
+          "rationale": "Single-token match on `icon` in an icons file for a specific block, not related to the block registration API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/icon/icon.js",
+          "rationale": "Single-token match on `icon` in a block-specific component file, not related to the block registration API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/menu/stories/index.story.tsx",
+          "rationale": "Single-token match on `name` in a stories/fixtures file — generic identifier collision, entirely unrelated to block registration."
+        }
+      ]
+    },
+    "block-selectors": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Canonical JSON schema for block.json, which is where the `selectors` API (root, feature, subfeature) is declared; matched on `css`, `root`, `color` — all core selectors API properties.",
+          "confidence": 0.9
+        }
+      ],
+      "secondary": [],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "theme.json schema provides context for `styles.blocks.<block-type>.css` referenced in the doc's Custom CSS selector section; matched on `css` and `color` but is not the primary selectors API definition.",
+          "confidence": 0.6
+        }
+      ],
+      "dropped": []
+    },
+    "block-styles": {
+      "primary": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/blocks.php",
+          "rationale": "Matched on `register_block_style` and `unregister_block_style` — the canonical PHP server-side implementation of both functions documented on this page.",
+          "confidence": 0.97
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/blocks/src/api/registration.ts",
+          "rationale": "Matched on `unregisterBlockStyle` — the canonical JS client-side implementation of `registerBlockStyle`/`unregisterBlockStyle` APIs documented on this page.",
+          "confidence": 0.92
+        }
+      ],
+      "secondary": [],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/dom-ready/src/index.ts",
+          "rationale": "Matched on `domReady` — the doc explicitly references `wp.domReady()` as the mechanism to safely unregister block styles; this is the implementation of that utility.",
+          "confidence": 0.62
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Single generic JSON-schema property collision — matched only on `name` and `label`, which are ubiquitous schema properties unrelated to block styles registration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Cross-schema property collision — matched on `core/quote` (a string value example) and `name`; this is the theme.json schema, not a block-styles implementation file."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Single generic JSON-schema property collision — matched only on `name`, a ubiquitous schema property with no relation to block styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/menu/stories/index.story.tsx",
+          "rationale": "Fixtures/stories directory match on single generic token `name` — entirely unrelated to block styles, noise from a Storybook story file."
+        }
+      ]
+    },
+    "block-supports": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Canonical JSON schema for block.json, matched on `allowedBlocks`, `align`, `backgroundImage`, `backgroundSize`, `style`, `background`, `source`, `title` — directly defines the supports API structure documented.",
+          "confidence": 0.95
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/class-wp-block-supports.php",
+          "rationale": "Matched on `get_block_wrapper_attributes` — the PHP class that implements the Block Supports API and the `get_block_wrapper_attributes()` function referenced in the doc.",
+          "confidence": 0.92
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Matched on `backgroundImage`, `backgroundSize`, `style`, `background`, `url`, `title`, `backgroundPosition`, `button` — theme.json schema defines the theme-side support declarations referenced throughout the doc.",
+          "confidence": 0.75
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/components/block-list/use-block-props/index.js",
+          "rationale": "Matched on `useBlockProps` — implements the hook that applies block support attributes to the wrapper element, central to the doc's usage examples.",
+          "confidence": 0.82
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/components/inner-blocks/index.js",
+          "rationale": "Matched on `useInnerBlocksProps` — implements the hook used in the `allowedBlocks` support example in the doc.",
+          "confidence": 0.78
+        }
+      ],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/components/block-list/use-block-props/index.native.js",
+          "rationale": "Matched on `useBlockProps` — native variant of the useBlockProps hook, relevant context for cross-platform support.",
+          "confidence": 0.62
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/components/inner-blocks/index.native.js",
+          "rationale": "Matched on `useInnerBlocksProps` — native variant of useInnerBlocksProps, context for cross-platform allowedBlocks support.",
+          "confidence": 0.6
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/components/block-edit/index.js",
+          "rationale": "Matched on `BlockEdit` — the BlockEdit component referenced in the doc's usage examples for applying block props.",
+          "confidence": 0.6
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/server-side-render/src/server-side-render.js",
+          "rationale": "Matched on `ServerSideRender` — referenced in the doc for `autoRegister` support which uses ServerSideRender for PHP-only blocks.",
+          "confidence": 0.58
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/list-item/icons.native.js",
+          "rationale": "Single weak token match on `height` — an icon file in a block library, not related to block supports API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/components/rich-text/native/index.native.js",
+          "rationale": "Single token match on `RichText` — native RichText component, only tangentially mentioned in the `splitting` support section."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/blocks/src/api/matchers.ts",
+          "rationale": "Single token match on `html` — `html` here refers to HTML parsing matchers, not the `html` block support property."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/editor/src/components/deprecated.js",
+          "rationale": "Matched on `BlockEdit` via a deprecated re-export — noise from deprecated wrapper, not the block supports implementation."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/format-library/src/text-color/index.js",
+          "rationale": "Single token match on `textColor` — format library text color format, not the block supports color.text implementation."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/format-library/src/text-color/index.native.js",
+          "rationale": "Single token match on `textColor` — native variant of format library text color, same noise pattern as web version."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/surface/styles.ts",
+          "rationale": "Single token match on `background` — generic CSS background styling for a UI component, unrelated to block supports."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/format-library/src/link/index.js",
+          "rationale": "Single token match on `link` — format library link format, not the block supports color.link implementation."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/format-library/src/link/index.native.js",
+          "rationale": "Single token match on `link` — native variant of format library link format, same noise pattern."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/text/styles/text-mixins.native.js",
+          "rationale": "Single token match on `text` — generic text styling mixins for UI components, unrelated to block supports."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/embed/icons.js",
+          "rationale": "Single token match on `height` — icon file in embed block, not related to block supports dimensions."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/guide/icons.tsx",
+          "rationale": "Single token match on `height` — icon file in components package, not related to block supports."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-heading/save.js",
+          "rationale": "Single token match on `save` — a block save function file, not related to block supports API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-item/save.js",
+          "rationale": "Single token match on `save` — a block save function file, not related to block supports API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-panel/save.js",
+          "rationale": "Single token match on `save` — a block save function file, not related to block supports API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion/save.js",
+          "rationale": "Single token match on `save` — a block save function file, not related to block supports API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/audio/save.js",
+          "rationale": "Single token match on `save` — a block save function file, not related to block supports API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/button/save.js",
+          "rationale": "Single token match on `save` — a block save function file, not related to block supports API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/buttons/save.js",
+          "rationale": "Single token match on `save` — a block save function file, not related to block supports API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/code/save.js",
+          "rationale": "Single token match on `save` — a block save function file, not related to block supports API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/column/save.js",
+          "rationale": "Single token match on `save` — a block save function file, not related to block supports API."
+        }
+      ]
+    },
+    "block-templates": {
+      "primary": [],
+      "secondary": [],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Matched on `attributes`, `supports`, `anchor`, `lock` — the doc explicitly references block.json for finding block attributes and supports values used in templates.",
+          "confidence": 0.65
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Single weak token match — `all` is a generic English word, not specific to block templates."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/rich-text/src/insert.js",
+          "rationale": "Single-token English match — `insert` is a rich-text utility, not related to block template insert-locking."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/dom/src/dom/remove.js",
+          "rationale": "Single-token English match — `remove` is a DOM utility, not related to block template remove-locking."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/rich-text/src/remove.js",
+          "rationale": "Single-token English match — `remove` is a rich-text utility, not related to block template remove-locking."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/popover/stories/index.story.tsx",
+          "rationale": "Fixtures/stories file matching only generic `anchor` identifier — unrelated to block templates."
+        }
+      ]
+    },
+    "block-transforms": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Matched on `transform`, `block`, `attributes`, `raw`, `content` — this is the canonical block configuration schema that defines the `transforms` key structure documented in the page.",
+          "confidence": 0.88
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/blocks/src/api/factory.ts",
+          "rationale": "Matched on `createBlock` and `transform` — factory.ts is the canonical source for `createBlock`, which is the primary utility used in all transform examples throughout the doc.",
+          "confidence": 0.85
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/dom/src/dom/clean-node-list.js",
+          "rationale": "Matched on `cleanNodeList` — the doc explicitly references this file as the implementation of schema-based content cleaning used in `raw` transforms.",
+          "confidence": 0.82
+        }
+      ],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Matched on `block` and `core/group` — theme.json references block types like `core/group` mentioned in the doc, providing surrounding schema context, but is not about block transforms.",
+          "confidence": 0.52
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Single-token match on `block` only — font-collection schema is unrelated to block transforms."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/e2e-test-utils-playwright/src/request-utils/blocks.ts",
+          "rationale": "Matched only on `createBlock` in a test-utilities context — not an implementation of block transforms, just a test helper."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/flex/styles.ts",
+          "rationale": "Single-token match on `block` — a CSS-in-JS styles file for a UI component, unrelated to block transforms."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/text/styles.ts",
+          "rationale": "Single-token match on `block` — a CSS-in-JS styles file for a UI component, unrelated to block transforms."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/toggle-group-control/toggle-group-control/styles.ts",
+          "rationale": "Single-token match on `block` — a CSS-in-JS styles file for a UI component, unrelated to block transforms."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/visually-hidden/stories/index.story.tsx",
+          "rationale": "Matched only on the English word `to` — a Storybook story file with no relation to block transforms."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/composite/legacy/stories/utils.tsx",
+          "rationale": "Single-token match on `transform` in a Storybook stories utility file — unrelated to block transforms API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/admin-ui/src/page/stories/index.story.tsx",
+          "rationale": "Single-token match on `content` in a Storybook story file — unrelated to block transforms."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/card/stories/index.story.tsx",
+          "rationale": "Single-token match on `content` in a Storybook story file — unrelated to block transforms."
+        }
+      ]
+    },
+    "block-variations": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/blocks/src/api/registration.ts",
+          "rationale": "Matched on `registerBlockVariation` and `unregisterBlockVariation` — the canonical implementation of the Block Variations registration API described in the doc.",
+          "confidence": 0.95
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/class-wp-block-type.php",
+          "rationale": "Matched on `get_block_type_variations` — the PHP-side implementation of the filter hook documented for registering block variations from PHP.",
+          "confidence": 0.9
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Matched on `name`, `title`, `description`, `category`, `keywords`, `icon`, `attributes`, `innerBlocks` — the canonical JSON schema defining the block variation object fields documented in the doc.",
+          "confidence": 0.82
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Matched on `variations`, `block`, `name`, `title`, `description`, `core/image` — theme.json schema includes block variation definitions relevant to the doc's PHP registration example.",
+          "confidence": 0.72
+        }
+      ],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/blocks/src/api/factory.ts",
+          "rationale": "Single weak token match — `transform` is a generic block transformation utility, not related to block variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Cross-schema property collision — matched only on generic `name` and `block` tokens from an unrelated font collection schema."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/edit-site/src/components/sidebar-navigation-screen-navigation-menu/index.js",
+          "rationale": "Single weak token match — `postType` is a generic WordPress property used in navigation menus, not block variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/editor/src/store/reducer.js",
+          "rationale": "Single weak token match — `postType` is a generic editor store property, not related to block variations."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/class-wpdb.php",
+          "rationale": "Single weak token match — `query` is a generic database query method, not related to block variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form-input/icons.js",
+          "rationale": "Single weak token match — `icon` is a generic identifier in an unrelated form-input icons file."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form/icons.js",
+          "rationale": "Single weak token match — `icon` is a generic identifier in an unrelated form icons file."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/flex/styles.ts",
+          "rationale": "Single weak token match — `block` is a CSS display property in a flex styles file, not related to block variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/text/styles.ts",
+          "rationale": "Single weak token match — `block` is a CSS display property in a text styles file, not related to block variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/toggle-group-control/toggle-group-control/styles.ts",
+          "rationale": "Single weak token match — `block` is a CSS display property in a toggle-group styles file, not related to block variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/composite/legacy/stories/utils.tsx",
+          "rationale": "Fixtures/stories file with single weak token match — `transform` in a stories utility file is unrelated to block variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/icon/icon.js",
+          "rationale": "Single weak token match — `icon` in an icon block component is unrelated to block variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/menu/stories/index.story.tsx",
+          "rationale": "Stories file with single weak token match — `name` is a generic identifier in an unrelated menu stories file."
+        }
+      ]
+    }
+  }
+}
