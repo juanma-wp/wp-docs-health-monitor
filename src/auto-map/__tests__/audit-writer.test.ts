@@ -315,7 +315,7 @@ describe('AuditWriter.formatFlagged', () => {
       secondary: [],
       context:   [],
       dropped:   [
-        { repo: 'g', path: 'noise.js', reason: 'English-word collision' },
+        { repo: 'g', path: 'noise.js', rationale: 'English-word collision' },
       ],
     };
     const out = writer.formatFlagged(result);

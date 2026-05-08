@@ -45,6 +45,40 @@ describe('extractDocSymbols', () => {
     expect(symbols).not.toContain('true');
     expect(symbols).not.toContain('false');
   });
+
+  it('strips call parens so call-form tokens match indexed bare identifiers', () => {
+    // Without this normalization `registerBlockVariation()` never matches the
+    // index entry from `export const registerBlockVariation = (...)`, and the
+    // canonical implementation file goes silently missing from candidates.
+    const symbols = extractDocSymbols('Call `registerBlockVariation()` to register one.');
+    expect(symbols).toContain('registerBlockVariation');
+    expect(symbols).not.toContain('registerBlockVariation()');
+  });
+
+  it('strips namespace/object prefixes from call-form tokens', () => {
+    const symbols = extractDocSymbols(
+      'Use `wp.blocks.registerBlockVariation()` and `wp.blocks.unregisterBlockVariation()`.',
+    );
+    expect(symbols).toContain('registerBlockVariation');
+    expect(symbols).toContain('unregisterBlockVariation');
+  });
+
+  it('strips PHP `::` and `->` from call-form tokens', () => {
+    const symbols = extractDocSymbols(
+      'Call `WP_Block_Type_Registry::get_instance()` then `$registry->register()`.',
+    );
+    expect(symbols).toContain('get_instance');
+    expect(symbols).toContain('register');
+  });
+
+  it('leaves bare dotted tokens (e.g. file names) untouched', () => {
+    // `block.json` has no parens — it's a filename, not a call. The dotted-
+    // segment rule must not apply or we'd lose `block.json` and emit `json`.
+    const symbols = extractDocSymbols('Edit `block.json` to set `registerBlockType`.');
+    expect(symbols).toContain('block.json');
+    expect(symbols).toContain('registerBlockType');
+    expect(symbols).not.toContain('json');
+  });
 });
 
 describe('findMissingSymbols', () => {

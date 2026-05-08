@@ -405,7 +405,7 @@ describe('orchestrator + AuditWriter wiring (--review smoke)', () => {
     ],
     context: [],
     dropped: [
-      { repo: 'gutenberg', path: 'packages/deprecated/src/index.ts', reason: 'unrelated logger named `deprecated`' },
+      { repo: 'gutenberg', path: 'packages/deprecated/src/index.ts', rationale: 'unrelated logger named `deprecated`' },
     ],
   };
 

@@ -153,6 +153,18 @@ Drop, do not keep at low confidence, when:
   - the only match is a generic JSON-schema property name shared across multiple unrelated schemas (\`name\`, \`style\`, \`title\`, \`version\`),
   - the file is in a fixtures, examples, stories, or icon directory and matches only generic identifiers.
 
+## Grounding rule for rationales (strict)
+
+You see only \`{ repo, path, score, matchedSymbols }\` per candidate — you do NOT see file contents. Therefore every rationale MUST be grounded in observable evidence you can point to in the candidate row itself:
+
+  - a name from \`matchedSymbols\` (e.g. "matched on \`registerBlockType\`"), OR
+  - a path-convention argument (e.g. "\`schemas/json/*.json\` files are the canonical schema for their slug", "\`tests/phpunit/\` is corroborating test evidence, not source authority"), OR
+  - the slug-to-path correspondence (e.g. "path segment \`block-variations\` matches the doc slug").
+
+Do NOT claim a file "contains", "implements", "exports", or "defines" an identifier unless that identifier appears in this candidate's \`matchedSymbols\`. Hedge words ("likely contains", "probably implements", "should define") indicate ungrounded inference and are forbidden — if you would write one, drop the file or move it to context with a path-convention rationale instead.
+
+A file whose only matched symbol is a single weak token (e.g. just \`transform\` or \`save\`) is at most secondary or context, never primary, regardless of how plausible its path looks.
+
 Use the \`report_rerank\` tool to return your result. Do not include files that were not in the candidate list.`;
 
 // ---------------------------------------------------------------------------
