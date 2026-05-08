@@ -125,30 +125,44 @@ async function main() {
   // 4. Score all files by how many doc symbols they define or fire
   const scored = scoreFilesAcrossRepos(docSymbols, indexes);
 
-  console.error('\nTop matches by symbol coverage:');
+  console.error('\nTop matches by symbol coverage (IDF-weighted, file-weighted):');
   scored.slice(0, 10).forEach(f =>
     console.error(
-      `  [${f.repo}] ${f.path}  score=${f.score}  (${f.matchedSymbols.slice(0, 5).join(', ')})`,
+      `  [${f.repo}] ${f.path}  score=${f.score.toFixed(2)}  (${f.matchedSymbols.slice(0, 5).join(', ')})`,
     ),
   );
 
   // 5. Assemble tiers
-  //    primary   — top symbol-matched files (max 3)
+  //    primary   — top symbol-matched files (max 3, max 1 schema for diversity)
   //    secondary — next best symbol-matched files (max 5)
   //    context   — structurally related files via slug keyword matching (max 8)
+  //
+  // The primary-tier schema cap exists because schemas accumulate matches
+  // on generic property names (`name`, `style`, `url`, `link`) shared across
+  // every schema in a corpus. Without the cap, schemas dominate all three
+  // primary slots even when the doc is not about any specific schema —
+  // pushing implementation files (the actual canon for many docs) out of
+  // primary. Allowing exactly one schema in primary surfaces the strongest
+  // schema candidate while leaving room for implementation files.
   const selected = new Set<string>();
+  const isSchemaPath = (path: string): boolean => /(^|\/)schemas\/.*\.json$/.test(path);
 
-  function pickNext(n: number) {
-    return scored
-      .filter(f => !selected.has(`${f.repo}:${f.path}`))
-      .slice(0, n)
-      .map(f => {
-        selected.add(`${f.repo}:${f.path}`);
-        return { repo: f.repo, path: f.path };
-      });
+  function pickNext(n: number, maxSchemas: number = Infinity) {
+    const result: Array<{ repo: string; path: string }> = [];
+    let schemaCount = 0;
+    for (const f of scored) {
+      if (result.length >= n) break;
+      const key = `${f.repo}:${f.path}`;
+      if (selected.has(key)) continue;
+      if (isSchemaPath(f.path) && schemaCount >= maxSchemas) continue;
+      selected.add(key);
+      if (isSchemaPath(f.path)) schemaCount++;
+      result.push({ repo: f.repo, path: f.path });
+    }
+    return result;
   }
 
-  const primary = pickNext(3);
+  const primary = pickNext(3, 1);
   const secondary = pickNext(5);
 
   const contextCandidates = findFilesByTreeHeuristic(slug, allFilesByRepo, selected);
