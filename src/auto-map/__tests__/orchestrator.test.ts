@@ -1,8 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
+import { mkdtempSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import type Anthropic from '@anthropic-ai/sdk';
 
 import { buildTiersForSlug } from '../orchestrator.js';
 import { Reranker } from '../rerank.js';
+import { RerankCache } from '../rerank-cache.js';
 import type { ScoredFile } from '../../indexer/symbol-index.js';
 
 // ---------------------------------------------------------------------------
@@ -129,6 +133,105 @@ describe('orchestrator — rerank on, mocked LLM', () => {
     expect(tiers.context).toEqual([{ repo: 'gutenberg', path: 'packages/blocks/src/api/utils.ts' }]);
     // Diagnosed FP is no longer in primary
     expect(tiers.primary.map(f => f.path)).not.toContain('packages/deprecated/src/index.ts');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// rerank-on with cache: second invocation is a cache hit (no LLM call)
+// ---------------------------------------------------------------------------
+
+describe('orchestrator — cache hit skips the LLM call', () => {
+  it('makes exactly one LLM call across two consecutive invocations on identical inputs', async () => {
+    const toolInput = {
+      primary:   [{ repo: 'gutenberg', path: 'packages/blocks/src/api/registration.js', rationale: 'canonical impl', confidence: 0.95 }],
+      secondary: [{ repo: 'gutenberg', path: 'packages/blocks/src/api/parser.js',       rationale: 'parser',         confidence: 0.85 }],
+      context:   [{ repo: 'gutenberg', path: 'packages/blocks/src/api/utils.ts',        rationale: 'helpers',        confidence: 0.75 }],
+      dropped:   [{ repo: 'gutenberg', path: 'packages/deprecated/src/index.ts',        reason:    'unrelated logger named `deprecated`' }],
+    };
+    const client = makeAnthropicClient([makeToolUseResponse(toolInput)]);
+    const createSpy = client.messages.create as ReturnType<typeof vi.fn>;
+
+    const reranker = new Reranker('claude-sonnet-4-6', client);
+    const cache    = new RerankCache(mkdtempSync(join(tmpdir(), 'orch-cache-test-')));
+
+    const inputs = {
+      docContent:     '# block-metadata',
+      slug:           'block-metadata',
+      scored:         SCORED,
+      allFilesByRepo: ALL_FILES,
+      reranker,
+      cache,
+    };
+
+    const t1 = await buildTiersForSlug(inputs);
+    const t2 = await buildTiersForSlug(inputs);
+
+    expect(createSpy).toHaveBeenCalledTimes(1);
+    // Both invocations produce the same tiers projected from the cached result.
+    expect(t2).toEqual(t1);
+    expect(t1.primary).toEqual([{ repo: 'gutenberg', path: 'packages/blocks/src/api/registration.js' }]);
+  });
+
+  it('produces a fresh LLM call when the cache is null (caching disabled)', async () => {
+    const toolInput = {
+      primary: [], secondary: [], context: [], dropped: [],
+    };
+    // Two responses queued — if the orchestrator only made one LLM call we'd
+    // still see it pinned by toHaveBeenCalledTimes(2) below.
+    const client = makeAnthropicClient([
+      makeToolUseResponse(toolInput),
+      makeToolUseResponse(toolInput),
+    ]);
+    const createSpy = client.messages.create as ReturnType<typeof vi.fn>;
+
+    const reranker = new Reranker('claude-sonnet-4-6', client);
+
+    const inputs = {
+      docContent:     '# block-metadata',
+      slug:           'block-metadata',
+      scored:         SCORED,
+      allFilesByRepo: ALL_FILES,
+      reranker,
+      cache:          null,
+    };
+
+    await buildTiersForSlug(inputs);
+    await buildTiersForSlug(inputs);
+
+    expect(createSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not store a sentinel result on rerank failure (next run still calls LLM)', async () => {
+    const toolInput = {
+      primary: [], secondary: [], context: [], dropped: [],
+    };
+    // First call throws (sentinel returned, fallback to lexical), second
+    // call succeeds with valid input.
+    const client = makeAnthropicClient([
+      new Error('transient API failure'),
+      makeToolUseResponse(toolInput),
+    ]);
+    const createSpy = client.messages.create as ReturnType<typeof vi.fn>;
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const reranker = new Reranker('claude-sonnet-4-6', client);
+    const cache    = new RerankCache(mkdtempSync(join(tmpdir(), 'orch-cache-fail-')));
+
+    const inputs = {
+      docContent:     '# block-metadata',
+      slug:           'block-metadata',
+      scored:         SCORED,
+      allFilesByRepo: ALL_FILES,
+      reranker,
+      cache,
+    };
+
+    await buildTiersForSlug(inputs);
+    await buildTiersForSlug(inputs);
+
+    // Cache miss + miss (sentinel not stored) means the LLM was called twice.
+    expect(createSpy).toHaveBeenCalledTimes(2);
+    errSpy.mockRestore();
   });
 });
 

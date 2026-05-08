@@ -167,7 +167,7 @@ export type RerankInput = {
 };
 
 export class Reranker {
-  private readonly model:       string;
+  public  readonly model:       string;
   private readonly anthropic:   Anthropic;
   private readonly temperature: number;
 

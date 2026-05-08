@@ -12,6 +12,7 @@
 import { CodeTiersSchema, type CodeTiers, type CodeFile } from '../types/mapping.js';
 import { findFilesByTreeHeuristic, type ScoredFile } from '../indexer/symbol-index.js';
 import type { Reranker, RerankResult } from './rerank.js';
+import type { RerankCache } from './rerank-cache.js';
 
 export type BuildTiersInput = {
   docContent:     string;
@@ -21,20 +22,47 @@ export type BuildTiersInput = {
   // null = --no-rerank (skip the AI step entirely; lexical-only tiers).
   // present = rerank is on; falls back to lexical-only on null result.
   reranker:       Reranker | null;
+  // Optional content-addressed cache. When supplied alongside a reranker,
+  // the orchestrator wraps lookup → call-on-miss → store around the LLM call:
+  // a hit skips the LLM entirely. `null` / `undefined` disables caching.
+  cache?:         RerankCache | null;
 };
 
 export async function buildTiersForSlug(input: BuildTiersInput): Promise<CodeTiers> {
   if (input.reranker) {
-    const result = await input.reranker.rerank({
-      doc:        input.docContent,
-      slug:       input.slug,
-      candidates: input.scored,
-    });
+    const result = await rerankWithCache(input.reranker, input.cache ?? null, input);
     if (result) return rerankToCodeTiers(result);
     // null = sentinel; the Reranker has already emitted a stderr warning.
     // Fall through to the lexical-only path.
   }
   return lexicalTiers(input.scored, input.allFilesByRepo, input.slug);
+}
+
+// Cache key is derived from docContent + canonically-sorted candidates +
+// model. Slug is intentionally NOT in the key — the doc content already
+// encodes it, and including it would split the cache for renamed slugs that
+// kept identical doc bodies.
+async function rerankWithCache(
+  reranker: Reranker,
+  cache:    RerankCache | null,
+  input:    BuildTiersInput,
+): Promise<RerankResult | null> {
+  const key = cache?.keyFor({
+    docContent: input.docContent,
+    candidates: input.scored,
+    model:      reranker.model,
+  });
+  if (cache && key) {
+    const hit = cache.get(key);
+    if (hit) return hit;
+  }
+  const result = await reranker.rerank({
+    doc:        input.docContent,
+    slug:       input.slug,
+    candidates: input.scored,
+  });
+  if (result && cache && key) cache.put(key, result);
+  return result;
 }
 
 // Project the rerank result down to the locked CodeTiers shape (repo + path).

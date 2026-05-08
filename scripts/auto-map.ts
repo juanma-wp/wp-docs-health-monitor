@@ -31,6 +31,7 @@ import {
   type SymbolIndex,
 } from '../src/indexer/symbol-index.js';
 import { Reranker } from '../src/auto-map/rerank.js';
+import { RerankCache } from '../src/auto-map/rerank-cache.js';
 import { buildTiersForSlug } from '../src/auto-map/orchestrator.js';
 
 function parseArgs(argv: string[]): {
@@ -165,12 +166,17 @@ async function main() {
     }
   }
 
+  // Cache is always on when re-rank is on (no `--no-cache` flag — cost is
+  // negligible and identical re-runs should be free + bit-identical).
+  const cache = reranker ? new RerankCache() : null;
+
   const tiers = await buildTiersForSlug({
     docContent,
     slug,
     scored,
     allFilesByRepo,
     reranker,
+    cache,
   });
 
   // 6. Output as JSON
