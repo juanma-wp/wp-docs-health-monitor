@@ -77,7 +77,16 @@ branch, tests locally, and merges. The merge auto-closes the issue via
    - path/to/file.ts
    ```
 7. **Push** — `git push -u origin ralph/<issue-number>-<short-slug>`.
-8. **PR** — `gh pr create --base main --head ralph/<issue-number>-<short-slug> --title "RALPH: <one-line summary> (#<issue-number>)" --body-file <(cat <<'EOF'
+8. **PR + request auto-merge** — first create the PR, then request auto-merge so it lands automatically once `ci` and `path-gate` go green:
+
+   ```bash
+   gh pr create --base main --head ralph/<issue-number>-<short-slug> ... # (full command below)
+   gh pr merge --auto --squash
+   ```
+
+   Auto-merge engages only when both required status checks pass. If the path-gate fails (the diff touches paths outside the Ralph-safe allowlist defined in `.github/workflows/path-gate.yml`), the PR sits open for a human admin merge — do NOT try to work around the gate. The full PR-create command:
+
+   `gh pr create --base main --head ralph/<issue-number>-<short-slug> --title "RALPH: <one-line summary> (#<issue-number>)" --body-file <(cat <<'EOF'
    ## Summary
 
    <one-paragraph: what changed and why, mapped to the Agent Brief's Desired behaviour>
@@ -113,11 +122,16 @@ branch, tests locally, and merges. The merge auto-closes the issue via
      confirm was NOT touched>
    - ...
    EOF
-   )`.
-9. **Comment on the issue with the PR link** — `gh issue comment <issue-number> --body "🤖 PR ready for review: #<PR-number>. Pull \`ralph/<issue-number>-<short-slug>\` and follow the *How to test* section in the PR body."`.
-10. **Stop.** Do not merge. Do not close the issue. Do not push to `main`.
-    The human pulls the branch, tests, and merges. Move on to the next issue
-    or emit `<promise>NO MORE TASKS</promise>`.
+   )`
+
+   Then immediately request auto-merge:
+
+   `gh pr merge --auto --squash`
+
+   This queues the PR for auto-merge. GitHub will merge it once `ci` and `path-gate` both go green. If `path-gate` fails (your diff touches paths outside the allowlist), the PR sits open and a human will admin-merge or comment with guidance — do NOT modify the workflow files to widen the gate, and do NOT use `--admin` or any other flag to bypass.
+
+9. **Comment on the issue with the PR link** — `gh issue comment <issue-number> --body "🤖 PR opened, auto-merge requested: #<PR-number>. Pull \`ralph/<issue-number>-<short-slug>\` if you want to test locally before checks complete; otherwise it will land automatically once CI and path-gate go green."`.
+10. **Stop.** Do not close the issue manually — the auto-merge of the PR will close it via `Closes #<n>`. Do not push to `main`. Move on to the next issue or emit `<promise>NO MORE TASKS</promise>`.
 
 ## Hard rules (non-negotiable)
 
@@ -127,10 +141,12 @@ branch, tests locally, and merges. The merge auto-closes the issue via
 - **Never edit `examples/results.schema.json` by hand** — it is generated.
 - **Never run `npm run analyze`** — it needs an API key the sandbox doesn't
   have, and consumes API budget the operator manages elsewhere.
-- **Never push directly to `main`.** Always go through a PR. The human merges.
-- **Never merge a PR.** No `gh pr merge`, no auto-merge flags. Even your own
-  PR is for the human to review and land.
-- **Never close an issue.** The human's merge of the PR will auto-close it
+- **Never push directly to `main`.** Always go through a PR.
+- **Only `gh pr merge --auto --squash` is permitted.** No `--admin`, no
+  `--merge` (non-squash), no manual `gh pr merge` without `--auto`. Auto-merge
+  engages only when both required status checks (`ci` and `path-gate`) go
+  green; you cannot bypass them.
+- **Never close an issue manually.** The auto-merge of your PR will close it
   via `Closes #<n>` in the PR body. Your only issue interaction is the
   single PR-link comment from step 9.
 - **Never touch issues or PRs that don't carry both `assignee:{{ASSIGNEE}}`

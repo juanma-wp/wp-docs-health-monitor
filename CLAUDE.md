@@ -47,9 +47,16 @@ These are conventions and invariants that surprise readers and aren't carried by
 - open PRs from those branches against `main`, with a *How to test* section in the body
 - post a **single** PR-link comment on a source issue *that carries both* `assignee:$RALPH_ASSIGNEE` *and* `label:ready-for-agent` (the `/triage` skill's AFK-ready state)
 
-Ralph **never** merges PRs and **never** closes issues. The human pulls the branch, runs the *How to test* steps, and merges manually; the merge auto-closes the issue via `Closes #<n>`.
+Ralph requests auto-merge (`gh pr merge --auto --squash`) on every PR it opens. **GitHub auto-merges only when both required status checks pass**:
 
-Any issue or PR not matching that exact pair (assignee `$RALPH_ASSIGNEE` from `.env` AND label `ready-for-agent`) still requires manual confirmation. Direct pushes to `main` remain forbidden — every change lands through a human-merged PR.
+- `ci` — `npm run typecheck` + `npm test` (`.github/workflows/ci.yml`).
+- `path-gate` — diff confined to a narrow allowlist (`.github/workflows/path-gate.yml`). The gate only enforces on PRs whose head branch starts with `ralph/`; human and external PRs pass straight through. Ralph PRs touching anything outside the allowlist (validator core, `src/types/`, prompts, configs, CI itself, package metadata) **fail this check** and bounce to manual review — they will not auto-merge.
+
+This means narrowly-scoped Ralph PRs land autonomously, scope-drifted Ralph PRs bounce, and human PRs are unaffected. Ralph never closes issues — the merge auto-closes via `Closes #<n>` in the PR body.
+
+To widen Ralph's allowlist (when a new module joins Ralph's scope), edit `ALLOWLIST_PATTERN` in `.github/workflows/path-gate.yml` from a non-`ralph/` branch (the gate is a no-op for those, so the change merges through normal review).
+
+Any issue or PR not matching the exact pair (assignee `$RALPH_ASSIGNEE` from `.env` AND label `ready-for-agent`) still requires manual confirmation. Direct pushes to `main` remain forbidden; branch protection enforces this. Human PRs go through normal review and merge.
 
 See [`DEVELOPMENT.md`](./DEVELOPMENT.md#autonomous-workflow-ralph) for setup (prerequisites, `.env` keys, three entry points).
 
