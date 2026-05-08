@@ -143,10 +143,12 @@ const SYSTEM_PROMPT = `You are an AI re-ranker for documentation-vs-code mapping
   - dropped:  files that match lexically but are NOT about this doc's subject (English-word collisions, cross-schema property collisions, generic identifiers). Each dropped file MUST carry a one-line rationale naming the noise pattern.
 
 Every file (kept or dropped) carries a one-line \`rationale\`. For kept files, the rationale describes what the file is and why this tier; for dropped files, the rationale names the noise pattern (e.g. "single-token English match", "cross-schema property collision"). Kept files additionally carry a \`confidence\` in [0, 1]:
-  - 0.9–1.0: the file is unambiguously canonical for this doc.
-  - 0.7–0.9: the file is clearly related but not the single canonical source.
-  - 0.5–0.7: plausibly related but the reviewer should double-check.
-  - < 0.5:   keep only if no better candidate exists; flag for human review.
+  - 0.9–1.0: the file is unambiguously canonical for this doc. Eligible for primary.
+  - 0.7–0.9: the file is clearly related but not the single canonical source. Eligible for primary or secondary.
+  - 0.5–0.7: plausibly related; the reviewer should double-check. **Place in context only — never primary or secondary.**
+  - < 0.5:   **Drop.** Do not keep at low confidence "in case it's useful" — a tangential file is analyzer noise, not corroboration. The downstream validator reads every kept file as authoritative input; weak entries pollute that signal. Move to \`dropped\` with a rationale naming why it's tangential.
+
+These confidence-tier rules are hard. Do not place a 0.65-confidence file in secondary "because primary is full" — if it doesn't meet the bar for the tier, it goes one tier down or to dropped, not up.
 
 Drop, do not keep at low confidence, when:
   - the only match is a single English word that happens to be a code identifier (e.g. "deprecated" matches a logging utility because the file exports a function literally called \`deprecated\`),

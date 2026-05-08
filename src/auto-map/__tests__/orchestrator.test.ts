@@ -143,6 +143,65 @@ describe('orchestrator — rerank on, mocked LLM', () => {
     expect(rerankResult).not.toBeNull();
     expect(rerankResult?.dropped.map(f => f.path)).toContain('packages/deprecated/src/index.ts');
   });
+
+  it('filters confidence < 0.5 entries from CodeTiers but keeps them in rerankResult/audit', async () => {
+    // Defends the user-visible invariant: weak entries (confidence < 0.5) must
+    // NOT reach the validator pipeline as authoritative input, but the audit
+    // must still record them so reviewers can see what the model considered.
+    // The model's prompt instructs it to drop these directly; this test pins
+    // the projection floor that catches the case where the model defies that
+    // instruction — exactly the `factory.ts @ 0.45` failure we observed live.
+    const toolInput = {
+      primary: [
+        { repo: 'gutenberg', path: 'packages/blocks/src/api/registration.js', rationale: 'canonical', confidence: 0.95 },
+      ],
+      secondary: [
+        { repo: 'gutenberg', path: 'packages/blocks/src/api/parser.js', rationale: 'parser',  confidence: 0.80 },
+        { repo: 'gutenberg', path: 'schemas/json/theme.json',           rationale: 'tangential schema',  confidence: 0.45 },
+      ],
+      context: [
+        { repo: 'gutenberg', path: 'packages/blocks/src/api/utils.ts',  rationale: 'helpers', confidence: 0.70 },
+        { repo: 'gutenberg', path: 'packages/blocks/src/api/factory.ts', rationale: 'matched only on transform', confidence: 0.45 },
+      ],
+      dropped: [],
+    };
+    const client = makeAnthropicClient([makeToolUseResponse(toolInput)]);
+    const reranker = new Reranker('claude-sonnet-4-6', client);
+
+    const { tiers, rerankResult } = await buildTiersForSlug({
+      docContent:     '# block-metadata',
+      slug:           'block-metadata',
+      scored:         SCORED,
+      allFilesByRepo: ALL_FILES,
+      reranker,
+    });
+
+    // CodeTiers (validator-pipeline input) excludes the < 0.5 entries.
+    expect(tiers.secondary.map(f => f.path)).toEqual(['packages/blocks/src/api/parser.js']);
+    expect(tiers.secondary.map(f => f.path)).not.toContain('schemas/json/theme.json');
+    expect(tiers.context.map(f => f.path)).toEqual(['packages/blocks/src/api/utils.ts']);
+    expect(tiers.context.map(f => f.path)).not.toContain('packages/blocks/src/api/factory.ts');
+
+    // RerankResult (audit input) preserves them so reviewers see the full picture.
+    expect(rerankResult?.secondary.map(f => f.path)).toContain('schemas/json/theme.json');
+    expect(rerankResult?.context.map(f => f.path)).toContain('packages/blocks/src/api/factory.ts');
+  });
+
+  it('keeps entries exactly at the 0.5 floor (>= is the bar, not >)', async () => {
+    // Off-by-one defence: a 0.5-confidence entry passes; only strictly < 0.5 drops.
+    const toolInput = {
+      primary:   [{ repo: 'gutenberg', path: 'packages/blocks/src/api/registration.js', rationale: 'canonical', confidence: 0.95 }],
+      secondary: [],
+      context:   [{ repo: 'gutenberg', path: 'packages/blocks/src/api/utils.ts', rationale: 'on the floor', confidence: 0.5 }],
+      dropped:   [],
+    };
+    const client = makeAnthropicClient([makeToolUseResponse(toolInput)]);
+    const reranker = new Reranker('claude-sonnet-4-6', client);
+    const { tiers } = await buildTiersForSlug({
+      docContent: '# x', slug: 'x', scored: SCORED, allFilesByRepo: ALL_FILES, reranker,
+    });
+    expect(tiers.context.map(f => f.path)).toContain('packages/blocks/src/api/utils.ts');
+  });
 });
 
 // ---------------------------------------------------------------------------

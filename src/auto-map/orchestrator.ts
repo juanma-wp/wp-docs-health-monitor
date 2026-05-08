@@ -14,6 +14,23 @@ import { findFilesByTreeHeuristic, type ScoredFile } from '../indexer/symbol-ind
 import type { Reranker, RerankResult } from './rerank.js';
 import type { RerankCache } from './rerank-cache.js';
 
+// Files with confidence STRICTLY BELOW this floor are excluded from the
+// canonical CodeTiers projection. They remain in the RerankResult / audit so
+// reviewers can see what the model considered, but the validator pipeline
+// (which reads every kept file as authoritative input) never sees them.
+//
+// The model's prompt instructs it to drop these directly into `dropped`; this
+// floor is a deterministic guard against the model defying that rule. Per
+// CLAUDE.md "Spend on context and model, not on guards", that wording usually
+// argues against post-hoc filters — but here the filter makes the model's own
+// self-rated confidence load-bearing rather than fighting its output. If the
+// model says "I'm < 50% sure this is relevant", we honour that.
+//
+// 0.5 mirrors the lower bound of the "double-check" band in the prompt's
+// confidence rubric; FLAGGED_CONFIDENCE_THRESHOLD (0.7) in audit-writer.ts
+// is the *upper* bound of that same band.
+export const MIN_INCLUSION_CONFIDENCE = 0.5;
+
 /**
  * Derive the audit-file path from the canonical mapping path, e.g.
  *   `mappings/gutenberg-block-api.json` → `mappings/gutenberg-block-api.audit.json`.
@@ -92,9 +109,16 @@ async function rerankWithCache(
 
 // Project the rerank result down to the locked CodeTiers shape (repo + path).
 // Rationale, confidence, and dropped lists are slice-C concerns (audit file).
+//
+// Files with confidence < MIN_INCLUSION_CONFIDENCE are filtered out here —
+// they remain in `result` (and therefore in the audit), but the canonical
+// mapping / validator-pipeline input excludes them. See the constant's
+// docstring for the rationale.
 function rerankToCodeTiers(result: RerankResult): CodeTiers {
-  const project = (xs: { repo: string; path: string }[]): CodeFile[] =>
-    xs.map(({ repo, path }) => ({ repo, path }));
+  const project = (xs: { repo: string; path: string; confidence: number }[]): CodeFile[] =>
+    xs
+      .filter(f => f.confidence >= MIN_INCLUSION_CONFIDENCE)
+      .map(({ repo, path }) => ({ repo, path }));
   return CodeTiersSchema.parse({
     primary:   project(result.primary),
     secondary: project(result.secondary),
