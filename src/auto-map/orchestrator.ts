@@ -14,6 +14,19 @@ import { findFilesByTreeHeuristic, type ScoredFile } from '../indexer/symbol-ind
 import type { Reranker, RerankResult } from './rerank.js';
 import type { RerankCache } from './rerank-cache.js';
 
+/**
+ * Derive the audit-file path from the canonical mapping path, e.g.
+ *   `mappings/gutenberg-block-api.json` → `mappings/gutenberg-block-api.audit.json`.
+ *
+ * Audit lives next to the mapping it audits and is committed alongside it.
+ */
+export function auditPathFor(mappingPath: string): string {
+  if (mappingPath.endsWith('.json')) {
+    return mappingPath.replace(/\.json$/, '.audit.json');
+  }
+  return `${mappingPath}.audit.json`;
+}
+
 export type BuildTiersInput = {
   docContent:     string;
   slug:           string;
@@ -28,14 +41,26 @@ export type BuildTiersInput = {
   cache?:         RerankCache | null;
 };
 
-export async function buildTiersForSlug(input: BuildTiersInput): Promise<CodeTiers> {
+export type BuildTiersResult = {
+  tiers: CodeTiers;
+  // null when --no-rerank was used or when rerank ran but failed (sentinel).
+  // Callers gate audit-file writing on this — no rerank, no rationale.
+  rerankResult: RerankResult | null;
+};
+
+export async function buildTiersForSlug(input: BuildTiersInput): Promise<BuildTiersResult> {
   if (input.reranker) {
     const result = await rerankWithCache(input.reranker, input.cache ?? null, input);
-    if (result) return rerankToCodeTiers(result);
+    if (result) {
+      return { tiers: rerankToCodeTiers(result), rerankResult: result };
+    }
     // null = sentinel; the Reranker has already emitted a stderr warning.
     // Fall through to the lexical-only path.
   }
-  return lexicalTiers(input.scored, input.allFilesByRepo, input.slug);
+  return {
+    tiers:        lexicalTiers(input.scored, input.allFilesByRepo, input.slug),
+    rerankResult: null,
+  };
 }
 
 // Cache key is derived from docContent + canonically-sorted candidates +

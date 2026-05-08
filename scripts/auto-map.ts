@@ -3,7 +3,7 @@
  * (optional) AI re-ranker.
  *
  * Usage:
- *   npx tsx scripts/auto-map.ts <slug> [--config <path>] [--write] [--no-rerank]
+ *   npx tsx scripts/auto-map.ts <slug> [--config <path>] [--write] [--no-rerank] [--explain]
  *
  * Builds a symbol index of all configured repos (cached by commit SHA),
  * cross-references the symbols named in the doc, and proposes a CodeTiers
@@ -14,8 +14,9 @@
  *
  * Flags:
  *   --config <path>   Config file (default: config/gutenberg-block-api.json)
- *   --write           Write result directly into the project mapping file
- *   --no-rerank       Skip the AI re-ranker (lexical-only output)
+ *   --write           Write the canonical mapping AND the audit file (when re-rank ran)
+ *   --no-rerank       Skip the AI re-ranker (lexical-only output, no audit)
+ *   --explain         Print rationale per kept file and reason per dropped file to stdout
  */
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
@@ -32,19 +33,22 @@ import {
 } from '../src/indexer/symbol-index.js';
 import { Reranker } from '../src/auto-map/rerank.js';
 import { RerankCache } from '../src/auto-map/rerank-cache.js';
-import { buildTiersForSlug } from '../src/auto-map/orchestrator.js';
+import { buildTiersForSlug, auditPathFor } from '../src/auto-map/orchestrator.js';
+import { AuditWriter } from '../src/auto-map/audit-writer.js';
 
 function parseArgs(argv: string[]): {
   slug: string;
   configPath: string;
   write: boolean;
   rerank: boolean;
+  explain: boolean;
 } {
   const args = argv.slice(2);
   let slug = '';
   let configPath = resolve('config/gutenberg-block-api.json');
   let write = false;
   let rerank = true;
+  let explain = false;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--config' && args[i + 1]) {
@@ -54,21 +58,23 @@ function parseArgs(argv: string[]): {
       write = true;
     } else if (args[i] === '--no-rerank') {
       rerank = false;
+    } else if (args[i] === '--explain') {
+      explain = true;
     } else if (!slug && !args[i].startsWith('--')) {
       slug = args[i];
     }
   }
 
   if (!slug) {
-    console.error('Usage: npx tsx scripts/auto-map.ts <slug> [--config <path>] [--write] [--no-rerank]');
+    console.error('Usage: npx tsx scripts/auto-map.ts <slug> [--config <path>] [--write] [--no-rerank] [--explain]');
     process.exit(1);
   }
 
-  return { slug, configPath, write, rerank };
+  return { slug, configPath, write, rerank, explain };
 }
 
 async function main() {
-  const { slug, configPath, write, rerank } = parseArgs(process.argv);
+  const { slug, configPath, write, rerank, explain } = parseArgs(process.argv);
   const config = await loadConfig(configPath);
 
   // 1. Fetch manifest and locate the entry for this slug
@@ -170,7 +176,7 @@ async function main() {
   // negligible and identical re-runs should be free + bit-identical).
   const cache = reranker ? new RerankCache() : null;
 
-  const tiers = await buildTiersForSlug({
+  const { tiers, rerankResult } = await buildTiersForSlug({
     docContent,
     slug,
     scored,
@@ -182,6 +188,21 @@ async function main() {
   // 6. Output as JSON
   const output = { [slug]: tiers };
   console.log(JSON.stringify(output, null, 2));
+
+  // 7. --explain: render rationale per kept file and reason per dropped file.
+  // Has no effect under --no-rerank or when the AI step failed (no audit
+  // material). The Reranker has already emitted a stderr warning in those
+  // cases.
+  const auditWriter = new AuditWriter();
+  if (explain) {
+    if (rerankResult) {
+      console.log('\n' + auditWriter.formatExplain(rerankResult));
+    } else {
+      console.error(
+        '\n--explain: no rationale to print (re-rank was skipped or failed).',
+      );
+    }
+  }
 
   if (write) {
     let existing: Record<string, unknown> = {};
@@ -198,6 +219,15 @@ async function main() {
     const merged = { ...existing, ...output };
     writeFileSync(config.mappingPath, JSON.stringify(merged, null, 2) + '\n');
     console.error(`\nWrote mapping for "${slug}" to ${config.mappingPath}`);
+
+    // Audit is the side channel of the AI re-ranker. It is written iff
+    // re-rank ran AND succeeded (rerankResult !== null). --no-rerank leaves
+    // any existing audit untouched.
+    if (rerankResult) {
+      const auditPath = auditPathFor(config.mappingPath);
+      auditWriter.writeAudit(auditPath, slug, rerankResult);
+      console.error(`Wrote audit for "${slug}" to ${auditPath}`);
+    }
   } else {
     console.error(
       `\nReview the above and merge into ${config.mappingPath}, or re-run with --write`,
