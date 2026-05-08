@@ -26,6 +26,12 @@ export const ConfigSchema = z.object({
     pass1Model:             z.string().default('claude-sonnet-4-6'),
     pass2Model:             z.string().default('claude-sonnet-4-6'),
     systemPromptExtension:  z.string().optional(), // path to a .md file with site-specific prompt rules
+    // Determinism + recall controls. See issue #56.
+    //   `temperature: 0` makes Pass 1 / Pass 2 reproducible run-to-run.
+    //   `samples > 1` runs Pass 1 N times and unions candidates by
+    //   fingerprint before Pass 2 — trades cost for recall.
+    temperature:            z.number().finite().default(0),
+    samples:                z.number().int().min(1).default(1),
   }),
   // Token pricing in USD per million tokens. Defaults match Sonnet 4.6 rates.
   // Check https://www.anthropic.com/pricing for current values and update as needed.
