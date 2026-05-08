@@ -1,38 +1,49 @@
 /**
- * auto-map.ts — AI-free mapping bootstrap using symbol index + tree heuristics
+ * auto-map.ts — mapping bootstrap using symbol index + tree heuristics +
+ * (optional) AI re-ranker.
  *
  * Usage:
- *   npx tsx scripts/auto-map.ts <slug> [--config <path>] [--write]
+ *   npx tsx scripts/auto-map.ts <slug> [--config <path>] [--write] [--no-rerank]
  *
  * Builds a symbol index of all configured repos (cached by commit SHA),
  * cross-references the symbols named in the doc, and proposes a CodeTiers
- * mapping ranked by symbol coverage.
- *
- * Unlike bootstrap-mapping.ts, requires no ANTHROPIC_API_KEY.
+ * mapping ranked by symbol coverage. By default, the lexical top-N is then
+ * passed to an AI re-ranker that re-orders the candidates by semantic
+ * judgment and drops coincidental matches; `--no-rerank` skips this step
+ * and reproduces the pre-rerank lexical-only output.
  *
  * Flags:
  *   --config <path>   Config file (default: config/gutenberg-block-api.json)
  *   --write           Write result directly into the project mapping file
+ *   --no-rerank       Skip the AI re-ranker (lexical-only output)
  */
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
+import Anthropic from '@anthropic-ai/sdk';
 import { loadConfig } from '../src/config/loader.js';
 import { createCodeSources } from '../src/adapters/index.js';
-import { ManifestEntrySchema, CodeTiersSchema, MappingSchema } from '../src/types/mapping.js';
+import { ManifestEntrySchema, MappingSchema } from '../src/types/mapping.js';
 import { extractDocSymbols } from '../src/adapters/validator/context-assembler.js';
 import {
   buildSymbolIndex,
   scoreFilesAcrossRepos,
-  findFilesByTreeHeuristic,
   type SymbolIndex,
 } from '../src/indexer/symbol-index.js';
+import { Reranker } from '../src/auto-map/rerank.js';
+import { buildTiersForSlug } from '../src/auto-map/orchestrator.js';
 
-function parseArgs(argv: string[]): { slug: string; configPath: string; write: boolean } {
+function parseArgs(argv: string[]): {
+  slug: string;
+  configPath: string;
+  write: boolean;
+  rerank: boolean;
+} {
   const args = argv.slice(2);
   let slug = '';
   let configPath = resolve('config/gutenberg-block-api.json');
   let write = false;
+  let rerank = true;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--config' && args[i + 1]) {
@@ -40,21 +51,23 @@ function parseArgs(argv: string[]): { slug: string; configPath: string; write: b
       i++;
     } else if (args[i] === '--write') {
       write = true;
+    } else if (args[i] === '--no-rerank') {
+      rerank = false;
     } else if (!slug && !args[i].startsWith('--')) {
       slug = args[i];
     }
   }
 
   if (!slug) {
-    console.error('Usage: npx tsx scripts/auto-map.ts <slug> [--config <path>] [--write]');
+    console.error('Usage: npx tsx scripts/auto-map.ts <slug> [--config <path>] [--write] [--no-rerank]');
     process.exit(1);
   }
 
-  return { slug, configPath, write };
+  return { slug, configPath, write, rerank };
 }
 
 async function main() {
-  const { slug, configPath, write } = parseArgs(process.argv);
+  const { slug, configPath, write, rerank } = parseArgs(process.argv);
   const config = await loadConfig(configPath);
 
   // 1. Fetch manifest and locate the entry for this slug
@@ -132,46 +145,33 @@ async function main() {
     ),
   );
 
-  // 5. Assemble tiers
-  //    primary   — top symbol-matched files (max 3, max 1 schema for diversity)
-  //    secondary — next best symbol-matched files (max 5)
-  //    context   — structurally related files via slug keyword matching (max 8)
+  // 5. Re-rank (optional) and assemble tiers.
   //
-  // The primary-tier schema cap exists because schemas accumulate matches
-  // on generic property names (`name`, `style`, `url`, `link`) shared across
-  // every schema in a corpus. Without the cap, schemas dominate all three
-  // primary slots even when the doc is not about any specific schema —
-  // pushing implementation files (the actual canon for many docs) out of
-  // primary. Allowing exactly one schema in primary surfaces the strongest
-  // schema candidate while leaving room for implementation files.
-  const selected = new Set<string>();
-  const isSchemaPath = (path: string): boolean => /(^|\/)schemas\/.*\.json$/.test(path);
-
-  function pickNext(n: number, maxSchemas: number = Infinity) {
-    const result: Array<{ repo: string; path: string }> = [];
-    let schemaCount = 0;
-    for (const f of scored) {
-      if (result.length >= n) break;
-      const key = `${f.repo}:${f.path}`;
-      if (selected.has(key)) continue;
-      if (isSchemaPath(f.path) && schemaCount >= maxSchemas) continue;
-      selected.add(key);
-      if (isSchemaPath(f.path)) schemaCount++;
-      result.push({ repo: f.repo, path: f.path });
+  // Default: AI re-ranker re-orders candidates by semantic judgment and
+  // drops coincidental matches (single-token English-word collisions,
+  // cross-schema property collisions). On API error / malformed output
+  // / missing API key, the Reranker emits a stderr warning and the
+  // orchestrator falls back to lexical-only output.
+  //
+  // `--no-rerank` skips the AI step entirely. Output is bit-identical to
+  // the pre-rerank lexical-only path.
+  let reranker: Reranker | null = null;
+  if (rerank) {
+    try {
+      reranker = new Reranker(config.validator.pass1Model, new Anthropic());
+    } catch (err) {
+      console.error(`AI re-rank failed: ${err instanceof Error ? err.message : String(err)}`);
+      reranker = null;
     }
-    return result;
   }
 
-  const primary = pickNext(3, 1);
-  const secondary = pickNext(5);
-
-  const contextCandidates = findFilesByTreeHeuristic(slug, allFilesByRepo, selected);
-  const context = contextCandidates.slice(0, 8).map(f => {
-    selected.add(`${f.repo}:${f.path}`);
-    return { repo: f.repo, path: f.path };
+  const tiers = await buildTiersForSlug({
+    docContent,
+    slug,
+    scored,
+    allFilesByRepo,
+    reranker,
   });
-
-  const tiers = CodeTiersSchema.parse({ primary, secondary, context });
 
   // 6. Output as JSON
   const output = { [slug]: tiers };
