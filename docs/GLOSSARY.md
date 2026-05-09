@@ -154,7 +154,29 @@ Site-published doc index. Decoupled from Mapping by design: doc sites can own an
 
 ### Mapping
 
-Slug → tiered file list. Hand-curated JSON in Phase 1. The bootstrap script (`scripts/bootstrap-mapping.ts`) is a dev-time accelerator, not a runtime dependency.
+Slug → tiered file list. Today produced by `scripts/auto-map.ts` (symbol indexer + AI re-ranker, with an optional confidence floor) and optionally hand-reviewed in place. The pipeline is generic: the file format is the manual-map adapter's concern, not the locked contract — `src/types/` only sees `CodeTiers`. Hand-edits and auto-generation coexist via Review Metadata.
+
+### Review Metadata
+
+Optional per-slug block in the mapping file marking a slug as human-reviewed:
+
+```json
+"_review": { "by": "<name>", "date": "<YYYY-MM-DD>", "notes": "<why this slug was edited>" }
+```
+
+Underscore-prefixed key matches the existing `_comment` convention and signals "metadata, not load-bearing data" to consumers that don't know about it. `by` and `date` are required; `notes` is optional but encouraged — six months on, "why was `class-wp-block-patterns-registry.php` added here?" needs an answer in the file, not in someone's memory.
+
+### Reviewed Slug
+
+Slug carrying Review Metadata. The regenerator treats reviewed slugs specially: it does **not** overwrite their entry. The default behaviour is "preserve human work; surface what auto-map would have done as a Suggested Mapping for human inspection."
+
+### Suggested Mapping
+
+Side file (`mappings/<site>.suggested.json`) the regenerator writes for Reviewed Slugs only. Contains the would-be auto-map output that *was not applied* because the slug was reviewed. Fully overwritten on each regen — what you see is always the latest delta, not history. Read it after re-runs to decide whether auto-map has produced a new candidate worth folding into the reviewed entry. The audit JSON remains the historical-reasoning artifact; Suggested Mapping is the change-since-last-review artifact.
+
+### `--force-regenerate`
+
+Flag on `auto-map.ts` for the rare "abandon my review and let auto-map start over on this slug" case. Without it, reviewed slugs are sacred. The asymmetry is deliberate: human work is hard to reproduce, machine work is one command away.
 
 ### Tier
 
