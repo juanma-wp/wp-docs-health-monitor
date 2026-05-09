@@ -43,8 +43,9 @@ import {
 } from '../src/indexer/symbol-index.js';
 import { Reranker } from '../src/auto-map/rerank.js';
 import { RerankCache } from '../src/auto-map/rerank-cache.js';
-import { buildTiersForSlug, auditPathFor } from '../src/auto-map/orchestrator.js';
+import { buildTiersForSlug, auditPathFor, suggestedPathFor } from '../src/auto-map/orchestrator.js';
 import { AuditWriter } from '../src/auto-map/audit-writer.js';
+import { SuggestedMappingWriter } from '../src/auto-map/suggested-mapping-writer.js';
 import { parseArgs } from '../src/auto-map/parse-args.js';
 import { decide as decideWriteAction } from '../src/auto-map/write-decision-policy.js';
 
@@ -208,8 +209,11 @@ async function main() {
 
     // Mapping write — only `write-mapping` and `force-regenerate` mutate the
     // mapping file. `write-suggestion` leaves the operator's curated entry
-    // intact; the freshly-computed tiers are still surfaced on stdout above
-    // (and Slice 3 will land them in the suggested side file).
+    // intact; the freshly-computed tiers are landed in the suggested side
+    // file below for the operator's annual review.
+    const suggestedWriter = new SuggestedMappingWriter();
+    const suggestedPath = suggestedPathFor(config.mappingPath);
+
     if (action.kind === 'write-mapping' || action.kind === 'force-regenerate') {
       const merged: Record<string, unknown> = { ...existingRaw, [slug]: action.tiers };
       writeFileSync(config.mappingPath, JSON.stringify(merged, null, 2) + '\n');
@@ -220,14 +224,23 @@ async function main() {
           `\n--force-regenerate: overrode review block on "${slug}" and wrote fresh tiers to ${config.mappingPath} (\`_reviews\` stripped).`,
         );
       }
+      // Both branches return the slug to "auto-map land" — no curated
+      // candidate to surface in the side file. `remove` is a no-op when the
+      // slug is absent, so this also handles the `write-mapping` case where
+      // the operator manually deleted `_reviews` and a stale suggestion
+      // entry might linger from an earlier review cycle.
+      suggestedWriter.remove(suggestedPath, slug);
     } else {
-      // write-suggestion
+      // write-suggestion: preserve the curated mapping; land the candidate
+      // in the side file as the annual review prompt.
       const r = action.latestReview;
       console.error(
         `\nSkipping mapping write for "${slug}": preserved curated entry ` +
           `(latest review by ${r.by} on ${r.date}). ` +
           `Re-run with --force-regenerate to override.`,
       );
+      suggestedWriter.upsert(suggestedPath, slug, action.tiers);
+      console.error(`Wrote suggested tiers for "${slug}" to ${suggestedPath}`);
     }
 
     // Audit refresh is decoupled from the mapping write — even on the

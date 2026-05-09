@@ -44,6 +44,20 @@ export function auditPathFor(mappingPath: string): string {
   return `${mappingPath}.audit.json`;
 }
 
+/**
+ * Derive the suggested-mapping side-file path from the canonical mapping
+ * path, e.g. `mappings/gutenberg-block-api.json` →
+ * `mappings/gutenberg-block-api.suggested.json`. Mirrors `auditPathFor`'s
+ * shape; the side file lives next to the canonical mapping and is committed
+ * alongside it.
+ */
+export function suggestedPathFor(mappingPath: string): string {
+  if (mappingPath.endsWith('.json')) {
+    return mappingPath.replace(/\.json$/, '.suggested.json');
+  }
+  return `${mappingPath}.suggested.json`;
+}
+
 export type BuildTiersInput = {
   docContent:     string;
   slug:           string;

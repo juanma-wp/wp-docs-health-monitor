@@ -4,7 +4,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import type Anthropic from '@anthropic-ai/sdk';
 
-import { buildTiersForSlug, auditPathFor } from '../orchestrator.js';
+import { buildTiersForSlug, auditPathFor, suggestedPathFor } from '../orchestrator.js';
 import { Reranker } from '../rerank.js';
 import { RerankCache } from '../rerank-cache.js';
 import { AuditWriter, MappingAuditSchema, NO_FLAGGED_SENTINEL } from '../audit-writer.js';
@@ -443,6 +443,14 @@ describe('orchestrator + AuditWriter wiring (smoke)', () => {
     );
     // Falls back to suffix append for non-.json paths
     expect(auditPathFor('mappings/site')).toBe('mappings/site.audit.json');
+  });
+
+  it('suggestedPathFor derives `<mapping>.suggested.json` from `<mapping>.json`', () => {
+    expect(suggestedPathFor('mappings/gutenberg-block-api.json')).toBe(
+      'mappings/gutenberg-block-api.suggested.json',
+    );
+    // Falls back to suffix append for non-.json paths
+    expect(suggestedPathFor('mappings/site')).toBe('mappings/site.suggested.json');
   });
 });
 
