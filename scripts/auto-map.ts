@@ -3,7 +3,7 @@
  * (optional) AI re-ranker.
  *
  * Usage:
- *   npx tsx scripts/auto-map.ts <slug> [--config <path>] [--write] [--no-rerank] [--explain] [--review]
+ *   npx tsx scripts/auto-map.ts <slug> [--config <path>] [--write] [--no-rerank] [--explain] [--review] [--force-regenerate]
  *
  * Builds a symbol index of all configured repos (cached by commit SHA),
  * cross-references the symbols named in the doc, and proposes a CodeTiers
@@ -13,23 +13,28 @@
  * and reproduces the pre-rerank lexical-only output.
  *
  * Flags:
- *   --config <path>   Config file (default: config/gutenberg-block-api.json)
- *   --write           Write the canonical mapping AND the audit file (when re-rank ran)
- *   --no-rerank       Skip the AI re-ranker (lexical-only output, no audit)
- *   --explain         Print rationale per kept file and reason per dropped file to stdout
- *   --review          Write mapping + audit AND emit only the flagged subset
- *                     (confidence < 0.7) to stdout for the human-review loop.
- *                     Implies --write. Mutually exclusive with --no-rerank.
- *                     Composes with --explain: both renderers run (explain
- *                     first, then flagged subset).
+ *   --config <path>      Config file (default: config/gutenberg-block-api.json)
+ *   --write              Write the canonical mapping AND the audit file (when re-rank ran)
+ *   --no-rerank          Skip the AI re-ranker (lexical-only output, no audit)
+ *   --explain            Print rationale per kept file and reason per dropped file to stdout
+ *   --review             Write mapping + audit AND emit only the flagged subset
+ *                        (confidence < 0.7) to stdout for the human-review loop.
+ *                        Implies --write. Mutually exclusive with --no-rerank.
+ *                        Composes with --explain: both renderers run (explain
+ *                        first, then flagged subset).
+ *   --force-regenerate   Override skip-on-review protection: when the existing
+ *                        mapping entry carries a `_reviews` block, write the
+ *                        fresh candidate tiers anyway (with `_reviews` stripped).
+ *                        Audit refreshes regardless. Without this flag, a
+ *                        reviewed slug leaves the mapping untouched and only
+ *                        refreshes the audit.
  */
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { resolve } from 'path';
 import Anthropic from '@anthropic-ai/sdk';
 import { loadConfig } from '../src/config/loader.js';
 import { createCodeSources } from '../src/adapters/index.js';
-import { ManifestEntrySchema, MappingSchema } from '../src/types/mapping.js';
+import { ManifestEntrySchema } from '../src/types/mapping.js';
 import { extractDocSymbols } from '../src/adapters/validator/context-assembler.js';
 import {
   buildSymbolIndex,
@@ -40,64 +45,13 @@ import { Reranker } from '../src/auto-map/rerank.js';
 import { RerankCache } from '../src/auto-map/rerank-cache.js';
 import { buildTiersForSlug, auditPathFor } from '../src/auto-map/orchestrator.js';
 import { AuditWriter } from '../src/auto-map/audit-writer.js';
+import { parseArgs } from '../src/auto-map/parse-args.js';
+import { decide as decideWriteAction } from '../src/auto-map/write-decision-policy.js';
 
-export function parseArgs(argv: string[]): {
-  slug: string;
-  configPath: string;
-  write: boolean;
-  rerank: boolean;
-  explain: boolean;
-  review: boolean;
-} {
-  const args = argv.slice(2);
-  let slug = '';
-  let configPath = resolve('config/gutenberg-block-api.json');
-  let write = false;
-  let rerank = true;
-  let explain = false;
-  let review = false;
-
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--config' && args[i + 1]) {
-      configPath = resolve(args[i + 1]);
-      i++;
-    } else if (args[i] === '--write') {
-      write = true;
-    } else if (args[i] === '--no-rerank') {
-      rerank = false;
-    } else if (args[i] === '--explain') {
-      explain = true;
-    } else if (args[i] === '--review') {
-      review = true;
-    } else if (!slug && !args[i].startsWith('--')) {
-      slug = args[i];
-    }
-  }
-
-  if (!slug) {
-    console.error('Usage: npx tsx scripts/auto-map.ts <slug> [--config <path>] [--write] [--no-rerank] [--explain] [--review]');
-    process.exit(1);
-  }
-
-  // --review needs the audit (rationale + confidence per kept file) which
-  // only the AI re-ranker produces. --no-rerank means no audit, so the
-  // combination is rejected up-front rather than producing empty output.
-  if (review && !rerank) {
-    console.error(
-      'Error: --review cannot be used with --no-rerank. The flagged subset is derived from re-rank confidence; --no-rerank produces no audit. Drop one of the two flags.',
-    );
-    process.exit(2);
-  }
-
-  // --review implies --write (the human-review loop lands the auto-mapping
-  // immediately and surfaces the flagged subset on top).
-  if (review) write = true;
-
-  return { slug, configPath, write, rerank, explain, review };
-}
+export { parseArgs };
 
 async function main() {
-  const { slug, configPath, write, rerank, explain, review } = parseArgs(process.argv);
+  const { slug, configPath, write, rerank, explain, review, forceRegenerate } = parseArgs(process.argv);
   const config = await loadConfig(configPath);
 
   // 1. Fetch manifest and locate the entry for this slug
@@ -228,24 +182,58 @@ async function main() {
   }
 
   if (write) {
-    let existing: Record<string, unknown> = {};
+    // Read the mapping raw (no schema parse) so a malformed `_reviews` on
+    // the target slug surfaces through WriteDecisionPolicy as a clear abort
+    // rather than a generic Zod error. Other slugs are passed through
+    // unchanged on write.
+    let existingRaw: Record<string, unknown> = {};
     if (existsSync(config.mappingPath)) {
-      existing = MappingSchema.parse(
-        JSON.parse(readFileSync(config.mappingPath, 'utf-8')),
-      );
+      const parsed = JSON.parse(readFileSync(config.mappingPath, 'utf-8'));
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        existingRaw = parsed as Record<string, unknown>;
+      }
     }
-    if (slug in existing) {
-      process.stderr.write(
-        `\nWarning: mapping for "${slug}" already exists and will be overwritten.\n`,
-      );
-    }
-    const merged = { ...existing, ...output };
-    writeFileSync(config.mappingPath, JSON.stringify(merged, null, 2) + '\n');
-    console.error(`\nWrote mapping for "${slug}" to ${config.mappingPath}`);
 
-    // Audit is the side channel of the AI re-ranker. It is written iff
-    // re-rank ran AND succeeded (rerankResult !== null). --no-rerank leaves
-    // any existing audit untouched.
+    const action = decideWriteAction({
+      slug,
+      existing: existingRaw[slug],
+      candidate: tiers,
+      forceRegenerate,
+    });
+
+    if (action.kind === 'abort') {
+      console.error(`\nError: ${action.reason}`);
+      process.exit(3);
+    }
+
+    // Mapping write — only `write-mapping` and `force-regenerate` mutate the
+    // mapping file. `write-suggestion` leaves the operator's curated entry
+    // intact; the freshly-computed tiers are still surfaced on stdout above
+    // (and Slice 3 will land them in the suggested side file).
+    if (action.kind === 'write-mapping' || action.kind === 'force-regenerate') {
+      const merged: Record<string, unknown> = { ...existingRaw, [slug]: action.tiers };
+      writeFileSync(config.mappingPath, JSON.stringify(merged, null, 2) + '\n');
+      if (action.kind === 'write-mapping') {
+        console.error(`\nWrote mapping for "${slug}" to ${config.mappingPath}`);
+      } else {
+        console.error(
+          `\n--force-regenerate: overrode review block on "${slug}" and wrote fresh tiers to ${config.mappingPath} (\`_reviews\` stripped).`,
+        );
+      }
+    } else {
+      // write-suggestion
+      const r = action.latestReview;
+      console.error(
+        `\nSkipping mapping write for "${slug}": preserved curated entry ` +
+          `(latest review by ${r.by} on ${r.date}). ` +
+          `Re-run with --force-regenerate to override.`,
+      );
+    }
+
+    // Audit refresh is decoupled from the mapping write — even on the
+    // `write-suggestion` branch we still refresh the audit so the operator
+    // can inspect what auto-map currently believes about the slug. The only
+    // branch that does NOT refresh is `abort` (returned above).
     if (rerankResult) {
       const auditPath = auditPathFor(config.mappingPath);
       auditWriter.writeAudit(auditPath, slug, rerankResult);
