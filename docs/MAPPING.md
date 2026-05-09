@@ -35,6 +35,22 @@ Both are committed to git.
 
 ---
 
+## CLI flag reference
+
+```
+npx tsx scripts/auto-map.ts <slug> [flags]
+```
+
+| Flag | Default | Purpose |
+|---|---|---|
+| `--config <path>` | `config/gutenberg-block-api.json` | Site config to use. Picks the mapping file path, code sources, doc source. |
+| `--write` | off | Persist results to disk. Without it, auto-map prints what it would do and exits. |
+| `--no-rerank` | off (re-rank is on) | Skip the AI re-ranker. Faster and free, but produces no audit. |
+| `--explain` | off | Verbose per-slug rationale to stdout. Diagnostic. |
+
+---
+
+
 ## Workflow
 
 The full loop is short:
@@ -59,20 +75,92 @@ That's it. No side files, no review metadata, no special flags. Re-running auto-
 
 ---
 
-## CLI flag reference
+## How auto-map works under the hood
+
+Two layers: a **lexical retrieval** pass that finds candidate files cheaply and deterministically, and an optional **AI re-rank** pass that picks among them with semantic judgement.
 
 ```
-npx tsx scripts/auto-map.ts <slug> [flags]
+       doc markdown                   configured repos
+             │                              │
+             ▼                              ▼
+  ┌────────────────────┐         ┌────────────────────────┐
+  │ extractDocSymbols  │         │  buildSymbolIndex      │
+  │ • backtick tokens  │         │  • AST per file:       │
+  │ • normalize calls  │         │     TS/JS · PHP · JSON │
+  │ • drop primitives  │         │  • symbols + hooks     │
+  └────────┬───────────┘         │  • per-repo IDF        │
+           │                     │  • cached by commit SHA│
+           │                     └───────────┬────────────┘
+           │                                 │
+           └──────────┬──────────────────────┘
+                      ▼
+          ┌──────────────────────────┐
+          │ scoreFilesAcrossRepos    │
+          │ score = Σ weight · idf   │  ← lexical retrieval
+          │ sort desc, take top-30   │     (cheap, deterministic)
+          └────────────┬─────────────┘
+                       │
+                       ▼
+       ┌─────────────────────────────────┐
+       │ Reranker (Claude + tool-use)    │  ← AI ranking
+       │ INPUT:  doc + 30× {repo,path,   │     skip with --no-rerank
+       │         score, matchedSymbols}  │
+       │ OUTPUT: primary/secondary/      │
+       │         context/dropped, each   │
+       │         with rationale +        │
+       │         confidence (kept)       │
+       └────────────┬────────────────────┘
+                    │  on failure ↓
+                    ▼
+       ┌────────────────────────┐
+       │ confidence floor 0.5   │     lexicalTiers fallback
+       │ → CodeTiers projection │     (top-3, top-5, tree
+       │ + audit JSON           │      heuristic for context)
+       └────────────┬───────────┘
+                    ▼
+              mapping JSON
+              + <site>.audit.json
 ```
 
-| Flag | Default | Purpose |
-|---|---|---|
-| `--config <path>` | `config/gutenberg-block-api.json` | Site config to use. Picks the mapping file path, code sources, doc source. |
-| `--write` | off | Persist results to disk. Without it, auto-map prints what it would do and exits. |
-| `--no-rerank` | off (re-rank is on) | Skip the AI re-ranker. Faster and free, but produces no audit. |
-| `--explain` | off | Verbose per-slug rationale to stdout. Diagnostic. |
+### Step 1 — extract doc symbols
+
+`extractDocSymbols` (in `src/adapters/validator/context-assembler.ts`) pulls backtick-wrapped tokens out of the doc markdown. Call-form tokens like `wp.blocks.registerBlockType()` are normalised to `registerBlockType` so they match the bare identifier the AST indexer recorded. Primitive literals (`true`, `null`, `string`) are dropped — they have no retrieval value.
+
+### Step 2 — build a symbol index per repo
+
+`buildSymbolIndex` walks each repo's tree once and parses every indexable file (`.ts/.tsx/.js/.jsx/.php`, plus `.json` only under `schemas/`). Per-language extractors live under `src/extractors/` — they parse with `@typescript-eslint/parser` (TS/JS), `php-parser` (PHP), and a hand-rolled AST walker for JSON Schemas. Each file emits **symbols** (named exports, declared functions, schema property names) and **hooks** (firing sites for `apply_filters` / `do_action` / `addFilter` / `addAction`).
+
+The index is cached on disk keyed by repo + commit SHA, so re-running auto-map on the same revision is free after the first build. Each repo also gets an **IDF** (inverse document frequency) per symbol name, so generic identifiers like `name`, `style`, `icon` (which appear everywhere) contribute much less to relevance than rare ones like `registerBlockBindingsSource`.
+
+### Step 3 — score files lexically
+
+`scoreFilesAcrossRepos` walks every doc symbol, looks up the files that define or fire it across all repo indexes, and accumulates per-file scores:
+
+```
+score(file) = Σ over matched symbols ( fileWeight(file) × idf(symbol) )
+```
+
+`fileWeight` boosts authoritative paths (`schemas/json/*.json` and `*.d.ts` × 2.0) and demotes noise (`*.story.tsx` and `icons/`/`fixtures/` × 0.1). The result is a flat list of `{repo, path, score, matchedSymbols}` sorted by score. Top-30 advances; the rest is dropped.
+
+### Step 4 — re-rank with the LLM
+
+The Reranker (`src/auto-map/rerank.ts`) sends the doc + the 30 candidates to Claude with a strict tool-use schema (`report_rerank`). The model has access to **no file contents** — only `{repo, path, score, matchedSymbols}` per candidate plus the doc markdown. The system prompt forces every rationale to be grounded in observable evidence (a name from `matchedSymbols`, a path-convention argument, or a slug-to-path correspondence) — hedge words like "likely contains" or "should define" are forbidden. The model returns each file classified as:
+
+- **primary** (max 3): canonical implementation files; read these first.
+- **secondary** (max 5): meaningfully implements/parses/validates/tests the same subject.
+- **context** (max 8): related but not authoritative on its own.
+- **dropped**: lexical match that's actually noise (single English-word collision, generic schema property, fixture/icon match).
+
+Each kept file carries a confidence in [0, 1]. Files with confidence below **0.5** are filtered out at projection time — the rationale is in `MIN_INCLUSION_CONFIDENCE` in `orchestrator.ts`: the model's own self-rated confidence is honoured rather than fought.
+
+The full re-rank result (rationales + confidences + dropped files) is written verbatim to `<site>.audit.json` for inspection. The canonical mapping JSON receives only `{repo, path}` — the locked `CodeTiers` shape.
+
+### Step 5 — fall back to lexical-only on failure
+
+If the LLM call errors, returns malformed output, or the API key is missing, the orchestrator falls back to `lexicalTiers`: top-3 by score → primary (capped at 1 schema file), next 5 → secondary, and for context it runs `findFilesByTreeHeuristic` — files whose **path** contains keywords from the slug (split on `-_/`, drop short and common words). This is also what `--no-rerank` produces directly. No audit file is written when the rerank step doesn't run.
 
 ---
+
 
 ## Gotchas
 
