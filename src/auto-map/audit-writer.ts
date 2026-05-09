@@ -28,17 +28,6 @@ export const AUDIT_FILE_VERSION = 1;
 export const AUDIT_WARNING =
   'GENERATED FILE — do not hand-edit. Re-run scripts/auto-map.ts to regenerate.';
 
-// Files with confidence STRICTLY BELOW this threshold are "flagged" — i.e.
-// surfaced by `--review` for the human to scrutinise first. A file with
-// confidence === 0.7 is NOT flagged. The PRD pins this value at 0.7.
-export const FLAGGED_CONFIDENCE_THRESHOLD = 0.7;
-
-// Sentinel string emitted by `formatFlagged` when nothing crosses the
-// threshold. Stable wording is part of the CLI contract — automation that
-// greps stdout under `--review` relies on it.
-export const NO_FLAGGED_SENTINEL =
-  '(no flagged entries — confidence ≥ 0.7 across all kept files)';
-
 export const MappingAuditSchema = z.object({
   _comment: z.string().optional(),
   version:  z.literal(AUDIT_FILE_VERSION),
@@ -97,32 +86,6 @@ export class AuditWriter {
     }
 
     return lines.join('\n');
-  }
-
-  /**
-   * Render the flagged-subset of kept files (confidence < 0.7) for `--review`
-   * stdout. Per flagged file, prints `<repo>:<path>` + tier + confidence +
-   * rationale. Files with `confidence >= 0.7` are not printed. When no kept
-   * file is below the threshold, returns `NO_FLAGGED_SENTINEL` verbatim —
-   * automation that greps stdout under `--review` depends on that exact
-   * string.
-   *
-   * Iteration order is fixed (primary → secondary → context) so output is
-   * stable across runs on identical input. Dropped files are NOT included —
-   * they belong to `formatExplain`.
-   */
-  formatFlagged(result: RerankResult): string {
-    const lines: string[] = [];
-    for (const tier of ['primary', 'secondary', 'context'] as const) {
-      for (const f of result[tier]) {
-        if (f.confidence < FLAGGED_CONFIDENCE_THRESHOLD) {
-          lines.push(`  [${tier}] ${f.repo}:${f.path} (confidence ${f.confidence.toFixed(2)})`);
-          lines.push(`    rationale: ${f.rationale}`);
-        }
-      }
-    }
-    if (lines.length === 0) return NO_FLAGGED_SENTINEL;
-    return ['Flagged entries (confidence < 0.7):', ...lines].join('\n');
   }
 
   private loadExisting(path: string): Record<string, RerankResult> {

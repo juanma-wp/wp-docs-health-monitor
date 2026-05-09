@@ -20,18 +20,10 @@ export const CodeFileSchema = z.object({
 });
 export type CodeFile = z.infer<typeof CodeFileSchema>;
 
-export const ReviewEntrySchema = z.object({
-  by:    z.string().min(1),
-  date:  z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  notes: z.string().optional(),
-});
-export type ReviewEntry = z.infer<typeof ReviewEntrySchema>;
-
 export const CodeTiersSchema = z.object({
   primary:   z.array(CodeFileSchema).max(3),
   secondary: z.array(CodeFileSchema).max(5),
   context:   z.array(CodeFileSchema).max(8),
-  _reviews:  z.array(ReviewEntrySchema).min(1).optional(),
 });
 export type CodeTiers = z.infer<typeof CodeTiersSchema>;
 

@@ -160,19 +160,23 @@
     "context": []
   },
   "block-deprecation": {
-    "primary": [],
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/blocks/src/api/parser/apply-block-deprecated-versions.ts"
+      },
+      {
+        "repo": "gutenberg",
+        "path": "packages/blocks/src/types.ts"
+      }
+    ],
     "secondary": [
       {
         "repo": "gutenberg",
         "path": "schemas/json/block.json"
       }
     ],
-    "context": [
-      {
-        "repo": "gutenberg",
-        "path": "schemas/json/block.json"
-      }
-    ]
+    "context": []
   },
   "block-transforms": {
     "primary": [

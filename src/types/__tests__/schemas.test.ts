@@ -13,7 +13,6 @@ import {
   CodeFileSchema,
   CodeTiersSchema,
   MappingSchema,
-  ReviewEntrySchema,
 } from '../mapping.js';
 import { fingerprintIssue } from '../../history.js';
 import { runPipeline } from '../../pipeline.js';
@@ -106,118 +105,6 @@ describe('CodeTiersSchema', () => {
         context:   [],
       })
     ).not.toThrow();
-  });
-});
-
-// ---------------------------------------------------------------------------
-// ReviewEntrySchema
-// ---------------------------------------------------------------------------
-
-describe('ReviewEntrySchema', () => {
-  it('accepts a valid entry without notes', () => {
-    expect(() =>
-      ReviewEntrySchema.parse({ by: 'jdoe', date: '2026-05-09' })
-    ).not.toThrow();
-  });
-
-  it('accepts a valid entry with notes', () => {
-    expect(() =>
-      ReviewEntrySchema.parse({ by: 'jdoe', date: '2026-05-09', notes: 'looks good' })
-    ).not.toThrow();
-  });
-
-  it('rejects an entry with empty by', () => {
-    expect(() =>
-      ReviewEntrySchema.parse({ by: '', date: '2026-05-09' })
-    ).toThrow(ZodError);
-  });
-
-  it('rejects an entry missing date', () => {
-    expect(() =>
-      ReviewEntrySchema.parse({ by: 'jdoe' })
-    ).toThrow(ZodError);
-  });
-
-  it('rejects single-digit month/day (2026-5-9)', () => {
-    expect(() =>
-      ReviewEntrySchema.parse({ by: 'jdoe', date: '2026-5-9' })
-    ).toThrow(ZodError);
-  });
-
-  it('rejects slash-separated date (05/09/2026)', () => {
-    expect(() =>
-      ReviewEntrySchema.parse({ by: 'jdoe', date: '05/09/2026' })
-    ).toThrow(ZodError);
-  });
-
-  it('rejects ISO datetime with time component', () => {
-    expect(() =>
-      ReviewEntrySchema.parse({ by: 'jdoe', date: '2026-05-09T12:00:00Z' })
-    ).toThrow(ZodError);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// CodeTiersSchema — _reviews
-// ---------------------------------------------------------------------------
-
-describe('CodeTiersSchema — _reviews', () => {
-  const baseTiers = {
-    primary:   [{ repo: 'gutenberg', path: 'a.ts' }],
-    secondary: [],
-    context:   [],
-  };
-
-  it('accepts an entry with _reviews absent (fresh auto-map output)', () => {
-    expect(() => CodeTiersSchema.parse(baseTiers)).not.toThrow();
-  });
-
-  it('accepts an entry with a non-empty _reviews array', () => {
-    expect(() =>
-      CodeTiersSchema.parse({
-        ...baseTiers,
-        _reviews: [{ by: 'jdoe', date: '2026-05-09' }],
-      })
-    ).not.toThrow();
-  });
-
-  it('preserves _reviews on parse (regression: Zod must not strip the known field)', () => {
-    const parsed = CodeTiersSchema.parse({
-      ...baseTiers,
-      _reviews: [{ by: 'jdoe', date: '2026-05-09', notes: 'verified' }],
-    });
-    expect(parsed._reviews).toEqual([{ by: 'jdoe', date: '2026-05-09', notes: 'verified' }]);
-  });
-
-  it('rejects _reviews set to an empty array', () => {
-    expect(() =>
-      CodeTiersSchema.parse({ ...baseTiers, _reviews: [] })
-    ).toThrow(ZodError);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// MappingSchema — multi-slug round-trip with mixed _reviews
-// ---------------------------------------------------------------------------
-
-describe('MappingSchema — multi-slug _reviews round-trip', () => {
-  it('round-trips a mapping where some slugs have _reviews and others do not', () => {
-    const input = {
-      'block-attributes': {
-        primary:   [{ repo: 'gutenberg', path: 'a.ts' }],
-        secondary: [],
-        context:   [],
-        _reviews: [{ by: 'jdoe', date: '2026-05-09' }],
-      },
-      'block-registration': {
-        primary:   [{ repo: 'gutenberg', path: 'b.ts' }],
-        secondary: [],
-        context:   [],
-      },
-    };
-    const parsed = MappingSchema.parse(input);
-    expect(parsed['block-attributes']._reviews).toEqual([{ by: 'jdoe', date: '2026-05-09' }]);
-    expect(parsed['block-registration']._reviews).toBeUndefined();
   });
 });
 

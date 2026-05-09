@@ -27,8 +27,7 @@ import type { RerankCache } from './rerank-cache.js';
 // model says "I'm < 50% sure this is relevant", we honour that.
 //
 // 0.5 mirrors the lower bound of the "double-check" band in the prompt's
-// confidence rubric; FLAGGED_CONFIDENCE_THRESHOLD (0.7) in audit-writer.ts
-// is the *upper* bound of that same band.
+// confidence rubric.
 export const MIN_INCLUSION_CONFIDENCE = 0.5;
 
 /**
@@ -42,20 +41,6 @@ export function auditPathFor(mappingPath: string): string {
     return mappingPath.replace(/\.json$/, '.audit.json');
   }
   return `${mappingPath}.audit.json`;
-}
-
-/**
- * Derive the suggested-mapping side-file path from the canonical mapping
- * path, e.g. `mappings/gutenberg-block-api.json` →
- * `mappings/gutenberg-block-api.suggested.json`. Mirrors `auditPathFor`'s
- * shape; the side file lives next to the canonical mapping and is committed
- * alongside it.
- */
-export function suggestedPathFor(mappingPath: string): string {
-  if (mappingPath.endsWith('.json')) {
-    return mappingPath.replace(/\.json$/, '.suggested.json');
-  }
-  return `${mappingPath}.suggested.json`;
 }
 
 export type BuildTiersInput = {
