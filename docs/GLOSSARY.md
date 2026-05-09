@@ -156,19 +156,30 @@ Site-published doc index. Decoupled from Mapping by design: doc sites can own an
 
 Slug → tiered file list. Today produced by `scripts/auto-map.ts` (symbol indexer + AI re-ranker, with an optional confidence floor) and optionally hand-reviewed in place. The pipeline is generic: the file format is the manual-map adapter's concern, not the locked contract — `src/types/` only sees `CodeTiers`. Hand-edits and auto-generation coexist via Review Metadata.
 
+**Operational cadence:** auto-map regeneration is *infrequent* — quarterly to annually, not weekly. The analyzer runs weekly against the *current* mapping; the mapping itself is treated as a long-lived artifact that drifts ahead of auto-map's view between regenerations. That asymmetry is intentional: hand-curation effort amortises across ~50 weekly analyzer runs, and the Suggested Mapping side file becomes an annual prompt to revisit reviews rather than a weekly delta.
+
 ### Review Metadata
 
-Optional per-slug block in the mapping file marking a slug as human-reviewed:
+Optional per-slug `_reviews` array in the mapping file, marking a slug as human-reviewed and recording the trail of who touched it:
 
 ```json
-"_review": { "by": "<name>", "date": "<YYYY-MM-DD>", "notes": "<why this slug was edited>" }
+"_reviews": [
+  { "by": "<name>", "date": "<YYYY-MM-DD>", "notes": "<why this slug was edited>" },
+  { "by": "<name>", "date": "<YYYY-MM-DD>", "notes": "<why a later edit was made>" }
+]
 ```
 
-Underscore-prefixed key matches the existing `_comment` convention and signals "metadata, not load-bearing data" to consumers that don't know about it. `by` and `date` are required; `notes` is optional but encouraged — six months on, "why was `class-wp-block-patterns-registry.php` added here?" needs an answer in the file, not in someone's memory.
+Underscore-prefixed key matches the existing `_comment` convention and signals "metadata, not load-bearing data" to consumers that don't know about it. Each entry has `by` (non-empty string) and `date` (ISO `YYYY-MM-DD`); `notes` is optional but encouraged — six months on, "why was `class-wp-block-patterns-registry.php` added here?" needs an answer in the file, not in someone's memory.
+
+The shape is an array (not a single object) so that successive reviews — by the same person at different times, or by different people — *append* rather than overwrite. The full trail lives in the file. Latest review is determined by `max(date)`, not by array position; manual reordering by hand is harmless.
+
+`_reviews` is optional and, when present, must be non-empty. An empty array is rejected as malformed — use omission to mean "no review."
+
+For comparing a current curated entry to what auto-map originally produced, use `git show` on the mapping file at a pre-review commit. The mapping file does not store its own history; that is what git is for.
 
 ### Reviewed Slug
 
-Slug carrying Review Metadata. The regenerator treats reviewed slugs specially: it does **not** overwrite their entry. The default behaviour is "preserve human work; surface what auto-map would have done as a Suggested Mapping for human inspection."
+Slug whose entry contains a non-empty `_reviews` array. The regenerator treats reviewed slugs specially: it does **not** overwrite their entry. The default behaviour is "preserve human work; surface what auto-map would have done as a Suggested Mapping for human inspection."
 
 ### Suggested Mapping
 

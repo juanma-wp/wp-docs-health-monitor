@@ -188,7 +188,7 @@ async function main() {
   let reranker: Reranker | null = null;
   if (rerank) {
     try {
-      reranker = new Reranker(config.validator.pass1Model, new Anthropic());
+      reranker = new Reranker(config.validator.rerankModel ?? config.validator.pass1Model, new Anthropic());
     } catch (err) {
       console.error(`AI re-rank failed: ${err instanceof Error ? err.message : String(err)}`);
       reranker = null;

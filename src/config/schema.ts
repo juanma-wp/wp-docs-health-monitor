@@ -25,6 +25,12 @@ export const ConfigSchema = z.object({
     type:                   z.literal('claude'),
     pass1Model:             z.string().default('claude-sonnet-4-6'),
     pass2Model:             z.string().default('claude-sonnet-4-6'),
+    // Model used by scripts/auto-map.ts for the canonical-mapping re-rank step.
+    // Optional: when unset, the auto-mapper falls back to pass1Model. Split out
+    // because mapping is run rarely but is structurally critical (one wrong
+    // primary file pollutes every validation run for that slug), so it's
+    // worth using a stronger model here than for routine validation passes.
+    rerankModel:            z.string().optional(),
     systemPromptExtension:  z.string().optional(), // path to a .md file with site-specific prompt rules
     // Determinism + recall controls. See issue #56.
     //   `temperature: 0` makes Pass 1 / Pass 2 reproducible run-to-run.

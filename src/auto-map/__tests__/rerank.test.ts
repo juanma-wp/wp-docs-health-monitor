@@ -206,7 +206,7 @@ describe('Reranker — failure modes', () => {
 // ---------------------------------------------------------------------------
 
 describe('Reranker — SDK call shape', () => {
-  it('passes the configured model and temperature 0 on every call', async () => {
+  it('passes the configured model on every call and omits temperature by default', async () => {
     const ok = makeToolUseResponse({
       primary: [], secondary: [], context: [], dropped: [],
     });
@@ -221,6 +221,25 @@ describe('Reranker — SDK call shape', () => {
     });
 
     expect(createSpy).toHaveBeenCalledTimes(1);
+    const callArgs = createSpy.mock.calls[0][0] as Record<string, unknown>;
+    expect(callArgs).toMatchObject({ model: 'claude-sonnet-4-6' });
+    expect('temperature' in callArgs).toBe(false);
+  });
+
+  it('passes an explicit temperature when provided to the constructor', async () => {
+    const ok = makeToolUseResponse({
+      primary: [], secondary: [], context: [], dropped: [],
+    });
+    const client = makeAnthropicClient([ok]);
+    const createSpy = client.messages.create as Mock;
+
+    const reranker = new Reranker('claude-sonnet-4-6', client, { temperature: 0 });
+    await reranker.rerank({
+      doc:        'doc',
+      slug:       'block-metadata',
+      candidates: [makeCandidate('r', 'a.ts', 1)],
+    });
+
     expect(createSpy.mock.calls[0][0]).toMatchObject({
       model:       'claude-sonnet-4-6',
       temperature: 0,

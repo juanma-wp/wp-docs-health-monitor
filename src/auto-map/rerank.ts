@@ -182,12 +182,15 @@ export type RerankInput = {
 export class Reranker {
   public  readonly model:       string;
   private readonly anthropic:   Anthropic;
-  private readonly temperature: number;
+  // Undefined = omit the field on the API call. Newer models (e.g. Opus 4.7)
+  // reject `temperature` outright; older models default to 1.0 server-side.
+  // Callers that need determinism pass an explicit value.
+  private readonly temperature: number | undefined;
 
   constructor(model: string, anthropic: Anthropic, options: { temperature?: number } = {}) {
     this.model       = model;
     this.anthropic   = anthropic;
-    this.temperature = options.temperature ?? 0;
+    this.temperature = options.temperature;
   }
 
   async rerank(input: RerankInput): Promise<RerankResult | null> {
@@ -196,9 +199,9 @@ export class Reranker {
     let response: Anthropic.Message;
     try {
       response = await this.anthropic.messages.create({
-        model:       this.model,
-        max_tokens:  4096,
-        temperature: this.temperature,
+        model:      this.model,
+        max_tokens: 4096,
+        ...(this.temperature !== undefined ? { temperature: this.temperature } : {}),
         system: [
           {
             type:          'text',
@@ -230,7 +233,7 @@ export class Reranker {
           const ts = Date.now();
           fs.writeFileSync(
             path.join(dir, `rerank-${input.slug}-${ts}.json`),
-            JSON.stringify({ stop_reason: response.stop_reason, usage: response.usage, input: block.input }, null, 2),
+            JSON.stringify({ model: response.model, stop_reason: response.stop_reason, usage: response.usage, input: block.input }, null, 2),
           );
         } catch { /* dump is best-effort */ }
       }
