@@ -57,8 +57,11 @@ await run({
     sandbox: {
       onSandboxReady: [
         { command: "npm install", timeoutMs: 300_000 },
-        { command: "git config --global user.email 'ralph@wp-docs-health-monitor.local'" },
-        { command: "git config --global user.name 'Ralph'" },
+        // Single hook combines both git-identity writes so the second `git config`
+        // doesn't race with the first's lock release on Docker Desktop's
+        // virtualized filesystem (manifests as "could not lock config file:
+        // File exists" on macOS hosts).
+        { command: "git config --global user.email 'ralph@wp-docs-health-monitor.local' && git config --global user.name 'Ralph'" },
       ],
     },
   },

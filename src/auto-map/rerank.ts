@@ -4,8 +4,8 @@
  * The lexical indexer (`src/indexer/symbol-index.ts`) is the retrieval layer:
  * cheap, deterministic, and it returns a top-N candidate list. This module is
  * the ranking layer: it asks an LLM to re-order the candidates by semantic
- * judgment, drop coincidental matches, and attach a short rationale per kept
- * file plus a reason per dropped file.
+ * judgment, drop coincidental matches, and attach a short rationale per file
+ * (kept files: why this tier; dropped files: which noise pattern fired).
  *
  * Public surface is intentionally small — `rerank({ doc, slug, candidates })`
  * returns a typed `RerankResult` or `null` (sentinel) on any failure mode
@@ -45,10 +45,15 @@ const KeptFileSchema = z.object({
   confidence: z.number().min(0).max(1),
 });
 
+// Dropped files use the same `rationale` field name as kept files — single
+// concept ("why is this file in this bucket?"), single field. The PRD sketch
+// (#71) used `reason`, but the model reliably emitted `rationale` for both
+// kept and dropped entries during diagnosis (see commit history); the split
+// was below the model's signal floor and forced every drop to fail schema.
 const DroppedFileSchema = z.object({
-  repo:   z.string(),
-  path:   z.string(),
-  reason: z.string(),
+  repo:      z.string(),
+  path:      z.string(),
+  rationale: z.string(),
 });
 
 export const RerankResultSchema = z.object({
@@ -66,10 +71,23 @@ export type DroppedFile  = z.infer<typeof DroppedFileSchema>;
 // Tool schema
 // ---------------------------------------------------------------------------
 
+const KEPT_FILE_PROPERTIES = {
+  repo:       { type: 'string', description: 'The repo id from the candidate list (e.g. "gutenberg", "wordpress-develop").' },
+  path:       { type: 'string', description: 'The file path within the repo, exactly as it appeared in the candidate list.' },
+  rationale:  { type: 'string', description: 'One-line explanation of what this file is and why it belongs in this tier.' },
+  confidence: { type: 'number', minimum: 0, maximum: 1, description: 'How sure you are this file belongs in this tier (0–1).' },
+} as const;
+
+const DROPPED_FILE_PROPERTIES = {
+  repo:      { type: 'string', description: 'The repo id from the candidate list.' },
+  path:      { type: 'string', description: 'The file path from the candidate list.' },
+  rationale: { type: 'string', description: 'One-line explanation naming the noise pattern (e.g. "single-token English match — `deprecated` is the JS logger, not block deprecation").' },
+} as const;
+
 export const RERANK_TOOL: Anthropic.Tool = {
   name: 'report_rerank',
   description:
-    'Report the re-ranked auto-map result: which candidate files belong in primary / secondary / context, with a one-line rationale and confidence per kept file, plus a parallel list of dropped files with a one-line reason each.',
+    'Report the re-ranked auto-map result: which candidate files belong in primary / secondary / context (each with a one-line rationale and a confidence in [0, 1]), and which were dropped (each with a one-line rationale naming the noise pattern).',
   input_schema: {
     type: 'object' as const,
     required: ['primary', 'secondary', 'context', 'dropped'],
@@ -80,12 +98,7 @@ export const RERANK_TOOL: Anthropic.Tool = {
         items: {
           type: 'object',
           required: ['repo', 'path', 'rationale', 'confidence'],
-          properties: {
-            repo:       { type: 'string' },
-            path:       { type: 'string' },
-            rationale:  { type: 'string' },
-            confidence: { type: 'number', minimum: 0, maximum: 1 },
-          },
+          properties: KEPT_FILE_PROPERTIES,
         },
       },
       secondary: {
@@ -94,12 +107,7 @@ export const RERANK_TOOL: Anthropic.Tool = {
         items: {
           type: 'object',
           required: ['repo', 'path', 'rationale', 'confidence'],
-          properties: {
-            repo:       { type: 'string' },
-            path:       { type: 'string' },
-            rationale:  { type: 'string' },
-            confidence: { type: 'number', minimum: 0, maximum: 1 },
-          },
+          properties: KEPT_FILE_PROPERTIES,
         },
       },
       context: {
@@ -108,24 +116,15 @@ export const RERANK_TOOL: Anthropic.Tool = {
         items: {
           type: 'object',
           required: ['repo', 'path', 'rationale', 'confidence'],
-          properties: {
-            repo:       { type: 'string' },
-            path:       { type: 'string' },
-            rationale:  { type: 'string' },
-            confidence: { type: 'number', minimum: 0, maximum: 1 },
-          },
+          properties: KEPT_FILE_PROPERTIES,
         },
       },
       dropped: {
         type: 'array',
         items: {
           type: 'object',
-          required: ['repo', 'path', 'reason'],
-          properties: {
-            repo:   { type: 'string' },
-            path:   { type: 'string' },
-            reason: { type: 'string' },
-          },
+          required: ['repo', 'path', 'rationale'],
+          properties: DROPPED_FILE_PROPERTIES,
         },
       },
     },
@@ -141,18 +140,32 @@ const SYSTEM_PROMPT = `You are an AI re-ranker for documentation-vs-code mapping
   - primary   (max 3): the canonical implementation files for the doc's subject. The reader should read these first to understand the doc.
   - secondary (max 5): files that meaningfully implement, parse, validate, or test the same subject. Useful for cross-checking the doc.
   - context   (max 8): related files that establish surrounding behaviour (helpers, types, integration points). Not authoritative on their own.
-  - dropped:  files that match lexically but are NOT about this doc's subject (English-word collisions, cross-schema property collisions, generic identifiers). Each dropped file MUST carry a one-line reason naming the noise pattern.
+  - dropped:  files that match lexically but are NOT about this doc's subject (English-word collisions, cross-schema property collisions, generic identifiers). Each dropped file MUST carry a one-line rationale naming the noise pattern.
 
-Each kept file carries a one-line rationale (what the file is and why this tier) and a confidence in [0, 1]:
-  - 0.9–1.0: the file is unambiguously canonical for this doc.
-  - 0.7–0.9: the file is clearly related but not the single canonical source.
-  - 0.5–0.7: plausibly related but the reviewer should double-check.
-  - < 0.5:   keep only if no better candidate exists; flag for human review.
+Every file (kept or dropped) carries a one-line \`rationale\`. For kept files, the rationale describes what the file is and why this tier; for dropped files, the rationale names the noise pattern (e.g. "single-token English match", "cross-schema property collision"). Kept files additionally carry a \`confidence\` in [0, 1]:
+  - 0.9–1.0: the file is unambiguously canonical for this doc. Eligible for primary.
+  - 0.7–0.9: the file is clearly related but not the single canonical source. Eligible for primary or secondary.
+  - 0.5–0.7: plausibly related; the reviewer should double-check. **Place in context only — never primary or secondary.**
+  - < 0.5:   **Drop.** Do not keep at low confidence "in case it's useful" — a tangential file is analyzer noise, not corroboration. The downstream validator reads every kept file as authoritative input; weak entries pollute that signal. Move to \`dropped\` with a rationale naming why it's tangential.
+
+These confidence-tier rules are hard. Do not place a 0.65-confidence file in secondary "because primary is full" — if it doesn't meet the bar for the tier, it goes one tier down or to dropped, not up.
 
 Drop, do not keep at low confidence, when:
   - the only match is a single English word that happens to be a code identifier (e.g. "deprecated" matches a logging utility because the file exports a function literally called \`deprecated\`),
   - the only match is a generic JSON-schema property name shared across multiple unrelated schemas (\`name\`, \`style\`, \`title\`, \`version\`),
   - the file is in a fixtures, examples, stories, or icon directory and matches only generic identifiers.
+
+## Grounding rule for rationales (strict)
+
+You see only \`{ repo, path, score, matchedSymbols }\` per candidate — you do NOT see file contents. Therefore every rationale MUST be grounded in observable evidence you can point to in the candidate row itself:
+
+  - a name from \`matchedSymbols\` (e.g. "matched on \`registerBlockType\`"), OR
+  - a path-convention argument (e.g. "\`schemas/json/*.json\` files are the canonical schema for their slug", "\`tests/phpunit/\` is corroborating test evidence, not source authority"), OR
+  - the slug-to-path correspondence (e.g. "path segment \`block-variations\` matches the doc slug").
+
+Do NOT claim a file "contains", "implements", "exports", or "defines" an identifier unless that identifier appears in this candidate's \`matchedSymbols\`. Hedge words ("likely contains", "probably implements", "should define") indicate ungrounded inference and are forbidden — if you would write one, drop the file or move it to context with a path-convention rationale instead.
+
+A file whose only matched symbol is a single weak token (e.g. just \`transform\` or \`save\`) is at most secondary or context, never primary, regardless of how plausible its path looks.
 
 Use the \`report_rerank\` tool to return your result. Do not include files that were not in the candidate list.`;
 
@@ -167,14 +180,17 @@ export type RerankInput = {
 };
 
 export class Reranker {
-  private readonly model:       string;
+  public  readonly model:       string;
   private readonly anthropic:   Anthropic;
-  private readonly temperature: number;
+  // Undefined = omit the field on the API call. Newer models (e.g. Opus 4.7)
+  // reject `temperature` outright; older models default to 1.0 server-side.
+  // Callers that need determinism pass an explicit value.
+  private readonly temperature: number | undefined;
 
   constructor(model: string, anthropic: Anthropic, options: { temperature?: number } = {}) {
     this.model       = model;
     this.anthropic   = anthropic;
-    this.temperature = options.temperature ?? 0;
+    this.temperature = options.temperature;
   }
 
   async rerank(input: RerankInput): Promise<RerankResult | null> {
@@ -183,9 +199,9 @@ export class Reranker {
     let response: Anthropic.Message;
     try {
       response = await this.anthropic.messages.create({
-        model:       this.model,
-        max_tokens:  4096,
-        temperature: this.temperature,
+        model:      this.model,
+        max_tokens: 4096,
+        ...(this.temperature !== undefined ? { temperature: this.temperature } : {}),
         system: [
           {
             type:          'text',
@@ -204,6 +220,23 @@ export class Reranker {
 
     for (const block of response.content) {
       if (block.type !== 'tool_use' || block.name !== 'report_rerank') continue;
+      // Diagnostic seam — set DUMP_RERANK=1 to capture the raw tool input under
+      // /tmp/wp-docs-rerank-dump/. Used to diagnose the original `reason` vs
+      // `rationale` field-conflation bug; kept as the seam for future
+      // model-output regressions per CLAUDE.md "Diagnose before defending".
+      if (process.env.DUMP_RERANK) {
+        try {
+          const fs = await import('fs');
+          const path = await import('path');
+          const dir = '/tmp/wp-docs-rerank-dump';
+          fs.mkdirSync(dir, { recursive: true });
+          const ts = Date.now();
+          fs.writeFileSync(
+            path.join(dir, `rerank-${input.slug}-${ts}.json`),
+            JSON.stringify({ model: response.model, stop_reason: response.stop_reason, usage: response.usage, input: block.input }, null, 2),
+          );
+        } catch { /* dump is best-effort */ }
+      }
       const parsed = RerankResultSchema.safeParse(block.input);
       if (!parsed.success) {
         console.error(`AI re-rank failed: tool input did not match schema: ${parsed.error.toString()}`);

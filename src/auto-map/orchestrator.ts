@@ -12,6 +12,36 @@
 import { CodeTiersSchema, type CodeTiers, type CodeFile } from '../types/mapping.js';
 import { findFilesByTreeHeuristic, type ScoredFile } from '../indexer/symbol-index.js';
 import type { Reranker, RerankResult } from './rerank.js';
+import type { RerankCache } from './rerank-cache.js';
+
+// Files with confidence STRICTLY BELOW this floor are excluded from the
+// canonical CodeTiers projection. They remain in the RerankResult / audit so
+// reviewers can see what the model considered, but the validator pipeline
+// (which reads every kept file as authoritative input) never sees them.
+//
+// The model's prompt instructs it to drop these directly into `dropped`; this
+// floor is a deterministic guard against the model defying that rule. Per
+// CLAUDE.md "Spend on context and model, not on guards", that wording usually
+// argues against post-hoc filters — but here the filter makes the model's own
+// self-rated confidence load-bearing rather than fighting its output. If the
+// model says "I'm < 50% sure this is relevant", we honour that.
+//
+// 0.5 mirrors the lower bound of the "double-check" band in the prompt's
+// confidence rubric.
+export const MIN_INCLUSION_CONFIDENCE = 0.5;
+
+/**
+ * Derive the audit-file path from the canonical mapping path, e.g.
+ *   `mappings/gutenberg-block-api.json` → `mappings/gutenberg-block-api.audit.json`.
+ *
+ * Audit lives next to the mapping it audits and is committed alongside it.
+ */
+export function auditPathFor(mappingPath: string): string {
+  if (mappingPath.endsWith('.json')) {
+    return mappingPath.replace(/\.json$/, '.audit.json');
+  }
+  return `${mappingPath}.audit.json`;
+}
 
 export type BuildTiersInput = {
   docContent:     string;
@@ -21,27 +51,73 @@ export type BuildTiersInput = {
   // null = --no-rerank (skip the AI step entirely; lexical-only tiers).
   // present = rerank is on; falls back to lexical-only on null result.
   reranker:       Reranker | null;
+  // Optional content-addressed cache. When supplied alongside a reranker,
+  // the orchestrator wraps lookup → call-on-miss → store around the LLM call:
+  // a hit skips the LLM entirely. `null` / `undefined` disables caching.
+  cache?:         RerankCache | null;
 };
 
-export async function buildTiersForSlug(input: BuildTiersInput): Promise<CodeTiers> {
+export type BuildTiersResult = {
+  tiers: CodeTiers;
+  // null when --no-rerank was used or when rerank ran but failed (sentinel).
+  // Callers gate audit-file writing on this — no rerank, no rationale.
+  rerankResult: RerankResult | null;
+};
+
+export async function buildTiersForSlug(input: BuildTiersInput): Promise<BuildTiersResult> {
   if (input.reranker) {
-    const result = await input.reranker.rerank({
-      doc:        input.docContent,
-      slug:       input.slug,
-      candidates: input.scored,
-    });
-    if (result) return rerankToCodeTiers(result);
+    const result = await rerankWithCache(input.reranker, input.cache ?? null, input);
+    if (result) {
+      return { tiers: rerankToCodeTiers(result), rerankResult: result };
+    }
     // null = sentinel; the Reranker has already emitted a stderr warning.
     // Fall through to the lexical-only path.
   }
-  return lexicalTiers(input.scored, input.allFilesByRepo, input.slug);
+  return {
+    tiers:        lexicalTiers(input.scored, input.allFilesByRepo, input.slug),
+    rerankResult: null,
+  };
+}
+
+// Cache key is derived from docContent + canonically-sorted candidates +
+// model. Slug is intentionally NOT in the key — the doc content already
+// encodes it, and including it would split the cache for renamed slugs that
+// kept identical doc bodies.
+async function rerankWithCache(
+  reranker: Reranker,
+  cache:    RerankCache | null,
+  input:    BuildTiersInput,
+): Promise<RerankResult | null> {
+  const key = cache?.keyFor({
+    docContent: input.docContent,
+    candidates: input.scored,
+    model:      reranker.model,
+  });
+  if (cache && key) {
+    const hit = cache.get(key);
+    if (hit) return hit;
+  }
+  const result = await reranker.rerank({
+    doc:        input.docContent,
+    slug:       input.slug,
+    candidates: input.scored,
+  });
+  if (result && cache && key) cache.put(key, result);
+  return result;
 }
 
 // Project the rerank result down to the locked CodeTiers shape (repo + path).
 // Rationale, confidence, and dropped lists are slice-C concerns (audit file).
+//
+// Files with confidence < MIN_INCLUSION_CONFIDENCE are filtered out here —
+// they remain in `result` (and therefore in the audit), but the canonical
+// mapping / validator-pipeline input excludes them. See the constant's
+// docstring for the rationale.
 function rerankToCodeTiers(result: RerankResult): CodeTiers {
-  const project = (xs: { repo: string; path: string }[]): CodeFile[] =>
-    xs.map(({ repo, path }) => ({ repo, path }));
+  const project = (xs: { repo: string; path: string; confidence: number }[]): CodeFile[] =>
+    xs
+      .filter(f => f.confidence >= MIN_INCLUSION_CONFIDENCE)
+      .map(({ repo, path }) => ({ repo, path }));
   return CodeTiersSchema.parse({
     primary:   project(result.primary),
     secondary: project(result.secondary),

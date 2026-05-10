@@ -12,6 +12,7 @@ import {
   ManifestEntrySchema,
   CodeFileSchema,
   CodeTiersSchema,
+  MappingSchema,
 } from '../mapping.js';
 import { fingerprintIssue } from '../../history.js';
 import { runPipeline } from '../../pipeline.js';

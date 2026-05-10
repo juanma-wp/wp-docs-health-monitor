@@ -3,7 +3,7 @@
  * (optional) AI re-ranker.
  *
  * Usage:
- *   npx tsx scripts/auto-map.ts <slug> [--config <path>] [--write] [--no-rerank]
+ *   npx tsx scripts/auto-map.ts <slug> [--config <path>] [--write] [--no-rerank] [--explain]
  *
  * Builds a symbol index of all configured repos (cached by commit SHA),
  * cross-references the symbols named in the doc, and proposes a CodeTiers
@@ -13,17 +13,17 @@
  * and reproduces the pre-rerank lexical-only output.
  *
  * Flags:
- *   --config <path>   Config file (default: config/gutenberg-block-api.json)
- *   --write           Write result directly into the project mapping file
- *   --no-rerank       Skip the AI re-ranker (lexical-only output)
+ *   --config <path>      Config file (default: config/gutenberg-block-api.json)
+ *   --write              Write the canonical mapping AND the audit file (when re-rank ran)
+ *   --no-rerank          Skip the AI re-ranker (lexical-only output, no audit)
+ *   --explain            Print rationale per kept file and reason per dropped file to stdout
  */
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { resolve } from 'path';
 import Anthropic from '@anthropic-ai/sdk';
 import { loadConfig } from '../src/config/loader.js';
 import { createCodeSources } from '../src/adapters/index.js';
-import { ManifestEntrySchema, MappingSchema } from '../src/types/mapping.js';
+import { ManifestEntrySchema } from '../src/types/mapping.js';
 import { extractDocSymbols } from '../src/adapters/validator/context-assembler.js';
 import {
   buildSymbolIndex,
@@ -31,43 +31,15 @@ import {
   type SymbolIndex,
 } from '../src/indexer/symbol-index.js';
 import { Reranker } from '../src/auto-map/rerank.js';
-import { buildTiersForSlug } from '../src/auto-map/orchestrator.js';
+import { RerankCache } from '../src/auto-map/rerank-cache.js';
+import { buildTiersForSlug, auditPathFor } from '../src/auto-map/orchestrator.js';
+import { AuditWriter } from '../src/auto-map/audit-writer.js';
+import { parseArgs } from '../src/auto-map/parse-args.js';
 
-function parseArgs(argv: string[]): {
-  slug: string;
-  configPath: string;
-  write: boolean;
-  rerank: boolean;
-} {
-  const args = argv.slice(2);
-  let slug = '';
-  let configPath = resolve('config/gutenberg-block-api.json');
-  let write = false;
-  let rerank = true;
-
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--config' && args[i + 1]) {
-      configPath = resolve(args[i + 1]);
-      i++;
-    } else if (args[i] === '--write') {
-      write = true;
-    } else if (args[i] === '--no-rerank') {
-      rerank = false;
-    } else if (!slug && !args[i].startsWith('--')) {
-      slug = args[i];
-    }
-  }
-
-  if (!slug) {
-    console.error('Usage: npx tsx scripts/auto-map.ts <slug> [--config <path>] [--write] [--no-rerank]');
-    process.exit(1);
-  }
-
-  return { slug, configPath, write, rerank };
-}
+export { parseArgs };
 
 async function main() {
-  const { slug, configPath, write, rerank } = parseArgs(process.argv);
+  const { slug, configPath, write, rerank, explain } = parseArgs(process.argv);
   const config = await loadConfig(configPath);
 
   // 1. Fetch manifest and locate the entry for this slug
@@ -158,40 +130,63 @@ async function main() {
   let reranker: Reranker | null = null;
   if (rerank) {
     try {
-      reranker = new Reranker(config.validator.pass1Model, new Anthropic());
+      reranker = new Reranker(config.validator.rerankModel ?? config.validator.pass1Model, new Anthropic());
     } catch (err) {
       console.error(`AI re-rank failed: ${err instanceof Error ? err.message : String(err)}`);
       reranker = null;
     }
   }
 
-  const tiers = await buildTiersForSlug({
+  // Cache is always on when re-rank is on (no `--no-cache` flag — cost is
+  // negligible and identical re-runs should be free + bit-identical).
+  const cache = reranker ? new RerankCache() : null;
+
+  const { tiers, rerankResult } = await buildTiersForSlug({
     docContent,
     slug,
     scored,
     allFilesByRepo,
     reranker,
+    cache,
   });
 
   // 6. Output as JSON
   const output = { [slug]: tiers };
   console.log(JSON.stringify(output, null, 2));
 
+  // 7. --explain: render rationale per kept file and reason per dropped file.
+  // Has no effect under --no-rerank or when the AI step failed (no audit
+  // material). The Reranker has already emitted a stderr warning in those
+  // cases.
+  const auditWriter = new AuditWriter();
+  if (explain) {
+    if (rerankResult) {
+      console.log('\n' + auditWriter.formatExplain(rerankResult));
+    } else {
+      console.error(
+        '\n--explain: no rationale to print (re-rank was skipped or failed).',
+      );
+    }
+  }
+
   if (write) {
-    let existing: Record<string, unknown> = {};
+    let existingRaw: Record<string, unknown> = {};
     if (existsSync(config.mappingPath)) {
-      existing = MappingSchema.parse(
-        JSON.parse(readFileSync(config.mappingPath, 'utf-8')),
-      );
+      const parsed = JSON.parse(readFileSync(config.mappingPath, 'utf-8'));
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        existingRaw = parsed as Record<string, unknown>;
+      }
     }
-    if (slug in existing) {
-      process.stderr.write(
-        `\nWarning: mapping for "${slug}" already exists and will be overwritten.\n`,
-      );
-    }
-    const merged = { ...existing, ...output };
+
+    const merged: Record<string, unknown> = { ...existingRaw, [slug]: tiers };
     writeFileSync(config.mappingPath, JSON.stringify(merged, null, 2) + '\n');
     console.error(`\nWrote mapping for "${slug}" to ${config.mappingPath}`);
+
+    if (rerankResult) {
+      const auditPath = auditPathFor(config.mappingPath);
+      auditWriter.writeAudit(auditPath, slug, rerankResult);
+      console.error(`Wrote audit for "${slug}" to ${auditPath}`);
+    }
   } else {
     console.error(
       `\nReview the above and merge into ${config.mappingPath}, or re-run with --write`,

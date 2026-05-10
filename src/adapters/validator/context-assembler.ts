@@ -94,6 +94,26 @@ const PRIMITIVE_LITERALS_DENYLIST = new Set([
   'string', 'boolean', 'number', 'integer', 'object', 'array', 'function',
 ]);
 
+// Normalise a backtick-captured token into the form the indexer keys on:
+// bare identifiers, no namespace prefix, no call parens.
+//
+// Triggers ONLY on call-form tokens (those ending with `(...)`). Bare tokens
+// like `block.json`, `core/block`, `registerBlockType` are left untouched —
+// they may legitimately contain `.` or `/` and are matched verbatim against
+// the index. Without this normalisation, doc tokens like `registerBlockVariation()`
+// or `wp.blocks.registerBlockVariation()` never match the index entry indexed
+// from `export const registerBlockVariation = (...)` (bare identifier),
+// so the canonical implementation file is silently absent from candidates.
+//
+// Separators handled: `.` (JS/TS dotted access), `::` (PHP static), `->` (PHP
+// instance). The last segment after any of these is the indexed identifier.
+function normalizeDocSymbol(raw: string): string {
+  const callMatch = raw.match(/^(.+?)\s*\(.*\)\s*$/);
+  if (!callMatch) return raw;
+  const segments = callMatch[1].split(/\.|::|->/);
+  return segments[segments.length - 1].trim();
+}
+
 // Extract backtick-wrapped identifiers from doc markdown (e.g. `registerBlockType`).
 // Skips primitive type names and literal values to keep the missingSymbols hint
 // focused on real candidate identifiers.
@@ -103,7 +123,10 @@ export function extractDocSymbols(docContent: string): string[] {
   for (const [, symbol] of matches) {
     if (!symbol) continue;
     if (PRIMITIVE_LITERALS_DENYLIST.has(symbol)) continue;
-    seen.add(symbol);
+    const normalized = normalizeDocSymbol(symbol);
+    if (!normalized) continue;
+    if (PRIMITIVE_LITERALS_DENYLIST.has(normalized)) continue;
+    seen.add(normalized);
   }
   return [...seen];
 }
