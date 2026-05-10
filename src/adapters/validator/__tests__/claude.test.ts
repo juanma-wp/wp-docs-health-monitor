@@ -997,3 +997,75 @@ describe('ClaudeValidator — N-sample Pass 1', () => {
     ).toThrow(/samples must be an integer >= 1/);
   });
 });
+
+// ---------------------------------------------------------------------------
+// ClaudeValidator — Pass 1 failure must downgrade status to 'critical' (issue #49)
+//
+// When the validator cannot complete Pass 1 (missing API key, network error,
+// rate-limit, malformed response, or — in multi-sample mode — every sample
+// throwing), the resulting DocResult must reflect analytic failure rather
+// than defaulting to `healthy/100` from `scoreDoc([])`. A clean doc (Pass 1
+// succeeded with zero issues) must still be `healthy/100` — the fix
+// distinguishes "no issues found" from "could not look".
+// ---------------------------------------------------------------------------
+
+describe('ClaudeValidator — Pass 1 failure status (issue #49)', () => {
+  it('marks the doc critical with healthScore 0 when single-sample Pass 1 throws', async () => {
+    const client = {
+      messages: {
+        create: vi.fn(async () => {
+          throw new Error('Anthropic API error: invalid x-api-key');
+        }),
+      },
+    } as unknown as Anthropic;
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), makeCodeSources());
+
+    expect(result.status).toBe('critical');
+    expect(result.healthScore).toBe(0);
+    expect(result.issues).toHaveLength(0);
+    expect(result.diagnostics.some(d => /Pass 1 failed/.test(d))).toBe(true);
+    expect(result.diagnostics.some(d => /invalid x-api-key/.test(d))).toBe(true);
+  });
+
+  it('marks the doc critical when every Pass-1 sample throws (multi-sample mode)', async () => {
+    const client = {
+      messages: {
+        create: vi.fn(async () => {
+          throw new Error('rate limited');
+        }),
+      },
+    } as unknown as Anthropic;
+
+    const validator = new ClaudeValidator(
+      'claude-sonnet-4-6',
+      'claude-sonnet-4-6',
+      client,
+      undefined,
+      { samples: 3 },
+    );
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), makeCodeSources());
+
+    expect(result.status).toBe('critical');
+    expect(result.healthScore).toBe(0);
+    expect(result.issues).toHaveLength(0);
+    // Per-sample failure entries should remain in diagnostics so the cause is surfaced.
+    expect(result.diagnostics.filter(d => /Pass 1 sample \d+\/3 failed/.test(d))).toHaveLength(3);
+  });
+
+  it('preserves healthy/100 for a clean doc where Pass 1 succeeds with zero issues', async () => {
+    // The empty-findings → healthy/100 contract on `scoreDoc` MUST remain
+    // intact. Only analytic failure (above) downgrades to critical.
+    const pass1Empty = makeReportFindingsResponse([], ['Documentation accurately describes the API']);
+    const client = makeAnthropicClient([pass1Empty]);
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), makeCodeSources());
+
+    expect(result.status).toBe('healthy');
+    expect(result.healthScore).toBe(100);
+    expect(result.issues).toHaveLength(0);
+    expect(result.diagnostics.some(d => /Pass 1 failed/.test(d))).toBe(false);
+  });
+});

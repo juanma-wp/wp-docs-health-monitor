@@ -370,8 +370,11 @@ export class ClaudeValidator implements Validator {
         pass1Issues = pass1Result.issues;
         positives = pass1Result.positives.slice(0, 3);
       } catch (err) {
+        // Pass 1 produced no signal — the doc's health is unknown.
+        // Surface that as `critical` rather than letting `scoreDoc([])`
+        // default to healthy/100 (issue #49).
         diagnostics.push(`Pass 1 failed: ${String(err)}`);
-        return this.buildDocResult(doc, [], positives, assembled.relatedCode, diagnostics, commitSha);
+        return this.buildFailureDocResult(doc, positives, assembled.relatedCode, diagnostics, commitSha);
       }
     } else {
       const seenFingerprints = new Set<string>();
@@ -403,7 +406,8 @@ export class ClaudeValidator implements Validator {
         }
       }
       if (succeededSamples === 0) {
-        return this.buildDocResult(doc, [], [], assembled.relatedCode, diagnostics, commitSha);
+        // Every sample failed — same situation as a single-sample throw.
+        return this.buildFailureDocResult(doc, [], assembled.relatedCode, diagnostics, commitSha);
       }
       positives = aggregatedPositives.slice(0, 3);
     }
@@ -493,6 +497,35 @@ export class ClaudeValidator implements Validator {
       healthScore,
       status,
       issues,
+      positives,
+      relatedCode,
+      diagnostics,
+      commitSha,
+      analyzedAt:  new Date().toISOString(),
+    };
+  }
+
+  // Build a DocResult for the case where Pass 1 produced no signal at all
+  // (single-sample throw, or every sample failing in multi-sample mode).
+  // Bypasses `scoreDoc` deliberately: an empty issue array there would
+  // collapse to healthy/100, masking analytic failure as a clean doc
+  // (issue #49). The clean-doc path (Pass 1 succeeded with zero issues)
+  // still flows through `buildDocResult` and remains healthy/100.
+  private buildFailureDocResult(
+    doc: Doc,
+    positives: string[],
+    relatedCode: DocResult['relatedCode'],
+    diagnostics: string[],
+    commitSha: string,
+  ): DocResult {
+    return {
+      slug:        doc.slug,
+      title:       doc.title,
+      parent:      doc.parent,
+      sourceUrl:   doc.sourceUrl,
+      healthScore: 0,
+      status:      'critical',
+      issues:      [],
       positives,
       relatedCode,
       diagnostics,
