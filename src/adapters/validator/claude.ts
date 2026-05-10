@@ -200,6 +200,12 @@ export function isSelfRejected(suggestion: string): boolean {
 //     evidence.
 //   - Inline code backticks (`` `foo` ``) — structural marker that
 //     distinguishes identifiers from prose; preserve.
+//   - Bullet markers (`- `) — handled in verbatimIncludes as a
+//     second-chance strategy rather than here, because stripping them
+//     from both sides of the base normaliser would break the existing
+//     match where whitespace-collapse already turns multi-line bullet
+//     content into inline ` - ` separators that the model retains.
+//     (Only `- ` is handled; `* ` bullet style is not stripped.)
 export function normalizeForVerbatim(s: string): string {
   return s
     // Strip Markdown link syntax: [text](url) → text. Works for inline
@@ -208,6 +214,52 @@ export function normalizeForVerbatim(s: string): string {
     // Collapse runs of whitespace to a single space.
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+// Verbatim substring check with two additional fallback strategies.
+//
+// Contract: `haystack` must already be normalizeForVerbatim'd.
+// `needle` is normalized internally.
+//
+// Strategy 2 — bullet-stripped match:
+//   Models sometimes prefix each quoted line with `- ` when the doc
+//   section is a bullet list. After normalizeForVerbatim these appear
+//   as a leading `- ` or inline ` - ` separators in the needle.
+//   Stripping them from both sides and retrying catches this pattern
+//   without touching the base normaliser (which needs those ` - `
+//   separators intact for the inverse case where the model collapses
+//   multi-line bullets into a single inline-dashed phrase).
+//   The haystack is stripped symmetrically so that whitespace-collapsed
+//   bullet items (`- a - b - c`) can match stripped needle `a b c`.
+//   The guard `nStripped !== n` ensures this path only activates when
+//   the needle itself contains a `- ` bullet pattern, bounding the
+//   risk of spurious matches from stripping legitimate inline dashes.
+//   Remove when: the model reliably omits bullet reformatting of prose
+//   quotes.
+//
+// Strategy 3 — single backtick identifier fallback:
+//   Docs sometimes omit the backticks around a property name in prose
+//   even when the model correctly quotes it as `identifier`. Allow a
+//   single-token backtick-wrapped needle to match the plain-text form.
+//   Remove when: the model reliably matches the doc's backtick
+//   convention when quoting identifiers.
+export function verbatimIncludes(haystack: string, needle: string): boolean {
+  const n = normalizeForVerbatim(needle);
+
+  // Strategy 1: direct normalized match
+  if (haystack.includes(n)) return true;
+
+  // Strategy 2: bullet-stripped match on both sides
+  const stripBullets = (s: string): string =>
+    s.replace(/(?:^| )- /g, ' ').replace(/\s+/g, ' ').trim();
+  const nStripped = stripBullets(n);
+  if (nStripped !== n && stripBullets(haystack).includes(nStripped)) return true;
+
+  // Strategy 3: single backtick identifier against plain text
+  const singleIdent = n.match(/^`([^`\s]+)`$/);
+  if (singleIdent) return haystack.includes(singleIdent[1]);
+
+  return false;
 }
 
 export function isWeakSuggestion(suggestion: string): boolean {
@@ -366,9 +418,11 @@ export class ClaudeValidator implements Validator {
       const { codeRepo, codeFile, codeSays, docSays } = issue.evidence;
 
       // docSays must be a verbatim quote from the doc
-      if (!normalizedDoc.includes(normalizeForVerbatim(docSays))) {
+      if (!verbatimIncludes(normalizedDoc, docSays)) {
         this.droppedHallucinations++;
-        console.warn(`[verbatim-check] dropped issue in ${doc.slug}: docSays "${docSays}" not found in doc content`);
+        const conf = issue.confidence;
+        const tag = conf >= 0.9 ? `[verbatim-check][high-conf:${conf}]` : '[verbatim-check]';
+        console.warn(`${tag} dropped issue in ${doc.slug}: docSays "${docSays}" not found in doc content`);
         continue;
       }
 
@@ -385,9 +439,11 @@ export class ClaudeValidator implements Validator {
         }
         // nonexistent-name evidence is absence — there is no quote to find in the file
         const isAbsenceIssue = issue.type === 'nonexistent-name';
-        if (!isAbsenceIssue && !normalizedFile.includes(normalizeForVerbatim(codeSays))) {
+        if (!isAbsenceIssue && !verbatimIncludes(normalizedFile, codeSays)) {
           this.droppedHallucinations++;
-          console.warn(`[verbatim-check] dropped issue in ${doc.slug}: codeSays "${codeSays}" not found in ${codeRepo}:${codeFile}`);
+          const conf = issue.confidence;
+          const tag = conf >= 0.9 ? `[verbatim-check][high-conf:${conf}]` : '[verbatim-check]';
+          console.warn(`${tag} dropped issue in ${doc.slug}: codeSays "${codeSays}" not found in ${codeRepo}:${codeFile}`);
           continue;
         }
         verbatimPassed.push(issue);
