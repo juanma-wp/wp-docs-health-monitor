@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Mock } from 'vitest';
 
 import type Anthropic from '@anthropic-ai/sdk';
-import { ClaudeValidator, isWeakSuggestion, isSelfRejected, normalizeForVerbatim, REPORT_FINDINGS_TOOL, PASS1_MAX_ISSUES } from '../claude.js';
+import { ClaudeValidator, isWeakSuggestion, isSelfRejected, normalizeForVerbatim, verbatimIncludes, REPORT_FINDINGS_TOOL, PASS1_MAX_ISSUES } from '../claude.js';
 import type { Doc } from '../../doc-source/types.js';
 import type { CodeTiers } from '../../../types/mapping.js';
 import type { CodeSource } from '../../code-source/types.js';
@@ -435,6 +435,56 @@ describe('normalizeForVerbatim', () => {
     );
     const needle = normalizeForVerbatim("stored in the block's comment delimiter.");
     expect(haystack.includes(needle)).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// verbatimIncludes
+// ---------------------------------------------------------------------------
+
+describe('verbatimIncludes', () => {
+  // Strategy 1: direct normalized match (existing behaviour, pinned)
+  it('delegates to normalizeForVerbatim for normal content', () => {
+    expect(verbatimIncludes('foo bar baz', 'foo bar')).toBe(true);
+    expect(verbatimIncludes('foo bar baz', 'qux')).toBe(false);
+  });
+
+  // Strategy 2: bullet-stripped match
+  it('matches when model prefixes lines with `- ` from a bullet-formatted doc section', () => {
+    // Doc content: plain text property descriptions (no bullets)
+    // Model's docSays: prefixed with `- ` on each line (bullet reformatting)
+    const docContent = normalizeForVerbatim('Optional.\nProperty: `apiVersion`');
+    expect(verbatimIncludes(docContent, '- Optional.\n- Property: `apiVersion`')).toBe(true);
+  });
+
+  it('matches when model uses leading `- ` on a single-line quote', () => {
+    const docContent = normalizeForVerbatim('The apiVersion field is required.');
+    expect(verbatimIncludes(docContent, '- The apiVersion field is required.')).toBe(true);
+  });
+
+  it('does not strip mid-word hyphens (content, not bullets)', () => {
+    // `type-signature` has a hyphen but no surrounding spaces — must stay
+    const docContent = normalizeForVerbatim('type-signature drift is flagged');
+    expect(verbatimIncludes(docContent, 'type-signature drift')).toBe(true);
+  });
+
+  // Strategy 3: single backtick identifier fallback
+  it('matches single backtick identifier against plain text in haystack', () => {
+    expect(verbatimIncludes('the filePath property is optional', '`filePath`')).toBe(true);
+    expect(verbatimIncludes('use apiVersion to declare the version', '`apiVersion`')).toBe(true);
+  });
+
+  it('matches when haystack also has the backtick form (strategy 1 fires)', () => {
+    expect(verbatimIncludes('use `filePath` to specify the path', '`filePath`')).toBe(true);
+  });
+
+  it('does not broaden multi-token backtick quotes', () => {
+    expect(verbatimIncludes('some content here', '`foo bar`')).toBe(false);
+  });
+
+  it('still rejects genuine hallucinations', () => {
+    expect(verbatimIncludes('The block name must be a string.', '`shadowColor`')).toBe(false);
+    expect(verbatimIncludes('The block name must be a string.', 'nonExistentFunction()')).toBe(false);
   });
 });
 
