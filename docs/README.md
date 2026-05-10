@@ -30,4 +30,4 @@ After that, jump to whichever section below matches your task.
 
 ## Design notes — *deferred* — `design/`
 
-- **[design/release-pinning.md](./design/release-pinning.md)** — pin code to released tags rather than `trunk`. Deferred to Phase 2.
+- **[design/release-pinning.md](./design/release-pinning.md)** — deferred extensions to the applied release-pinning policy (auto-resolve Gutenberg's latest plugin release tag; bundled-into-core snapshot). Trigger: P2-M3.

@@ -259,6 +259,11 @@ the last doc edit would produce false positives.
 
 ### On release pinning
 
-Phase 1 validates against `trunk`, which contains unreleased Gutenberg code. This is
-a known limitation. Phase 2 pins to the latest stable Gutenberg release tag. See
-[docs/design/release-pinning.md](./design/release-pinning.md).
+Each `codeSource` pins its `ref` to reflect what users actually run for that channel:
+`wordpress-develop` to the current WP release branch (`6.9` today), `gutenberg` to
+`trunk` (the published Handbook is generated from trunk, so the comparison is
+internally consistent). Two extensions remain deferred: auto-resolving Gutenberg's
+latest plugin release tag, and the bundled-into-core Gutenberg snapshot. See
+[ARCHITECTURE.md § Code Ingestion](./ARCHITECTURE.md#code-ingestion-codesource) for
+the applied policy and [docs/design/release-pinning.md](./design/release-pinning.md)
+for the deferred work.

@@ -17,7 +17,7 @@
     "wordpress-develop": {
       "type": "git-clone",
       "repoUrl": "https://github.com/WordPress/wordpress-develop.git",
-      "ref": "trunk"
+      "ref": "6.9"
     }
   },
   "mappingPath": "mappings/gutenberg-block-api.json",

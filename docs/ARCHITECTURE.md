@@ -92,7 +92,14 @@ A mock fixture (`examples/mock-results.json`) exercises every schema and unblock
 
 **Key decision — commit SHA on `DocResult`:** the SHA of the code repo at analysis time is stored on every `DocResult`. This enables the change detector (deferred to Stretch): next run compares current SHA to stored SHA and skips docs whose mapped code hasn't changed.
 
-**Open design issue — `trunk` as default ref:** the Phase 1 `git-clone` implementation clones without specifying a ref, resolving to `trunk`. `trunk` contains unreleased code that no end user runs, so a doc correctly describing released behavior can be flagged against unreleased refactors, and a doc describing unreleased APIs can be flagged as *healthy* when no plugin user can use them yet. Small implementation footprint; Phase 2 scope. See [release-pinning.md](./design/release-pinning.md) for the proposed fix and deferral rationale.
+**Release-pinning policy — `ref` per `codeSource` reflects what users actually run:** the `git-clone` adapter accepts a `ref` per source, and each source must pick a ref deliberately rather than defaulting to `trunk`. `trunk` contains unreleased code that no end user runs, so default-to-`trunk` flags healthy docs against unreleased refactors and silently approves docs describing APIs nobody can use yet.
+
+Current policy for the Gutenberg Block API site (`config/gutenberg-block-api.json`):
+
+- **`wordpress-develop` → current WP release branch** (e.g. `6.9`). The Block Editor Handbook's audience is running a stable WP release, so the WP-core side of the analysis is grounded against the code those users actually execute. Bumped manually when a new core major ships.
+- **`gutenberg` → `trunk`**. The published Handbook (`developer.wordpress.org/block-editor/`) is generated from `gutenberg/trunk/docs/manifest.json`, so docs and code are read from the same ref — the comparison is internally consistent for the page as published.
+
+Two extensions remain deferred (see [release-pinning.md](./design/release-pinning.md)): auto-resolving Gutenberg's latest plugin release tag — captures the orthogonal drift "doc claims an API that hasn't shipped to plugin users yet" — and the bundled-into-core Gutenberg snapshot (the version frozen into the pinned `wordpress-develop` branch, which is what core-only users actually run).
 
 ---
 
