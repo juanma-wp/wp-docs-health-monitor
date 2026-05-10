@@ -28,7 +28,7 @@ export const DocResultSchema = z.object({
   parent:      z.string().nullable(),  // parent slug from manifest — used by dashboard tree view
   sourceUrl:   z.string().url(),
   healthScore: z.number().min(0).max(100).nullable(),
-  status:      z.enum(['healthy', 'needs-attention', 'critical', 'not-mapped']),
+  status:      z.enum(['healthy', 'needs-attention', 'critical', 'not-mapped', 'analysis-failed']),
   issues:      z.array(IssueSchema),
   positives:   z.array(z.string()).max(3),
   relatedCode: z.array(z.object({
@@ -78,6 +78,7 @@ export const RunResultsSchema = z.object({
     needsAttention: z.number().int(),
     critical:       z.number().int(),
     notMapped:      z.number().int().default(0),
+    analysisFailed: z.number().int().default(0),
     issues: z.object({
       total:    z.number().int(),
       critical: z.number().int(),

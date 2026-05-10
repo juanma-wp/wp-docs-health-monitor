@@ -947,3 +947,70 @@ describe('ClaudeValidator — N-sample Pass 1', () => {
     ).toThrow(/samples must be an integer >= 1/);
   });
 });
+
+// ---------------------------------------------------------------------------
+// ClaudeValidator — Pass 1 failure status (issue #49)
+//
+// When Pass 1 cannot complete (single-sample throw, or every multi-sample
+// throw), the resulting DocResult must reflect analytic failure as a
+// distinct non-scoring status — not silently roll through scoreDoc([]) and
+// land at healthy/100. See docs/GLOSSARY.md § Status (`analysis-failed`).
+// ---------------------------------------------------------------------------
+
+describe('ClaudeValidator — Pass 1 failure status (issue #49)', () => {
+  it('produces status:analysis-failed / healthScore:null when single-sample Pass 1 throws', async () => {
+    const client = {
+      messages: {
+        create: vi.fn(async () => {
+          throw new Error('transient API error');
+        }),
+      },
+    } as unknown as Anthropic;
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), makeCodeSources());
+
+    expect(result.status).toBe('analysis-failed');
+    expect(result.healthScore).toBeNull();
+    expect(result.issues).toHaveLength(0);
+    expect(result.diagnostics.some(d => /Pass 1 failed/.test(d))).toBe(true);
+  });
+
+  it('produces status:analysis-failed when every multi-sample Pass 1 throws', async () => {
+    const client = {
+      messages: {
+        create: vi.fn(async () => {
+          throw new Error('rate limit');
+        }),
+      },
+    } as unknown as Anthropic;
+
+    const validator = new ClaudeValidator(
+      'claude-sonnet-4-6',
+      'claude-sonnet-4-6',
+      client,
+      undefined,
+      { samples: 3 },
+    );
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), makeCodeSources());
+
+    expect(result.status).toBe('analysis-failed');
+    expect(result.healthScore).toBeNull();
+    expect(result.issues).toHaveLength(0);
+    // Each failed sample emits its own diagnostic so the cause is recoverable.
+    expect(result.diagnostics.filter(d => /Pass 1 sample \d\/3 failed/.test(d))).toHaveLength(3);
+  });
+
+  it('preserves healthy/100 on the clean-doc path (regression pin: empty issues != failure)', async () => {
+    // Pass 1 succeeds and legitimately reports zero issues — must remain healthy/100.
+    const pass1Response = makeReportFindingsResponse([], ['Doc accurately describes the API']);
+    const client = makeAnthropicClient([pass1Response]);
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), makeCodeSources());
+
+    expect(result.status).toBe('healthy');
+    expect(result.healthScore).toBe(100);
+    expect(result.issues).toHaveLength(0);
+  });
+});

@@ -319,7 +319,7 @@ export class ClaudeValidator implements Validator {
         positives = pass1Result.positives.slice(0, 3);
       } catch (err) {
         diagnostics.push(`Pass 1 failed: ${String(err)}`);
-        return this.buildDocResult(doc, [], positives, assembled.relatedCode, diagnostics, commitSha);
+        return this.buildAnalysisFailedDocResult(doc, assembled.relatedCode, diagnostics, commitSha);
       }
     } else {
       const seenFingerprints = new Set<string>();
@@ -351,7 +351,7 @@ export class ClaudeValidator implements Validator {
         }
       }
       if (succeededSamples === 0) {
-        return this.buildDocResult(doc, [], [], assembled.relatedCode, diagnostics, commitSha);
+        return this.buildAnalysisFailedDocResult(doc, assembled.relatedCode, diagnostics, commitSha);
       }
       positives = aggregatedPositives.slice(0, 3);
     }
@@ -438,6 +438,33 @@ export class ClaudeValidator implements Validator {
       status,
       issues,
       positives,
+      relatedCode,
+      diagnostics,
+      commitSha,
+      analyzedAt:  new Date().toISOString(),
+    };
+  }
+
+  // Used when Pass 1 cannot complete (single-sample throw, or every
+  // multi-sample throw). The doc is non-scoring: status 'analysis-failed',
+  // healthScore null, no issues, no positives. Diagnostics carry the cause
+  // and are excluded from Overall Health by computeOverallHealth in the
+  // pipeline. See docs/GLOSSARY.md § Status.
+  private buildAnalysisFailedDocResult(
+    doc: Doc,
+    relatedCode: DocResult['relatedCode'],
+    diagnostics: string[],
+    commitSha: string,
+  ): DocResult {
+    return {
+      slug:        doc.slug,
+      title:       doc.title,
+      parent:      doc.parent,
+      sourceUrl:   doc.sourceUrl,
+      healthScore: null,
+      status:      'analysis-failed',
+      issues:      [],
+      positives:   [],
       relatedCode,
       diagnostics,
       commitSha,

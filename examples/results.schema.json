@@ -80,6 +80,10 @@
               "type": "integer",
               "default": 0
             },
+            "analysisFailed": {
+              "type": "integer",
+              "default": 0
+            },
             "issues": {
               "type": "object",
               "properties": {
@@ -181,7 +185,8 @@
                   "healthy",
                   "needs-attention",
                   "critical",
-                  "not-mapped"
+                  "not-mapped",
+                  "analysis-failed"
                 ]
               },
               "issues": {

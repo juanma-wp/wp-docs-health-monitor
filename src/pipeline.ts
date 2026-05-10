@@ -22,7 +22,10 @@ function formatRunId(date: Date): string {
 }
 
 function computeOverallHealth(docResults: DocResult[]): number {
-  const analyzed = docResults.filter(d => d.status !== 'not-mapped');
+  // Exclude non-scoring statuses: 'not-mapped' (no code to compare against)
+  // and 'analysis-failed' (validator never produced findings). Both carry
+  // healthScore: null and must not contribute to the average.
+  const analyzed = docResults.filter(d => d.status !== 'not-mapped' && d.status !== 'analysis-failed');
   if (analyzed.length === 0) return 100;
   const sum = analyzed.reduce((acc, d) => acc + (d.healthScore ?? 0), 0);
   return Math.round(sum / analyzed.length);
@@ -175,6 +178,7 @@ export async function runPipeline(config: Config, options: RunPipelineOptions = 
     needsAttention: docResults.filter(d => d.status === 'needs-attention').length,
     critical:       docResults.filter(d => d.status === 'critical').length,
     notMapped:      docResults.filter(d => d.status === 'not-mapped').length,
+    analysisFailed: docResults.filter(d => d.status === 'analysis-failed').length,
     issues: {
       total:    allIssues.length,
       critical: allIssues.filter(i => i.severity === 'critical').length,
