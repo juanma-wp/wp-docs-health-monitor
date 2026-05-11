@@ -108,7 +108,7 @@ To use OpenRouter, keep `type: "claude"` and switch the provider + model IDs:
 
 ## Cost note
 
-Each pipeline run calls the configured Claude-compatible provider once per doc. With `claude-sonnet-4-6`, a full run over ~10 docs costs roughly $1–$3 depending on doc length and code context size. Use `--results` with `examples/mock-results.json` to explore the dashboard at zero cost.
+Each pipeline run calls the configured Claude-compatible provider once per doc. With Anthropic `claude-sonnet-4-6` (or equivalent OpenRouter model), a full run over ~10 docs costs roughly $1–$3 depending on doc length and code context size. Use `--results` with `examples/mock-results.json` to explore the dashboard at zero cost.
 
 The estimated cost is stored in `results.json` under `usage.estimatedCostUsd` and appended to `data/history.json` after each run. It is calculated from the token counts returned by the API using the prices configured in `config.pricing`. The defaults match the current Sonnet 4.6 rates — check [Anthropic's pricing page](https://www.anthropic.com/pricing) for updates and adjust `config.pricing` in your config file if needed.
 

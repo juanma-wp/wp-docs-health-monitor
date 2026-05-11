@@ -125,6 +125,12 @@ describe('createValidator', () => {
     expect(() => createValidator(cfg)).toThrow('OPENROUTER_API_KEY');
   });
 
+  it('throws with the custom apiKeyEnvVar name when it is missing', () => {
+    const cfg = makeDocSourceConfig('manifest-url');
+    cfg.validator.apiKeyEnvVar = 'MY_OPENROUTER_KEY';
+    expect(() => createValidator(cfg)).toThrow('MY_OPENROUTER_KEY');
+  });
+
   it('returns a ClaudeValidator for provider=openrouter when key is set', () => {
     process.env.OPENROUTER_API_KEY = 'sk-or-test';
     const cfg = makeDocSourceConfig('manifest-url');
