@@ -50,6 +50,8 @@ CLAUDE.local.md
 !.claude/skills/triage/
 !.claude/skills/grill-me/
 !.claude/skills/grill-with-docs/
+!.claude/skills/to-issues/
+!.claude/skills/to-prd/
 
 # Sandcastle runtime state (logs, worktrees, sessions, local env)
 .sandcastle/.env
