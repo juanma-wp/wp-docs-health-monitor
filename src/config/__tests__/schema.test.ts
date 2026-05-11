@@ -21,6 +21,7 @@ describe('ConfigSchema — validator.temperature / validator.samples (issue #56)
   it('defaults temperature to 0 and samples to 1 when both are omitted', () => {
     const parsed = ConfigSchema.parse(baseRaw);
     expect(parsed.validator.provider).toBe('anthropic');
+    expect(parsed.validator.format).toBe('anthropic');
     expect(parsed.validator.temperature).toBe(0);
     expect(parsed.validator.samples).toBe(1);
   });
@@ -76,6 +77,14 @@ describe('ConfigSchema — validator.temperature / validator.samples (issue #56)
     const result = ConfigSchema.safeParse({
       ...baseRaw,
       validator: { ...baseRaw.validator, temperature: Number.POSITIVE_INFINITY },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects unsupported validator format values', () => {
+    const result = ConfigSchema.safeParse({
+      ...baseRaw,
+      validator: { ...baseRaw.validator, format: 'openai' },
     });
     expect(result.success).toBe(false);
   });
