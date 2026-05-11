@@ -15,61 +15,115 @@ Node 20+ required. ESM throughout (`"type": "module"`); intra-package imports us
 
 ## Architecture
 
-Read these in order when orienting: `PLAN.md` (phases + decisions) → `docs/prd.md` (requirements + user stories) → `docs/architecture.md` (why decisions were made) → `AGENTS.md` (role-scoped reviewing/implementation) → `src/pipeline.ts` (the wire-up).
+Read these in order when orienting: `PLAN.md` (phases + decisions) → `docs/PRD.md` (requirements + user stories) → `docs/ARCHITECTURE.md` (why decisions were made, including the locked-contract / adapter-pattern rationale) → `AGENTS.md` (role-scoped reviewing/implementation, including hard boundaries) → `src/pipeline.ts` (the wire-up).
 
-### The contract is the center of gravity
+### Project stance — non-obvious things you can't infer from the code
 
-`src/types/results.ts` and `src/types/mapping.ts` define every object that crosses a component boundary — `ManifestEntry`, `CodeTiers`, `Issue`, `DocResult`, `RunResults`. These are **Zod schemas with inferred TypeScript types**; the schemas are the source of truth, the types are derivatives. Two implications:
+These are conventions and invariants that surprise readers and aren't carried by the code alone. Everything else (contract layout, adapter wiring, current adapter list, role boundaries) lives in `docs/ARCHITECTURE.md` and `AGENTS.md` — go there, don't restate it here.
 
-1. Every boundary-crossing value (config files, manifest JSON, Claude tool output, `results.json`) is parsed through a schema — no ambient trust.
-2. `examples/mock-results.json` must round-trip `RunResultsSchema.parse()` successfully. It's the coordination artifact that lets the dashboard track build against a contract while the pipeline track is still implementing it. `examples/results.schema.json` is a generated artifact — never edit by hand; re-run `npm run gen:schema`.
+- **Pipeline error-handling stance.** `runPipeline` always produces a valid `RunResults`. Failed fetches and mapping errors become per-doc `diagnostics` entries with `status: 'critical'` — never uncaught exceptions. Tests pin this: `src/types/__tests__/schemas.test.ts` (`runPipeline` block) and `src/adapters/doc-source/__tests__/manifest-url.test.ts` (error-handling block).
+- **`src/types/` is locked.** Zod schemas are the source of truth; TypeScript types are derived. `examples/mock-results.json` must round-trip `RunResultsSchema.parse()`. `examples/results.schema.json` is generated — never edit by hand; re-run `npm run gen:schema`.
+- **`GitCloneSource.readFile(path, startLine?, endLine?)` only slices when both bounds are provided.** Partial bounds silently return the full file. Pinned by tests.
+- **Metrics (`wordCount`, `codeExampleCount`, `linkCount`) are computed at ingest**, not at validation time. The validator receives pre-parsed `Doc` objects.
+- **`deriveSourceUrl` in `manifest-url.ts` has two branches** (URL-base transform vs. GitHub UI fallback). The transform requires a `/docs/` segment and falls through to the fallback if absent. Both covered by tests.
 
-`AGENTS.md` codifies this: `src/types/` is locked. Neither the Backend Engineer nor Frontend Engineer role is permitted to modify those contracts.
+## Repository layout — commentary-only entries
 
-### Adapter pattern drives the pipeline
+(Most directories are self-describing. Listed here are the ones with non-obvious conventions.)
 
-The pipeline (`src/pipeline.ts`) never imports concrete adapters. It depends on three interfaces — `DocSource`, `CodeSource`, `DocCodeMapper` — and asks `src/adapters/index.ts` to instantiate implementations based on config type strings:
+- `src/types/` — locked contracts (see above).
+- `mappings/test.json` — intentionally empty `{}`, used by unit tests.
+- `examples/mock-results.json` — canonical `RunResults` fixture; round-trips `RunResultsSchema`.
+- `examples/results.schema.json` — generated artifact; never hand-edit.
+- `scripts/bootstrap-mapping.ts` — dev-time accelerator for generating mappings via Claude.
+- `scripts/verify-ingestion.ts` — end-to-end smoke test of the ingestion pipeline.
+- `scripts/gen-schema.ts` — regenerates `examples/results.schema.json` from Zod.
+
+## Autonomous workflow (Ralph) — pre-confirmation scope
+
+`./ralph/afk.sh` runs Claude Code autonomously inside a Sandcastle Docker sandbox to clear an issue queue. While that loop is running, the agent has narrow blanket pre-confirmation to:
+
+- push branches matching `ralph/**`
+- open PRs from those branches against `main`, with a *How to test* section in the body
+- post a **single** PR-link comment on a source issue *that carries both* `assignee:$RALPH_ASSIGNEE` *and* `label:ready-for-agent` (the `/triage` skill's AFK-ready state)
+
+Ralph requests auto-merge (`gh pr merge --auto --squash`) on every PR it opens. **GitHub auto-merges only when both required status checks pass**:
+
+- `ci` — `npm run typecheck` + `npm test` (`.github/workflows/ci.yml`).
+- `path-gate` — diff confined to a narrow allowlist (`.github/workflows/path-gate.yml`). The gate only enforces on PRs whose head branch starts with `ralph/`; human and external PRs pass straight through. Ralph PRs touching anything outside the allowlist (validator core, `src/types/`, prompts, configs, CI itself, package metadata) **fail this check** and bounce to manual review — they will not auto-merge.
+
+This means narrowly-scoped Ralph PRs land autonomously, scope-drifted Ralph PRs bounce, and human PRs are unaffected. Ralph never closes issues — the merge auto-closes via `Closes #<n>` in the PR body.
+
+To widen Ralph's allowlist (when a new module joins Ralph's scope), edit `ALLOWLIST_PATTERN` in `.github/workflows/path-gate.yml` from a non-`ralph/` branch (the gate is a no-op for those, so the change merges through normal review).
+
+Any issue or PR not matching the exact pair (assignee `$RALPH_ASSIGNEE` from `.env` AND label `ready-for-agent`) still requires manual confirmation. Direct pushes to `main` remain forbidden; branch protection enforces this. Human PRs go through normal review and merge.
+
+See [`DEVELOPMENT.md`](./DEVELOPMENT.md#autonomous-workflow-ralph) for setup (prerequisites, `.env` keys, three entry points).
+
+## Validator pipeline discipline
+
+This project is a **generic** docs-vs-code drift validator. Each site plugs in its own config, mappings, and per-site prompt extension (`config.validator.promptExtension`, wired into `SYSTEM_PROMPT` at `claude.ts:313-315`). The pipeline must remain useful for any docs/codebase pair.
+
+That generality dictates how the validator stack (`src/adapters/validator/`, `src/extractors/`, `SYSTEM_PROMPT`) evolves.
+
+### Where a new rule belongs — layered home, broadest first
+
+When you discover a class of false positive or missed bug, the rule needs a home. Walk these layers in order and pick the **broadest** one the rule honestly fits — not the narrowest. Adding to a site extension is a positive choice, not a fallback.
+
+1. **Common `SYSTEM_PROMPT`** (`src/adapters/validator/prompts/system.md`) — every site benefits. Rules that apply to *every* docs/codebase pair regardless of language, framework, or corpus: the impact filter, severity rubric, evidence rules, claim-type-keyed authority guidance, drift-type definitions and their generic refinements, "verify before reporting" rules (cross-section check, short-circuit evaluation, direct contradiction), prose-quote constraints. If a rule names a specific identifier, file convention, package, framework, language, or version, it does NOT belong here.
+
+2. **Language pack** (`prompts/lang-<lang>.md`, e.g. `lang-jsts.md`, `lang-php.md`) — any site using that language benefits. Conventions that apply to *any* corpus written in a particular ecosystem: JS/TS test path globs, JSDoc/PHPDoc tag conventions, fallback-expression idioms (`value || X`, `value ?? X`), `*.d.ts` as surface contract, PHP `_doing_it_wrong()` semantics. A rule that would be true for *any* JS/TS (or PHP, or Python, …) corpus belongs here, not in a site extension. Sites declare which packs apply via `validator.languagePacks` in config.
+
+3. **Config field + auto-injection** — declarative knowledge that varies across sites but should not be prose. If you find yourself writing prose like "in this corpus, identifiers starting with X are internal" or "schemas at path Y are the documented contract," that is a config field, not a prompt rule. Existing examples: `codeSources`. Planned: `internalPrefixes`, `documentedSchemas`. The assembler injects the rule text from the structured config at prompt-build time.
+
+4. **Site-specific extension** (`prompts/<site>.md`) — genuinely one-corpus-only knowledge. Single-symbol carve-outs (e.g. `core/block` reusable category), per-corpus authority overrides not expressible as config flags, and the TP/FP example list earned from real reviews on this corpus. Examples that calibrate generic common-prompt rules to concrete corpus failure modes are part of how those rules fire reliably — verify with a controlled run before removing.
+
+**Default discipline**: before writing to a site extension, articulate in one sentence why the rule cannot live in layers 1, 2, or 3. If you cannot, the rule belongs higher up. The same applies in reverse: if you find a rule sitting in a site extension that fits a broader layer, promote it.
+
+When the same rule turns up across multiple sites' extensions, that is a signal to promote up the stack. But the more common failure mode is the opposite — a rule was written in a site extension when it should have lived elsewhere. Be willing to relocate; the layers are not write-once.
+
+#### Examples (calibration)
+
+- "Type-label imprecision is not drift" — **common** (every doc/code pair has type prose vs concrete types).
+- "Tests under `__tests__/` and `*.test.{js,ts}` are corroborating evidence" — **language pack** (true for any JS/TS corpus).
+- "Identifiers starting with `__experimental` are internal" — **config** (`internalPrefixes: [...]`); the *rule* "internal-prefixed names are not drift" is **common**.
+- "The `core/block` block uses the `reusable` category" — **site extension** (single-symbol carve-out, no broader pattern).
+- "`schemas/json/block.json` IS the documented contract" — **site extension** (a per-corpus declaration; the *mechanism* of schema-authority elevation is **config** + auto-injection).
+
+### Spend on context and model, not on guards
+
+Cost is not the primary constraint. A single accurate drift finding on a high-traffic doc page is worth far more than the model spend that surfaced it. Optimise accordingly:
+
+- **Spend on context.** When the model misses or mis-classifies an issue, the first question is "did it have what it needed?" — better extractors, more authoritative source files, line-range hints, real test files, more of the right repos in `codeSources`. Not "what filter can I add to compensate?"
+- **Spend on prompt clarity.** A longer, coherent prompt with examples is preferred over a terse prompt plus a regex post-filter. There is no hard token ceiling on `SYSTEM_PROMPT`; coherence and consistency are the constraints, not size.
+- **Spend on model quality.** Use the strongest available pass-1 and pass-2 models. Models keep getting better; this stack should ride that curve, not work around it with heuristics.
+- **Heuristic post-processing layers (regex filters, weak-suggestion detectors, confidence thresholds, retry loops, dedup keys) are temporary scaffolding.** Each one is a load-bearing admission that the model's output isn't trusted. When you add such a layer, document what would let it be removed: a prompt change, a context change, a stronger model.
+
+### Diagnose before defending
+
+When the model returns an unexpected shape (malformed evidence, truncated tool input, missing fields, degenerate output), capture the actual response *before* adding any guard.
+
+The seam: setting `DUMP_PASS1=1` in the environment makes `runPass1` write the raw `report_findings` input to `/tmp/wp-docs-pass1-dump/pass1-<ts>.json`. Targeted invocation:
 
 ```
-config → adapters/index.ts factory → concrete adapter → pipeline uses interface only
+DUMP_PASS1=1 npm run analyze -- --slug <slug> --config <config> --output ./out
 ```
 
-`createDocSource` / `createCodeSources` throw `NotImplementedError` for unrecognised type strings. Those throws are the documented extension point — adding a new adapter means a new file plus one branch in `src/adapters/index.ts`, nothing else.
+(`ANTHROPIC_API_KEY` must be provided by the environment — by whatever mechanism the operator already uses for normal runs.)
 
-Current Phase 1 adapters:
-- `manifest-url` (DocSource) — `src/adapters/doc-source/manifest-url.ts`. Fetches a Gutenberg-style `manifest.json`, filters by `parentSlug`, concurrently fetches each doc's raw markdown, strips frontmatter (`gray-matter`), counts code blocks + links (`remark`). Bounded concurrency via `p-limit(5)`.
-- `git-clone` (CodeSource) — `src/adapters/code-source/git-clone.ts`. Shallow-clones a repo into `tmp/<slug>-<ref>/`, lazy-initialized on first `readFile` / `listDir` / `getCommitSha`. Subsequent runs reuse the cached `.git` dir.
-- `manual-map` (DocCodeMapper) — `src/adapters/doc-code-mapper/manual-map.ts`. Loads a slug-keyed JSON file (see `mappings/`), cross-validates every `CodeFile.repo` against the configured `codeSources` at construction time (throws `ConfigError` on mismatch). Unknown slugs throw `MappingError`, which the pipeline now catches per-doc (see `pipeline.ts:30-36`) rather than aborting the run.
+A coding agent may or may not be able to run this directly, depending on how the operator provides credentials. If the agent cannot reach the API key (e.g. it lives in a credential vault that requires interactive auth), the agent should hand the exact command above to the operator, then read `/tmp/wp-docs-pass1-dump/pass1-<ts>.json` once the run completes. Operator-specific credential mechanics belong in `CLAUDE.local.md`, not here.
 
-### Error-handling stance
+If the misbehavior is non-deterministic across runs, the cause is upstream — fix it there. A downstream guard added without diagnosis hides signal and creates the illusion of a fix.
 
-The pipeline is designed to **produce a valid `RunResults` even when individual docs fail**. Failed fetches and mapping errors become per-doc `diagnostics` entries with `status: 'critical'` — never uncaught exceptions. Tests enforce this stance: see `src/types/__tests__/schemas.test.ts` (`runPipeline` block) and `src/adapters/doc-source/__tests__/manifest-url.test.ts` (error-handling block).
+### Comparison layers must tolerate authoring-format noise
 
-Adapter-level invariants worth knowing before touching this code:
-- `deriveSourceUrl` in `manifest-url.ts` has two branches (URL-base transform vs. GitHub UI fallback); both are covered by tests. The transform requires a `/docs/` segment and falls through to the fallback if absent.
-- `GitCloneSource.readFile(path, startLine?, endLine?)` only slices when **both** bounds are provided. Partial bounds silently return the full file — this is the current contract, pinned by tests.
-- Metrics (`wordCount`, `codeExampleCount`, `linkCount`) are computed **at ingest**, not at validation time. The validator receives pre-parsed `Doc` objects.
+Verbatim and substring checks (e.g. the post-Pass-1 `codeSays` / `docSays` verifier in `claude.ts`) must tolerate whitespace, line endings, comment-continuation characters, indent variations, and quote-style differences. Documentation rarely quotes source code character-for-character; the comparison layer must close that gap. If a check rejects legitimate findings, normalise the comparison — never tighten the prompt to avoid the case.
 
-### AGENTS.md and role boundaries
+### Pipeline-change checklist
 
-`AGENTS.md` defines three roles (Backend Engineer, Frontend Engineer, QA Engineer) with hard boundaries. When acting on a PR via `@claude act as the <Role>`, those boundaries are enforceable rules, not suggestions:
+Every change to `src/adapters/validator/`, `SYSTEM_PROMPT`, or `src/extractors/` should answer in the PR description:
 
-- Backend owns `src/pipeline.ts`, all adapters, validator, storage, config. Cannot touch `src/types/` or frontend.
-- Frontend owns the static HTML dashboard + CLI. No frameworks, no build step (Tailwind via CDN). Cannot touch `src/types/`, pipeline, or validator.
-- QA owns the entire test suite. Writes tests only — never modifies feature code, never weakens an existing assertion. "A test is only worth writing if it can fail."
-
-Read `AGENTS.md` before assuming scope on any PR-driven task.
-
-### Phase context
-
-This repo is in **Phase 1 (PoC)** — ~10 docs from the Gutenberg Block API Reference, end-to-end. The Drift Validator and Dashboard are not yet implemented; `runPipeline` currently produces stub `DocResult`s with `healthScore: 0` and `status: 'critical'`. The `console.log` at `pipeline.ts:32` is intentional PoC-stage debug output and should not be mistaken for production logging. Phase 2 scope (symbol-search mapper, full handbook, weekly cron) is documented in `PLAN.md` and `docs/timeline.md` — do not proactively implement Phase 2 work unless a task explicitly targets it.
-
-## Repository layout quick reference
-
-- `src/adapters/` — interface types live in `types.ts` files next to implementations; `src/adapters/index.ts` is the factory registry.
-- `src/types/` — **locked contracts.** Zod schemas that drive everything else.
-- `config/*.json` — runtime configs (parsed through `src/config/schema.ts`).
-- `mappings/*.json` — doc-slug → tiered code-file mappings. `mappings/test.json` is an empty `{}` used by the unit tests.
-- `tests/fixtures/` — `mini-manifest.json`, `mini-mapping.json`, `sample-doc.md` for adapter tests.
-- `examples/mock-results.json` — the canonical `RunResults` fixture; must round-trip through `RunResultsSchema`.
-- `scripts/` — one-off tools (`bootstrap-mapping.ts` is a dev-time accelerator for generating mappings via Claude; `verify-ingestion.ts` is the end-to-end smoke test; `gen-schema.ts` regenerates the JSON Schema from Zod).
+1. The bad shape that motivates the change, with a reproducer command and observed output.
+2. **Where the rule lives, and why it can't live higher.** Walk the layers from "Where a new rule belongs": common, language pack, config field, site extension. Pick the broadest layer it honestly fits and state in one sentence why the next-broader layer doesn't fit. A new rule landing in a site extension must justify why it isn't config-derivable or language-pack material.
+3. If it adds a heuristic post-processing layer: what change (prompt, context, or model) would later let it be removed.
+4. The expected outcome, expressed as something measurable through the `runPass1Only` experiment seam (`claude.ts:507`).

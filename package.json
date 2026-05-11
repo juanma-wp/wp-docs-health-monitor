@@ -10,28 +10,30 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "gen:schema": "tsx scripts/gen-schema.ts",
-    "analyze": "tsx src/cli.ts"
+    "analyze": "tsx --env-file=.env src/cli.ts"
   },
   "dependencies": {
-    "commander": "^12.1.0",
     "@anthropic-ai/sdk": "^0.91.0",
+    "commander": "^12.1.0",
     "gray-matter": "^4.0.3",
     "p-limit": "^5.0.0",
+    "php-parser": "^3.5.1",
     "remark": "^15.0.1",
     "remark-parse": "^11.0.0",
     "simple-git": "^3.36.0",
+    "typescript": "^5.4.0",
     "unist-util-visit": "^5.1.0",
     "zod": "^3.23.0",
     "zod-to-json-schema": "^3.23.0"
   },
   "devDependencies": {
+    "@ai-hero/sandcastle": "^0.5.10",
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
     "eslint": "^8.57.0",
     "prettier": "^3.3.0",
     "tsx": "^4.0.0",
-    "typescript": "^5.4.0",
     "vitest": "^1.6.0"
   }
 }

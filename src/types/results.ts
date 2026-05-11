@@ -28,7 +28,7 @@ export const DocResultSchema = z.object({
   parent:      z.string().nullable(),  // parent slug from manifest — used by dashboard tree view
   sourceUrl:   z.string().url(),
   healthScore: z.number().min(0).max(100).nullable(),
-  status:      z.enum(['healthy', 'needs-attention', 'critical', 'not-mapped']),
+  status:      z.enum(['healthy', 'needs-attention', 'critical', 'not-mapped', 'analysis-failed']),
   issues:      z.array(IssueSchema),
   positives:   z.array(z.string()).max(3),
   relatedCode: z.array(z.object({
@@ -49,6 +49,12 @@ export const RunModelsSchema = z.object({
 });
 export type RunModels = z.infer<typeof RunModelsSchema>;
 
+export const RunSamplingSchema = z.object({
+  temperature: z.number().finite().default(0),
+  samples:     z.number().int().min(1).default(1),
+});
+export type RunSampling = z.infer<typeof RunSamplingSchema>;
+
 export const RunUsageSchema = z.object({
   inputTokens:      z.number().int(),
   outputTokens:     z.number().int(),
@@ -63,6 +69,7 @@ export const RunResultsSchema = z.object({
   timestamp:     z.string().datetime(),
   overallHealth: z.number().min(0).max(100),
   models:        RunModelsSchema,
+  sampling:      RunSamplingSchema.default({}),
   repoUrls:      z.record(z.string(), z.string()),   // repoId → GitHub base URL (no trailing slash)
   repoRefs:      z.record(z.string(), z.string()),   // repoId → branch or tag ref (e.g. "trunk")
   totals: z.object({
@@ -70,7 +77,8 @@ export const RunResultsSchema = z.object({
     healthy:        z.number().int(),
     needsAttention: z.number().int(),
     critical:       z.number().int(),
-    notMapped:      z.number().int(),
+    notMapped:      z.number().int().default(0),
+    analysisFailed: z.number().int().default(0),
     issues: z.object({
       total:    z.number().int(),
       critical: z.number().int(),

@@ -12,6 +12,7 @@ import {
   ManifestEntrySchema,
   CodeFileSchema,
   CodeTiersSchema,
+  MappingSchema,
 } from '../mapping.js';
 import { fingerprintIssue } from '../../history.js';
 import { runPipeline } from '../../pipeline.js';
@@ -44,7 +45,7 @@ const minimalConfig: Config = {
   },
   mappingPath: 'mappings/test.json',
   outputDir: '/tmp/wp-docs-health-monitor-test',
-  validator: { type: 'claude', pass1Model: 'claude-sonnet-4-6', pass2Model: 'claude-sonnet-4-6', responseMode: 'tool-use' },
+  validator: { type: 'claude', pass1Model: 'claude-sonnet-4-6', pass2Model: 'claude-sonnet-4-6', responseMode: 'tool-use', temperature: 0, samples: 1 },
   pricing: { inputPerMtok: 3, outputPerMtok: 15, cacheWritePerMtok: 3.75, cacheReadPerMtok: 0.30 },
 };
 

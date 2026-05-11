@@ -1,7 +1,7 @@
 # WP Docs Health Monitor — Plan
 
-Reading order: this file first (phases + decisions) → [docs/prd.md](./docs/prd.md)
-(full requirements with user stories) → [docs/architecture.md](./docs/architecture.md)
+Reading order: this file first (phases + decisions) → [docs/PRD.md](./docs/PRD.md)
+(full requirements with user stories) → [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
 (why each decision was made) → [AGENTS.md](./AGENTS.md) (role boundaries).
 
 The original plan (component breakdown, timeline, backlog) is preserved in
@@ -27,8 +27,8 @@ The original plan (component breakdown, timeline, backlog) is preserved in
 For every phase, open a fresh context window and use this prompt:
 
 ```
-Do [phase name] from @docs/prd.md and @PLAN.md.
-User stories in scope: [numbers from prd.md].
+Do [phase name] from @docs/PRD.md and @PLAN.md.
+User stories in scope: [numbers from PRD.md].
 [Paste the phase block below.]
 ```
 
@@ -165,17 +165,19 @@ Suggested docs:
 | Known-clean | `block-context` | Small, stable API |
 | Uncertain | your pick | Interesting signal |
 
-Document the decision in `docs/phase-0-results.md`:
+Document the decision in the commit message and PR:
 
 - **Go** — precision ≥ 80% AND clean doc shows 0 issues → proceed as-is
 - **No-go** — iterate system prompt up to half a day, then cut Pass 2 and raise
   confidence threshold to ≥ 0.8 for a Pass-1-only ship
 - **Abort** — still failing after cuts → honest conversation about PoC viability
 
+Outcome: gate passed 2026-04-28 with precision 6/6 and 0 clean-doc FPs (run
+`20260428-190955`).
+
 **Done when:** `npm run analyze -- --config config/gutenberg-block-api.json
 --output ./out` produces valid `RunResults` with real issues on drifted docs and 0
-issues on healthy docs, for under $1. `docs/phase-0-results.md` records the decision.
-Commit.
+issues on healthy docs, for under $1. Commit.
 
 ---
 

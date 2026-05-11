@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Mock } from 'vitest';
 
 import type Anthropic from '@anthropic-ai/sdk';
-import { ClaudeValidator, isWeakSuggestion, isSelfRejected } from '../claude.js';
+import { ClaudeValidator, isWeakSuggestion, isSelfRejected, normalizeForVerbatim, verbatimIncludes, REPORT_FINDINGS_TOOL, PASS1_MAX_ISSUES } from '../claude.js';
 import type { Doc } from '../../doc-source/types.js';
 import type { CodeTiers } from '../../../types/mapping.js';
 import type { CodeSource } from '../../code-source/types.js';
@@ -229,6 +229,55 @@ describe('ClaudeValidator — verbatim check', () => {
     expect(validator.droppedHallucinations).toBe(0);
   });
 
+  it('drops an issue where docSays is NOT a substring of the doc content', async () => {
+    const pass1Response = makeReportFindingsResponse([
+      {
+        ...BASE_ISSUE,
+        evidence: {
+          ...BASE_ISSUE.evidence,
+          docSays: 'THIS QUOTE NEVER APPEARS IN THE DOC',
+        },
+      },
+    ], []);
+
+    // Pass 2 should never run for this issue
+    const pass2Response = makeReportFindingsResponse([], []);
+
+    const client = makeAnthropicClient([pass1Response, pass2Response]);
+    const codeSources = makeCodeSources();
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
+
+    expect(result.issues).toHaveLength(0);
+    expect(validator.droppedHallucinations).toBe(1);
+  });
+
+  it('drops a hallucinated docSays even on a nonexistent-name issue', async () => {
+    // Absence-of-code is allowed for nonexistent-name, but the doc quote must still be real
+    const pass1Response = makeReportFindingsResponse([
+      {
+        ...BASE_ISSUE,
+        type: 'nonexistent-name',
+        evidence: {
+          ...BASE_ISSUE.evidence,
+          docSays: 'INVENTED DOC QUOTE',
+          codeSays: 'somethingMissing',
+        },
+      },
+    ], []);
+
+    const pass2Response = makeReportFindingsResponse([], []);
+    const client = makeAnthropicClient([pass1Response, pass2Response]);
+    const codeSources = makeCodeSources();
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
+
+    expect(result.issues).toHaveLength(0);
+    expect(validator.droppedHallucinations).toBe(1);
+  });
+
   it('passes a nonexistent-name issue through even when codeSays is not in the file', async () => {
     // The API named in codeSays genuinely does not exist in the file — that IS the finding
     const pass1Response = makeReportFindingsResponse([
@@ -262,6 +311,202 @@ describe('ClaudeValidator — verbatim check', () => {
     expect(result.issues).toHaveLength(1);
     expect(result.issues[0].type).toBe('nonexistent-name');
     expect(validator.droppedHallucinations).toBe(0);
+  });
+
+  it('keeps an issue where docSays differs from doc content only in whitespace', async () => {
+    // The doc has a multi-line bullet list with newlines + indentation;
+    // the model paraphrases it as a single-line smooth quote. Pre-fix
+    // this dropped silently — the smoke-test failure mode on
+    // `block-attributes` (type/source allowed-values lists).
+    const docWithBullets =
+      '# Block Attributes\n\nThe `type` field MUST be one of the following:\n\n  - `null`\n  - `boolean`\n  - `object`\n';
+    const docSays = 'The `type` field MUST be one of the following: - `null` - `boolean` - `object`';
+    const fileContent = 'function registerBlockType(name, settings) {}';
+    const codeSays = 'function registerBlockType(name, settings)';
+
+    const pass1Response = makeReportFindingsResponse([
+      { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, docSays, codeSays } },
+    ], []);
+    const pass2Response = makeReportFindingsResponse([
+      { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, docSays, codeSays }, confidence: 0.9 },
+    ], []);
+
+    const client = makeAnthropicClient([pass1Response, pass2Response]);
+    const codeSources = makeCodeSources(fileContent);
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const result = await validator.validateDoc(
+      makeDoc({ content: docWithBullets }),
+      makeCodeTiers(),
+      codeSources,
+    );
+
+    expect(result.issues).toHaveLength(1);
+    expect(validator.droppedHallucinations).toBe(0);
+  });
+
+  it('keeps an issue where codeSays differs from file content only in whitespace', async () => {
+    // File has indented code; model quotes it without leading indent.
+    const fileContent =
+      'function registerBlockType(\n  name,\n  settings,\n) {\n  return settings;\n}';
+    const codeSays = 'function registerBlockType( name, settings, )';
+
+    const pass1Response = makeReportFindingsResponse([
+      { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays } },
+    ], []);
+    const pass2Response = makeReportFindingsResponse([
+      { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays }, confidence: 0.9 },
+    ], []);
+
+    const client = makeAnthropicClient([pass1Response, pass2Response]);
+    const codeSources = makeCodeSources(fileContent);
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
+
+    expect(result.issues).toHaveLength(1);
+    expect(validator.droppedHallucinations).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// normalizeForVerbatim — unit tests
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// REPORT_FINDINGS_TOOL — schema-level caps
+// ---------------------------------------------------------------------------
+
+describe('REPORT_FINDINGS_TOOL schema', () => {
+  // Pinned because the cap is structural — encoded on the tool schema
+  // rather than in the system prompt. Any future schema rewrite must
+  // preserve it; otherwise we re-open the 1,787-malformed-evidence
+  // failure mode that this PR was designed to prevent.
+  it('caps issues array at PASS1_MAX_ISSUES via schema maxItems', () => {
+    const schema = REPORT_FINDINGS_TOOL.input_schema as {
+      properties: {
+        issues:    { maxItems?: number };
+        positives: { maxItems?: number };
+      };
+    };
+    expect(schema.properties.issues.maxItems).toBe(PASS1_MAX_ISSUES);
+    expect(PASS1_MAX_ISSUES).toBe(10);
+  });
+
+  it('keeps positives capped at 3 (unchanged)', () => {
+    const schema = REPORT_FINDINGS_TOOL.input_schema as {
+      properties: { positives: { maxItems?: number } };
+    };
+    expect(schema.properties.positives.maxItems).toBe(3);
+  });
+});
+
+describe('normalizeForVerbatim', () => {
+  it('collapses runs of whitespace to a single space', () => {
+    expect(normalizeForVerbatim('foo    bar')).toBe('foo bar');
+    expect(normalizeForVerbatim('foo\n\n  bar')).toBe('foo bar');
+    expect(normalizeForVerbatim('foo\tbar')).toBe('foo bar');
+  });
+
+  it('trims leading and trailing whitespace', () => {
+    expect(normalizeForVerbatim('  foo bar  ')).toBe('foo bar');
+    expect(normalizeForVerbatim('\nfoo\n')).toBe('foo');
+  });
+
+  it('strips Markdown link syntax', () => {
+    // Bare inline link
+    expect(normalizeForVerbatim('see [the docs](https://example.com)')).toBe('see the docs');
+    // Image link with alt text
+    expect(normalizeForVerbatim('![alt text](image.png)')).toBe('alt text');
+    // Link with title attribute
+    expect(normalizeForVerbatim('[text](url "title")')).toBe('text');
+    // Relative path with anchor (the block-attributes case)
+    expect(
+      normalizeForVerbatim("data is stored in the block's [comment delimiter](/docs/explanations.md#data)."),
+    ).toBe("data is stored in the block's comment delimiter.");
+  });
+
+  it('does not strip comment-continuation characters', () => {
+    // PHPDoc `*` and similar are language-specific and intentionally NOT
+    // normalised here — would belong in per-site config if needed.
+    expect(normalizeForVerbatim('* foo\n * bar')).toBe('* foo * bar');
+    expect(normalizeForVerbatim('# foo\n# bar')).toBe('# foo # bar');
+  });
+
+  it('does not strip bold/italic emphasis or inline code', () => {
+    // Stripping emphasis would mangle identifiers like `__experimental`.
+    // Stripping backticks would erase the structural distinction between
+    // identifiers and prose. Both are deliberately preserved.
+    expect(normalizeForVerbatim('**bold** _italic_ ~~strike~~')).toBe('**bold** _italic_ ~~strike~~');
+    expect(normalizeForVerbatim('use `registerBlockType()` here')).toBe('use `registerBlockType()` here');
+    expect(normalizeForVerbatim('the `__experimentalFoo` API')).toBe('the `__experimentalFoo` API');
+  });
+
+  it('preserves substring detection across line breaks', () => {
+    const haystack = normalizeForVerbatim('one\n  - two\n  - three\n  - four');
+    const needle = normalizeForVerbatim('two - three - four');
+    expect(haystack.includes(needle)).toBe(true);
+  });
+
+  it('preserves substring detection across Markdown link rendering', () => {
+    // The block-attributes regression: doc has `[comment delimiter](url)`,
+    // model paraphrases as plain `comment delimiter`. After normalisation
+    // both sides should match.
+    const haystack = normalizeForVerbatim(
+      "stored in the block's [comment delimiter](/docs/key-concepts.md#data).",
+    );
+    const needle = normalizeForVerbatim("stored in the block's comment delimiter.");
+    expect(haystack.includes(needle)).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// verbatimIncludes
+// ---------------------------------------------------------------------------
+
+describe('verbatimIncludes', () => {
+  // Strategy 1: direct normalized match (existing behaviour, pinned)
+  it('delegates to normalizeForVerbatim for normal content', () => {
+    expect(verbatimIncludes('foo bar baz', 'foo bar')).toBe(true);
+    expect(verbatimIncludes('foo bar baz', 'qux')).toBe(false);
+  });
+
+  // Strategy 2: bullet-stripped match
+  it('matches when model prefixes lines with `- ` from a bullet-formatted doc section', () => {
+    // Doc content: plain text property descriptions (no bullets)
+    // Model's docSays: prefixed with `- ` on each line (bullet reformatting)
+    const docContent = normalizeForVerbatim('Optional.\nProperty: `apiVersion`');
+    expect(verbatimIncludes(docContent, '- Optional.\n- Property: `apiVersion`')).toBe(true);
+  });
+
+  it('matches when model uses leading `- ` on a single-line quote', () => {
+    const docContent = normalizeForVerbatim('The apiVersion field is required.');
+    expect(verbatimIncludes(docContent, '- The apiVersion field is required.')).toBe(true);
+  });
+
+  it('does not strip mid-word hyphens (content, not bullets)', () => {
+    // `type-signature` has a hyphen but no surrounding spaces — must stay
+    const docContent = normalizeForVerbatim('type-signature drift is flagged');
+    expect(verbatimIncludes(docContent, 'type-signature drift')).toBe(true);
+  });
+
+  // Strategy 3: single backtick identifier fallback
+  it('matches single backtick identifier against plain text in haystack', () => {
+    expect(verbatimIncludes('the filePath property is optional', '`filePath`')).toBe(true);
+    expect(verbatimIncludes('use apiVersion to declare the version', '`apiVersion`')).toBe(true);
+  });
+
+  it('matches when haystack also has the backtick form (strategy 1 fires)', () => {
+    expect(verbatimIncludes('use `filePath` to specify the path', '`filePath`')).toBe(true);
+  });
+
+  it('does not broaden multi-token backtick quotes', () => {
+    expect(verbatimIncludes('some content here', '`foo bar`')).toBe(false);
+  });
+
+  it('still rejects genuine hallucinations', () => {
+    expect(verbatimIncludes('The block name must be a string.', '`shadowColor`')).toBe(false);
+    expect(verbatimIncludes('The block name must be a string.', 'nonExistentFunction()')).toBe(false);
   });
 });
 
@@ -574,7 +819,7 @@ describe('ClaudeValidator — single-prompt mode', () => {
     const createSpy = client.messages.create as Mock;
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, 'single-prompt');
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, { responseMode: 'single-prompt' });
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     expect(result.issues).toHaveLength(1);
@@ -587,7 +832,7 @@ describe('ClaudeValidator — single-prompt mode', () => {
     const client = makeAnthropicClient([singlePromptResponse]);
     const codeSources = makeCodeSources('function registerBlockType(name, settings) {}');
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, 'single-prompt');
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, { responseMode: 'single-prompt' });
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     expect(result.issues).toHaveLength(0);
@@ -600,7 +845,7 @@ describe('ClaudeValidator — single-prompt mode', () => {
         {
           severity: 'major',
           type: 'type-signature',
-          evidence: { docSays: 'doc', codeSays: 'code', codeFile: 'file.js', codeRepo: 'gutenberg' },
+          evidence: { docSays: 'The `name` parameter is required.', codeSays: 'code', codeFile: 'file.js', codeRepo: 'gutenberg' },
           suggestion: 'Update `registerBlockType` docs',
           confidence: 0.9,
         },
@@ -616,7 +861,7 @@ describe('ClaudeValidator — single-prompt mode', () => {
     const client = makeAnthropicClient([singlePromptResponse]);
     const codeSources = makeCodeSources('code');
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, 'single-prompt');
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, { responseMode: 'single-prompt' });
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     expect(result.issues).toHaveLength(1);
@@ -638,7 +883,7 @@ ${JSON.stringify({
     const client = makeAnthropicClient([singlePromptResponse]);
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, 'single-prompt');
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, { responseMode: 'single-prompt' });
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     expect(result.issues).toHaveLength(1);
@@ -658,7 +903,7 @@ ${JSON.stringify({
     const client = makeAnthropicClient([singlePromptResponse]);
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, 'single-prompt');
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, { responseMode: 'single-prompt' });
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     expect(result.issues).toHaveLength(0);
@@ -684,7 +929,7 @@ ${JSON.stringify({
     const createSpy = client.messages.create as Mock;
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, 'single-prompt');
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, { responseMode: 'single-prompt' });
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     expect(result.issues).toHaveLength(0);
@@ -712,7 +957,7 @@ ${JSON.stringify({
     const createSpy = client.messages.create as Mock;
     const codeSources = makeCodeSources(fileContent);
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, 'single-prompt');
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, { responseMode: 'single-prompt' });
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     expect(result.issues).toHaveLength(1);
@@ -735,10 +980,292 @@ ${JSON.stringify({
     const client = makeAnthropicClient([singlePromptResponse]);
     const codeSources = makeCodeSources('function registerBlockType(name, settings) { return settings; }');
 
-    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, 'single-prompt');
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, { responseMode: 'single-prompt' });
     const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
 
     expect(result.issues).toHaveLength(0);
     expect(validator.droppedHallucinations).toBe(1);
+  });
+});
+// ---------------------------------------------------------------------------
+// ClaudeValidator — temperature plumbing (issue #56)
+// ---------------------------------------------------------------------------
+
+describe('ClaudeValidator — temperature plumbing', () => {
+  it('passes the configured temperature on every messages.create call (Pass 1, Pass 2, retry)', async () => {
+    const fileContent = 'function registerBlockType(name, settings) {}';
+    const codeSays = 'function registerBlockType(name, settings)';
+
+    const pass1Response = makeReportFindingsResponse([
+      { ...BASE_ISSUE, severity: 'critical', evidence: { ...BASE_ISSUE.evidence, codeSays } },
+    ], []);
+    // Pass 2 returns a weak suggestion → triggers a retry (third call).
+    const pass2WeakResponse = makeReportFindingsResponse([
+      {
+        ...BASE_ISSUE,
+        severity:   'critical',
+        evidence:   { ...BASE_ISSUE.evidence, codeSays },
+        confidence: 0.8,
+        suggestion: 'fix the description',
+      },
+    ], []);
+    const retryResponse = makeReportFindingsResponse([
+      {
+        ...BASE_ISSUE,
+        severity:   'critical',
+        evidence:   { ...BASE_ISSUE.evidence, codeSays },
+        confidence: 0.8,
+        suggestion: 'Update `registerBlockType` to document the new `metadata` overload',
+      },
+    ], []);
+
+    const client = makeAnthropicClient([pass1Response, pass2WeakResponse, retryResponse]);
+    const createSpy = client.messages.create as Mock;
+    const codeSources = makeCodeSources(fileContent);
+
+    const validator = new ClaudeValidator(
+      'claude-sonnet-4-6',
+      'claude-sonnet-4-6',
+      client,
+      undefined,
+      { temperature: 0 },
+    );
+    await validator.validateDoc(makeDoc(), makeCodeTiers(), codeSources);
+
+    expect(createSpy).toHaveBeenCalledTimes(3);
+    for (const call of createSpy.mock.calls) {
+      expect(call[0]).toMatchObject({ temperature: 0 });
+    }
+  });
+
+  it('defaults temperature to 0 when no option is provided', async () => {
+    const fileContent = 'function registerBlockType(name, settings) {}';
+    const codeSays = 'function registerBlockType(name, settings)';
+
+    const pass1Response = makeReportFindingsResponse([
+      { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays } },
+    ], []);
+    const pass2Response = makeReportFindingsResponse([
+      { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays }, confidence: 0.9 },
+    ], []);
+
+    const client = makeAnthropicClient([pass1Response, pass2Response]);
+    const createSpy = client.messages.create as Mock;
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    await validator.validateDoc(makeDoc(), makeCodeTiers(), makeCodeSources(fileContent));
+
+    expect(createSpy.mock.calls.length).toBeGreaterThan(0);
+    for (const call of createSpy.mock.calls) {
+      expect(call[0].temperature).toBe(0);
+    }
+  });
+
+  it('honours a non-zero temperature when explicitly configured', async () => {
+    const pass1Response = makeReportFindingsResponse([], []);
+    const client = makeAnthropicClient([pass1Response]);
+    const createSpy = client.messages.create as Mock;
+
+    const validator = new ClaudeValidator(
+      'claude-sonnet-4-6',
+      'claude-sonnet-4-6',
+      client,
+      undefined,
+      { temperature: 0.7 },
+    );
+    await validator.validateDoc(makeDoc(), makeCodeTiers(), makeCodeSources());
+
+    expect(createSpy.mock.calls[0][0].temperature).toBe(0.7);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// ClaudeValidator — N-sample Pass 1 with fingerprint dedup (issue #56)
+// ---------------------------------------------------------------------------
+
+describe('ClaudeValidator — N-sample Pass 1', () => {
+  it('runs Pass 1 N times when samples > 1 and unions candidates by fingerprint', async () => {
+    const fileContent = 'function registerBlockType(name, settings) {}';
+    const codeSays = 'function registerBlockType(name, settings)';
+
+    // Sample 1 returns issue A (type-signature) only.
+    const pass1Sample1 = makeReportFindingsResponse([
+      { ...BASE_ISSUE, type: 'type-signature', evidence: { ...BASE_ISSUE.evidence, codeSays } },
+    ], ['Doc accurately describes the API']);
+
+    // Sample 2 returns issue A again (same type+codeFile+codeRepo → same fingerprint)
+    // PLUS a different issue B (deprecated-api → different fingerprint).
+    const pass1Sample2 = makeReportFindingsResponse([
+      { ...BASE_ISSUE, type: 'type-signature', evidence: { ...BASE_ISSUE.evidence, codeSays } },
+      {
+        ...BASE_ISSUE,
+        type:     'deprecated-api',
+        evidence: { ...BASE_ISSUE.evidence, codeSays, docSays: 'The `name` parameter is required.' },
+      },
+    ], ['Doc accurately describes the API']);
+
+    // Sample 3 returns nothing new.
+    const pass1Sample3 = makeReportFindingsResponse([], []);
+
+    // Each unique candidate must be verified at most once by Pass 2 → 2 calls.
+    const pass2A = makeReportFindingsResponse([
+      {
+        ...BASE_ISSUE,
+        type:       'type-signature',
+        evidence:   { ...BASE_ISSUE.evidence, codeSays },
+        confidence: 0.9,
+        suggestion: 'Update `registerBlockType` to document the new `metadata` overload',
+      },
+    ], []);
+    const pass2B = makeReportFindingsResponse([
+      {
+        ...BASE_ISSUE,
+        type:       'deprecated-api',
+        evidence:   { ...BASE_ISSUE.evidence, codeSays },
+        confidence: 0.9,
+        suggestion: 'Mark `registerBlockType` deprecated in favour of `wp.blocks.register`',
+      },
+    ], []);
+
+    const client = makeAnthropicClient([pass1Sample1, pass1Sample2, pass1Sample3, pass2A, pass2B]);
+    const createSpy = client.messages.create as Mock;
+
+    const validator = new ClaudeValidator(
+      'claude-sonnet-4-6',
+      'claude-sonnet-4-6',
+      client,
+      undefined,
+      { samples: 3 },
+    );
+    const result = await validator.validateDoc(
+      makeDoc(),
+      makeCodeTiers(),
+      makeCodeSources(fileContent),
+    );
+
+    // 3 Pass-1 calls + 2 Pass-2 calls (one per unique candidate, not per sample sighting).
+    expect(createSpy).toHaveBeenCalledTimes(5);
+    // Both unique findings survive.
+    expect(result.issues).toHaveLength(2);
+    const types = result.issues.map(i => i.type).sort();
+    expect(types).toEqual(['deprecated-api', 'type-signature']);
+  });
+
+  it('still produces a valid DocResult when one Pass-1 sample throws', async () => {
+    const fileContent = 'function registerBlockType(name, settings) {}';
+    const codeSays = 'function registerBlockType(name, settings)';
+
+    const goodPass1 = makeReportFindingsResponse([
+      { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays } },
+    ], []);
+    const pass2Response = makeReportFindingsResponse([
+      { ...BASE_ISSUE, evidence: { ...BASE_ISSUE.evidence, codeSays }, confidence: 0.9 },
+    ], []);
+
+    let callCount = 0;
+    const client = {
+      messages: {
+        create: vi.fn(async () => {
+          callCount++;
+          if (callCount === 1) throw new Error('transient API error');
+          if (callCount === 2) return goodPass1;
+          return pass2Response;
+        }),
+      },
+    } as unknown as Anthropic;
+
+    const validator = new ClaudeValidator(
+      'claude-sonnet-4-6',
+      'claude-sonnet-4-6',
+      client,
+      undefined,
+      { samples: 2 },
+    );
+    const result = await validator.validateDoc(
+      makeDoc(),
+      makeCodeTiers(),
+      makeCodeSources(fileContent),
+    );
+
+    // The surviving sample's findings are kept; the failed sample is reported in diagnostics.
+    expect(result.issues).toHaveLength(1);
+    expect(result.diagnostics.some(d => /Pass 1 sample 1\/2 failed/.test(d))).toBe(true);
+  });
+
+  it('rejects samples < 1 at construction time', () => {
+    const client = makeAnthropicClient([makeReportFindingsResponse([], [])]);
+    expect(
+      () =>
+        new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client, undefined, {
+          samples: 0,
+        }),
+    ).toThrow(/samples must be an integer >= 1/);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// ClaudeValidator — Pass 1 failure status (issue #49)
+//
+// When Pass 1 cannot complete (single-sample throw, or every multi-sample
+// throw), the resulting DocResult must reflect analytic failure as a
+// distinct non-scoring status — not silently roll through scoreDoc([]) and
+// land at healthy/100. See docs/GLOSSARY.md § Status (`analysis-failed`).
+// ---------------------------------------------------------------------------
+
+describe('ClaudeValidator — Pass 1 failure status (issue #49)', () => {
+  it('produces status:analysis-failed / healthScore:null when single-sample Pass 1 throws', async () => {
+    const client = {
+      messages: {
+        create: vi.fn(async () => {
+          throw new Error('transient API error');
+        }),
+      },
+    } as unknown as Anthropic;
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), makeCodeSources());
+
+    expect(result.status).toBe('analysis-failed');
+    expect(result.healthScore).toBeNull();
+    expect(result.issues).toHaveLength(0);
+    expect(result.diagnostics.some(d => /Pass 1 failed/.test(d))).toBe(true);
+  });
+
+  it('produces status:analysis-failed when every multi-sample Pass 1 throws', async () => {
+    const client = {
+      messages: {
+        create: vi.fn(async () => {
+          throw new Error('rate limit');
+        }),
+      },
+    } as unknown as Anthropic;
+
+    const validator = new ClaudeValidator(
+      'claude-sonnet-4-6',
+      'claude-sonnet-4-6',
+      client,
+      undefined,
+      { samples: 3 },
+    );
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), makeCodeSources());
+
+    expect(result.status).toBe('analysis-failed');
+    expect(result.healthScore).toBeNull();
+    expect(result.issues).toHaveLength(0);
+    // Each failed sample emits its own diagnostic so the cause is recoverable.
+    expect(result.diagnostics.filter(d => /Pass 1 sample \d\/3 failed/.test(d))).toHaveLength(3);
+  });
+
+  it('preserves healthy/100 on the clean-doc path (regression pin: empty issues != failure)', async () => {
+    // Pass 1 succeeds and legitimately reports zero issues — must remain healthy/100.
+    const pass1Response = makeReportFindingsResponse([], ['Doc accurately describes the API']);
+    const client = makeAnthropicClient([pass1Response]);
+
+    const validator = new ClaudeValidator('claude-sonnet-4-6', 'claude-sonnet-4-6', client);
+    const result = await validator.validateDoc(makeDoc(), makeCodeTiers(), makeCodeSources());
+
+    expect(result.status).toBe('healthy');
+    expect(result.healthScore).toBe(100);
+    expect(result.issues).toHaveLength(0);
   });
 });

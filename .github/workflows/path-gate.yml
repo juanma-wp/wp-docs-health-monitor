@@ -1,0 +1,69 @@
+name: path-gate
+
+# Confines Ralph's auto-mergeable PRs to a narrow allowlist of paths. The
+# gate ONLY enforces on PRs whose head branch starts with `ralph/` — human
+# PRs and external contributor PRs pass straight through. See CLAUDE.md §
+# "Autonomous workflow (Ralph)" for the policy.
+#
+# To extend the allowlist (e.g. when a new module joins Ralph's scope), edit
+# ALLOWLIST_PATTERN below. The change itself touches `.github/**` and so will
+# fail the gate when Ralph tries to land it — that is intentional. Land such
+# changes from a non-`ralph/` branch (the gate is a no-op for those).
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  ralph-allowlist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate changed paths
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$HEAD_REF" != ralph/* ]]; then
+            echo "Non-Ralph branch ($HEAD_REF) — path-gate not enforced."
+            echo "(This check exists for branch-protection compatibility; only"
+            echo " 'ralph/*' branches are constrained to the allowlist.)"
+            exit 0
+          fi
+
+          git fetch --no-tags origin "$BASE_REF" --depth=50
+          BASE_SHA=$(git rev-parse "origin/$BASE_REF")
+          MERGE_BASE=$(git merge-base "$BASE_SHA" HEAD)
+
+          # Anchored regex; one alternative per line for readability.
+          ALLOWLIST_PATTERN='^(scripts/auto-map\.ts|src/auto-map/.*|src/auto-map/__tests__/.*|src/.*/__tests__/.*\.test\.ts|mappings/[^/]+\.audit\.json|\.gitignore)$'
+
+          OFFENDERS=()
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            if ! echo "$f" | grep -qE "$ALLOWLIST_PATTERN"; then
+              OFFENDERS+=("$f")
+            fi
+          done < <(git diff --name-only "$MERGE_BASE..HEAD")
+
+          if [ "${#OFFENDERS[@]}" -gt 0 ]; then
+            echo "::error::Ralph PR ($HEAD_REF) modifies paths outside the allowlist:"
+            for f in "${OFFENDERS[@]}"; do
+              echo "::error::  $f"
+            done
+            echo ""
+            echo "Resolution:"
+            echo "  - The issue's scope drifted; the PR should not auto-merge."
+            echo "  - A maintainer can land it via admin merge if intentional."
+            echo "  - To permanently widen Ralph's scope, edit ALLOWLIST_PATTERN"
+            echo "    in this file from a non-Ralph branch (the gate is a no-op"
+            echo "    for human PRs)."
+            exit 1
+          fi
+
+          echo "All changed files are within the Ralph-safe allowlist."

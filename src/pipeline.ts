@@ -8,7 +8,7 @@ import type { RunResults, DocResult } from './types/results.js';
 import type { DocFetchResult, Doc } from './adapters/doc-source/types.js';
 import { createDocSource, createCodeSources, createDocCodeMapper, createValidator } from './adapters/index.js';
 import type { CostAccumulator } from './adapters/validator/claude.js';
-import type { RunUsage, RunModels } from './types/results.js';
+import type { RunUsage, RunModels, RunSampling } from './types/results.js';
 
 function formatRunId(date: Date): string {
   const pad = (n: number, len = 2) => String(n).padStart(len, '0');
@@ -22,7 +22,10 @@ function formatRunId(date: Date): string {
 }
 
 function computeOverallHealth(docResults: DocResult[]): number {
-  const analyzed = docResults.filter(d => d.status !== 'not-mapped');
+  // Exclude non-scoring statuses: 'not-mapped' (no code to compare against)
+  // and 'analysis-failed' (validator never produced findings). Both carry
+  // healthScore: null and must not contribute to the average.
+  const analyzed = docResults.filter(d => d.status !== 'not-mapped' && d.status !== 'analysis-failed');
   if (analyzed.length === 0) return 100;
   const sum = analyzed.reduce((acc, d) => acc + (d.healthScore ?? 0), 0);
   return Math.round(sum / analyzed.length);
@@ -61,7 +64,11 @@ function logCostSummary(docResults: DocResult[], usage: RunUsage): void {
   );
 }
 
-export async function runPipeline(config: Config): Promise<RunResults> {
+export type RunPipelineOptions = {
+  slugs?: string[];
+};
+
+export async function runPipeline(config: Config, options: RunPipelineOptions = {}): Promise<RunResults> {
   const docSource   = createDocSource(config);
   const codeSources = createCodeSources(config);
   const mapper      = createDocCodeMapper(config, codeSources);
@@ -76,8 +83,19 @@ export async function runPipeline(config: Config): Promise<RunResults> {
     warmupPromise,
   ]);
 
-  const docs   = fetchResults.filter((r): r is Extract<DocFetchResult, { ok: true }>  => r.ok).map(r => r.doc as Doc);
-  const failed = fetchResults.filter((r): r is Extract<DocFetchResult, { ok: false }> => !r.ok);
+  const slugFilter = options.slugs && options.slugs.length > 0 ? new Set(options.slugs) : null;
+
+  const allOk    = fetchResults.filter((r): r is Extract<DocFetchResult, { ok: true }>  => r.ok).map(r => r.doc as Doc);
+  const allFailed = fetchResults.filter((r): r is Extract<DocFetchResult, { ok: false }> => !r.ok);
+
+  const docs   = slugFilter ? allOk.filter(d => slugFilter.has(d.slug)) : allOk;
+  const failed = slugFilter ? allFailed.filter(f => slugFilter.has(f.slug)) : allFailed;
+
+  if (slugFilter && docs.length === 0 && failed.length === 0) {
+    const requested = [...slugFilter].join(', ');
+    const available = allOk.map(d => d.slug).slice(0, 20).join(', ');
+    console.warn(`[pipeline] No docs matched slug filter (${requested}). First available slugs: ${available}`);
+  }
 
   const limit = pLimit(3);
   const docResults: DocResult[] = [];
@@ -106,7 +124,27 @@ export async function runPipeline(config: Config): Promise<RunResults> {
         };
       }
 
-      return validator.validateDoc(doc, codeTiers, codeSources);
+      try {
+        return await validator.validateDoc(doc, codeTiers, codeSources);
+      } catch (err) {
+        // A validator throw must not abort the whole run — emit a critical
+        // DocResult with the error in diagnostics so the run still completes.
+        console.warn(`[pipeline] validator failed for ${doc.slug}: ${String(err)}`);
+        return {
+          slug:        doc.slug,
+          title:       doc.title,
+          parent:      doc.parent,
+          sourceUrl:   doc.sourceUrl,
+          healthScore: 0,
+          status:      'critical' as const,
+          issues:      [],
+          positives:   [],
+          relatedCode: [],
+          diagnostics: [`Validator failed: ${(err as Error).message ?? String(err)}`],
+          commitSha:   '',
+          analyzedAt:  new Date().toISOString(),
+        };
+      }
     }),
   );
 
@@ -140,6 +178,7 @@ export async function runPipeline(config: Config): Promise<RunResults> {
     needsAttention: docResults.filter(d => d.status === 'needs-attention').length,
     critical:       docResults.filter(d => d.status === 'critical').length,
     notMapped:      docResults.filter(d => d.status === 'not-mapped').length,
+    analysisFailed: docResults.filter(d => d.status === 'analysis-failed').length,
     issues: {
       total:    allIssues.length,
       critical: allIssues.filter(i => i.severity === 'critical').length,
@@ -158,6 +197,11 @@ export async function runPipeline(config: Config): Promise<RunResults> {
     pass2: config.validator.pass2Model,
   };
 
+  const sampling: RunSampling = {
+    temperature: config.validator.temperature,
+    samples:     config.validator.samples,
+  };
+
   const repoUrls: Record<string, string> = {};
   const repoRefs: Record<string, string> = {};
   for (const [id, cs] of Object.entries(config.codeSources)) {
@@ -170,6 +214,7 @@ export async function runPipeline(config: Config): Promise<RunResults> {
     timestamp:     now.toISOString(),
     overallHealth,
     models,
+    sampling,
     repoUrls,
     repoRefs,
     totals,

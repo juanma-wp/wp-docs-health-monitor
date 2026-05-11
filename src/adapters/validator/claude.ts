@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
 import Anthropic from '@anthropic-ai/sdk';
 
 import type { Doc } from '../doc-source/types.js';
@@ -5,7 +8,11 @@ import type { CodeTiers } from '../../types/mapping.js';
 import type { DocResult, Issue } from '../../types/results.js';
 import type { CodeSource } from '../code-source/types.js';
 import type { Validator } from './types.js';
-import { assembleContext, formatContextForClaude } from './context-assembler.js';
+import { assembleContext, formatContextForClaude, isTestFile } from './context-assembler.js';
+import { formatSymbolsAsText } from '../../extractors/typescript.js';
+import { formatHooksAsText } from '../../extractors/hooks.js';
+import { formatDefaultsAsText } from '../../extractors/defaults.js';
+import { formatSchemasAsText } from '../../extractors/schemas.js';
 import { scoreDoc } from '../../health-scorer.js';
 import { fingerprintIssue } from '../../history.js';
 
@@ -59,91 +66,45 @@ const ISSUE_TYPES = new Set<RawIssue['type']>([
   'required-optional-mismatch',
 ]);
 
+export type Pass1Candidate = RawIssue;
+
+export type RunPass1Result = {
+  candidates: Pass1Candidate[];
+  positives:  string[];
+};
+
+export type RunPass1Options = {
+  dropBodies?:  boolean;
+  temperature?: number;
+};
+
 // ---------------------------------------------------------------------------
 // System prompt (cached across calls)
+//
+// Prose lives in `./prompts/system.md` so prompt chang[es diff as Markdown
+// rather than as escaped TypeScript template literals. The .md is read once
+// at module init via `import.meta.url`. Per-site extensions are appended at
+// the constructor seam (see `systemPrompt` assignment below) — this constant
+// holds the common gate only.
 // ---------------------------------------------------------------------------
 
-const SYSTEM_PROMPT = `You are a documentation accuracy validator for the WordPress Block Editor.
-
-Your job: read a documentation page and its mapped source code, then identify specific places where the documentation is inaccurate, outdated, or misleading relative to the current code.
-
-## What counts as drift — report these
-
-- Type signature changes: a parameter was added, removed, or renamed; a return type changed
-- Default value changes: a documented default no longer matches the code
-- Deprecated APIs shown as current or recommended
-- Code examples that would throw or produce wrong output against the current code
-- Function, hook, filter, or attribute names that no longer exist in the code
-- Required parameters documented as optional, or optional parameters documented as required
-
-## What does NOT count as drift — do not report these
-
-- Teaching simplifications: intentional omission of edge cases or complexity for clarity
-- Undocumented optional parameters, unless their absence would cause a reader's code to fail
-- Style, grammar, or typos
-- Broken external links
-- If the documented behavior is a strict subset of actual behavior AND following the doc would not cause a developer's code to fail or produce a surprise, it is not drift
-
-## Severity
-
-- critical: following the doc would cause a developer's code to fail or produce incorrect output
-- major: the doc is misleading or likely to confuse developers, but not immediately breaking
-- minor: technically inaccurate but unlikely to cause problems in practice
-
-## Source authority — ranked highest to lowest
-
-When multiple source files are provided, resolve conflicts in this order:
-
-1. **Test files** (path contains /test/ or .test.) — highest authority. A test assertion is an explicit contract about intended public API behavior. If a test confirms the doc claim, it is not drift. If a test contradicts the doc claim, that is strong evidence of drift. Never report an issue based on implementation code alone if a test file is available and confirms the documented behavior.
-
-2. **AST-generated symbols** — when present, a machine-extracted list of all exported names, signatures, and constants. Will be provided as a dedicated section in the source context when available. Treat these as authoritative for what names and signatures are part of the public API.
-
-3. **TypeScript type definition files** (types.ts, .d.ts) — authoritative for the public API surface. Type signatures here define what the API accepts and returns. Until AST symbols are available, treat these as the closest proxy for the full generated API surface.
-
-4. **JSDoc / PHPDoc inline comments** — describe intended behavior. Read them before the code body. If a JSDoc comment confirms the doc claim, prefer that over code-body logic.
-
-5. **JSON Schema files** (e.g. schemas/json/block.json) — valid for property names and allowed values only. Do NOT use their required arrays to determine whether a field is required — confirm that in TypeScript or PHP source.
-
-6. **Implementation code** — authoritative for runtime behavior, but requires careful interpretation: short-circuit logic, internal-only APIs, and implementation details intentionally abstracted from the public API must not be reported as drift.
-
-## Evidence rules — strictly enforced
-
-Every issue MUST include:
-- docSays: an exact verbatim quote from the documentation
-- codeSays: an exact verbatim quote from one of the provided source files — copy the text character-for-character
-- codeFile: the repo-relative path to the file containing codeSays
-- codeRepo: the repo ID of that file (e.g. "gutenberg" or "wordpress-develop")
-
-If you cannot find a verbatim quote from the code that directly contradicts the doc claim, do NOT report the issue. Guessed or paraphrased codeSays values are not acceptable.
-
-## Suggestions — must be specific and structured
-
-Every suggestion must name the exact function, parameter, attribute, hook, or line that needs to change. Examples of unacceptable suggestions: "update the documentation", "revise this section", "fix the description". These will be rejected.
-
-Format every suggestion as:
-1. A single summary sentence stating what needs to change.
-2. A bullet list of specific actions, one per line, starting with "- ".
-
-Example:
-Update the \`registerBlockType\` documentation to reflect the metadata object overload.
-- In the function signature section, add the overload: \`registerBlockType( metadata: BlockConfiguration, settings?: Partial<BlockConfiguration> )\`
-- Note that when a metadata object is passed as the first argument, the \`settings\` parameter becomes optional
-
-Keep the summary sentence short. Put all detail in the bullets.
-
-## Confidence
-
-Rate your confidence from 0.0 to 1.0. Only report issues you are confident about (≥ 0.7). When in doubt, omit.
-
-## Positives
-
-Report up to 3 things the documentation gets specifically right. These must be concrete — point to something in both the doc and the code. Do not write generic positives like "the documentation is clear". If the doc is entirely accurate, these positives are your primary finding.`;
+const SYSTEM_PROMPT = readFileSync(
+  fileURLToPath(new URL('./prompts/system.md', import.meta.url)),
+  'utf-8',
+).trimEnd();
 
 // ---------------------------------------------------------------------------
 // Tool schemas
 // ---------------------------------------------------------------------------
 
-const REPORT_FINDINGS_TOOL: Anthropic.Tool = {
+// Cap on issues per doc per Pass 1. Encoded on the tool schema rather
+// than in the prompt: structural caps belong with the schema, prose
+// caps drift. The 1,787-malformed-evidence event on `block-patterns`
+// (run 20260502-124630) showed what happens when a degenerate output
+// has no schema-level brake.
+export const PASS1_MAX_ISSUES = 10;
+
+export const REPORT_FINDINGS_TOOL: Anthropic.Tool = {
   name: 'report_findings',
   description: 'Report all drift issues and positives found in the documentation.',
   input_schema: {
@@ -152,6 +113,7 @@ const REPORT_FINDINGS_TOOL: Anthropic.Tool = {
     properties: {
       issues: {
         type: 'array',
+        maxItems: PASS1_MAX_ISSUES,
         items: {
           type: 'object',
           required: ['severity', 'type', 'evidence', 'suggestion', 'confidence'],
@@ -189,7 +151,7 @@ const FETCH_CODE_TOOL: Anthropic.Tool = {
     type: 'object' as const,
     required: ['repo', 'path', 'startLine', 'endLine'],
     properties: {
-      repo:      { type: 'string', description: "Repo ID — e.g. 'gutenberg' or 'wordpress-develop'" },
+      repo:      { type: 'string', description: 'Repo ID — must be one of the keys configured in `codeSources` for this corpus' },
       path:      { type: 'string', description: 'Repo-relative file path' },
       startLine: { type: 'integer', minimum: 1 },
       endLine:   { type: 'integer', minimum: 1 },
@@ -224,6 +186,94 @@ export function isSelfRejected(suggestion: string): boolean {
   return SELF_REJECTION_PATTERNS.some(re => re.test(suggestion.trim()));
 }
 
+// Tolerant normalisation for verbatim substring comparison.
+//
+// Models paraphrase content rather than quote it byte-for-byte:
+//   1. Multi-line content (bullet lists, indented blocks, continuation
+//      lines) gets flattened to a smooth quotable form — single spaces,
+//      no line breaks.
+//   2. Markdown link syntax `[text](url)` gets rendered to plain `text`
+//      (the model writes what it visually parses, not the raw markup).
+//
+// Both have produced silent drops on real docs (block-attributes
+// `source` enum lists, block-patterns `filePath` PHPDoc evidence).
+// A byte-exact `.includes()` would treat these as hallucinations even
+// though the meaningful content is identical.
+//
+// Generic by design — applies to any Markdown-based docs site:
+//   - Whitespace collapse: universal across docs/codebases.
+//   - Markdown link stripping: universal across Markdown-based docs.
+//
+// Intentionally OUT OF SCOPE:
+//   - Comment-continuation characters (`*` PHPDoc, `#` Python, `///`
+//     Rust) — language-specific; per-site configuration territory.
+//   - Bold/italic emphasis markers (`**foo**`, `__foo__`) — risk of
+//     false-merging identifiers like `__experimental`. Add only with
+//     evidence.
+//   - Inline code backticks (`` `foo` ``) — structural marker that
+//     distinguishes identifiers from prose; preserve.
+//   - Bullet markers (`- `) — handled in verbatimIncludes as a
+//     second-chance strategy rather than here, because stripping them
+//     from both sides of the base normaliser would break the existing
+//     match where whitespace-collapse already turns multi-line bullet
+//     content into inline ` - ` separators that the model retains.
+//     (Only `- ` is handled; `* ` bullet style is not stripped.)
+export function normalizeForVerbatim(s: string): string {
+  return s
+    // Strip Markdown link syntax: [text](url) → text. Works for inline
+    // links and image alt text; ignores nested-bracket edge cases.
+    .replace(/!?\[([^\]]+)\]\([^)]*\)/g, '$1')
+    // Collapse runs of whitespace to a single space.
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Verbatim substring check with two additional fallback strategies.
+//
+// Contract: `haystack` must already be normalizeForVerbatim'd.
+// `needle` is normalized internally.
+//
+// Strategy 2 — bullet-stripped match:
+//   Models sometimes prefix each quoted line with `- ` when the doc
+//   section is a bullet list. After normalizeForVerbatim these appear
+//   as a leading `- ` or inline ` - ` separators in the needle.
+//   Stripping them from both sides and retrying catches this pattern
+//   without touching the base normaliser (which needs those ` - `
+//   separators intact for the inverse case where the model collapses
+//   multi-line bullets into a single inline-dashed phrase).
+//   The haystack is stripped symmetrically so that whitespace-collapsed
+//   bullet items (`- a - b - c`) can match stripped needle `a b c`.
+//   The guard `nStripped !== n` ensures this path only activates when
+//   the needle itself contains a `- ` bullet pattern, bounding the
+//   risk of spurious matches from stripping legitimate inline dashes.
+//   Remove when: the model reliably omits bullet reformatting of prose
+//   quotes.
+//
+// Strategy 3 — single backtick identifier fallback:
+//   Docs sometimes omit the backticks around a property name in prose
+//   even when the model correctly quotes it as `identifier`. Allow a
+//   single-token backtick-wrapped needle to match the plain-text form.
+//   Remove when: the model reliably matches the doc's backtick
+//   convention when quoting identifiers.
+export function verbatimIncludes(haystack: string, needle: string): boolean {
+  const n = normalizeForVerbatim(needle);
+
+  // Strategy 1: direct normalized match
+  if (haystack.includes(n)) return true;
+
+  // Strategy 2: bullet-stripped match on both sides
+  const stripBullets = (s: string): string =>
+    s.replace(/(?:^| )- /g, ' ').replace(/\s+/g, ' ').trim();
+  const nStripped = stripBullets(n);
+  if (nStripped !== n && stripBullets(haystack).includes(nStripped)) return true;
+
+  // Strategy 3: single backtick identifier against plain text
+  const singleIdent = n.match(/^`([^`\s]+)`$/);
+  if (singleIdent) return haystack.includes(singleIdent[1]);
+
+  return false;
+}
+
 export function isWeakSuggestion(suggestion: string): boolean {
   if (!suggestion) return true;
   const trimmed = suggestion.trim();
@@ -254,12 +304,26 @@ export type CostAccumulator = {
 // ClaudeValidator
 // ---------------------------------------------------------------------------
 
+export type ClaudeValidatorOptions = {
+  responseMode?: 'tool-use' | 'single-prompt';
+  // Sampling temperature for all three messages.create call sites
+  // (Pass 1, Pass 2 agentic loop, weak-suggestion retry). Default 0 ⇒
+  // deterministic runs.
+  temperature?: number;
+  // Number of Pass 1 samples per doc. samples > 1 trades cost for recall:
+  // candidates are unioned across samples by fingerprint before the
+  // verbatim check / Pass 2, so each unique candidate is verified once.
+  samples?: number;
+};
+
 export class ClaudeValidator implements Validator {
   private readonly pass1Model: string;
   private readonly pass2Model: string;
   private readonly responseMode: ValidatorResponseMode;
   private readonly anthropic: Anthropic;
   private readonly systemPrompt: string;
+  private readonly temperature: number;
+  private readonly samples: number;
   readonly costAccumulator: CostAccumulator = { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheCreationTokens: 0 };
   droppedHallucinations = 0;
 
@@ -268,15 +332,21 @@ export class ClaudeValidator implements Validator {
     pass2Model: string,
     anthropic: Anthropic,
     promptExtension?: string,
-    responseMode: ValidatorResponseMode = 'tool-use',
+    options: ClaudeValidatorOptions = {},
   ) {
     this.pass1Model = pass1Model;
     this.pass2Model = pass2Model;
-    this.responseMode = responseMode;
+    this.responseMode = options.responseMode ?? 'tool-use';
     this.anthropic = anthropic;
     this.systemPrompt = promptExtension?.trim()
       ? `${SYSTEM_PROMPT}\n\n## Site-specific rules\n\n${promptExtension}`
       : SYSTEM_PROMPT;
+    this.temperature = options.temperature ?? 0;
+    const requestedSamples = options.samples ?? 1;
+    if (!Number.isInteger(requestedSamples) || requestedSamples < 1) {
+      throw new Error(`ClaudeValidator: samples must be an integer >= 1 (got ${requestedSamples})`);
+    }
+    this.samples = requestedSamples;
   }
 
   async validateDoc(
@@ -299,51 +369,96 @@ export class ClaudeValidator implements Validator {
     }
 
     // Build user message content
-    const codeContext = formatContextForClaude(assembled.fileBlocks);
-    const missingSymbolsHint = assembled.missingSymbols.length > 0
-      ? `\n\n## Potentially removed APIs\n\nThe following identifiers appear in the doc but were not found in any source file. Investigate each as a possible \`nonexistent-name\` issue:\n\n${assembled.missingSymbols.map(s => `- \`${s}\``).join('\n')}`
-      : '';
-    const userContent = `## Documentation: ${doc.title}
+    const userContent = ClaudeValidator.buildUserContent(doc, assembled, {});
 
-URL: ${doc.sourceUrl}
-
-${doc.content}
-
----
-
-## Source Code
-
-${codeContext || '(No source files were available for this document.)'}${missingSymbolsHint}`;
-
-    // Pass 1: get initial issues and positives
+    // Pass 1: get initial issues and positives. When `samples > 1` we run
+    // Pass 1 N times and union candidates by `fingerprintIssue` *before*
+    // the verbatim check / Pass 2 — each unique candidate is verified once.
+    // Trades cost for recall (issue #56). With samples=1 the path collapses
+    // to the historical single-call shape and is byte-identical to it.
     let pass1Issues: RawIssue[] = [];
     let positives: string[] = [];
 
-    try {
-      const pass1Result = await this.runPass1(userContent);
-      pass1Issues = pass1Result.issues;
-      positives = pass1Result.positives.slice(0, 3);
-    } catch (err) {
-      diagnostics.push(`Pass 1 failed: ${String(err)}`);
-      return this.buildDocResult(doc, [], positives, assembled.relatedCode, diagnostics, commitSha);
+    if (this.samples === 1) {
+      try {
+        const pass1Result = await this.runPass1(userContent);
+        pass1Issues = pass1Result.issues;
+        positives = pass1Result.positives.slice(0, 3);
+      } catch (err) {
+        diagnostics.push(`Pass 1 failed: ${String(err)}`);
+        return this.buildAnalysisFailedDocResult(doc, assembled.relatedCode, diagnostics, commitSha);
+      }
+    } else {
+      const seenFingerprints = new Set<string>();
+      const aggregatedPositives: string[] = [];
+      let succeededSamples = 0;
+      for (let i = 0; i < this.samples; i++) {
+        let pass1Result: ReportFindingsInput;
+        try {
+          pass1Result = await this.runPass1(userContent);
+        } catch (err) {
+          diagnostics.push(`Pass 1 sample ${i + 1}/${this.samples} failed: ${String(err)}`);
+          continue;
+        }
+        succeededSamples++;
+        for (const candidate of pass1Result.issues) {
+          const fp = fingerprintIssue(
+            doc.slug,
+            candidate.type,
+            candidate.evidence.codeRepo,
+            candidate.evidence.codeFile,
+          );
+          if (!seenFingerprints.has(fp)) {
+            seenFingerprints.add(fp);
+            pass1Issues.push(candidate);
+          }
+        }
+        for (const p of pass1Result.positives) {
+          if (!aggregatedPositives.includes(p)) aggregatedPositives.push(p);
+        }
+      }
+      if (succeededSamples === 0) {
+        return this.buildAnalysisFailedDocResult(doc, assembled.relatedCode, diagnostics, commitSha);
+      }
+      positives = aggregatedPositives.slice(0, 3);
     }
 
-    // Verbatim check
+    // Verbatim check — both docSays and codeSays must be real quotes.
+    // Comparison is whitespace-tolerant (see normalizeForVerbatim) so
+    // multi-line bullet lists and continuation-line content survive.
     const verbatimPassed: RawIssue[] = [];
+    const normalizedDoc = normalizeForVerbatim(doc.content);
+    const normalizedFileCache = new Map<string, string>();
     for (const issue of pass1Issues) {
-      const { codeRepo, codeFile, codeSays } = issue.evidence;
+      const { codeRepo, codeFile, codeSays, docSays } = issue.evidence;
+
+      // docSays must be a verbatim quote from the doc
+      if (!verbatimIncludes(normalizedDoc, docSays)) {
+        this.droppedHallucinations++;
+        const conf = issue.confidence;
+        const tag = conf >= 0.9 ? `[verbatim-check][high-conf:${conf}]` : '[verbatim-check]';
+        console.warn(`${tag} dropped issue in ${doc.slug}: docSays "${docSays}" not found in doc content`);
+        continue;
+      }
+
       if (!codeSources[codeRepo]) {
         diagnostics.push(`Unknown repo "${codeRepo}" in issue evidence — dropping`);
         continue;
       }
       try {
-        const fileContent = await codeSources[codeRepo].readFile(codeFile);
-        const needle = codeSays.trim();
+        const cacheKey = `${codeRepo}:${codeFile}`;
+        let normalizedFile = normalizedFileCache.get(cacheKey);
+        if (normalizedFile === undefined) {
+          normalizedFile = normalizeForVerbatim(await codeSources[codeRepo].readFile(codeFile));
+          normalizedFileCache.set(cacheKey, normalizedFile);
+        }
         // nonexistent-name evidence is absence — there is no quote to find in the file
         const isAbsenceIssue = issue.type === 'nonexistent-name';
-        if (!isAbsenceIssue && !fileContent.includes(needle)) {
+        if (!isAbsenceIssue && !verbatimIncludes(normalizedFile, codeSays)) {
           this.droppedHallucinations++;
-          console.warn(`[verbatim-check] dropped issue in ${doc.slug}: "${codeSays}" not found in ${codeRepo}:${codeFile}`);
+          const conf = issue.confidence;
+          const tag = conf >= 0.9 ? `[verbatim-check][high-conf:${conf}]` : '[verbatim-check]';
+          console.warn(`${tag} dropped issue in ${doc.slug}: codeSays "${codeSays}" not found in ${codeRepo}:${codeFile}`);
           continue;
         }
         verbatimPassed.push(issue);
@@ -403,14 +518,134 @@ ${codeContext || '(No source files were available for this document.)'}${missing
     };
   }
 
-  private async runPass1(userContent: string): Promise<ReportFindingsInput> {
+  // Used when Pass 1 cannot complete (single-sample throw, or every
+  // multi-sample throw). The doc is non-scoring: status 'analysis-failed',
+  // healthScore null, no issues, no positives. Diagnostics carry the cause
+  // and are excluded from Overall Health by computeOverallHealth in the
+  // pipeline. See docs/GLOSSARY.md § Status.
+  private buildAnalysisFailedDocResult(
+    doc: Doc,
+    relatedCode: DocResult['relatedCode'],
+    diagnostics: string[],
+    commitSha: string,
+  ): DocResult {
+    return {
+      slug:        doc.slug,
+      title:       doc.title,
+      parent:      doc.parent,
+      sourceUrl:   doc.sourceUrl,
+      healthScore: null,
+      status:      'analysis-failed',
+      issues:      [],
+      positives:   [],
+      relatedCode,
+      diagnostics,
+      commitSha,
+      analyzedAt:  new Date().toISOString(),
+    };
+  }
+
+  // Public helper used by experiment scripts. Builds the same Pass 1 user
+  // message that validateDoc would, optionally dropping the Source Code bulk.
+  static buildUserContent(
+    doc: Doc,
+    assembled: Awaited<ReturnType<typeof assembleContext>>,
+    options: { dropBodies?: boolean } = {},
+  ): string {
+    // dropBodies omits implementation source code but ALWAYS retains test
+    // files — assertion strings and inline comments often carry drift
+    // evidence (e.g. expected error messages, expected outputs) that the
+    // structured extractors cannot capture.
+    const renderedFileBlocks = options.dropBodies
+      ? assembled.fileBlocks.filter(fb => isTestFile(fb.path))
+      : assembled.fileBlocks;
+    const codeContext = formatContextForClaude(renderedFileBlocks);
+    const symbolsText  = formatSymbolsAsText(assembled.extractedSymbols);
+    const hooksText    = formatHooksAsText(assembled.extractedHooks);
+    const defaultsText = formatDefaultsAsText(assembled.extractedDefaults);
+    const schemasText  = formatSchemasAsText(assembled.extractedSchemas);
+    // Each structured section carries its own authority note inline — the
+    // system prompt's "How to read the input" section tells the model to
+    // read these notes before using the section's content. Keep the notes
+    // claim-type-keyed (what is this section AUTHORITATIVE FOR? what is it
+    // NOT?) rather than restating a global ranking.
+    const symbolsSection = symbolsText
+      ? `\n\n---\n\n## Exported API symbols\n\nMachine-extracted from the source AST: exported names, signatures, and the documentation tags attached to them. Authoritative for: which symbols exist (this is the canonical export list), their signatures, and the lifecycle/intent tags surfaced here. NOT authoritative for runtime behaviour or descriptive prose — verify those in Source Code. Use this section to confirm or refute specific claims you already have in mind, not as a checklist to walk against the doc.\n\n${symbolsText}`
+      : '';
+    const hooksSection = hooksText
+      ? `\n\n---\n\n## Hooks and filters\n\nFiring sites for action and filter hooks. Authoritative for: which hook names exist and where they fire. Use to verify hook names referenced in the documentation.\n\n${hooksText}`
+      : '';
+    const defaultsSection = defaultsText
+      ? `\n\n---\n\n## Defaults\n\nExtracted default-value sites (e.g. \`wp_parse_args\` calls, object-spread merges). Authoritative for: documented default-value claims when a literal default is visible here. If a documented default is built from a fallback expression (\`value ?? X\`, \`value || X\`) or computed, cross-reference Source Code — runtime behaviour wins.\n\n${defaultsText}`
+      : '';
+    // Schemas survive `dropBodies`: JSON files are small and load-bearing
+    // for property/enum claims, worth keeping when Source Code is omitted.
+    const schemasSection = schemasText
+      ? `\n\n---\n\n## Schemas\n\nJSON schema files. Authoritative for: property names and allowed enum values. NOT a sole source for whether a field is required — confirm "required" claims against the implementation language rather than the schema's \`required\` array, unless the per-site extension elevates schema authority.\n\n${schemasText}`
+      : '';
+    const missingSymbolsHint = assembled.missingSymbols.length > 0
+      ? `\n\n## Potentially removed APIs\n\nThe following identifiers appear in the doc but were not found in any source file. Investigate each as a possible \`nonexistent-name\` issue:\n\n${assembled.missingSymbols.map(s => `- \`${s}\``).join('\n')}`
+      : '';
+    // The dropBodies experiment seam ships only test files (assertions
+    // carry drift evidence — expected error messages, expected outputs —
+    // that the structured extractors cannot capture). Keep the model
+    // oriented when the implementation bulk is missing.
+    const sourceCodeBlock = options.dropBodies
+      ? (codeContext
+          ? `(Implementation source code omitted for this run — only test files are included below. Use the structured sections above for surface-contract claims.)\n\n${codeContext}`
+          : '(Implementation source code omitted for this run, and no test files were available. Rely on the structured sections above.)')
+      : (codeContext || '(No source files were available for this document.)');
+    const sourceCodeAuthorityNote = 'Authoritative for: runtime behaviour, default values built from fallback expressions, branching logic, error paths — anything not captured by the structured sections above. Test files (when present, identified by path or filename convention) are corroborating evidence: a failing assertion against the doc claim is strong drift signal; a passing test only confirms the case it tests.';
+    return `## Documentation: ${doc.title}
+
+URL: ${doc.sourceUrl}
+
+${doc.content}${symbolsSection}${hooksSection}${defaultsSection}${schemasSection}
+
+---
+
+## Source Code
+
+${sourceCodeAuthorityNote}
+
+${sourceCodeBlock}${missingSymbolsHint}`;
+  }
+
+  // Public entrypoint for experiment scripts: runs only Pass 1 and returns
+  // the raw candidates (no verbatim check, no Pass 2). Supports temperature
+  // override and dropBodies for fair extractor-vs-bulk comparisons.
+  async runPass1Only(
+    doc: Doc,
+    codeTiers: CodeTiers,
+    codeSources: Record<string, CodeSource>,
+    options: RunPass1Options = {},
+  ): Promise<RunPass1Result> {
+    const assembled = await assembleContext(doc, codeTiers, codeSources);
+    const userContent = ClaudeValidator.buildUserContent(doc, assembled, {
+      dropBodies: options.dropBodies,
+    });
+    const result = await this.runPass1(userContent, options.temperature);
+    return { candidates: result.issues, positives: result.positives };
+  }
+
+  private async runPass1(
+    userContent: string,
+    temperatureOverride?: number,
+  ): Promise<ReportFindingsInput> {
+    // Per-call override (used by `runPass1Only` experiments) wins over the
+    // instance default (set from config.validator.temperature, default 0).
+    const temperature = temperatureOverride ?? this.temperature;
     if (this.responseMode === 'single-prompt') {
-      return this.runSinglePromptPass1(userContent);
+      return this.runSinglePromptPass1(userContent, temperature);
     }
 
     const response = await this.anthropic.messages.create({
       model:      this.pass1Model,
-      max_tokens: 4096,
+      // 8192 sized for up to PASS1_MAX_ISSUES issues × structured
+      // suggestion (~500 tokens each) + positives + slack. 4096 was
+      // tight on multi-issue docs and contributed to truncation.
+      max_tokens: 8192,
+      temperature,
       system: [
         {
           type:          'text',
@@ -435,6 +670,39 @@ ${codeContext || '(No source files were available for this document.)'}${missing
 
     for (const block of response.content) {
       if (block.type === 'tool_use' && block.name === 'report_findings') {
+        // TEMP DIAGNOSTIC: capture Pass 1 raw shape when DUMP_PASS1=1
+        // Used to investigate the block-patterns "1787 malformed evidence" event.
+        // Remove after the structural fix lands.
+        if (process.env.DUMP_PASS1) {
+          const inp = block.input as Record<string, unknown> | undefined;
+          const issues = inp?.issues as unknown;
+          const issuesType = Array.isArray(issues) ? 'array' : typeof issues;
+          const issuesLen = Array.isArray(issues)
+            ? issues.length
+            : (typeof issues === 'string' ? issues.length : 'n/a');
+          console.warn(
+            `[pass1-dump] stop_reason=${response.stop_reason} issuesType=${issuesType} length=${issuesLen} outTok=${response.usage.output_tokens}`,
+          );
+          try {
+            const fs = await import('fs');
+            const path = await import('path');
+            const dir = '/tmp/wp-docs-pass1-dump';
+            fs.mkdirSync(dir, { recursive: true });
+            const ts = Date.now();
+            fs.writeFileSync(
+              path.join(dir, `pass1-${ts}.json`),
+              JSON.stringify({
+                stop_reason: response.stop_reason,
+                usage:       response.usage,
+                inputType:   typeof block.input,
+                inputIsArray: Array.isArray(block.input),
+                input:       block.input,
+              }, null, 2),
+            );
+          } catch {
+            // ignore — diagnostic only
+          }
+        }
         return block.input as ReportFindingsInput;
       }
     }
@@ -442,10 +710,11 @@ ${codeContext || '(No source files were available for this document.)'}${missing
     return { issues: [], positives: [] };
   }
 
-  private async runSinglePromptPass1(userContent: string): Promise<ReportFindingsInput> {
+  private async runSinglePromptPass1(userContent: string, temperature: number): Promise<ReportFindingsInput> {
     const response = await this.anthropic.messages.create({
-      model:      this.pass1Model,
-      max_tokens: 4096,
+      model:       this.pass1Model,
+      max_tokens:  4096,
+      temperature,
       system: [
         {
           type:          'text',
@@ -621,8 +890,9 @@ ${JSON.stringify(candidate, null, 2)}`,
     // Agentic loop: allow Claude to call fetch_code before report_findings
     for (let turn = 0; turn < 10; turn++) {
       const response = await this.anthropic.messages.create({
-        model:      this.pass2Model,
-        max_tokens: 2048,
+        model:       this.pass2Model,
+        max_tokens:  2048,
+        temperature: this.temperature,
         system: [
           {
             type:          'text',
@@ -750,8 +1020,9 @@ ${JSON.stringify(candidate, null, 2)}`,
 
   private async retryWeakSuggestionSinglePrompt(rawIssue: RawIssue): Promise<string | null> {
     const response = await this.anthropic.messages.create({
-      model:      this.pass2Model,
-      max_tokens: 512,
+      model:       this.pass2Model,
+      max_tokens:  512,
+      temperature: this.temperature,
       system: [
         {
           type:          'text',
@@ -814,8 +1085,9 @@ ${JSON.stringify(rawIssue, null, 2)}`,
     ];
 
     const response = await this.anthropic.messages.create({
-      model:      this.pass2Model,
-      max_tokens: 1024,
+      model:       this.pass2Model,
+      max_tokens:  1024,
+      temperature: this.temperature,
       system: [
         {
           type:          'text',

@@ -33,6 +33,22 @@
           ],
           "additionalProperties": false
         },
+        "sampling": {
+          "type": "object",
+          "properties": {
+            "temperature": {
+              "type": "number",
+              "default": 0
+            },
+            "samples": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          "additionalProperties": false,
+          "default": {}
+        },
         "repoUrls": {
           "type": "object",
           "additionalProperties": {
@@ -61,7 +77,12 @@
               "type": "integer"
             },
             "notMapped": {
-              "type": "integer"
+              "type": "integer",
+              "default": 0
+            },
+            "analysisFailed": {
+              "type": "integer",
+              "default": 0
             },
             "issues": {
               "type": "object",
@@ -93,7 +114,6 @@
             "healthy",
             "needsAttention",
             "critical",
-            "notMapped",
             "issues"
           ],
           "additionalProperties": false
@@ -165,7 +185,8 @@
                   "healthy",
                   "needs-attention",
                   "critical",
-                  "not-mapped"
+                  "not-mapped",
+                  "analysis-failed"
                 ]
               },
               "issues": {

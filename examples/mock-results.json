@@ -6,6 +6,10 @@
     "pass1": "claude-sonnet-4-6",
     "pass2": "claude-sonnet-4-6"
   },
+  "sampling": {
+    "temperature": 0,
+    "samples": 1
+  },
   "repoUrls": {
     "gutenberg": "https://github.com/WordPress/gutenberg",
     "wordpress-develop": "https://github.com/WordPress/wordpress-develop"

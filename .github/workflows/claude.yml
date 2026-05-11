@@ -45,7 +45,7 @@ jobs:
 
       - name: Run Claude Code
         id: claude
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@v1.0.111
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           base_branch: ${{ steps.pr-branch.outputs.branch }}
@@ -54,8 +54,11 @@ jobs:
           additional_permissions: |
             actions: read
 
-          prompt: |
-            ${{ steps.pr-branch.outputs.branch != '' && format('IMPORTANT: This review is for PR branch `{0}`. When generating any "Fix this" links, always append `&branch={0}` to the claude.ai/code URL so the fix targets the correct branch instead of main. Example format: https://claude.ai/code?q=<task>&repo=<owner/repo>&branch={0}', steps.pr-branch.outputs.branch) || '' }}
-
-            Perform the task described in the triggering comment.
+          # No `prompt:` set on purpose — the action's default mode reads the
+          # triggering comment, drives the review, and posts the result via
+          # its built-in `mcp__github__update_claude_comment` tool. Setting
+          # a custom `prompt:` was previously suppressing that auto-post path
+          # (Claude tried alternatives that the sandbox denied — observed as
+          # `permission_denials_count: 12` and "No buffered inline comments"
+          # in past runs of PR #51, #52, #53, #54, #55, #58).
 

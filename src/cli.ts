@@ -17,6 +17,7 @@ program
   .option('--output <dir>', 'Output directory for the dashboard')
   .option('--results <path>', 'Load RunResults from a JSON file instead of running the pipeline')
   .option('--dry-run', 'Print what would be analyzed without running the pipeline')
+  .option('--slug <slug...>', 'Only validate the given doc slug(s); repeatable')
   .parse(process.argv);
 
 const opts = program.opts<{
@@ -24,6 +25,7 @@ const opts = program.opts<{
   output?: string;
   results?: string;
   dryRun?: boolean;
+  slug?: string[];
 }>();
 
 async function main(): Promise<void> {
@@ -65,7 +67,7 @@ async function main(): Promise<void> {
       process.exit(0);
     }
 
-    results = await runPipeline(config);
+    results = await runPipeline(config, { slugs: opts.slug });
   }
 
   // Determine output directory
