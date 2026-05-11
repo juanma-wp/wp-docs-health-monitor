@@ -23,6 +23,9 @@ export const ConfigSchema = z.object({
   outputDir:   z.string(),
   validator: z.object({
     type:                   z.literal('claude'),
+    provider:               z.enum(['anthropic', 'openrouter']).default('anthropic'),
+    apiKeyEnvVar:           z.string().optional(),
+    baseUrl:                z.string().url().optional(),
     pass1Model:             z.string().default('claude-sonnet-4-6'),
     pass2Model:             z.string().default('claude-sonnet-4-6'),
     // Model used by scripts/auto-map.ts for the canonical-mapping re-rank step.

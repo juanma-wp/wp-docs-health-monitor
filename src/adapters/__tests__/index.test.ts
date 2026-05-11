@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 import type { Config } from '../../config/schema.js';
 import {
@@ -33,7 +33,7 @@ function makeDocSourceConfig(type: string): Config {
     },
     mappingPath: 'mappings/test.json',
     outputDir: './out',
-    validator: { type: 'claude', pass1Model: 'claude-sonnet-4-6', pass2Model: 'claude-sonnet-4-6', temperature: 0, samples: 1 },
+    validator: { type: 'claude', provider: 'anthropic', pass1Model: 'claude-sonnet-4-6', pass2Model: 'claude-sonnet-4-6', temperature: 0, samples: 1 },
     pricing: { inputPerMtok: 3, outputPerMtok: 15, cacheWritePerMtok: 3.75, cacheReadPerMtok: 0.30 },
   };
 }
@@ -100,8 +100,36 @@ describe('createCodeSources', () => {
 // ---------------------------------------------------------------------------
 
 describe('createValidator', () => {
+  const originalOpenRouterKey = process.env.OPENROUTER_API_KEY;
+
+  beforeEach(() => {
+    delete process.env.OPENROUTER_API_KEY;
+  });
+
+  afterEach(() => {
+    if (originalOpenRouterKey === undefined) {
+      delete process.env.OPENROUTER_API_KEY;
+    } else {
+      process.env.OPENROUTER_API_KEY = originalOpenRouterKey;
+    }
+  });
+
   it('returns a ClaudeValidator for type "claude"', () => {
     const validator = createValidator(makeDocSourceConfig('manifest-url'));
+    expect(validator).toBeInstanceOf(ClaudeValidator);
+  });
+
+  it('throws when provider=openrouter and OPENROUTER_API_KEY is missing', () => {
+    const cfg = makeDocSourceConfig('manifest-url');
+    cfg.validator.provider = 'openrouter';
+    expect(() => createValidator(cfg)).toThrow('OPENROUTER_API_KEY');
+  });
+
+  it('returns a ClaudeValidator for provider=openrouter when key is set', () => {
+    process.env.OPENROUTER_API_KEY = 'sk-or-test';
+    const cfg = makeDocSourceConfig('manifest-url');
+    cfg.validator.provider = 'openrouter';
+    const validator = createValidator(cfg);
     expect(validator).toBeInstanceOf(ClaudeValidator);
   });
 

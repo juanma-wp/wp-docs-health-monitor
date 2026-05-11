@@ -20,8 +20,24 @@ const baseRaw = {
 describe('ConfigSchema — validator.temperature / validator.samples (issue #56)', () => {
   it('defaults temperature to 0 and samples to 1 when both are omitted', () => {
     const parsed = ConfigSchema.parse(baseRaw);
+    expect(parsed.validator.provider).toBe('anthropic');
     expect(parsed.validator.temperature).toBe(0);
     expect(parsed.validator.samples).toBe(1);
+  });
+
+  it('accepts openrouter provider with custom key env var and base URL', () => {
+    const parsed = ConfigSchema.parse({
+      ...baseRaw,
+      validator: {
+        ...baseRaw.validator,
+        provider: 'openrouter',
+        apiKeyEnvVar: 'MY_OPENROUTER_KEY',
+        baseUrl: 'https://openrouter.ai/api/v1/anthropic',
+      },
+    });
+    expect(parsed.validator.provider).toBe('openrouter');
+    expect(parsed.validator.apiKeyEnvVar).toBe('MY_OPENROUTER_KEY');
+    expect(parsed.validator.baseUrl).toBe('https://openrouter.ai/api/v1/anthropic');
   });
 
   it('accepts an explicit temperature override', () => {
