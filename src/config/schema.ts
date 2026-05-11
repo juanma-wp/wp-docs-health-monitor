@@ -24,6 +24,7 @@ export const ConfigSchema = z.object({
   validator: z.object({
     type:                   z.literal('claude'),
     provider:               z.enum(['anthropic', 'openrouter']).default('anthropic'),
+    format:                 z.literal('anthropic').default('anthropic'),
     apiKeyEnvVar:           z.string().optional(),
     baseUrl:                z.string().url().optional(),
     pass1Model:             z.string().default('claude-sonnet-4-6'),
