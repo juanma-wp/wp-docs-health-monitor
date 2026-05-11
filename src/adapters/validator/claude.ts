@@ -81,7 +81,7 @@ export type RunPass1Options = {
 // ---------------------------------------------------------------------------
 // System prompt (cached across calls)
 //
-// Prose lives in `./prompts/system.md` so prompt chang[es diff as Markdown
+// Prose lives in `./prompts/system.md` so prompt changes diff as Markdown
 // rather than as escaped TypeScript template literals. The .md is read once
 // at module init via `import.meta.url`. Per-site extensions are appended at
 // the constructor seam (see `systemPrompt` assignment below) — this constant
