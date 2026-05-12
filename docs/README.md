@@ -21,6 +21,7 @@ After that, jump to whichever section below matches your task.
 - **[reference/checks.md](./reference/checks.md)** — every drift type the validator runs (`type-signature`, `default-value`, `deprecated-api`, `broken-example`, `nonexistent-name`, `required-optional-mismatch`), with severity and real examples.
 - **[reference/mapping-guidelines.md](./reference/mapping-guidelines.md)** — building entries in `mappings/`: source authority order, tier assignment, schema-as-contract guidance.
 - **[reference/PER-DOC-PIPELINE.md](./reference/PER-DOC-PIPELINE.md)** — the per-doc loop: what runs for each doc, per-doc independence, the shared prompt cache, cost shape, and why `p-limit(3)`.
+- **[reference/PASS2.md](./reference/PASS2.md)** — per-survivor verification: the agentic `fetch_code` loop, what "agentic" means here, and the four drop filters (confidence floor, malformed/self-rejected suggestion, weak-suggestion gate with retry).
 
 ## Active plans — the *what's next* — `plans/`
 
