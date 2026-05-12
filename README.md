@@ -106,12 +106,14 @@ Each config file supports a local `.dev.json` override loaded automatically when
 {
   "validator": {
     "pass1Model": "claude-haiku-4-5-20251001",
-    "pass2Model": "claude-haiku-4-5-20251001"
+    "pass2Model": "claude-haiku-4-5-20251001",
+    "responseMode": "single-prompt"
   }
 }
 ```
 
 The override is deep-merged into the base config — only the keys you specify are replaced. This is the recommended way to use cheaper models during development. See `config/gutenberg-block-api.json` for all available settings.
+Set `"responseMode": "single-prompt"` for models that do not support tool calling.
 
 ## Customising for your own docs
 

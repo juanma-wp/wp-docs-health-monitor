@@ -40,6 +40,7 @@ export const ConfigSchema = z.object({
     // worth using a stronger model here than for routine validation passes.
     rerankModel:            z.string().optional(),
     systemPromptExtension:  z.string().optional(), // path to a .md file with site-specific prompt rules
+    responseMode:           z.enum(['tool-use', 'single-prompt']).default('tool-use'),
     // Determinism + recall controls. See issue #56.
     //   `temperature: 0` makes Pass 1 / Pass 2 reproducible run-to-run.
     //   `samples > 1` runs Pass 1 N times and unions candidates by

@@ -54,6 +54,18 @@ type FetchCodeInput = {
   endLine:   number;
 };
 
+type ValidatorResponseMode = 'tool-use' | 'single-prompt';
+
+const ISSUE_SEVERITIES = new Set<RawIssue['severity']>(['critical', 'major', 'minor']);
+const ISSUE_TYPES = new Set<RawIssue['type']>([
+  'type-signature',
+  'default-value',
+  'deprecated-api',
+  'broken-example',
+  'nonexistent-name',
+  'required-optional-mismatch',
+]);
+
 export type Pass1Candidate = RawIssue;
 
 export type RunPass1Result = {
@@ -69,7 +81,7 @@ export type RunPass1Options = {
 // ---------------------------------------------------------------------------
 // System prompt (cached across calls)
 //
-// Prose lives in `./prompts/system.md` so prompt chang[es diff as Markdown
+// Prose lives in `./prompts/system.md` so prompt changes diff as Markdown
 // rather than as escaped TypeScript template literals. The .md is read once
 // at module init via `import.meta.url`. Per-site extensions are appended at
 // the constructor seam (see `systemPrompt` assignment below) — this constant
@@ -293,6 +305,7 @@ export type CostAccumulator = {
 // ---------------------------------------------------------------------------
 
 export type ClaudeValidatorOptions = {
+  responseMode?: 'tool-use' | 'single-prompt';
   // Sampling temperature for all three messages.create call sites
   // (Pass 1, Pass 2 agentic loop, weak-suggestion retry). Default 0 ⇒
   // deterministic runs.
@@ -306,6 +319,7 @@ export type ClaudeValidatorOptions = {
 export class ClaudeValidator implements Validator {
   private readonly pass1Model: string;
   private readonly pass2Model: string;
+  private readonly responseMode: ValidatorResponseMode;
   private readonly anthropic: Anthropic;
   private readonly systemPrompt: string;
   private readonly temperature: number;
@@ -322,6 +336,7 @@ export class ClaudeValidator implements Validator {
   ) {
     this.pass1Model = pass1Model;
     this.pass2Model = pass2Model;
+    this.responseMode = options.responseMode ?? 'tool-use';
     this.anthropic = anthropic;
     this.systemPrompt = promptExtension?.trim()
       ? `${SYSTEM_PROMPT}\n\n## Site-specific rules\n\n${promptExtension}`
@@ -452,12 +467,14 @@ export class ClaudeValidator implements Validator {
       }
     }
 
-    // Pass 2: targeted verification for each surviving candidate
+    // Pass 2 (tool-use mode only): targeted verification for each surviving candidate
     const finalIssues: Issue[] = [];
     const seenKeys = new Set<string>();
     for (const candidate of verbatimPassed) {
       try {
-        const verified = await this.runPass2(candidate, codeSources, doc.slug);
+        const verified = this.responseMode === 'single-prompt'
+          ? await this.toIssueWithoutPass2(candidate, doc.slug)
+          : await this.runPass2(candidate, codeSources, doc.slug);
         if (verified) {
           // Deduplicate: same type + codeFile + docSays = same finding reported twice
           const key = `${verified.type}|${verified.evidence.codeFile}|${verified.evidence.docSays}`;
@@ -618,6 +635,10 @@ ${sourceCodeBlock}${missingSymbolsHint}`;
     // Per-call override (used by `runPass1Only` experiments) wins over the
     // instance default (set from config.validator.temperature, default 0).
     const temperature = temperatureOverride ?? this.temperature;
+    if (this.responseMode === 'single-prompt') {
+      return this.runSinglePromptPass1(userContent, temperature);
+    }
+
     const response = await this.anthropic.messages.create({
       model:      this.pass1Model,
       // 8192 sized for up to PASS1_MAX_ISSUES issues × structured
@@ -687,6 +708,165 @@ ${sourceCodeBlock}${missingSymbolsHint}`;
     }
 
     return { issues: [], positives: [] };
+  }
+
+  private async runSinglePromptPass1(userContent: string, temperature: number): Promise<ReportFindingsInput> {
+    const response = await this.anthropic.messages.create({
+      model:       this.pass1Model,
+      max_tokens:  4096,
+      temperature,
+      system: [
+        {
+          type:          'text',
+          text:          this.systemPrompt,
+          cache_control: { type: 'ephemeral' },
+        },
+      ],
+      messages: [
+        {
+          role: 'user',
+          content: `${userContent}
+
+Return JSON only with this shape:
+{"issues":[{"severity":"critical|major|minor","type":"type-signature|default-value|deprecated-api|broken-example|nonexistent-name|required-optional-mismatch","evidence":{"docSays":"...","codeSays":"...","codeFile":"...","codeRepo":"..."},"suggestion":"...","confidence":0.85}],"positives":["..."]}
+
+Set confidence between 0.0 and 1.0 based on certainty.`,
+        },
+      ],
+    });
+
+    this.costAccumulator.inputTokens         += response.usage.input_tokens;
+    this.costAccumulator.outputTokens        += response.usage.output_tokens;
+    this.costAccumulator.cacheReadTokens     += response.usage.cache_read_input_tokens    ?? 0;
+    this.costAccumulator.cacheCreationTokens += response.usage.cache_creation_input_tokens ?? 0;
+
+    const text = response.content
+      .filter((block): block is Anthropic.TextBlock => block.type === 'text')
+      .map(block => block.text)
+      .join('\n')
+      .trim();
+
+    const parsed = this.parseReportFindingsFromText(text);
+    return {
+      issues:    parsed.issues,
+      positives: parsed.positives,
+    };
+  }
+
+  private parseReportFindingsFromText(text: string): ReportFindingsInput {
+    if (!text) {
+      throw new Error('Pass 1 single-prompt validation failed: response was empty');
+    }
+
+    const fencedJsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+    const candidate = fencedJsonMatch?.[1] ?? text;
+    const jsonCandidates = this.extractJsonObjectCandidates(candidate);
+    if (jsonCandidates.length === 0) {
+      throw new Error('Pass 1 single-prompt validation failed: could not extract JSON from response text');
+    }
+
+    let parsed: Partial<ReportFindingsInput> | null = null;
+    let lastParseError: Error | null = null;
+    for (const jsonCandidate of jsonCandidates) {
+      try {
+        const candidateParsed = JSON.parse(jsonCandidate) as Partial<ReportFindingsInput>;
+        if (this.looksLikeReportFindings(candidateParsed)) {
+          parsed = candidateParsed;
+          break;
+        }
+      } catch (err) {
+        lastParseError = err as Error;
+      }
+    }
+
+    if (!parsed) {
+      if (lastParseError) {
+        throw new Error(`Pass 1 single-prompt validation failed: invalid JSON response (${lastParseError.message})`);
+      }
+      throw new Error('Pass 1 single-prompt validation failed: response JSON did not match expected shape');
+    }
+
+    const issues = Array.isArray(parsed.issues)
+      ? parsed.issues.filter((issue): issue is RawIssue => this.isRawIssue(issue))
+      : [];
+
+    return {
+      issues,
+      positives: Array.isArray(parsed.positives) ? parsed.positives.filter((p): p is string => typeof p === 'string') : [],
+    };
+  }
+
+  private extractJsonObjectCandidates(text: string): string[] {
+    const candidates: string[] = [];
+    let depth = 0;
+    let start = -1;
+    let inString = false;
+    let escaped = false;
+
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (!ch) continue;
+
+      if (inString) {
+        if (escaped) {
+          escaped = false;
+          continue;
+        }
+        if (ch === '\\') {
+          escaped = true;
+          continue;
+        }
+        if (ch === '"') {
+          inString = false;
+        }
+        continue;
+      }
+
+      if (ch === '"') {
+        inString = true;
+        continue;
+      }
+
+      if (ch === '{') {
+        if (depth === 0) {
+          start = i;
+        }
+        depth++;
+        continue;
+      }
+
+      if (ch === '}' && depth > 0) {
+        depth--;
+        if (depth === 0 && start !== -1) {
+          candidates.push(text.slice(start, i + 1));
+          start = -1;
+        }
+      }
+    }
+
+    return candidates;
+  }
+
+  private looksLikeReportFindings(value: Partial<ReportFindingsInput>): boolean {
+    return Array.isArray(value.issues) || Array.isArray(value.positives);
+  }
+
+  // Strictly validates a pass-1 issue so downstream code can rely on suggestion being a non-empty string.
+  private isRawIssue(value: unknown): value is RawIssue {
+    if (!value || typeof value !== 'object') return false;
+    const candidate = value as Partial<RawIssue>;
+    const evidence = candidate.evidence as Partial<RawIssue['evidence']> | undefined;
+    return ISSUE_SEVERITIES.has(candidate.severity as RawIssue['severity'])
+      && ISSUE_TYPES.has(candidate.type as RawIssue['type'])
+      && !!evidence
+      && typeof evidence.docSays === 'string'
+      && typeof evidence.codeSays === 'string'
+      && typeof evidence.codeFile === 'string'
+      && typeof evidence.codeRepo === 'string'
+      && typeof candidate.suggestion === 'string'
+      && typeof candidate.confidence === 'number'
+      && candidate.confidence >= 0
+      && candidate.confidence <= 1;
   }
 
   private async runPass2(
@@ -813,6 +993,83 @@ ${JSON.stringify(candidate, null, 2)}`,
     };
 
     return issue;
+  }
+
+  private async toIssueWithoutPass2(candidate: RawIssue, slug: string): Promise<Issue | null> {
+    if (candidate.confidence < 0.7) return null;
+    if (!candidate.suggestion) return null;
+    if (isSelfRejected(candidate.suggestion)) return null;
+    if (isWeakSuggestion(candidate.suggestion)) {
+      if (candidate.severity === 'minor') return null;
+      const retried = await this.retryWeakSuggestionSinglePrompt(candidate);
+      if (!retried) return null;
+      if (isSelfRejected(retried)) return null;
+      if (isWeakSuggestion(retried)) return null;
+      candidate.suggestion = retried;
+    }
+
+    return {
+      severity:    candidate.severity,
+      type:        candidate.type,
+      evidence:    candidate.evidence,
+      suggestion:  candidate.suggestion,
+      confidence:  candidate.confidence,
+      fingerprint: fingerprintIssue(slug, candidate.type, candidate.evidence.codeFile, candidate.suggestion),
+    };
+  }
+
+  private async retryWeakSuggestionSinglePrompt(rawIssue: RawIssue): Promise<string | null> {
+    const response = await this.anthropic.messages.create({
+      model:       this.pass2Model,
+      max_tokens:  512,
+      temperature: this.temperature,
+      system: [
+        {
+          type:          'text',
+          text:          this.systemPrompt,
+          cache_control: { type: 'ephemeral' },
+        },
+      ],
+      messages: [
+        {
+          role: 'user',
+          content: `Rewrite the suggestion below so it names the exact function, parameter, attribute, hook, or file path that must change.
+Return either:
+- plain suggestion text, OR
+- JSON object: {"suggestion":"..."}
+
+Issue:
+${JSON.stringify(rawIssue, null, 2)}`,
+        },
+      ],
+    });
+
+    this.costAccumulator.inputTokens         += response.usage.input_tokens;
+    this.costAccumulator.outputTokens        += response.usage.output_tokens;
+    this.costAccumulator.cacheReadTokens     += response.usage.cache_read_input_tokens    ?? 0;
+    this.costAccumulator.cacheCreationTokens += response.usage.cache_creation_input_tokens ?? 0;
+
+    const text = response.content
+      .filter((block): block is Anthropic.TextBlock => block.type === 'text')
+      .map(block => block.text)
+      .join('\n')
+      .trim();
+    if (!text) return null;
+
+    const fencedJsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+    const candidate = fencedJsonMatch?.[1] ?? text;
+    for (const jsonCandidate of this.extractJsonObjectCandidates(candidate)) {
+      try {
+        const parsed = JSON.parse(jsonCandidate) as { suggestion?: unknown };
+        if (typeof parsed.suggestion === 'string' && parsed.suggestion.trim()) {
+          return parsed.suggestion.trim();
+        }
+      } catch {
+        // fall through to raw text
+      }
+    }
+
+    return candidate.trim();
   }
 
   private async retryWeakSuggestion(
