@@ -21,9 +21,9 @@ export class NotImplementedError extends Error {
 }
 
 export function createDocSource(config: Config): DocSource {
-  const { type, manifestUrl, parentSlug, sourceUrlBase } = config.docSource;
+  const { type, manifestUrl, parentSlug, sourceUrlBase, ignore } = config.docSource;
   if (type === 'manifest-url') {
-    return new ManifestUrlDocSource({ manifestUrl, parentSlug, sourceUrlBase });
+    return new ManifestUrlDocSource({ manifestUrl, parentSlug, sourceUrlBase, ignore });
   }
   throw new NotImplementedError(type);
 }

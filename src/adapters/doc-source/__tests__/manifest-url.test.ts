@@ -336,3 +336,122 @@ describe('ManifestUrlDocSource — sourceUrl', () => {
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// Ignore mechanism (per-slug + per-subtree)
+// ---------------------------------------------------------------------------
+
+// Flat fixture: two siblings under `block-api`. Used for the basic
+// drop-direct-child cases where descendants are not in play.
+const flatManifest = [
+  { slug: 'block-api',        title: 'Block API',  markdown_source: '../docs/block-api/README.md',      parent: null      },
+  { slug: 'block-attributes', title: 'Attributes', markdown_source: '../docs/block-api/attributes.md',  parent: 'block-api' },
+  { slug: 'block-bindings',   title: 'Bindings',   markdown_source: '../docs/block-api/bindings.md',    parent: 'block-api' },
+];
+
+// Deep fixture: ancestor chain block-api → block-bindings → binding-source-1 → sub-detail.
+// Used to verify the transitive ancestor walk: `sub-detail` is two levels below
+// `block-bindings`. Scoping `parentSlug: 'binding-source-1'` puts `sub-detail` in the
+// direct-children slice, so the only thing that can drop it is the walk reaching
+// the ignored `block-bindings` root.
+const deepManifest = [
+  { slug: 'block-api',        title: 'Block API',  markdown_source: '../docs/block-api/README.md',         parent: null               },
+  { slug: 'block-bindings',   title: 'Bindings',   markdown_source: '../docs/block-api/bindings.md',       parent: 'block-api'        },
+  { slug: 'binding-source-1', title: 'Source 1',   markdown_source: '../docs/block-api/source-1.md',       parent: 'block-bindings'   },
+  { slug: 'sub-detail',       title: 'Sub Detail', markdown_source: '../docs/block-api/sub-detail.md',     parent: 'binding-source-1' },
+];
+
+function mockManifestFetch(manifest: unknown[]): void {
+  vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+    const urlStr = String(url);
+    if (urlStr === MANIFEST_URL) {
+      return new Response(JSON.stringify(manifest), { status: 200 });
+    }
+    if (urlStr.startsWith('https://api.github.com/')) {
+      return new Response(JSON.stringify([]), { status: 200 });
+    }
+    // Any .md fetch returns the sample doc — content is not under test here.
+    return new Response(sampleDoc, { status: 200 });
+  }));
+}
+
+describe('ManifestUrlDocSource — ignore', () => {
+  it('omitted ignore is a no-op (existing direct-children behavior preserved)', async () => {
+    mockManifestFetch(flatManifest);
+    const source = new ManifestUrlDocSource({
+      manifestUrl: MANIFEST_URL,
+      parentSlug: 'block-api',
+    });
+    const results = await source.fetchDocs();
+    const slugs = results.flatMap(r => r.ok ? [r.doc.slug] : []);
+    expect(slugs.sort()).toEqual(['block-attributes', 'block-bindings']);
+  });
+
+  it('ignore.slugs drops the named entry from the direct-children slice', async () => {
+    mockManifestFetch(flatManifest);
+    const source = new ManifestUrlDocSource({
+      manifestUrl: MANIFEST_URL,
+      parentSlug: 'block-api',
+      ignore: { slugs: ['block-bindings'] },
+    });
+    const results = await source.fetchDocs();
+    const slugs = results.flatMap(r => r.ok ? [r.doc.slug] : []);
+    expect(slugs).toEqual(['block-attributes']);
+  });
+
+  it('ignore.subtrees drops the subtree-root entry itself', async () => {
+    // The root is included in the subtree, so listing a slug in `subtrees`
+    // also drops the entry whose own slug matches.
+    mockManifestFetch(flatManifest);
+    const source = new ManifestUrlDocSource({
+      manifestUrl: MANIFEST_URL,
+      parentSlug: 'block-api',
+      ignore: { subtrees: ['block-bindings'] },
+    });
+    const results = await source.fetchDocs();
+    const slugs = results.flatMap(r => r.ok ? [r.doc.slug] : []);
+    expect(slugs).toEqual(['block-attributes']);
+  });
+
+  it('ignore.subtrees drops a descendant whose ancestor chain hits the ignored root (depth ≥ 2)', async () => {
+    // sub-detail is a direct child of binding-source-1 (in scope under parentSlug).
+    // Its ancestor chain reaches block-bindings two levels up. ignore.subtrees
+    // for block-bindings must drop sub-detail via the transitive walk.
+    mockManifestFetch(deepManifest);
+    const source = new ManifestUrlDocSource({
+      manifestUrl: MANIFEST_URL,
+      parentSlug: 'binding-source-1',
+      ignore: { subtrees: ['block-bindings'] },
+    });
+    const results = await source.fetchDocs();
+    expect(results).toEqual([]);
+  });
+
+  it('ignore.slugs does NOT drop descendants of the named slug (contrast with subtrees)', async () => {
+    // Same scope as the previous test, same fixture. Switching from
+    // `subtrees` to `slugs` for the same name must NOT drop sub-detail —
+    // because per-slug ignore drops only the named entry, not its descendants.
+    // This test pins the semantic distinction between the two fields.
+    mockManifestFetch(deepManifest);
+    const source = new ManifestUrlDocSource({
+      manifestUrl: MANIFEST_URL,
+      parentSlug: 'binding-source-1',
+      ignore: { slugs: ['block-bindings'] },
+    });
+    const results = await source.fetchDocs();
+    const slugs = results.flatMap(r => r.ok ? [r.doc.slug] : []);
+    expect(slugs).toEqual(['sub-detail']);
+  });
+
+  it('ignoring a slug not present in the manifest is a silent no-op', async () => {
+    mockManifestFetch(flatManifest);
+    const source = new ManifestUrlDocSource({
+      manifestUrl: MANIFEST_URL,
+      parentSlug: 'block-api',
+      ignore: { slugs: ['nonexistent-slug'], subtrees: ['also-nonexistent'] },
+    });
+    const results = await source.fetchDocs();
+    const slugs = results.flatMap(r => r.ok ? [r.doc.slug] : []);
+    expect(slugs.sort()).toEqual(['block-attributes', 'block-bindings']);
+  });
+});
