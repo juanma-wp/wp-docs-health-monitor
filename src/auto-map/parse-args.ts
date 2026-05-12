@@ -6,16 +6,28 @@
 import { resolve } from 'path';
 
 export interface AutoMapArgs {
+  // Empty string when --all is set; populated otherwise.
   slug:       string;
+  // Batch mode: iterate every in-scope, non-ignored manifest entry.
+  all:        boolean;
+  // Batch mode: re-map every slug even if it's already in the mapping file.
+  force:      boolean;
   configPath: string;
   write:      boolean;
   rerank:     boolean;
   explain:    boolean;
 }
 
+const USAGE =
+  'Usage:\n' +
+  '  npx tsx scripts/auto-map.ts <slug> [--config <path>] [--write] [--no-rerank] [--explain]\n' +
+  '  npx tsx scripts/auto-map.ts --all  [--config <path>] [--no-rerank] [--force]';
+
 export function parseArgs(argv: string[]): AutoMapArgs {
   const args = argv.slice(2);
   let slug = '';
+  let all = false;
+  let force = false;
   let configPath = resolve('config/gutenberg-block-api.json');
   let write = false;
   let rerank = true;
@@ -31,17 +43,28 @@ export function parseArgs(argv: string[]): AutoMapArgs {
       rerank = false;
     } else if (args[i] === '--explain') {
       explain = true;
+    } else if (args[i] === '--all') {
+      all = true;
+    } else if (args[i] === '--force') {
+      force = true;
     } else if (!slug && !args[i].startsWith('--')) {
       slug = args[i];
     }
   }
 
-  if (!slug) {
-    console.error(
-      'Usage: npx tsx scripts/auto-map.ts <slug> [--config <path>] [--write] [--no-rerank] [--explain]',
-    );
+  if (all && slug) {
+    console.error('Usage error: cannot combine <slug> with --all (mutually exclusive).');
+    console.error(USAGE);
+    process.exit(1);
+  }
+  if (!all && !slug) {
+    console.error(USAGE);
     process.exit(1);
   }
 
-  return { slug, configPath, write, rerank, explain };
+  // --all implies --write. Opting out of write makes batch mode useless;
+  // the operator's intent is unambiguous.
+  if (all) write = true;
+
+  return { slug, all, force, configPath, write, rerank, explain };
 }
