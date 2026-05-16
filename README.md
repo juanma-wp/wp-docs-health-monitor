@@ -11,7 +11,7 @@ see [diagram](https://excalidraw.com/#json=NQXUcZaoSsTj6SHnI4Z_F,W7sPJGcKmJ_-6fn
 ## Prerequisites
 
 - Node.js ≥ 20
-- `ANTHROPIC_API_KEY` (required for live pipeline runs)
+- `ANTHROPIC_API_KEY` or `OPENROUTER_API_KEY` (required for live pipeline runs)
 
 ## Install
 
@@ -21,13 +21,16 @@ npm install
 
 ## Environment setup
 
-`ANTHROPIC_API_KEY` must be set in the environment before running the live pipeline. How you provide it is up to you:
+Set an API key in the environment before running the live pipeline:
 
 ```bash
-# Inline
+# Anthropic (default provider)
 ANTHROPIC_API_KEY=sk-ant-... npm run analyze -- --config config/gutenberg-block-api.json --output ./out
 
-# Exported in your shell session
+# OpenRouter (set validator.provider to "openrouter" in config)
+OPENROUTER_API_KEY=sk-or-... npm run analyze -- --config config/gutenberg-block-api.json --output ./out
+
+# Exported in your shell session (Anthropic example)
 export ANTHROPIC_API_KEY=sk-ant-...
 npm run analyze -- --config config/gutenberg-block-api.json --output ./out
 
@@ -87,14 +90,29 @@ Then open `./out/index.html` in your browser.
   "outputDir": "./out",
   "validator": {
     "type": "claude",
-    "model": "claude-sonnet-4-6"
+    "provider": "anthropic",
+    "pass1Model": "claude-sonnet-4-6",
+    "pass2Model": "claude-sonnet-4-6"
+  }
+}
+```
+
+To use OpenRouter, keep `type: "claude"` and switch the provider + model IDs:
+
+```json
+{
+  "validator": {
+    "type": "claude",
+    "provider": "openrouter",
+    "pass1Model": "anthropic/claude-sonnet-4",
+    "pass2Model": "anthropic/claude-sonnet-4"
   }
 }
 ```
 
 ## Cost note
 
-Each pipeline run calls the Anthropic API once per doc. With `claude-sonnet-4-6`, a full run over ~10 docs costs roughly $1–$3 depending on doc length and code context size. Use `--results` with `examples/mock-results.json` to explore the dashboard at zero cost.
+Each pipeline run calls the configured Claude-compatible provider once per doc. With Anthropic `claude-sonnet-4-6` (or equivalent OpenRouter model), a full run over ~10 docs costs roughly $1–$3 depending on doc length and code context size. Use `--results` with `examples/mock-results.json` to explore the dashboard at zero cost.
 
 The estimated cost is stored in `results.json` under `usage.estimatedCostUsd` and appended to `data/history.json` after each run. It is calculated from the token counts returned by the API using the prices configured in `config.pricing`. The defaults match the current Sonnet 4.6 rates — check [Anthropic's pricing page](https://www.anthropic.com/pricing) for updates and adjust `config.pricing` in your config file if needed.
 
@@ -137,7 +155,7 @@ To monitor a different WordPress doc site or doc section, you supply two JSON fi
   },
   "mappingPath": "mappings/your-site.json",
   "outputDir":   "./out",
-  "validator":   { "type": "claude", "model": "claude-sonnet-4-6" }
+  "validator":   { "type": "claude", "provider": "anthropic", "pass1Model": "claude-sonnet-4-6", "pass2Model": "claude-sonnet-4-6" }
 }
 ```
 

@@ -47,9 +47,21 @@ export function createDocCodeMapper(config: Config, codeSources: Record<string, 
 }
 
 export function createValidator(config: Config): Validator {
-  const { type, pass1Model, pass2Model, systemPromptExtension, temperature, samples } = config.validator;
+  const { type, provider, apiKeyEnvVar, baseUrl, pass1Model, pass2Model, systemPromptExtension, temperature, samples } = config.validator;
   if (type === 'claude') {
-    const anthropic = new Anthropic();
+    const keyEnvVar = apiKeyEnvVar ?? (provider === 'openrouter' ? 'OPENROUTER_API_KEY' : 'ANTHROPIC_API_KEY');
+    const key = process.env[keyEnvVar];
+    if (!key && (provider === 'openrouter' || apiKeyEnvVar)) {
+      throw new Error(`Missing API key: set ${keyEnvVar} for validator.provider="${provider}"`);
+    }
+    const anthropicOptions: ConstructorParameters<typeof Anthropic>[0] = {};
+    if (key) anthropicOptions.apiKey = key;
+    if (baseUrl) {
+      anthropicOptions.baseURL = baseUrl;
+    } else if (provider === 'openrouter') {
+      anthropicOptions.baseURL = 'https://openrouter.ai/api/v1/anthropic';
+    }
+    const anthropic = new Anthropic(anthropicOptions);
     let promptExtension: string | undefined;
     if (systemPromptExtension) {
       try {
