@@ -106,6 +106,10 @@ To use OpenRouter, keep `type: "claude"` and switch the provider + model IDs:
 }
 ```
 
+### OpenRouter model ID format for this adapter
+
+OpenRouter model IDs should include the provider prefix (`<provider>/<model>`). With this adapter, use Anthropic IDs such as `anthropic/claude-sonnet-4` because `validator.type: "claude"` speaks Anthropic's tool/message format and uses OpenRouter's Anthropic-compatible endpoint (`https://openrouter.ai/api/v1/anthropic`), not OpenRouter's OpenAI-compatible `/api/v1/chat/completions` endpoint.
+
 ## Cost note
 
 Each pipeline run calls the configured Claude-compatible provider once per doc. With Anthropic `claude-sonnet-4-6` (or equivalent OpenRouter model), a full run over ~10 docs costs roughly $1–$3 depending on doc length and code context size. Use `--results` with `examples/mock-results.json` to explore the dashboard at zero cost.

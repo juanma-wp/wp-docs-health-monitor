@@ -24,8 +24,16 @@ export const ConfigSchema = z.object({
   validator: z.object({
     type:                   z.literal('claude'),
     provider:               z.enum(['anthropic', 'openrouter']).default('anthropic'),
+    // Wire format of request payloads. Separate from `provider` (transport endpoint):
+    // e.g. provider 'openrouter' + format 'anthropic' = OpenRouter via Anthropic-shaped requests.
+    // Currently only 'anthropic' is supported.
     format:                 z.literal('anthropic').default('anthropic'),
+    // Optional API-key environment variable override.
+    // Defaults: ANTHROPIC_API_KEY (provider=anthropic), OPENROUTER_API_KEY (provider=openrouter).
     apiKeyEnvVar:           z.string().optional(),
+    // Optional base URL override for compatible proxies.
+    // For provider=openrouter, the default is the Anthropic-compatible endpoint:
+    // https://openrouter.ai/api/v1/anthropic
     baseUrl:                z.string().url().optional(),
     pass1Model:             z.string().default('claude-sonnet-4-6'),
     pass2Model:             z.string().default('claude-sonnet-4-6'),

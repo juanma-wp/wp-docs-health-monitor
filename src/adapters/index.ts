@@ -49,6 +49,21 @@ export function createDocCodeMapper(config: Config, codeSources: Record<string, 
 export function createValidator(config: Config): Validator {
   const { type, provider, apiKeyEnvVar, baseUrl, pass1Model, pass2Model, systemPromptExtension, temperature, samples } = config.validator;
   if (type === 'claude') {
+    if (provider === 'openrouter') {
+      const looksLikeOpenRouterOpenAIEndpoint = /\/api\/v1\/?$/.test(baseUrl ?? '');
+      if (looksLikeOpenRouterOpenAIEndpoint) {
+        throw new Error(
+          'OpenRouter with validator.type="claude" requires the Anthropic-compatible endpoint (https://openrouter.ai/api/v1/anthropic). ' +
+          'The OpenAI-compatible endpoint (/api/v1) is not supported by this adapter.',
+        );
+      }
+      const nonAnthropicModel = [pass1Model, pass2Model].find((m) => !m.startsWith('anthropic/'));
+      if (nonAnthropicModel) {
+        throw new Error(
+          `OpenRouter with validator.type="claude" only supports Anthropic model IDs (expected "anthropic/..."; got "${nonAnthropicModel}").`,
+        );
+      }
+    }
     const keyEnvVar = apiKeyEnvVar ?? (provider === 'openrouter' ? 'OPENROUTER_API_KEY' : 'ANTHROPIC_API_KEY');
     const key = process.env[keyEnvVar];
     if (!key && (provider === 'openrouter' || apiKeyEnvVar)) {

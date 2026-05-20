@@ -122,11 +122,16 @@ describe('createValidator', () => {
   it('throws when provider=openrouter and OPENROUTER_API_KEY is missing', () => {
     const cfg = makeDocSourceConfig('manifest-url');
     cfg.validator.provider = 'openrouter';
+    cfg.validator.pass1Model = 'anthropic/claude-sonnet-4';
+    cfg.validator.pass2Model = 'anthropic/claude-sonnet-4';
     expect(() => createValidator(cfg)).toThrow('OPENROUTER_API_KEY');
   });
 
   it('throws with the custom apiKeyEnvVar name when it is missing', () => {
     const cfg = makeDocSourceConfig('manifest-url');
+    cfg.validator.provider = 'openrouter';
+    cfg.validator.pass1Model = 'anthropic/claude-sonnet-4';
+    cfg.validator.pass2Model = 'anthropic/claude-sonnet-4';
     cfg.validator.apiKeyEnvVar = 'MY_OPENROUTER_KEY';
     expect(() => createValidator(cfg)).toThrow('MY_OPENROUTER_KEY');
   });
@@ -135,8 +140,28 @@ describe('createValidator', () => {
     process.env.OPENROUTER_API_KEY = 'sk-or-test';
     const cfg = makeDocSourceConfig('manifest-url');
     cfg.validator.provider = 'openrouter';
+    cfg.validator.pass1Model = 'anthropic/claude-sonnet-4';
+    cfg.validator.pass2Model = 'anthropic/claude-sonnet-4';
     const validator = createValidator(cfg);
     expect(validator).toBeInstanceOf(ClaudeValidator);
+  });
+
+  it('throws when provider=openrouter uses a non-Anthropic model id', () => {
+    process.env.OPENROUTER_API_KEY = 'sk-or-test';
+    const cfg = makeDocSourceConfig('manifest-url');
+    cfg.validator.provider = 'openrouter';
+    cfg.validator.pass1Model = 'openai/gpt-4o';
+    expect(() => createValidator(cfg)).toThrow('only supports Anthropic model IDs');
+  });
+
+  it('throws when provider=openrouter uses the OpenAI-compatible /api/v1 endpoint', () => {
+    process.env.OPENROUTER_API_KEY = 'sk-or-test';
+    const cfg = makeDocSourceConfig('manifest-url');
+    cfg.validator.provider = 'openrouter';
+    cfg.validator.pass1Model = 'anthropic/claude-sonnet-4';
+    cfg.validator.pass2Model = 'anthropic/claude-sonnet-4';
+    cfg.validator.baseUrl = 'https://openrouter.ai/api/v1';
+    expect(() => createValidator(cfg)).toThrow('OpenAI-compatible endpoint (/api/v1) is not supported');
   });
 
   it('throws NotImplementedError for an unrecognised validator type', () => {
