@@ -106,6 +106,8 @@ To use OpenRouter, keep `type: "claude"` and switch the provider + model IDs:
 }
 ```
 
+### OpenRouter model ID format for this adapter
+
 OpenRouter model IDs should include the provider prefix (`<provider>/<model>`). With this adapter, use Anthropic IDs such as `anthropic/claude-sonnet-4` because `validator.type: "claude"` speaks Anthropic's tool/message format and uses OpenRouter's Anthropic-compatible endpoint (`https://openrouter.ai/api/v1/anthropic`), not OpenRouter's OpenAI-compatible `/api/v1/chat/completions` endpoint.
 
 ## Cost note
