@@ -95,39 +95,117 @@ const PRIMITIVE_LITERALS_DENYLIST = new Set([
 ]);
 
 // Normalise a backtick-captured token into the form the indexer keys on:
-// bare identifiers, no namespace prefix, no call parens.
+// bare identifiers, no namespace prefix, no call parens, no JSX brackets.
 //
-// Triggers ONLY on call-form tokens (those ending with `(...)`). Bare tokens
-// like `block.json`, `core/block`, `registerBlockType` are left untouched —
-// they may legitimately contain `.` or `/` and are matched verbatim against
-// the index. Without this normalisation, doc tokens like `registerBlockVariation()`
-// or `wp.blocks.registerBlockVariation()` never match the index entry indexed
-// from `export const registerBlockVariation = (...)` (bare identifier),
-// so the canonical implementation file is silently absent from candidates.
+// Three transforms, applied in order:
 //
-// Separators handled: `.` (JS/TS dotted access), `::` (PHP static), `->` (PHP
-// instance). The last segment after any of these is the indexed identifier.
+//   1. JSX bracket unwrap. Backticked JSX references like `<PluginSidebar />`,
+//      `<PluginSidebar>`, or `</PluginSidebar>` come out as the raw bracketed
+//      string and never match the bare identifier in the symbol index. The
+//      uppercase-required regex ensures we don't accidentally pick up generic
+//      HTML elements (`<div>`, `<p>`) — JSX/React convention is component
+//      names start uppercase, HTML elements lowercase.
+//
+//   2. Call-form strip. Doc tokens like `registerBlockVariation()` or
+//      `wp.blocks.registerBlockVariation()` never match the index entry
+//      `export const registerBlockVariation = (...)` (bare identifier) without
+//      this. Separators handled: `.` (JS/TS dotted access), `::` (PHP static),
+//      `->` (PHP instance) — the last segment after any of these is the
+//      indexed identifier.
+//
+//   3. Bare tokens. `block.json`, `core/block`, `registerBlockType` are left
+//      untouched — they may legitimately contain `.` or `/` and are matched
+//      verbatim against the index.
 function normalizeDocSymbol(raw: string): string {
+  const jsxMatch = raw.match(/^<\/?\s*([A-Z][A-Za-z0-9_]*)\s*\/?>$/);
+  if (jsxMatch) return jsxMatch[1];
+
   const callMatch = raw.match(/^(.+?)\s*\(.*\)\s*$/);
   if (!callMatch) return raw;
   const segments = callMatch[1].split(/\.|::|->/);
   return segments[segments.length - 1].trim();
 }
 
-// Extract backtick-wrapped identifiers from doc markdown (e.g. `registerBlockType`).
-// Skips primitive type names and literal values to keep the missingSymbols hint
-// focused on real candidate identifiers.
+// Push a candidate identifier through the denylist + normalize chain into the
+// running set. Centralises the four-line guard pattern so every extraction
+// source (backticks, headings, imports) shares the same gate.
+function addSymbol(seen: Set<string>, raw: string): void {
+  if (!raw) return;
+  if (PRIMITIVE_LITERALS_DENYLIST.has(raw)) return;
+  const normalized = normalizeDocSymbol(raw);
+  if (!normalized) return;
+  if (PRIMITIVE_LITERALS_DENYLIST.has(normalized)) return;
+  seen.add(normalized);
+}
+
+// True when the heading text looks like an API identifier worth indexing.
+// Filters plain-English titles ("Accessibility", "Tutorial") by requiring
+// either multiple uppercase letters (CamelCase / PascalCase / camelCase) or
+// a kebab/snake separator. WP_Block, useBlockProps, PluginSidebar, theme-json
+// pass; Accessibility, Tutorial, Overview do not.
+function isIdentifierLikeHeading(text: string): boolean {
+  if (!/^[A-Za-z_][A-Za-z0-9_-]*$/.test(text)) return false;
+  return /[A-Z].*[A-Z]/.test(text) || /[_-]/.test(text);
+}
+
+// Extract candidate symbols from doc markdown. Three sources, in order:
+//
+//   1. Inline backticked tokens: `registerBlockType`, `<PluginSidebar />`,
+//      `wp.blocks.registerBlockType()`. The historical core source.
+//
+//   2. H1 headings whose title text is a single identifier-like token:
+//      `# PluginSidebar`, `# useBlockProps`, `# theme-json`. Reference-style
+//      docs (SlotFills, theme.json sub-pages) put the API name in the H1 and
+//      then describe the API in prose without re-mentioning the name in
+//      inline backticks. Without this, those docs surface zero symbols.
+//
+//   3. Imports inside fenced code blocks: JS/TS `import { X } from ...`
+//      (including aliased and default forms) and PHP `use Foo\Bar\Baz;`. Usage
+//      examples in fences literally name the API the doc is documenting, even
+//      when no inline backticks reference it. Each fence is scanned; multiple
+//      imports per fence are all collected.
+//
+// All three sources funnel through `addSymbol`, which applies the same
+// primitive-denylist + normalize chain (JSX unwrap + call-form strip).
+//
+// Heading scope is H1 only by deliberate choice — H2/H3 in this corpus tend
+// to be section labels ("Examples", "Location") or auto-generated selector
+// names that don't help the validator (Pattern A docs handled via ignore).
 export function extractDocSymbols(docContent: string): string[] {
-  const matches = docContent.matchAll(/`([^`\s][^`]*[^`\s]|[^`\s])`/g);
   const seen = new Set<string>();
-  for (const [, symbol] of matches) {
-    if (!symbol) continue;
-    if (PRIMITIVE_LITERALS_DENYLIST.has(symbol)) continue;
-    const normalized = normalizeDocSymbol(symbol);
-    if (!normalized) continue;
-    if (PRIMITIVE_LITERALS_DENYLIST.has(normalized)) continue;
-    seen.add(normalized);
+
+  // 1. Inline backticks
+  for (const [, symbol] of docContent.matchAll(/`([^`\s][^`]*[^`\s]|[^`\s])`/g)) {
+    addSymbol(seen, symbol);
   }
+
+  // 2. H1 identifier-like headings
+  for (const [, heading] of docContent.matchAll(/^#\s+(.+?)\s*$/gm)) {
+    const trimmed = heading.trim();
+    if (isIdentifierLikeHeading(trimmed)) addSymbol(seen, trimmed);
+  }
+
+  // 3. Imports inside fenced code blocks
+  for (const [, fence] of docContent.matchAll(/```[a-zA-Z]*\n([\s\S]*?)```/g)) {
+    // JS/TS named imports: `import { A, B as C, type D } from '...'`
+    for (const [, body] of fence.matchAll(/import\s*(?:type\s+)?\{\s*([^}]+)\s*\}\s*from/g)) {
+      for (const part of body.split(',')) {
+        const cleaned = part.trim().replace(/^type\s+/, '');
+        const name = cleaned.split(/\s+as\s+/)[0].trim();
+        if (/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) addSymbol(seen, name);
+      }
+    }
+    // JS/TS default imports: `import X from '...'` / `import type X from '...'`
+    for (const [, name] of fence.matchAll(/import\s+(?:type\s+)?([A-Za-z_][A-Za-z0-9_]*)\s+from/g)) {
+      addSymbol(seen, name);
+    }
+    // PHP `use Foo\Bar\Baz;` (optional leading backslash, optional `as alias`)
+    for (const [, fqn] of fence.matchAll(/^\s*use\s+\\?([A-Za-z_][A-Za-z0-9_\\]*)(?:\s+as\s+\w+)?\s*;/gm)) {
+      const last = fqn.split('\\').pop();
+      if (last) addSymbol(seen, last);
+    }
+  }
+
   return [...seen];
 }
 
