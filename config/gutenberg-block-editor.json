@@ -8,7 +8,7 @@
     "parentSlug": "*",
     "sourceUrlBase": "https://developer.wordpress.org/block-editor/",
     "ignore": {
-      "subtrees": ["packages", "components", "contributors"]
+      "subtrees": ["packages", "components", "contributors", "data"]
     }
   },
   "codeSources": {
