@@ -32,7 +32,7 @@ export const MIN_INCLUSION_CONFIDENCE = 0.5;
 
 /**
  * Derive the audit-file path from the canonical mapping path, e.g.
- *   `mappings/gutenberg-block-api.json` → `mappings/gutenberg-block-api.audit.json`.
+ *   `mappings/<site>.json` → `mappings/<site>.audit.json`.
  *
  * Audit lives next to the mapping it audits and is committed alongside it.
  */

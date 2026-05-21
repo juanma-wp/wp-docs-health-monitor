@@ -12,6 +12,10 @@ export interface AutoMapArgs {
   all:        boolean;
   // Batch mode: re-map every slug even if it's already in the mapping file.
   force:      boolean;
+  // Batch mode preview: print the planned slug list and exit without
+  // building indexes or invoking the LLM. Free and fast — used to sanity-check
+  // scope before paying for a `*`-wide re-rank batch.
+  dryRun:     boolean;
   configPath: string;
   write:      boolean;
   rerank:     boolean;
@@ -20,15 +24,16 @@ export interface AutoMapArgs {
 
 const USAGE =
   'Usage:\n' +
-  '  npx tsx scripts/auto-map.ts <slug> [--config <path>] [--write] [--no-rerank] [--explain]\n' +
-  '  npx tsx scripts/auto-map.ts --all  [--config <path>] [--no-rerank] [--force]';
+  '  npx tsx scripts/auto-map.ts <slug> --config <path> [--write] [--no-rerank] [--explain]\n' +
+  '  npx tsx scripts/auto-map.ts --all  --config <path> [--no-rerank] [--force] [--dry-run]';
 
 export function parseArgs(argv: string[]): AutoMapArgs {
   const args = argv.slice(2);
   let slug = '';
   let all = false;
   let force = false;
-  let configPath = resolve('config/gutenberg-block-api.json');
+  let dryRun = false;
+  let configPath: string | null = null;
   let write = false;
   let rerank = true;
   let explain = false;
@@ -47,6 +52,8 @@ export function parseArgs(argv: string[]): AutoMapArgs {
       all = true;
     } else if (args[i] === '--force') {
       force = true;
+    } else if (args[i] === '--dry-run') {
+      dryRun = true;
     } else if (!slug && !args[i].startsWith('--')) {
       slug = args[i];
     }
@@ -61,10 +68,23 @@ export function parseArgs(argv: string[]): AutoMapArgs {
     console.error(USAGE);
     process.exit(1);
   }
+  if (!configPath) {
+    console.error('Usage error: --config is required.');
+    console.error(USAGE);
+    process.exit(1);
+  }
+  if (dryRun && !all) {
+    // Single-slug mode without `--write` already previews to stdout without
+    // touching disk — no need for a separate dry-run flag there.
+    console.error('Usage error: --dry-run only applies in batch mode (--all). For single-slug, omit --write to preview.');
+    console.error(USAGE);
+    process.exit(1);
+  }
 
   // --all implies --write. Opting out of write makes batch mode useless;
-  // the operator's intent is unambiguous.
-  if (all) write = true;
+  // the operator's intent is unambiguous. --dry-run is the exception: it
+  // exits before touching disk, so --write is meaningless under dry-run.
+  if (all && !dryRun) write = true;
 
-  return { slug, all, force, configPath, write, rerank, explain };
+  return { slug, all, force, dryRun, configPath, write, rerank, explain };
 }
