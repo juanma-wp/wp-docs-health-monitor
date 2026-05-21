@@ -2,7 +2,7 @@
  * test-context-assembly.ts — prints the assembled Claude prompt for one doc.
  *
  * Usage:
- *   npx tsx scripts/test-context-assembly.ts [slug]
+ *   npx tsx scripts/test-context-assembly.ts [slug] --config <path>
  *
  * Defaults to the first doc in the manifest if no slug is provided.
  * No API calls to Claude — zero cost.
@@ -18,8 +18,24 @@ import { formatHooksAsText } from '../src/extractors/hooks.js';
 import { formatDefaultsAsText } from '../src/extractors/defaults.js';
 import { formatSchemasAsText } from '../src/extractors/schemas.js';
 
-const targetSlug = process.argv[2];
-const config = await loadConfig('config/gutenberg-block-api.json');
+const args = process.argv.slice(2);
+let configPath: string | null = null;
+let targetSlug: string | undefined;
+for (let i = 0; i < args.length; i++) {
+  if (args[i] === '--config' && args[i + 1]) {
+    configPath = args[i + 1];
+    i++;
+  } else if (!args[i].startsWith('--') && !targetSlug) {
+    targetSlug = args[i];
+  }
+}
+
+if (!configPath) {
+  console.error('Usage: npx tsx scripts/test-context-assembly.ts [slug] --config <path>');
+  process.exit(1);
+}
+
+const config = await loadConfig(configPath);
 
 const docSource = createDocSource(config);
 const codeSources = createCodeSources(config);

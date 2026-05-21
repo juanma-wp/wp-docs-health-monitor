@@ -28,7 +28,9 @@ export interface PlanBatchOptions {
  * Produce an ordered list of slugs to process in `--all` mode.
  *
  * Filtering applied (in order):
- *  1. `parent === parentSlug` (same in-scope predicate the adapter uses).
+ *  1. Parent filter — matches the adapter's filter:
+ *     - `parentSlug === '*'`: no parent filter, every manifest entry is in scope.
+ *     - otherwise: `e.parent === parentSlug` (direct children only).
  *  2. Drop ignored entries via the shared `isIgnored` predicate.
  *
  * The returned length is the denominator of the `[N/total]` progress counter;
@@ -38,7 +40,8 @@ export interface PlanBatchOptions {
 export function planBatch(opts: PlanBatchOptions): BatchPlanItem[] {
   const slugToParent = buildSlugToParent(opts.entries);
   const inScope = opts.entries.filter(e =>
-    e.parent === opts.parentSlug && !isIgnored(e.slug, slugToParent, opts.ignore),
+    (opts.parentSlug === '*' || e.parent === opts.parentSlug) &&
+    !isIgnored(e.slug, slugToParent, opts.ignore),
   );
   return inScope.map(e => ({
     slug:   e.slug,
