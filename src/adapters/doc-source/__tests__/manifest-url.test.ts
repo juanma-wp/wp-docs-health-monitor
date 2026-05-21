@@ -455,3 +455,40 @@ describe('ManifestUrlDocSource — ignore', () => {
     expect(slugs.sort()).toEqual(['block-attributes', 'block-bindings']);
   });
 });
+
+// ---------------------------------------------------------------------------
+// parentSlug "*" — wildcard scope (every manifest entry, modulo ignore)
+// ---------------------------------------------------------------------------
+
+describe('ManifestUrlDocSource — parentSlug "*"', () => {
+  it('"*" skips the parent filter — every manifest entry reaches the fetch stage', async () => {
+    // flatManifest has 3 entries: block-api (parent: null), block-attributes,
+    // and block-bindings. Under literal-slug scoping `parentSlug: 'block-api'`
+    // only block-attributes / block-bindings make it through. Under "*" all 3
+    // do, including the parent-null root.
+    mockManifestFetch(flatManifest);
+    const source = new ManifestUrlDocSource({
+      manifestUrl: MANIFEST_URL,
+      parentSlug: '*',
+    });
+    const results = await source.fetchDocs();
+    const slugs = results.map(r => (r.ok ? r.doc.slug : r.slug));
+    expect(slugs.sort()).toEqual(['block-api', 'block-attributes', 'block-bindings']);
+  });
+
+  it('"*" composes with ignore.subtrees — drops the subtree, keeps the rest', async () => {
+    // deepManifest: block-api → block-bindings → binding-source-1 → sub-detail.
+    // ignore.subtrees: ['block-bindings'] drops block-bindings AND its
+    // transitive descendants. "*" keeps everything else, including the
+    // parent-null root block-api.
+    mockManifestFetch(deepManifest);
+    const source = new ManifestUrlDocSource({
+      manifestUrl: MANIFEST_URL,
+      parentSlug: '*',
+      ignore: { subtrees: ['block-bindings'] },
+    });
+    const results = await source.fetchDocs();
+    const slugs = results.map(r => (r.ok ? r.doc.slug : r.slug));
+    expect(slugs.sort()).toEqual(['block-api']);
+  });
+});

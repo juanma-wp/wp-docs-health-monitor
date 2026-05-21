@@ -64,3 +64,35 @@ describe('ConfigSchema — validator.temperature / validator.samples (issue #56)
     expect(result.success).toBe(false);
   });
 });
+
+describe('ConfigSchema — docSource.parentSlug', () => {
+  it('accepts "*" as the explicit wildcard for all-manifest scope', () => {
+    const parsed = ConfigSchema.parse({
+      ...baseRaw,
+      docSource: { ...baseRaw.docSource, parentSlug: '*' },
+    });
+    expect(parsed.docSource.parentSlug).toBe('*');
+  });
+
+  it('rejects an empty parentSlug with a message naming both valid forms', () => {
+    const result = ConfigSchema.safeParse({
+      ...baseRaw,
+      docSource: { ...baseRaw.docSource, parentSlug: '' },
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const message = result.error.issues.map(i => i.message).join('\n');
+      expect(message).toContain('"*"');
+      expect(message).toContain('parent slug');
+    }
+  });
+
+  it('rejects a missing parentSlug field', () => {
+    const { parentSlug: _omitted, ...docSourceWithoutParentSlug } = baseRaw.docSource;
+    const result = ConfigSchema.safeParse({
+      ...baseRaw,
+      docSource: docSourceWithoutParentSlug,
+    });
+    expect(result.success).toBe(false);
+  });
+});
