@@ -1,4 +1,4 @@
-These rules apply when validating the Gutenberg Block API Reference documentation. They encode learnings from manual review against this corpus.
+These rules apply when validating the Gutenberg Block Editor Handbook documentation. They encode learnings from manual review against this corpus.
 
 You are validating WordPress Block Editor documentation. The codebase backing it lives across two repos.
 

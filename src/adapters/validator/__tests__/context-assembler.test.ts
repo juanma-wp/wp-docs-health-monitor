@@ -79,6 +79,159 @@ describe('extractDocSymbols', () => {
     expect(symbols).toContain('registerBlockType');
     expect(symbols).not.toContain('json');
   });
+
+  // ---------------------------------------------------------------------------
+  // JSX bracket unwrap — Pattern B Gap 1
+  // ---------------------------------------------------------------------------
+
+  it('unwraps JSX self-closing tags to bare identifiers', () => {
+    // Symbol index keys on bare `PluginSidebar`, not on `<PluginSidebar />`.
+    // Without unwrap, slotfill docs that reference the component this way
+    // surface zero matchable symbols.
+    const symbols = extractDocSymbols('Use `<PluginSidebar />` to add an entry.');
+    expect(symbols).toContain('PluginSidebar');
+    expect(symbols).not.toContain('<PluginSidebar />');
+  });
+
+  it('unwraps JSX opening and closing tags', () => {
+    expect(extractDocSymbols('See `<PluginSidebar>` and `</PluginSidebar>`.'))
+      .toEqual(['PluginSidebar']);
+  });
+
+  it('skips lowercase HTML elements (`<div>`, `<p>`) — components are uppercase by convention', () => {
+    const symbols = extractDocSymbols('Wrap output in `<div>` or `<span />`.');
+    expect(symbols).not.toContain('div');
+    expect(symbols).not.toContain('span');
+  });
+
+  // ---------------------------------------------------------------------------
+  // H1 heading extraction — Pattern B Gap 2
+  // ---------------------------------------------------------------------------
+
+  it('extracts H1 headings that look like a single identifier', () => {
+    // SlotFill-style docs put the API name in the H1 (`# PluginSidebar`)
+    // and never mention it again in inline backticks — without this rule
+    // the symbol set is empty.
+    const symbols = extractDocSymbols('# PluginSidebar\n\nThis slot allows…');
+    expect(symbols).toContain('PluginSidebar');
+  });
+
+  it('rejects H1 headings that are plain English titles', () => {
+    // `Accessibility`, `Tutorial`, `Overview` are too generic to be useful
+    // index candidates — they have only one capital and no separator.
+    expect(extractDocSymbols('# Accessibility\n\nGuidance…')).not.toContain('Accessibility');
+    expect(extractDocSymbols('# Tutorial\n\nGuidance…')).not.toContain('Tutorial');
+  });
+
+  it('extracts kebab-case and snake_case H1 identifiers', () => {
+    expect(extractDocSymbols('# theme-json\n\nDescribes theme.json…')).toContain('theme-json');
+    expect(extractDocSymbols('# WP_Block\n\nCore PHP class…')).toContain('WP_Block');
+  });
+
+  it('extracts camelCase / hook-style H1 identifiers', () => {
+    expect(extractDocSymbols('# useBlockProps\n\nReact hook…')).toContain('useBlockProps');
+  });
+
+  it('does NOT extract H2/H3 (H1 only by deliberate choice)', () => {
+    const symbols = extractDocSymbols('## PluginSidebar\n\n### useBlockProps\n');
+    expect(symbols).not.toContain('PluginSidebar');
+    expect(symbols).not.toContain('useBlockProps');
+  });
+
+  it('ignores multi-word H1 titles (must be a single identifier-shaped token)', () => {
+    expect(extractDocSymbols('# Block Editor Handbook\n\nWelcome…')).toEqual([]);
+  });
+
+  // ---------------------------------------------------------------------------
+  // Fenced code-block imports — Pattern B Gap 3
+  // ---------------------------------------------------------------------------
+
+  it('extracts JS/TS named imports from inside fenced code blocks', () => {
+    // Reference docs like `plugin-post-publish-panel.md` show the import in a
+    // ```js fence — without parsing fence content, the component name is
+    // invisible to the lexical retrieval.
+    const content = [
+      '# PluginPostPublishPanel',
+      '',
+      '```js',
+      "import { PluginPostPublishPanel } from '@wordpress/editor';",
+      '```',
+    ].join('\n');
+    expect(extractDocSymbols(content)).toContain('PluginPostPublishPanel');
+  });
+
+  it('handles aliased imports — extracts the original name, not the alias', () => {
+    const content =
+      '```js\n' +
+      "import { __experimentalMainDashboardButton as MainDashboardButton } from '@wordpress/edit-post';\n" +
+      '```';
+    const symbols = extractDocSymbols(content);
+    expect(symbols).toContain('__experimentalMainDashboardButton');
+    // The alias is the local name in the example, not what the index knows.
+    expect(symbols).not.toContain('MainDashboardButton');
+  });
+
+  it('extracts JS default imports', () => {
+    const content = '```js\nimport React from \'react\';\nimport defaultExport from \'./foo\';\n```';
+    const symbols = extractDocSymbols(content);
+    expect(symbols).toContain('React');
+    expect(symbols).toContain('defaultExport');
+  });
+
+  it('extracts multi-line and type-only imports', () => {
+    const content = [
+      '```ts',
+      'import {',
+      '  PluginSidebar,',
+      '  PluginSidebarMoreMenuItem,',
+      '  type EditorProps,',
+      "} from '@wordpress/editor';",
+      "import type EditorDefault from '@wordpress/editor';",
+      '```',
+    ].join('\n');
+    const symbols = extractDocSymbols(content);
+    expect(symbols).toContain('PluginSidebar');
+    expect(symbols).toContain('PluginSidebarMoreMenuItem');
+    expect(symbols).toContain('EditorProps');
+    expect(symbols).toContain('EditorDefault');
+  });
+
+  it('extracts the trailing segment of PHP `use` statements', () => {
+    const content = [
+      '```php',
+      'use WP_Block_Type_Registry;',
+      'use WP\\Blocks\\WP_Block;',
+      'use WP\\Blocks\\WP_Block_Type as BlockType;',
+      '```',
+    ].join('\n');
+    const symbols = extractDocSymbols(content);
+    expect(symbols).toContain('WP_Block_Type_Registry');
+    expect(symbols).toContain('WP_Block');
+    // `as` alias is local naming; the original class is what the index keys on.
+    expect(symbols).toContain('WP_Block_Type');
+  });
+
+  it('combines all three sources (backticks + H1 + fenced imports) into one set', () => {
+    // The canonical SlotFill-style doc shape: H1 with the API name, prose
+    // description, JS example with the import. All three converge on the
+    // same identifier — dedupe via Set.
+    const content = [
+      '# PluginSidebar',
+      '',
+      'This slot allows adding items. Use `registerPlugin` to register.',
+      '',
+      '```js',
+      "import { PluginSidebar } from '@wordpress/editor';",
+      "import { registerPlugin } from '@wordpress/plugins';",
+      '```',
+    ].join('\n');
+    const symbols = extractDocSymbols(content);
+    expect(symbols).toContain('PluginSidebar');     // H1 + fenced import (deduped)
+    expect(symbols).toContain('registerPlugin');     // inline backtick + fenced import (deduped)
+    // Set semantics: each appears exactly once.
+    expect(symbols.filter(s => s === 'PluginSidebar')).toHaveLength(1);
+    expect(symbols.filter(s => s === 'registerPlugin')).toHaveLength(1);
+  });
 });
 
 describe('findMissingSymbols', () => {

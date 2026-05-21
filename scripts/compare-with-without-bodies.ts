@@ -26,14 +26,14 @@ import { readFile } from 'fs/promises';
 const args = process.argv.slice(2);
 const slug = args.find(a => !a.startsWith('--'));
 const configIdx = args.indexOf('--config');
-const configPath = configIdx >= 0 ? args[configIdx + 1] : 'config/gutenberg-block-api.json';
+const configPath = configIdx >= 0 ? args[configIdx + 1] : null;
 
-if (!slug) {
-  console.error('Usage: tsx scripts/compare-with-without-bodies.ts <slug> [--config <path>]');
+if (!slug || !configPath) {
+  console.error('Usage: tsx scripts/compare-with-without-bodies.ts <slug> --config <path>');
   process.exit(1);
 }
 
-const config = await loadConfig(configPath as string);
+const config = await loadConfig(configPath);
 const docSource   = createDocSource(config);
 const codeSources = createCodeSources(config);
 const mapping = MappingSchema.parse(JSON.parse(readFileSync(config.mappingPath, 'utf-8')));

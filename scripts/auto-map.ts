@@ -3,8 +3,8 @@
  * (optional) AI re-ranker.
  *
  * Usage:
- *   npx tsx scripts/auto-map.ts <slug> [--config <path>] [--write] [--no-rerank] [--explain]
- *   npx tsx scripts/auto-map.ts --all  [--config <path>] [--no-rerank] [--force]
+ *   npx tsx scripts/auto-map.ts <slug> --config <path> [--write] [--no-rerank] [--explain]
+ *   npx tsx scripts/auto-map.ts --all  --config <path> [--no-rerank] [--force] [--dry-run]
  *
  * Single-slug mode: maps one slug to a CodeTiers entry. Refuses ignored slugs
  * (those matched by `config.docSource.ignore`) with a clear error — the
@@ -12,18 +12,21 @@
  * dead weight.
  *
  * Batch mode (`--all`): iterates every in-scope, non-ignored manifest entry
- * (same `parent === parentSlug` filter and `isIgnored` predicate the adapter
- * uses at runtime), maps each to a CodeTiers entry, and writes them all to
+ * (same parent filter and `isIgnored` predicate the adapter uses at runtime —
+ * `parent === parentSlug`, or no parent filter when `parentSlug === "*"`),
+ * maps each to a CodeTiers entry, and writes them all to
  * `config.mappingPath`. Resumable by default — slugs already keyed in the
  * mapping file are skipped (use `--force` to re-map regardless).
  *
  * Flags:
- *   --config <path>      Config file (default: config/gutenberg-block-api.json)
+ *   --config <path>      Config file (required)
  *   --write              Write the canonical mapping AND the audit file (when re-rank ran)
  *   --no-rerank          Skip the AI re-ranker (lexical-only output, no audit)
  *   --explain            Print rationale per kept file and reason per dropped file to stdout
  *   --all                Batch mode (implicit --write)
  *   --force              In --all mode, re-map every slug even if already in the mapping file
+ *   --dry-run            In --all mode, print the plan (action, slug, parent) to stdout and exit
+ *                        before cloning repos or invoking the LLM. Zero cost, fast.
  */
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
@@ -215,8 +218,11 @@ async function main() {
   // cross-schema property collisions). On API error / malformed output
   // / missing API key, the Reranker emits a stderr warning and the
   // orchestrator falls back to lexical-only output.
+  // Dry-run never invokes the LLM — skip the Reranker (and the Anthropic
+  // client construction it depends on) so an unset ANTHROPIC_API_KEY doesn't
+  // produce a confusing warning during a preview-only run.
   let reranker: Reranker | null = null;
-  if (args.rerank) {
+  if (args.rerank && !args.dryRun) {
     try {
       reranker = new Reranker(config.validator.rerankModel ?? config.validator.pass1Model, new Anthropic());
     } catch (err) {
@@ -319,13 +325,28 @@ async function runBatch(opts: {
     return;
   }
 
+  const byMappingSlug = new Map(resolvedEntries.map(e => [e.slug, e]));
+
+  if (args.dryRun) {
+    // Preview path: print plan rows (action, slug, parent) to stdout, summary
+    // to stderr, and exit. Skips clone + index + LLM — zero cost, fast.
+    const mapCount = plan.filter(p => p.action === 'map').length;
+    const skipCount = plan.length - mapCount;
+    console.error(
+      `[dry-run] ${total} in-scope slugs: ${mapCount} map, ${skipCount} skip-already-mapped.`,
+    );
+    for (const item of plan) {
+      const parent = byMappingSlug.get(item.slug)?.parent ?? '';
+      process.stdout.write(`${item.action}\t${item.slug}\t${parent}\n`);
+    }
+    return;
+  }
+
   console.error(`Found ${total} in-scope, non-ignored slug(s) to process.`);
 
   // Build symbol indexes once — buildSymbolIndex caches by commit SHA, so
   // multi-slug iteration reuses the index across calls.
   const { indexes, allFilesByRepo } = await buildIndexes(config);
-
-  const byMappingSlug = new Map(resolvedEntries.map(e => [e.slug, e]));
 
   let i = 0;
   for (const item of plan) {

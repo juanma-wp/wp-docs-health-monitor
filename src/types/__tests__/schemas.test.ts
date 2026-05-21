@@ -234,15 +234,23 @@ describe('runPipeline', () => {
     vi.restoreAllMocks();
   });
 
+  // These two tests don't stub fetch / codeSources, so they trigger the
+  // pipeline's eager warm-up (`getCommitSha()` on the configured git-clone
+  // source pointing at the real WordPress/gutenberg repo). On a CI runner with
+  // a cold filesystem cache, the shallow clone takes 5-15s and exceeds the
+  // default 5000ms per-test timeout. Locally it's instant because
+  // tmp/gutenberg-trunk is reused across sessions. Bumping to 60s here lets
+  // the cold clone complete on first run; subsequent tests (and all warm-cache
+  // runs) finish well under that.
   it('returns a RunResults with a correctly-formatted runId', async () => {
     const result = await runPipeline(minimalConfig);
     expect(result.runId).toMatch(/^\d{8}-\d{6}$/);
-  });
+  }, 60_000);
 
   it('returns a result that passes RunResultsSchema.parse', async () => {
     const result = await runPipeline(minimalConfig);
     expect(() => RunResultsSchema.parse(result)).not.toThrow();
-  });
+  }, 60_000);
 
   it('appends a DocResult with diagnostics when doc fetch returns 404', async () => {
     vi.stubGlobal('fetch', vi.fn(async (url: string) => {
