@@ -10,6 +10,14 @@ export const ConfigSchema = z.object({
     parentSlug:    z.string(),
     sourceUrlBase: z.string().url().optional(), // e.g. "https://developer.wordpress.org/block-editor/"
                                                 // if absent, falls back to GitHub UI URL
+    // Manifest entries to drop before any markdown fetches. `slugs` drops
+    // just the named entry; `subtrees` drops the entry AND all transitive
+    // descendants via the manifest `parent` pointer. Use `subtrees` for
+    // auto-generated branches (e.g. component/package reference docs).
+    ignore: z.object({
+      slugs:    z.array(z.string()).default([]),
+      subtrees: z.array(z.string()).default([]),
+    }).optional(),
   }),
   codeSources: z.record(
     z.string(),

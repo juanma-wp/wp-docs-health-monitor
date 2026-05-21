@@ -11,6 +11,10 @@ interface ManifestUrlConfig {
   manifestUrl: string;
   parentSlug: string;
   sourceUrlBase?: string;
+  ignore?: {
+    slugs?:    string[];
+    subtrees?: string[];
+  };
 }
 
 function deriveSourceUrl(absoluteRawUrl: string, sourceUrlBase?: string): string {
@@ -108,10 +112,31 @@ export class ManifestUrlDocSource implements DocSource {
     // Filter by parentSlug
     const filtered = resolvedEntries.filter(e => e.parent === parentSlug);
 
+    // Apply ignore: drop entries by slug, or whose ancestor chain hits a subtree root.
+    // The walk starts at the entry's own slug so `subtrees: [X]` drops X itself too.
+    const ignoredSlugs = new Set(this.config.ignore?.slugs    ?? []);
+    const ignoredRoots = new Set(this.config.ignore?.subtrees ?? []);
+    let scoped = filtered;
+    if (ignoredSlugs.size > 0 || ignoredRoots.size > 0) {
+      const slugToParent = new Map(resolvedEntries.map(e => [e.slug, e.parent]));
+      const isIgnored = (slug: string): boolean => {
+        if (ignoredSlugs.has(slug)) return true;
+        let cursor: string | null = slug;
+        const seen = new Set<string>(); // cycle guard
+        while (cursor !== null && !seen.has(cursor)) {
+          if (ignoredRoots.has(cursor)) return true;
+          seen.add(cursor);
+          cursor = slugToParent.get(cursor) ?? null;
+        }
+        return false;
+      };
+      scoped = filtered.filter(e => !isIgnored(e.slug));
+    }
+
     const limit = pLimit(5);
 
     const results = await Promise.all(
-      filtered.map(entry =>
+      scoped.map(entry =>
         limit(async (): Promise<DocFetchResult> => {
           const { slug, title, markdown_source, parent } = entry;
           const sourceUrl = deriveSourceUrl(markdown_source, sourceUrlBase);

@@ -4,6 +4,10 @@ Automated health monitor for WordPress-hosted developer documentation sites.
 
 The tool compares docs against their underlying source code and produces an evidence-backed, scored report of drift — outdated APIs, missing parameters, broken examples, deprecated usage — with suggested fixes, rendered as a static HTML dashboard.
 
+![architecture](./docs/assets/architecture.png)
+
+see [diagram](https://excalidraw.com/#json=NQXUcZaoSsTj6SHnI4Z_F,W7sPJGcKmJ_-6fnPgZ99Nw) 
+
 ## Prerequisites
 
 - Node.js ≥ 20
