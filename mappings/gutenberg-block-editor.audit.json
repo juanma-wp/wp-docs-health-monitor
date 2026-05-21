@@ -4850,39 +4850,167 @@
       ]
     },
     "iapi-about": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": [
-        {
-          "repo": "wordpress-develop",
-          "path": "src/wp-includes/l10n.php",
-          "rationale": "Single-token English match — `__`/`_e` are mentioned only as examples of i18n APIs that remain compatible; not about the Interactivity API itself."
-        },
+      "primary": [
         {
           "repo": "gutenberg",
-          "path": "packages/i18n/src/default-i18n.ts",
-          "rationale": "Single-token match on `__` — i18n implementation unrelated to the Interactivity API overview."
-        },
+          "path": "packages/interactivity/src/store.ts",
+          "rationale": "Canonical `store` implementation for the Interactivity API package, matching the doc's `store('wpmovies', {...})` example.",
+          "confidence": 0.95
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/interactivity/src/scopes.ts",
+          "rationale": "Interactivity package file exporting `getContext`, the other directly-cited API in the doc's declarative example.",
+          "confidence": 0.85
+        }
+      ],
+      "context": [
         {
           "repo": "wordpress-develop",
           "path": "src/wp-includes/blocks.php",
-          "rationale": "Generic hook-name match on `render_block` — doc only references the filter as an extensibility example, not the Interactivity API."
-        },
-        {
-          "repo": "wordpress-develop",
-          "path": "src/wp-admin/includes/noop.php",
-          "rationale": "Single-token match on `__` — noop stub of i18n, unrelated to the Interactivity API."
+          "rationale": "Core blocks PHP file matched on `render_block`, the filter the doc references for extending directive behavior.",
+          "confidence": 0.55
         },
         {
           "repo": "wordpress-develop",
           "path": "src/wp-includes/class-wp-block.php",
-          "rationale": "Generic match on `render_block` token — block rendering class is not the subject of this conceptual Interactivity API doc."
+          "rationale": "WP_Block class matched on `render_block`; surrounding server-side rendering integration mentioned in the doc.",
+          "confidence": 0.5
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/l10n.php",
+          "rationale": "Core translation API (`__`, `_e`) referenced in the doc's Backward-compatible section.",
+          "confidence": 0.55
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/i18n/src/default-i18n.ts",
+          "rationale": "Single-token match on `__`; doc only mentions WP PHP i18n, not the JS i18n package."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/commands/src/store/selectors.js",
+          "rationale": "`getContext` here is a commands-store selector, unrelated to the Interactivity API's getContext."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-admin/includes/noop.php",
+          "rationale": "Noop stub matching `__`; not related to Interactivity API."
         },
         {
           "repo": "wordpress-develop",
           "path": "tests/phpunit/tests/blocks/supportedStyles.php",
-          "rationale": "Test fixture matching only `render_block`; unrelated to Interactivity API overview."
+          "rationale": "Block styles test matched on `render_block`; unrelated to Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/abilities/src/store/index.ts",
+          "rationale": "Generic `store` token collision — unrelated data store."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/annotations/src/store/index.ts",
+          "rationale": "Generic `store` token collision — unrelated data store."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-directory/src/store/index.js",
+          "rationale": "Generic `store` token collision — unrelated data store."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/store/index.js",
+          "rationale": "Generic `store` token collision — unrelated data store."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/blocks/src/store/index.ts",
+          "rationale": "Generic `store` token collision — unrelated data store."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/boot/src/store/index.ts",
+          "rationale": "Generic `store` token collision — unrelated data store."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/commands/src/store/index.js",
+          "rationale": "Generic `store` token collision — unrelated data store."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/connectors/src/store.ts",
+          "rationale": "Generic `store` token collision — unrelated data store."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/core-data/src/index.js",
+          "rationale": "Generic `store` token collision — unrelated data store."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/customize-widgets/src/store/index.js",
+          "rationale": "Generic `store` token collision — unrelated data store."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/edit-post/src/store/index.js",
+          "rationale": "Generic `store` token collision — unrelated data store."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/edit-site/src/store/index.js",
+          "rationale": "Generic `store` token collision — unrelated data store."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/edit-widgets/src/store/index.js",
+          "rationale": "Generic `store` token collision — unrelated data store."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/editor/src/store/index.js",
+          "rationale": "Generic `store` token collision — unrelated data store."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/interface/src/store/index.js",
+          "rationale": "Generic `store` token collision — unrelated data store."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/keyboard-shortcuts/src/store/index.ts",
+          "rationale": "Generic `store` token collision — unrelated data store."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/media-editor/src/store/index.ts",
+          "rationale": "Generic `store` token collision — unrelated data store."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/notices/src/store/index.ts",
+          "rationale": "Generic `store` token collision — unrelated data store."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/nux/src/store/index.js",
+          "rationale": "Generic `store` token collision — unrelated data store."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/patterns/src/store/index.js",
+          "rationale": "Generic `store` token collision — unrelated data store."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/preferences/src/store/index.ts",
+          "rationale": "Generic `store` token collision — unrelated data store."
         }
       ]
     },
@@ -5102,7 +5230,18 @@
       "primary": [],
       "secondary": [],
       "context": [],
-      "dropped": []
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/commands/src/store/actions.js",
+          "rationale": "Single-token English match on `close` — this is the commands store actions, unrelated to MainDashboardButton slot."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/plugins/src/api/index.ts",
+          "rationale": "Match on `registerPlugin` is incidental (used in the doc's example); this is the plugins API, not the MainDashboardButton slot implementation."
+        }
+      ]
     },
     "markup-representation-block": {
       "primary": [],
@@ -5369,22 +5508,42 @@
         {
           "repo": "wordpress-develop",
           "path": "src/wp-includes/functions.php",
-          "rationale": "Single-token match on `wp` — generic WordPress global, not about package modularity architecture."
+          "rationale": "Generic match on the token `wp` — unrelated to the modularity/packages architecture doc."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/button/index.native.js",
+          "rationale": "Matched only on `Button` from the doc's code sample; the Button component is an illustrative example, not the doc's subject."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/button/index.tsx",
+          "rationale": "Matched only on `Button` from the doc's code sample; not authoritative on modularity architecture."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/button/button.tsx",
+          "rationale": "Matched only on `Button` from the doc's code sample; tangential to the modularity narrative."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/button/index.ts",
+          "rationale": "Matched only on `Button` from the doc's code sample; tangential to the modularity narrative."
         },
         {
           "repo": "wordpress-develop",
           "path": "src/wp-includes/class-wp.php",
-          "rationale": "Single-token match on `wp` — core WP request class, unrelated to @wordpress/* JS package modularity doc."
+          "rationale": "Single-token match on `wp` — the WP core request class is unrelated to npm package architecture."
         },
         {
           "repo": "wordpress-develop",
           "path": "tests/phpunit/tests/customize/selective-refresh-ajax.php",
-          "rationale": "Single-token match on `wp` in unrelated Customizer test file."
+          "rationale": "Single-token match on `wp`; customize test file unrelated to doc subject."
         },
         {
           "repo": "wordpress-develop",
           "path": "tests/phpunit/tests/customize/widgets.php",
-          "rationale": "Single-token match on `wp` in unrelated Customizer widgets test file."
+          "rationale": "Single-token match on `wp`; customize widgets test unrelated to doc subject."
         }
       ]
     },
@@ -5590,12 +5749,47 @@
       "primary": [],
       "secondary": [],
       "context": [],
-      "dropped": []
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/button/index.native.js",
+          "rationale": "Single-token match on `Button` — the doc only uses Button as a one-line usage example for the @wordpress/components package, not as its subject."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/button/index.tsx",
+          "rationale": "Single-token match on `Button` — doc subject is the platform/packages overview, not the Button component implementation."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/button/button.tsx",
+          "rationale": "Single-token match on `Button` — incidental example identifier in the doc, not the platform topic."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/button/index.ts",
+          "rationale": "Single-token match on `Button` — incidental example identifier, unrelated to the platform overview doc."
+        }
+      ]
     },
     "plugin-block-settings-menu-item": {
-      "primary": [],
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/edit-post/src/deprecated.js",
+          "rationale": "Matched on `PluginBlockSettingsMenuItem` — re-exports the slot component (likely the deprecated edit-post alias path for the doc subject).",
+          "confidence": 0.75
+        }
+      ],
       "secondary": [],
-      "context": [],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/plugins/src/api/index.ts",
+          "rationale": "Matched on `registerPlugin` — the plugins API used in the doc's example to register the slot fill.",
+          "confidence": 0.6
+        }
+      ],
       "dropped": []
     },
     "plugin-document-setting-panel": {
@@ -5626,34 +5820,211 @@
       "dropped": []
     },
     "plugin-more-menu-item": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/editor/src/components/plugin-more-menu-item/index.js",
+          "rationale": "Path segment `plugin-more-menu-item` matches doc slug exactly; matched on `PluginMoreMenuItem`.",
+          "confidence": 0.98
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/edit-post/src/deprecated.js",
+          "rationale": "Matched on `PluginMoreMenuItem` — likely the deprecated re-export shim from edit-post for the slot.",
+          "confidence": 0.75
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/edit-site/src/deprecated.js",
+          "rationale": "Matched on `PluginMoreMenuItem` — likely the deprecated re-export shim from edit-site for the slot.",
+          "confidence": 0.75
+        }
+      ],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/plugins/src/api/index.ts",
+          "rationale": "Matched on `registerPlugin` — the plugins API used in the example to register the plugin hosting this slot.",
+          "confidence": 0.6
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/format-library/src/image/index.js",
+          "rationale": "Single-token match on `image` — this is the image format for rich text, unrelated to the More Menu slot; `image` only appears in the doc's example as an icon import."
+        }
+      ]
     },
     "plugin-post-publish-panel": {
       "primary": [],
-      "secondary": [],
-      "context": [],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/edit-post/src/deprecated.js",
+          "rationale": "Matched on `PluginPostPublishPanel` — likely re-exports the deprecated edit-post alias for the editor package's slot.",
+          "confidence": 0.7
+        }
+      ],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/plugins/src/api/index.ts",
+          "rationale": "Matched on `registerPlugin` — the plugins registration API used in the doc example, surrounding behaviour not the slot itself.",
+          "confidence": 0.6
+        }
+      ],
       "dropped": []
     },
     "plugin-post-status-info": {
-      "primary": [],
-      "secondary": [],
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/edit-post/src/deprecated.js",
+          "rationale": "Matched on `PluginPostStatusInfo` — the deprecated re-export from edit-post is one of the few files that names this slot directly.",
+          "confidence": 0.7
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/plugins/src/api/index.ts",
+          "rationale": "Matched on `registerPlugin` — implements the plugin registration API used in the doc example, but not the slot itself.",
+          "confidence": 0.7
+        }
+      ],
       "context": [],
       "dropped": []
     },
     "plugin-pre-publish-panel": {
       "primary": [],
-      "secondary": [],
-      "context": [],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/edit-post/src/deprecated.js",
+          "rationale": "Matched on `PluginPrePublishPanel` — likely the deprecated re-export from edit-post pointing to the editor package version.",
+          "confidence": 0.7
+        }
+      ],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/plugins/src/api/index.ts",
+          "rationale": "Matched on `registerPlugin` — the plugin registration API used in the example, but not specific to PluginPrePublishPanel.",
+          "confidence": 0.55
+        }
+      ],
       "dropped": []
     },
     "plugin-sidebar": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/editor/src/components/plugin-sidebar/index.js",
+          "rationale": "Canonical PluginSidebar component implementation — path slug matches doc slug exactly and matched on `PluginSidebar`.",
+          "confidence": 0.97
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/editor/src/components/plugin-sidebar-more-menu-item/index.js",
+          "rationale": "Canonical implementation of `PluginSidebarMoreMenuItem` companion described in the doc.",
+          "confidence": 0.9
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/edit-post/src/deprecated.js",
+          "rationale": "Matched on both `PluginSidebar` and `PluginSidebarMoreMenuItem` — likely re-export shim from edit-post since the doc notes the slot is now in `@wordpress/editor`.",
+          "confidence": 0.75
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/edit-site/src/deprecated.js",
+          "rationale": "Matched on both `PluginSidebar` and `PluginSidebarMoreMenuItem` — companion deprecated re-export from edit-site.",
+          "confidence": 0.75
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/plugins/src/api/index.ts",
+          "rationale": "Implements `registerPlugin` used in the example to register the sidebar plugin.",
+          "confidence": 0.7
+        }
+      ],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/panel/body.tsx",
+          "rationale": "`PanelBody` from the usage example — surrounding-component context only.",
+          "confidence": 0.55
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/text-control/index.tsx",
+          "rationale": "`TextControl` used in the example snippet — peripheral component.",
+          "confidence": 0.5
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/select-control/index.tsx",
+          "rationale": "`SelectControl` used in the example snippet — peripheral component.",
+          "confidence": 0.5
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/i18n/src/default-i18n.ts",
+          "rationale": "Matched only on the generic `__` i18n function used incidentally in the example."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/panel/body.native.js",
+          "rationale": "Native variant of PanelBody — already covered by the web `body.tsx`; redundant noise."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/color-picker/styles.ts",
+          "rationale": "Cross-component collision — color-picker styles file unrelated to SelectControl proper."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/select-control/index.native.js",
+          "rationale": "Native variant of SelectControl — peripheral example component, redundant."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/button/index.native.js",
+          "rationale": "Button native variant — unrelated to PluginSidebar subject."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/button/index.tsx",
+          "rationale": "`Button` is incidental example UI, not the doc's subject."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/button/button.tsx",
+          "rationale": "Separate `ui` package Button — unrelated to PluginSidebar."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/button/index.ts",
+          "rationale": "Separate `ui` package Button barrel — unrelated to PluginSidebar."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-admin/includes/noop.php",
+          "rationale": "Single-token English match on `__` (i18n alias) — unrelated PHP file."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/l10n.php",
+          "rationale": "Matched only on the generic `__` translation function — unrelated to the JS PluginSidebar slot."
+        }
+      ]
     },
     "plugin-sidebar-0": {
       "primary": [
@@ -5828,10 +6199,114 @@
       ]
     },
     "plugin-sidebar-more-menu-item": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/editor/src/components/plugin-sidebar-more-menu-item/index.js",
+          "rationale": "Path slug `plugin-sidebar-more-menu-item` matches the doc slug exactly; matched on `PluginSidebarMoreMenuItem`.",
+          "confidence": 0.98
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/editor/src/components/plugin-sidebar/index.js",
+          "rationale": "Companion `PluginSidebar` component that auto-registers the menu item; matched on `PluginSidebar`.",
+          "confidence": 0.85
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/edit-post/src/deprecated.js",
+          "rationale": "Matched on both `PluginSidebar` and `PluginSidebarMoreMenuItem` — likely re-exports/deprecation shims from edit-post for these slots.",
+          "confidence": 0.7
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/edit-site/src/deprecated.js",
+          "rationale": "Matched on both `PluginSidebar` and `PluginSidebarMoreMenuItem` — parallel re-export/deprecation shim from edit-site.",
+          "confidence": 0.7
+        }
+      ],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/plugins/src/api/index.ts",
+          "rationale": "Provides `registerPlugin` used in the example to register the plugin that renders the slot.",
+          "confidence": 0.6
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/text-control/index.tsx",
+          "rationale": "Example-snippet collision — `TextControl` is unrelated UI used in the demo."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/format-library/src/image/index.js",
+          "rationale": "Single-token match `image` — refers to the icon import in the example, not this format-library file."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/i18n/src/default-i18n.ts",
+          "rationale": "Single-token match `__` — i18n helper used in the example, not the doc's subject."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/panel/body.native.js",
+          "rationale": "Example-snippet collision — `PanelBody` is unrelated UI used in the demo."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/panel/body.tsx",
+          "rationale": "Example-snippet collision — `PanelBody` is unrelated UI used in the demo."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/color-picker/styles.ts",
+          "rationale": "Cross-symbol collision on `SelectControl` styling — unrelated to this slot."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/select-control/index.native.js",
+          "rationale": "Example-snippet collision — `SelectControl` is unrelated UI used in the demo."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/select-control/index.tsx",
+          "rationale": "Example-snippet collision — `SelectControl` is unrelated UI used in the demo."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/button/index.native.js",
+          "rationale": "Example-snippet collision — `Button` is unrelated UI used in the demo."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/button/index.tsx",
+          "rationale": "Example-snippet collision — `Button` is unrelated UI used in the demo."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/button/button.tsx",
+          "rationale": "Example-snippet collision — generic `Button` identifier match."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/button/index.ts",
+          "rationale": "Example-snippet collision — generic `Button` identifier match."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-admin/includes/noop.php",
+          "rationale": "Single-token English/identifier match on `__` — i18n noop unrelated to this slot."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/l10n.php",
+          "rationale": "Single-token match on `__` — PHP i18n function, unrelated to this JS slot."
+        }
+      ]
     },
     "propagating-updates": {
       "primary": [],
@@ -6610,14 +7085,163 @@
       "dropped": []
     },
     "the-reactive-and-declarative-mindset": {
-      "primary": [],
-      "secondary": [],
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/interactivity/src/store.ts",
+          "rationale": "Canonical `store()` implementation for the Interactivity API — matched on `store` and lives in `packages/interactivity/`, the package the doc imports from.",
+          "confidence": 0.95
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/interactivity/src/scopes.ts",
+          "rationale": "Matched on `getContext`, the helper used in the doc's `data-wp-watch` example, and lives in the Interactivity package.",
+          "confidence": 0.8
+        }
+      ],
       "context": [],
       "dropped": [
         {
           "repo": "gutenberg",
           "path": "schemas/json/block.json",
-          "rationale": "Single-token collision — `isActive` matched the doc's example state property but block.json is the block metadata schema, unrelated to Interactivity API reactivity concepts."
+          "rationale": "Cross-schema property collision — `isActive` happens to appear in block.json schema, unrelated to Interactivity API state."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/commands/src/store/selectors.js",
+          "rationale": "Single-token match on `getContext` in commands package — unrelated to Interactivity API's getContext."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/abilities/src/store/index.ts",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/annotations/src/store/index.ts",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-directory/src/store/index.js",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/store/index.js",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/blocks/src/store/index.ts",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/boot/src/store/index.ts",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/commands/src/store/index.js",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/connectors/src/store.ts",
+          "rationale": "Generic `store` token match — unrelated package store."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/core-data/src/index.js",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/customize-widgets/src/store/index.js",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/edit-post/src/store/index.js",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/edit-site/src/store/index.js",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/edit-widgets/src/store/index.js",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/editor/src/store/index.js",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/interface/src/store/index.js",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/keyboard-shortcuts/src/store/index.ts",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/media-editor/src/store/index.ts",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/notices/src/store/index.ts",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/nux/src/store/index.js",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/patterns/src/store/index.js",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/preferences/src/store/index.ts",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/reusable-blocks/src/store/index.js",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/rich-text/src/store/index.js",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/upload-media/src/store/index.ts",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/viewport/src/store/index.ts",
+          "rationale": "Generic `store` token match — @wordpress/data store, not Interactivity API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "routes/guidelines/store.ts",
+          "rationale": "Generic `store` token match — guidelines route store, unrelated to Interactivity API."
         }
       ]
     },

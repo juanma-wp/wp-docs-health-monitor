@@ -253,11 +253,6 @@
       }
     ]
   },
-  "block-annotations": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
   "block-api-versions": {
     "primary": [
       {
@@ -357,36 +352,6 @@
       }
     ]
   },
-  "handbook": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "getting-started": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "devenv": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "nodejs-development-environment": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "get-started-with-wp-env": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "get-started-with-create-block": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
   "get-started-with-wp-scripts": {
     "primary": [],
     "secondary": [],
@@ -396,11 +361,6 @@
         "path": "src/wp-includes/blocks.php"
       }
     ]
-  },
-  "quick-start-guide": {
-    "primary": [],
-    "secondary": [],
-    "context": []
   },
   "tutorial": {
     "primary": [
@@ -678,16 +638,6 @@
       }
     ]
   },
-  "glossary": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "faq": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
   "how-to-guides": {
     "primary": [],
     "secondary": [],
@@ -697,16 +647,6 @@
         "path": "packages/plugins/src/api/index.ts"
       }
     ]
-  },
-  "accessibility": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "block-tutorial": {
-    "primary": [],
-    "secondary": [],
-    "context": []
   },
   "applying-styles-with-stylesheets": {
     "primary": [
@@ -817,11 +757,6 @@
       }
     ]
   },
-  "platform": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
   "custom-block-editor": {
     "primary": [
       {
@@ -877,16 +812,6 @@
         "path": "packages/data/src/components/registry-provider/context.ts"
       }
     ]
-  },
-  "data-basics": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "1-data-basics-setup": {
-    "primary": [],
-    "secondary": [],
-    "context": []
   },
   "2-building-a-list-of-pages": {
     "primary": [
@@ -1007,16 +932,6 @@
       }
     ]
   },
-  "curating-the-editor-experience": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "block-locking": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
   "patterns": {
     "primary": [],
     "secondary": [],
@@ -1026,11 +941,6 @@
         "path": "schemas/json/theme.json"
       }
     ]
-  },
-  "theme-json": {
-    "primary": [],
-    "secondary": [],
-    "context": []
   },
   "filters-and-hooks": {
     "primary": [
@@ -1120,11 +1030,6 @@
         "path": "lib/experimental/class-wp-rest-block-editor-settings-controller.php"
       }
     ]
-  },
-  "feature-flags": {
-    "primary": [],
-    "secondary": [],
-    "context": []
   },
   "format-api": {
     "primary": [
@@ -1268,16 +1173,6 @@
     ],
     "context": []
   },
-  "propagating-updates": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "themes": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
   "global-settings-and-styles": {
     "primary": [
       {
@@ -1353,11 +1248,6 @@
       }
     ]
   },
-  "widgets": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
   "overview": {
     "primary": [],
     "secondary": [],
@@ -1403,16 +1293,6 @@
       }
     ]
   },
-  "reference-guides": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "block-api": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
   "block-migration-for-iframe-editor-compatibility": {
     "primary": [
       {
@@ -1426,16 +1306,6 @@
         "path": "packages/compose/src/hooks/use-ref-effect/index.ts"
       }
     ],
-    "context": []
-  },
-  "core-blocks": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "filters": {
-    "primary": [],
-    "secondary": [],
     "context": []
   },
   "block-filters": {
@@ -1636,16 +1506,6 @@
     ],
     "context": []
   },
-  "core-concepts": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "the-reactive-and-declarative-mindset": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
   "understanding-global-state-local-context-derived-state-and-config": {
     "primary": [
       {
@@ -1753,11 +1613,6 @@
     ],
     "context": []
   },
-  "iapi-quick-start-guide": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
   "directives-and-store": {
     "primary": [
       {
@@ -1783,11 +1638,6 @@
         "path": "packages/interactivity/src/index.ts"
       }
     ],
-    "context": []
-  },
-  "iapi-about": {
-    "primary": [],
-    "secondary": [],
     "context": []
   },
   "iapi-faq": {
@@ -1828,16 +1678,6 @@
     ],
     "context": []
   },
-  "main-dashboard-button": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "plugin-block-settings-menu-item": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
   "plugin-document-setting-panel": {
     "primary": [
       {
@@ -1858,36 +1698,6 @@
       }
     ]
   },
-  "plugin-more-menu-item": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "plugin-post-publish-panel": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "plugin-post-status-info": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "plugin-pre-publish-panel": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "plugin-sidebar": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "plugin-sidebar-more-menu-item": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
   "richtext": {
     "primary": [],
     "secondary": [
@@ -1896,11 +1706,6 @@
         "path": "packages/rich-text/src/unregister-format-type.js"
       }
     ],
-    "context": []
-  },
-  "theme-json-reference": {
-    "primary": [],
-    "secondary": [],
     "context": []
   },
   "theme-json-living": {
@@ -1916,11 +1721,6 @@
         "path": "schemas/json/block.json"
       }
     ],
-    "context": []
-  },
-  "theme-json-v1": {
-    "primary": [],
-    "secondary": [],
     "context": []
   },
   "theme-json-v2": {
@@ -1963,6 +1763,400 @@
     ],
     "context": []
   },
+  "entities": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/core-data/src/actions.js"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/editor/src/store/actions.js"
+      }
+    ],
+    "context": []
+  },
+  "styles": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      },
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/block.json"
+      }
+    ],
+    "secondary": [],
+    "context": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/font-collection.json"
+      }
+    ]
+  },
+  "animation": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/components/src/animate/index.tsx"
+      }
+    ],
+    "secondary": [],
+    "context": []
+  },
+  "handbook": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "getting-started": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "devenv": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "nodejs-development-environment": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "get-started-with-wp-env": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "get-started-with-create-block": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "quick-start-guide": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "glossary": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "faq": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "accessibility": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "block-tutorial": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "platform": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "data-basics": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "1-data-basics-setup": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "curating-the-editor-experience": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "block-locking": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "theme-json": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "feature-flags": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "propagating-updates": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "themes": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "widgets": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "reference-guides": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "block-api": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "block-annotations": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "core-blocks": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "filters": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "core-concepts": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "the-reactive-and-declarative-mindset": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/interactivity/src/store.ts"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/interactivity/src/scopes.ts"
+      }
+    ],
+    "context": []
+  },
+  "iapi-quick-start-guide": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "iapi-about": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/interactivity/src/store.ts"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/interactivity/src/scopes.ts"
+      }
+    ],
+    "context": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/blocks.php"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/class-wp-block.php"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/l10n.php"
+      }
+    ]
+  },
+  "main-dashboard-button": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "plugin-block-settings-menu-item": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/edit-post/src/deprecated.js"
+      }
+    ],
+    "secondary": [],
+    "context": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/plugins/src/api/index.ts"
+      }
+    ]
+  },
+  "plugin-more-menu-item": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/editor/src/components/plugin-more-menu-item/index.js"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/edit-post/src/deprecated.js"
+      },
+      {
+        "repo": "gutenberg",
+        "path": "packages/edit-site/src/deprecated.js"
+      }
+    ],
+    "context": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/plugins/src/api/index.ts"
+      }
+    ]
+  },
+  "plugin-post-publish-panel": {
+    "primary": [],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/edit-post/src/deprecated.js"
+      }
+    ],
+    "context": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/plugins/src/api/index.ts"
+      }
+    ]
+  },
+  "plugin-post-status-info": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/edit-post/src/deprecated.js"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/plugins/src/api/index.ts"
+      }
+    ],
+    "context": []
+  },
+  "plugin-pre-publish-panel": {
+    "primary": [],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/edit-post/src/deprecated.js"
+      }
+    ],
+    "context": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/plugins/src/api/index.ts"
+      }
+    ]
+  },
+  "plugin-sidebar": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/editor/src/components/plugin-sidebar/index.js"
+      },
+      {
+        "repo": "gutenberg",
+        "path": "packages/editor/src/components/plugin-sidebar-more-menu-item/index.js"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/edit-post/src/deprecated.js"
+      },
+      {
+        "repo": "gutenberg",
+        "path": "packages/edit-site/src/deprecated.js"
+      },
+      {
+        "repo": "gutenberg",
+        "path": "packages/plugins/src/api/index.ts"
+      }
+    ],
+    "context": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/components/src/panel/body.tsx"
+      },
+      {
+        "repo": "gutenberg",
+        "path": "packages/components/src/text-control/index.tsx"
+      },
+      {
+        "repo": "gutenberg",
+        "path": "packages/components/src/select-control/index.tsx"
+      }
+    ]
+  },
+  "plugin-sidebar-more-menu-item": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/editor/src/components/plugin-sidebar-more-menu-item/index.js"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/editor/src/components/plugin-sidebar/index.js"
+      },
+      {
+        "repo": "gutenberg",
+        "path": "packages/edit-post/src/deprecated.js"
+      },
+      {
+        "repo": "gutenberg",
+        "path": "packages/edit-site/src/deprecated.js"
+      }
+    ],
+    "context": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/plugins/src/api/index.ts"
+      }
+    ]
+  },
+  "theme-json-reference": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "theme-json-v1": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
   "explanations": {
     "primary": [],
     "secondary": [],
@@ -1981,21 +2175,6 @@
   "data-flow": {
     "primary": [],
     "secondary": [],
-    "context": []
-  },
-  "entities": {
-    "primary": [
-      {
-        "repo": "gutenberg",
-        "path": "packages/core-data/src/actions.js"
-      }
-    ],
-    "secondary": [
-      {
-        "repo": "gutenberg",
-        "path": "packages/editor/src/store/actions.js"
-      }
-    ],
     "context": []
   },
   "modularity": {
@@ -2018,25 +2197,6 @@
     "secondary": [],
     "context": []
   },
-  "styles": {
-    "primary": [
-      {
-        "repo": "gutenberg",
-        "path": "schemas/json/theme.json"
-      },
-      {
-        "repo": "gutenberg",
-        "path": "schemas/json/block.json"
-      }
-    ],
-    "secondary": [],
-    "context": [
-      {
-        "repo": "gutenberg",
-        "path": "schemas/json/font-collection.json"
-      }
-    ]
-  },
   "user-interface": {
     "primary": [],
     "secondary": [],
@@ -2044,16 +2204,6 @@
   },
   "block-design": {
     "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "animation": {
-    "primary": [
-      {
-        "repo": "gutenberg",
-        "path": "packages/components/src/animate/index.tsx"
-      }
-    ],
     "secondary": [],
     "context": []
   },
