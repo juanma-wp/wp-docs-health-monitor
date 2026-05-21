@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Attributes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/block-api.html" class="hover:underline text-blue-600">block-api</a>
+      &rsaquo; <span>Attributes</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">Attributes</h1>
+        <a href="https://developer.wordpress.org/block-editor/reference-guides/block-api/block-attributes/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/block-editor/reference-guides/block-api/block-attributes/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">93</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>
+      </div>
+    </div><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Issues (1)</h2>
+        
+    <div class="border-l-4 border-l-yellow-500 bg-yellow-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">major</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">type-signature</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 95%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">type</code> field MUST be one of the following:
+
+- <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">null</code>
+- <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">boolean</code>
+- <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">object</code>
+- <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">array</code>
+- <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">string</code>
+- <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">integer</code>
+- <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">number</code> (same as <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">integer</code>)
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/gutenberg/blob/trunk/schemas/json/block.json" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">gutenberg:schemas/json/block.json</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>&quot;enum&quot;: [
+										&quot;null&quot;,
+										&quot;boolean&quot;,
+										&quot;object&quot;,
+										&quot;array&quot;,
+										&quot;string&quot;,
+										&quot;rich-text&quot;,
+										&quot;integer&quot;,
+										&quot;number&quot;
+									]</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Add <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">rich-text</code> to the list of valid <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">type</code> values in the block attributes documentation.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>In the bullet list under &quot;The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">type</code> field MUST be one of the following:&quot;, add <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">- \</code>rich-text\`<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono"> as a valid type value (it appears between </code>string<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono"> and </code>integer` in the schema enum).</li><li>Note that <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">rich-text</code> is only valid when <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">type</code> is a single string value, not when it is an array of types — the schema&#39;s array variant (<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">oneOf</code> second branch) does not include <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">rich-text</code>, so this distinction should be documented.</li></ul>
+      </div>
+    </div>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The documentation correctly describes the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">role</code> property with both <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">content</code> and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">local</code> values, which matches the schema&#39;s <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">&quot;enum&quot;: [ &quot;content&quot;, &quot;local&quot; ]</code> in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">schemas/json/block.json</code>.</li><li>The documentation accurately describes the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">query</code> source, including that entries are determined by the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">selector</code> argument and that the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">query</code> field is a nested block attributes definition — this matches the schema&#39;s <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">&quot;type&quot;: &quot;object&quot;</code> for the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">query</code> property and the runtime behaviour in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">matchers.ts</code>.</li><li>GAP: The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">source</code> value <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">rich-text</code> is implemented in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">packages/blocks/src/api/matchers.ts</code> as a full exported function returning <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">RichTextData</code>, but the documentation omits it entirely from the Value source section. Developers using <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">RichText</code> components would benefit from knowing this source type exists and what it returns.</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-900 font-medium"><code>gutenberg:schemas/json/block.json</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-900 font-medium"><code>gutenberg:packages/blocks/src/api/matchers.ts</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/post.php</code> <span class="text-xs">[context] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/editor/src/store/selectors.js</code> <span class="text-xs">[context] ✓</span></li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code>1642980d599be51c7cce7b2dc3a0c052b69ad367</code> &nbsp;·&nbsp; Analyzed: 2026-05-21T15:34:43.507Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>

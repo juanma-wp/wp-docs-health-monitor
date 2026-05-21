@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Disable Editor functionality</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/curating-the-editor-experience.html" class="hover:underline text-blue-600">curating-the-editor-experience</a>
+      &rsaquo; <span>Disable Editor functionality</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">Disable Editor functionality</h1>
+        <a href="https://developer.wordpress.org/block-editor/how-to-guides/curating-the-editor-experience/disable-editor-functionality/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/block-editor/how-to-guides/curating-the-editor-experience/disable-editor-functionality/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">100</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>
+      </div>
+    </div><section class="mb-8"><p class="text-green-700 font-medium">✅ No issues found.</p></section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">unregisterFormatType</code> function is correctly documented as <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">wp.richText.unregisterFormatType</code> — the source confirms it is exported from <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">packages/rich-text/src/unregister-format-type.js</code> and accepts a single <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">name</code> string parameter, matching the doc&#39;s usage exactly.</li><li>The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">block_editor_settings_all</code> filter usage with <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$settings</code> and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$context</code> as the two parameters (registered with <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">accepted_args = 2</code>) is consistent with the filter&#39;s standard signature in WordPress core.</li><li>GAP: <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">unregisterFormatType</code> returns the previous <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">WPFormat</code> object on success or <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">undefined</code> if the format was not registered (and logs a console error). The doc never mentions this return value or the error-logging behaviour, which could help developers debug failed unregistration attempts.</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-500"><code>gutenberg:packages/rich-text/src/unregister-format-type.js</code> <span class="text-xs">[secondary] ✓</span></li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code></code> &nbsp;·&nbsp; Analyzed: 2026-05-21T15:29:07.541Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>

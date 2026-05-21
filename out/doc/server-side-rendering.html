@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Server-side rendering: Processing directives on the server</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/core-concepts.html" class="hover:underline text-blue-600">core-concepts</a>
+      &rsaquo; <span>Server-side rendering: Processing directives on the server</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">Server-side rendering: Processing directives on the server</h1>
+        <a href="https://developer.wordpress.org/block-editor/reference-guides/interactivity-api/core-concepts/server-side-rendering/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/block-editor/reference-guides/interactivity-api/core-concepts/server-side-rendering/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">100</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>
+      </div>
+    </div><section class="mb-8"><p class="text-green-700 font-medium">✅ No issues found.</p></section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The doc correctly documents <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">wp_interactivity_state</code> as accepting an optional <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$store_namespace</code> and optional <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$state</code> array, matching the actual PHP signature <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">function wp_interactivity_state( ?string $store_namespace = null, array $state = array() ): array</code>.</li><li>The doc correctly documents <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">wp_interactivity_config</code> with its <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$store_namespace</code> and optional <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$config</code> parameters, and the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">getConfig()</code> JS client counterpart, both of which exist exactly as described in the source.</li><li>GAP: <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">wp_interactivity_get_element()</code> (added in 6.7.0) is not mentioned anywhere in the documentation. It returns an array representation of the current element being processed (including its attributes) and is useful inside derived state getters or callbacks that need to inspect the current DOM element during server-side directive processing.</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-900 font-medium"><code>wordpress-develop:src/wp-includes/interactivity-api/interactivity-api.php</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/interactivity/src/store.ts</code> <span class="text-xs">[secondary] ✓</span></li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code>3d199988d6e0e011b0a71c4c58b900cd475dc73d</code> &nbsp;·&nbsp; Analyzed: 2026-05-21T15:40:18.305Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>

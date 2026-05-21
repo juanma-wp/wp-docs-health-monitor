@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Editor Hooks</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/filters.html" class="hover:underline text-blue-600">filters</a>
+      &rsaquo; <span>Editor Hooks</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">Editor Hooks</h1>
+        <a href="https://developer.wordpress.org/block-editor/reference-guides/filters/editor-filters/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/block-editor/reference-guides/filters/editor-filters/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">93</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>
+      </div>
+    </div><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Issues (1)</h2>
+        
+    <div class="border-l-4 border-l-yellow-500 bg-yellow-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">major</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">default-value</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 98%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        It defaults to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">&#39;post-thumbnail&#39;</code> and will fail back to the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">full</code> image size when the specified image size doesn&#39;t exist in the media object.
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/gutenberg/blob/trunk/packages/editor/src/components/post-featured-image/index.js" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">gutenberg:packages/editor/src/components/post-featured-image/index.js</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>const defaultSize = applyFilters(
+		&#39;editor.PostFeaturedImage.imageSize&#39;,
+		&#39;large&#39;,
+		media.id,
+		postId
+	);</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Update the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">editor.PostFeaturedImage.imageSize</code> filter documentation to correct both the default size and the fallback chain.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>Change &quot;It defaults to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">&#39;post-thumbnail&#39;</code>&quot; to &quot;It defaults to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">&#39;large&#39;</code>&quot; — the filter is invoked with <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">&#39;large&#39;</code> as the second argument (the default size).</li><li>Change &quot;will fail back to the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">full</code> image size&quot; to &quot;will fall back to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">&#39;thumbnail&#39;</code> (the filter is invoked a second time with <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">&#39;thumbnail&#39;</code> as the default), and if that is also unavailable, will use the full image dimensions via <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">media.source_url</code>&quot;.</li></ul>
+      </div>
+    </div>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">editor.ErrorBoundary.errorLogged</code> action hook is correctly documented — the code in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">packages/editor/src/components/error-boundary/index.js</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">packages/customize-widgets/src/components/error-boundary/index.js</code>, and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">packages/edit-widgets/src/components/error-boundary/index.js</code> all fire <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">doAction(&#39;editor.ErrorBoundary.errorLogged&#39;, error)</code> exactly as described, passing the error object as the sole argument.</li><li>The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">should_load_remote_block_patterns</code> filter is correctly documented as defaulting to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">true</code> and accepting <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">__return_false</code> to disable remote patterns — confirmed by <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">apply_filters(&#39;should_load_remote_block_patterns&#39;, true)</code> in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">src/wp-includes/block-patterns.php</code> at multiple call sites.</li><li>GAP: The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">media.crossOrigin</code> filter accepts a second <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">mediaSrc</code> argument (the URL of the foreign media), which the doc mentions in a comment inside the example snippet but does not formally document as part of the filter&#39;s parameter list. Developers implementing this filter would benefit from a formal <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">@param</code> description noting that the second argument is the media source URL string.</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-900 font-medium"><code>wordpress-develop:src/wp-includes/block-editor.php</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-900 font-medium"><code>wordpress-develop:src/wp-includes/block-patterns.php</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-900 font-medium"><code>gutenberg:packages/editor/src/components/post-featured-image/index.js</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/editor/src/components/post-preview-button/index.js</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/editor/src/components/error-boundary/index.js</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/block-editor/src/components/image-editor/use-transform-image.js</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/class-wp-block-editor-context.php</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/general-template.php</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/block-library/src/cover/edit/color-utils.js</code> <span class="text-xs">[context] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/customize-widgets/src/components/error-boundary/index.js</code> <span class="text-xs">[context] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/edit-widgets/src/components/error-boundary/index.js</code> <span class="text-xs">[context] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-admin/includes/post.php</code> <span class="text-xs">[context] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/script-loader.php</code> <span class="text-xs">[context] ✓</span></li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code>3d199988d6e0e011b0a71c4c58b900cd475dc73d</code> &nbsp;·&nbsp; Analyzed: 2026-05-21T15:38:58.480Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>

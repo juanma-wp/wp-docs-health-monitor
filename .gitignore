@@ -5,7 +5,6 @@ node_modules/
 # Build output
 dist/
 build/
-out/
 *.tsbuildinfo
 
 # Environment / secrets
@@ -59,3 +58,20 @@ CLAUDE.local.md
 .sandcastle/logs/
 .sandcastle/sessions/
 .sandcastle/.cache/
+
+# Build output analyzer
+out/*
+!out/index.html
+!out/folder/
+!out/doc/
+!out/data/
+
+out/data/*
+!out/data/history.json
+!out/data/runs/
+
+out/data/runs/*
+!out/data/runs/20260521-174606/
+
+out/data/runs/20260521-174606/*
+!out/data/runs/20260521-174606/results.json

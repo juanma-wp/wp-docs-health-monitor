@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Theme.json Version 2 Reference</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/theme-json-reference.html" class="hover:underline text-blue-600">theme-json-reference</a>
+      &rsaquo; <span>Theme.json Version 2 Reference</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">Theme.json Version 2 Reference</h1>
+        <a href="https://developer.wordpress.org/block-editor/reference-guides/theme-json-reference/theme-json-v2/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/block-editor/reference-guides/theme-json-reference/theme-json-v2/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">86</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>
+      </div>
+    </div><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Issues (2)</h2>
+        
+    <div class="border-l-4 border-l-yellow-500 bg-yellow-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">major</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">nonexistent-name</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 95%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        | backgroundImage | boolean | false |  |
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/gutenberg/blob/trunk/schemas/json/theme.json" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">gutenberg:schemas/json/theme.json</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>&quot;backgroundSize&quot;: {
+							&quot;description&quot;: &quot;Allow users to set values related to the size of a background image, including size, position, and repeat controls.&quot;,
+							&quot;type&quot;: &quot;boolean&quot;,
+							&quot;default&quot;: false
+						}</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Update the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">settings.background</code> property table to include the two missing sub-properties.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>Add a row for <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">backgroundSize</code> with type <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">boolean</code> and default <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">false</code>, described as allowing users to set values related to the size of a background image (size, position, and repeat controls)</li><li>Add a row for <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">gradient</code> with type <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">boolean</code> and default <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">false</code>, described as allowing users to set a gradient background</li></ul>
+      </div>
+    </div>
+    <div class="border-l-4 border-l-yellow-500 bg-yellow-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">major</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">nonexistent-name</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 95%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        | aspectRatio | boolean | false |  |
+| minHeight | boolean | false |  |
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/gutenberg/blob/trunk/schemas/json/theme.json" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">gutenberg:schemas/json/theme.json</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>&quot;defaultAspectRatios&quot;: {
+							&quot;description&quot;: &quot;Allow users to choose aspect ratios from the default set of aspect ratios.&quot;,
+							&quot;type&quot;: &quot;boolean&quot;,
+							&quot;default&quot;: true
+						}</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Update the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">settings.dimensions</code> property table to include all schema-defined properties that are currently missing.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>Add a row for <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">defaultAspectRatios</code> (type: boolean, default: <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">true</code>) — allows users to choose from the default set of aspect ratios.</li><li>Add a row for <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">aspectRatios</code> (type: array) — allows users to define custom aspect ratio presets.</li><li>Add a row for <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">height</code> (type: boolean, default: <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">false</code>) — allows users to set custom height.</li><li>Add a row for <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">minWidth</code> (type: boolean, default: <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">false</code>) — allows users to set custom minimum width.</li><li>Add a row for <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">width</code> (type: boolean, default: <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">false</code>) — allows users to set custom width.</li><li>Add a row for <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">dimensionSizes</code> (type: array) — dimension size presets that generate <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">--wp--preset--dimension--{slug}</code> custom properties.</li></ul>
+      </div>
+    </div>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">settings.spacing</code> table accurately documents all core properties (<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">blockGap</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">margin</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">padding</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">units</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">customSpacingSize</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">spacingSizes</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">spacingScale</code>) with correct types and defaults matching the schema, including the nuanced <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">blockGap</code> type of <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">boolean, null</code> with default <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">null</code>.</li><li>The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">settings.typography</code> table correctly documents the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">fluid</code> property as <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">object, boolean</code> with default <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">false</code>, matching the schema&#39;s <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">oneOf</code> definition combining an object shape and a boolean type.</li><li>GAP: The schema defines <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">settings.spacing.defaultSpacingSizes</code> (boolean, default true) which is entirely absent from the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">settings.spacing</code> property table. Theme authors who want to hide the default spacing size presets would not know this control exists.</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-900 font-medium"><code>gutenberg:schemas/json/theme.json</code> <span class="text-xs">[primary] ✓</span></li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code>1642980d599be51c7cce7b2dc3a0c052b69ad367</code> &nbsp;·&nbsp; Analyzed: 2026-05-21T15:44:52.922Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>

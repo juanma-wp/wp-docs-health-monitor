@@ -1,0 +1,54 @@
+[
+  {
+    "runId": "20260513-133812",
+    "timestamp": "2026-05-13T12:38:12.518Z",
+    "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+    "overallHealth": 98,
+    "totals": {
+      "docs": 16,
+      "healthy": 16,
+      "needsAttention": 0,
+      "critical": 0,
+      "notMapped": 0,
+      "analysisFailed": 0,
+      "issues": {
+        "total": 5,
+        "critical": 0,
+        "major": 3,
+        "minor": 2
+      }
+    },
+    "estimatedCostUsd": 5.0639
+  },
+  {
+    "runId": "20260513-133812",
+    "timestamp": "2026-05-13T12:38:12.518Z",
+    "overallHealth": 98
+  },
+  {
+    "runId": "20260521-174606",
+    "timestamp": "2026-05-21T15:46:06.570Z",
+    "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+    "overallHealth": 99,
+    "totals": {
+      "docs": 89,
+      "healthy": 88,
+      "needsAttention": 1,
+      "critical": 0,
+      "notMapped": 0,
+      "analysisFailed": 0,
+      "issues": {
+        "total": 18,
+        "critical": 1,
+        "major": 12,
+        "minor": 5
+      }
+    },
+    "estimatedCostUsd": 24.1679
+  },
+  {
+    "runId": "20260521-174606",
+    "timestamp": "2026-05-21T15:46:06.570Z",
+    "overallHealth": 99
+  }
+]

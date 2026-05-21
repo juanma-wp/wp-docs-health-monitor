@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Block Filters</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/filters.html" class="hover:underline text-blue-600">filters</a>
+      &rsaquo; <span>Block Filters</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">Block Filters</h1>
+        <a href="https://developer.wordpress.org/block-editor/reference-guides/filters/block-filters/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/block-editor/reference-guides/filters/block-filters/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-yellow-100 text-yellow-800">82</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">needs-attention</span>
+      </div>
+    </div><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Issues (4)</h2>
+        
+    <div class="border-l-4 border-l-yellow-500 bg-yellow-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">major</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">type-signature</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 90%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        It receives the block settings, the name of the registered block, and either null or the deprecated block settings (when applied to a registered deprecation) as arguments.
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/gutenberg/blob/trunk/packages/blocks/src/store/process-block-type.ts" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">gutenberg:packages/blocks/src/store/process-block-type.ts</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>applyFilters(
+						&#39;blocks.registerBlockType&#39;,
+						// Merge deprecation keys with pre-filter settings
+						// so that filters that depend on specific keys being
+						// present don&#39;t fail.
+						{
+							// Omit deprecation keys here so that deprecations
+							// can opt out of specific keys like &quot;supports&quot;.
+							...omit( blockType, DEPRECATED_ENTRY_KEYS ),
+							...deprecation,
+						},
+						blockType.name,
+						deprecation
+					)</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Update the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">blocks.registerBlockType</code> filter signature description to accurately describe the third argument when applied to a deprecation entry.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>Change &#39;the deprecated block settings&#39; to &#39;the original deprecation entry object&#39; (i.e., the raw deprecation object before merging with the block type settings).</li><li>Clarify that the first argument (block settings) passed to the filter for deprecations is a *merged* object — the block type settings with deprecation keys spread on top — not the raw deprecated block settings alone.</li><li>Suggested revised sentence: &#39;It receives the block settings, the name of the registered block, and either <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">null</code> (for the initial registration call) or the original deprecation entry object (when applied to a registered deprecation) as arguments.&#39;</li></ul>
+      </div>
+    </div>
+    <div class="border-l-4 border-l-yellow-500 bg-yellow-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">major</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">deprecated-api</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 92%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        The following example sets the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">apiVersion</code> of all blocks to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">2</code>.
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/gutenberg/blob/trunk/packages/blocks/src/store/process-block-type.ts" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">gutenberg:packages/blocks/src/store/process-block-type.ts</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>if ( settings.apiVersion &lt;= 2 ) {
+			deprecated( &#39;Block with API version 2 or lower&#39;, {
+				since: &#39;6.9&#39;,
+				hint: `The block &quot;${ name }&quot; is registered with API version ${ settings.apiVersion }. This means that the post editor may work as a non-iframe editor. Since all editors are planned to work as iframes in the future, set the \`apiVersion\` field to 3 and test the block inside the iframe editor.`,</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Update the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">block_type_metadata</code> filter example to use <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">apiVersion: 3</code> instead of <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">2</code>.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>The example sets <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$metadata[&#39;apiVersion&#39;] = 2</code>, but since Gutenberg 6.9, any block registered with <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">apiVersion</code> ≤ 2 triggers a deprecation warning directing developers to upgrade to version 3.</li><li>Change the example value from <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">2</code> to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">3</code> so developers copying the snippet do not immediately trigger a deprecation warning in their projects.</li></ul>
+      </div>
+    </div>
+    <div class="border-l-4 border-l-gray-400 bg-gray-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">minor</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">broken-example</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 72%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        add_filter( &#39;render_block&#39;, &#39;example_add_custom_class_to_paragraph_block&#39;, 10, 2 );
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/wordpress-develop/blob/6.9/src/wp-includes/class-wp-block.php" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">wordpress-develop:src/wp-includes/class-wp-block.php</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>$block_content = apply_filters( &#39;render_block&#39;, $block_content, $this-&gt;parsed_block, $this );</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Update the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">render_block</code> example&#39;s <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">add_filter</code> call to declare 3 accepted arguments instead of 2, since the filter passes 3 arguments.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>Change <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">add_filter( &#39;render_block&#39;, &#39;example_add_custom_class_to_paragraph_block&#39;, 10, 2 )</code> to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">add_filter( &#39;render_block&#39;, &#39;example_add_custom_class_to_paragraph_block&#39;, 10, 3 )</code> so the callback can receive the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$instance</code> (<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">WP_Block</code>) third parameter.</li><li>Note: the example still works with <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">accepted_args = 2</code> if the callback only needs <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$block_content</code> and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$block</code>, but if the doc itself documents the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$instance</code> parameter as available, the example should reflect that by declaring 3 accepted args.</li></ul>
+      </div>
+    </div>
+    <div class="border-l-4 border-l-gray-400 bg-gray-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">minor</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">broken-example</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 92%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        add_filter( &#39;render_block_core/paragraph&#39;, &#39;example_add_custom_class_to_paragraph_block&#39;, 10, 2 );
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/wordpress-develop/blob/6.9/src/wp-includes/class-wp-block.php" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">wordpress-develop:src/wp-includes/class-wp-block.php</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>$block_content = apply_filters( &quot;render_block_{$this-&gt;name}&quot;, $block_content, $this-&gt;parsed_block, $this );</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Update the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">add_filter</code> call in the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">render_block_core/paragraph</code> example to declare 3 accepted arguments instead of 2.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>Change <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">add_filter( &#39;render_block_core/paragraph&#39;, &#39;example_add_custom_class_to_paragraph_block&#39;, 10, 2 )</code> to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">add_filter( &#39;render_block_core/paragraph&#39;, &#39;example_add_custom_class_to_paragraph_block&#39;, 10, 3 )</code> so the callback can receive the third <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$instance</code> (<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">WP_Block</code>) argument that the filter passes and that the doc itself documents as available.</li></ul>
+      </div>
+    </div>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">render_block</code> and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">render_block_{block_name}</code> filter callback parameter lists (3 params: <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$block_content</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$block</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$instance</code>) are correctly documented and match the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">apply_filters</code> calls in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">class-wp-block.php</code>.</li><li>The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">blocks.getBlockAttributes</code> filter callback signature (4 parameters: <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">blockAttributes</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">blockType</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">innerHTML</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">attributes</code>) is correctly documented and matches the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">applyFilters</code> call in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">packages/blocks/src/api/parser/get-block-attributes.ts</code>.</li><li>GAP: The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">blocks.registerBlockType</code> filter is also applied to each deprecation entry with the deprecation object as the third argument (not just <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">null</code>), and the code in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">process-block-type.ts</code> shows the merged object passed — developers writing filters that need to distinguish initial registration from deprecation processing would benefit from a more precise description of what the third argument contains in each case.</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-900 font-medium"><code>wordpress-develop:src/wp-includes/blocks.php</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-900 font-medium"><code>gutenberg:packages/blocks/src/api/serializer.tsx</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-900 font-medium"><code>gutenberg:packages/blocks/src/store/process-block-type.ts</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/block-editor.php</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/class-wp-block-type.php</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/class-wp-block.php</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/blocks/src/api/parser/get-block-attributes.ts</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/editor/src/components/provider/use-post-content-block-types.js</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/blocks/src/api/factory.ts</code> <span class="text-xs">[context] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/block-editor/src/components/block-edit/index.js</code> <span class="text-xs">[context] ✓</span></li><li class="text-gray-500"><code>gutenberg:schemas/json/block.json</code> <span class="text-xs">[context] ✓</span></li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code>3d199988d6e0e011b0a71c4c58b900cd475dc73d</code> &nbsp;·&nbsp; Analyzed: 2026-05-21T15:40:11.554Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Internationalization</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/how-to-guides.html" class="hover:underline text-blue-600">how-to-guides</a>
+      &rsaquo; <span>Internationalization</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">Internationalization</h1>
+        <a href="https://developer.wordpress.org/block-editor/how-to-guides/internationalization/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/block-editor/how-to-guides/internationalization/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">93</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>
+      </div>
+    </div><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Issues (1)</h2>
+        
+    <div class="border-l-4 border-l-yellow-500 bg-yellow-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">major</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">broken-example</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 90%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        WordPress will check for a file in that path with the format <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">${domain}-${locale}-${handle}.json</code> as the source of translations. Alternatively, instead of the registered handle you can use the md5 hash of the relative path of the file, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">${domain}-${locale} in the form of ${domain}-${locale}-${md5}.json.</code>
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/wordpress-develop/blob/6.9/src/wp-includes/l10n.php" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">wordpress-develop:src/wp-includes/l10n.php</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>$file_base       = &#39;default&#39; === $domain ? $locale : $domain . &#39;-&#39; . $locale;
+	$handle_filename = $file_base . &#39;-&#39; . $handle . &#39;.json&#39;;</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Update the file-naming description to accurately reflect both lookup patterns used by <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">load_script_textdomain()</code>.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>For the handle-based filename: when <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$domain</code> is <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">&#39;default&#39;</code>, the format is <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">${locale}-${handle}.json</code>; otherwise it is <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">${domain}-${locale}-${handle}.json</code>.</li><li>For the md5-based filename (line 1264): when <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$domain</code> is <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">&#39;default&#39;</code>, the format is <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">${locale}-${md5}.json</code>; otherwise it is <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">${domain}-${locale}-${md5}.json</code>.</li><li>Remove the malformed sentence fragment ending in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">${domain}-${locale} in the form of ${domain}-${locale}-${md5}.json.</code> — the opening clause is syntactically broken and the format it describes is only correct when domain is not <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">&#39;default&#39;</code>.</li></ul>
+      </div>
+    </div>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The documentation correctly describes the three main JS i18n functions (<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">__</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">_n</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">_x</code>) and their signatures match the exported API in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">packages/i18n/src/default-i18n.ts</code> — including argument order (text, domain) for <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">__</code>, (single, plural, number, domain) for <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">_n</code>, and (text, context, domain) for <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">_x</code>.</li><li>The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">wp_set_script_translations()</code> call with the optional third <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$path</code> argument is accurately documented and matches the function signature <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">wp_set_script_translations( $handle, $domain = &#39;default&#39;, $path = &#39;&#39; )</code> in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">src/wp-includes/functions.wp-scripts.php</code>.</li><li>GAP: The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">_nx()</code> function (plural form with gettext context) is exported from <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">@wordpress/i18n</code> (<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">packages/i18n/src/default-i18n.ts</code>) but is not listed in the doc&#39;s &#39;Common functions available&#39; bullet list, even though its PHP counterpart <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">_nx()</code> exists. Developers who need context-aware plural translations in JavaScript would not know this function is available.</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-900 font-medium"><code>gutenberg:packages/i18n/src/default-i18n.ts</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-900 font-medium"><code>wordpress-develop:src/wp-includes/l10n.php</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/functions.wp-scripts.php</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-admin/includes/noop.php</code> <span class="text-xs">[context] ✓</span></li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Diagnostics</h2>
+        <ul class="space-y-1 text-sm text-yellow-800 bg-yellow-50 p-3 rounded">
+          <li>⚠️ Could not read gutenberg: for verbatim check — dropping issue</li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code>1642980d599be51c7cce7b2dc3a0c052b69ad367</code> &nbsp;·&nbsp; Analyzed: 2026-05-21T15:30:23.478Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>
