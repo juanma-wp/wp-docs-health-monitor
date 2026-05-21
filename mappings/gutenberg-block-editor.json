@@ -352,16 +352,6 @@
       }
     ]
   },
-  "get-started-with-wp-scripts": {
-    "primary": [],
-    "secondary": [],
-    "context": [
-      {
-        "repo": "wordpress-develop",
-        "path": "src/wp-includes/blocks.php"
-      }
-    ]
-  },
   "tutorial": {
     "primary": [
       {
@@ -1763,121 +1753,7 @@
     ],
     "context": []
   },
-  "entities": {
-    "primary": [
-      {
-        "repo": "gutenberg",
-        "path": "packages/core-data/src/actions.js"
-      }
-    ],
-    "secondary": [
-      {
-        "repo": "gutenberg",
-        "path": "packages/editor/src/store/actions.js"
-      }
-    ],
-    "context": []
-  },
-  "styles": {
-    "primary": [
-      {
-        "repo": "gutenberg",
-        "path": "schemas/json/theme.json"
-      },
-      {
-        "repo": "gutenberg",
-        "path": "schemas/json/block.json"
-      }
-    ],
-    "secondary": [],
-    "context": [
-      {
-        "repo": "gutenberg",
-        "path": "schemas/json/font-collection.json"
-      }
-    ]
-  },
-  "animation": {
-    "primary": [
-      {
-        "repo": "gutenberg",
-        "path": "packages/components/src/animate/index.tsx"
-      }
-    ],
-    "secondary": [],
-    "context": []
-  },
-  "handbook": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "getting-started": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "devenv": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "nodejs-development-environment": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "get-started-with-wp-env": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "get-started-with-create-block": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "quick-start-guide": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "glossary": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "faq": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "accessibility": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "block-tutorial": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "platform": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "data-basics": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
   "1-data-basics-setup": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "curating-the-editor-experience": {
     "primary": [],
     "secondary": [],
     "context": []
@@ -1902,42 +1778,7 @@
     "secondary": [],
     "context": []
   },
-  "themes": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "widgets": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "reference-guides": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "block-api": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
   "block-annotations": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "core-blocks": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "filters": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "core-concepts": {
     "primary": [],
     "secondary": [],
     "context": []
@@ -1955,11 +1796,6 @@
         "path": "packages/interactivity/src/scopes.ts"
       }
     ],
-    "context": []
-  },
-  "iapi-quick-start-guide": {
-    "primary": [],
-    "secondary": [],
     "context": []
   },
   "iapi-about": {
@@ -2147,72 +1983,7 @@
       }
     ]
   },
-  "theme-json-reference": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
   "theme-json-v1": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "explanations": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "architecture": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "key-concepts": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "data-flow": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "modularity": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "performance": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "automated-testing": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "full-site-editing-templates": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "user-interface": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "block-design": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "design-resources": {
-    "primary": [],
-    "secondary": [],
-    "context": []
-  },
-  "history": {
     "primary": [],
     "secondary": [],
     "context": []

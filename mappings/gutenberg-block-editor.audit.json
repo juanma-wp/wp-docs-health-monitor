@@ -258,41 +258,6 @@
         }
       ]
     },
-    "accessibility": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
-    },
-    "animation": {
-      "primary": [
-        {
-          "repo": "gutenberg",
-          "path": "packages/components/src/animate/index.tsx",
-          "rationale": "Canonical implementation of the `Animate` component explicitly referenced in the doc's 'Inventory of Reused Animations' section.",
-          "confidence": 0.95
-        }
-      ],
-      "secondary": [],
-      "context": [],
-      "dropped": [
-        {
-          "repo": "gutenberg",
-          "path": "schemas/json/block.json",
-          "rationale": "Single-token match on `transform` — refers to block transforms (block conversion API), not CSS animation transforms."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/blocks/src/api/factory.ts",
-          "rationale": "Single-token match on `transform` — block transforms factory, unrelated to animation/CSS transforms."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/components/src/composite/legacy/stories/utils.tsx",
-          "rationale": "Stories/utils file with single-token `transform` match; very low score and unrelated to animation principles."
-        }
-      ]
-    },
     "applying-styles-with-stylesheets": {
       "primary": [
         {
@@ -377,12 +342,6 @@
         }
       ]
     },
-    "architecture": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
-    },
     "autocomplete-filters": {
       "primary": [
         {
@@ -414,12 +373,6 @@
           "rationale": "Single-token match on `Autocomplete` in a deprecated re-exports module — not authoritative on the filter."
         }
       ]
-    },
-    "automated-testing": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
     },
     "block-annotations": {
       "primary": [],
@@ -482,12 +435,6 @@
           "rationale": "Stories directory with single-token `content` match; analyzer noise."
         }
       ]
-    },
-    "block-api": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
     },
     "block-api-versions": {
       "primary": [
@@ -1306,12 +1253,6 @@
           "rationale": "Generic `save` token match — block save implementation, not deprecation docs."
         }
       ]
-    },
-    "block-design": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
     },
     "block-edit-save": {
       "primary": [
@@ -2768,12 +2709,6 @@
         }
       ]
     },
-    "block-tutorial": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
-    },
     "block-variations": {
       "primary": [
         {
@@ -3277,18 +3212,6 @@
         }
       ]
     },
-    "core-blocks": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
-    },
-    "core-concepts": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
-    },
     "creating-dynamic-blocks": {
       "primary": [
         {
@@ -3447,12 +3370,6 @@
           "rationale": "Generic `save` token collision — unrelated static block save."
         }
       ]
-    },
-    "curating-the-editor-experience": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
     },
     "custom-block-editor": {
       "primary": [
@@ -3625,41 +3542,6 @@
           "rationale": "Single generic `settings` token match in unrelated accordion block."
         }
       ]
-    },
-    "data-basics": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
-    },
-    "data-flow": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": [
-        {
-          "repo": "gutenberg",
-          "path": "schemas/json/theme.json",
-          "rationale": "Single-token collision — `cite` matched only because the doc mentions a quote block's `cite` attribute as an example; theme.json schema is unrelated to block data flow/serialization."
-        },
-        {
-          "repo": "wordpress-develop",
-          "path": "src/wp-includes/class-wp-post.php",
-          "rationale": "Single-token English/identifier match — `WP_Post` appears in the doc only as a passing reference; the WP_Post class is not the implementation of block parsing/serialization."
-        }
-      ]
-    },
-    "design-resources": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
-    },
-    "devenv": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
     },
     "directives-and-store": {
       "primary": [
@@ -4021,32 +3903,6 @@
         }
       ]
     },
-    "entities": {
-      "primary": [
-        {
-          "repo": "gutenberg",
-          "path": "packages/core-data/src/actions.js",
-          "rationale": "Canonical core-data actions file matched on `editEntityRecord`, `undo`, `redo`, and `__unstableCreateUndoLevel` — the exact APIs the doc describes.",
-          "confidence": 0.97
-        }
-      ],
-      "secondary": [
-        {
-          "repo": "gutenberg",
-          "path": "packages/editor/src/store/actions.js",
-          "rationale": "Editor store actions matched on `undo`/`redo`, likely the editor-level wrappers that delegate to core-data — corroborates undo/redo orchestration.",
-          "confidence": 0.7
-        }
-      ],
-      "context": [],
-      "dropped": []
-    },
-    "explanations": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
-    },
     "extending-the-query-loop-block": {
       "primary": [],
       "secondary": [
@@ -4142,23 +3998,6 @@
           "repo": "gutenberg",
           "path": "packages/components/src/menu/stories/index.story.tsx",
           "rationale": "Stories directory match on generic `name` token — noise."
-        }
-      ]
-    },
-    "faq": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": [
-        {
-          "repo": "gutenberg",
-          "path": "schemas/json/block.json",
-          "rationale": "Generic JSON-schema property collision — `embed`/`className` are mentioned anecdotally in the FAQ but block.json is not the subject of an FAQ page."
-        },
-        {
-          "repo": "wordpress-develop",
-          "path": "src/wp-includes/theme.php",
-          "rationale": "Single-token match on `add_theme_support` from one FAQ code snippet — theme.php is not the subject of the FAQ doc."
         }
       ]
     },
@@ -4346,12 +4185,6 @@
         }
       ]
     },
-    "filters": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
-    },
     "filters-and-hooks": {
       "primary": [
         {
@@ -4466,23 +4299,6 @@
         }
       ]
     },
-    "full-site-editing-templates": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": [
-        {
-          "repo": "gutenberg",
-          "path": "schemas/json/block.json",
-          "rationale": "Single-token match on `theme` — block.json schema is unrelated to site editing template CPT synchronization."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/components/src/theme/stories/index.story.tsx",
-          "rationale": "Storybook file for the Theme UI component — single-token English match on `theme`, unrelated to wp_template CPT."
-        }
-      ]
-    },
     "fundamentals": {
       "primary": [],
       "secondary": [
@@ -4493,59 +4309,6 @@
           "confidence": 0.75
         }
       ],
-      "context": [],
-      "dropped": []
-    },
-    "get-started-with-create-block": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": [
-        {
-          "repo": "gutenberg",
-          "path": "schemas/json/font-collection.json",
-          "rationale": "Generic JSON-schema property collision — `slug` is a common schema field, unrelated to the create-block package."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "schemas/json/theme.json",
-          "rationale": "Generic JSON-schema property collision — `slug` in theme.json schema has nothing to do with the create-block scaffolding tool."
-        }
-      ]
-    },
-    "get-started-with-wp-env": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
-    },
-    "get-started-with-wp-scripts": {
-      "primary": [],
-      "secondary": [],
-      "context": [
-        {
-          "repo": "wordpress-develop",
-          "path": "src/wp-includes/blocks.php",
-          "rationale": "Matched on `register_block_type`, referenced in the doc's enqueue example as the function that auto-enqueues block.json assets.",
-          "confidence": 0.55
-        }
-      ],
-      "dropped": [
-        {
-          "repo": "gutenberg",
-          "path": "schemas/json/font-collection.json",
-          "rationale": "Single-token match on `src` (generic JSON schema property), unrelated to the @wordpress/scripts package."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "schemas/json/theme.json",
-          "rationale": "Single-token match on `src` (generic JSON schema property), unrelated to the @wordpress/scripts package."
-        }
-      ]
-    },
-    "getting-started": {
-      "primary": [],
-      "secondary": [],
       "context": [],
       "dropped": []
     },
@@ -4787,24 +4550,6 @@
         }
       ]
     },
-    "glossary": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
-    },
-    "handbook": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
-    },
-    "history": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
-    },
     "how-to-guides": {
       "primary": [],
       "secondary": [],
@@ -5045,18 +4790,6 @@
         }
       ]
     },
-    "iapi-quick-start-guide": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": [
-        {
-          "repo": "gutenberg",
-          "path": "schemas/json/wp-env.json",
-          "rationale": "Single-token English match on `plugins` — wp-env schema is unrelated to the Interactivity API quick start guide."
-        }
-      ]
-    },
     "interactivity-api": {
       "primary": [],
       "secondary": [
@@ -5179,23 +4912,6 @@
           "repo": "wordpress-develop",
           "path": "src/wp-includes/class-wp-customize-widgets.php",
           "rationale": "Matched `enqueue_block_editor_assets` inside customizer-widgets class; tangential customizer integration, not authoritative for this doc."
-        }
-      ]
-    },
-    "key-concepts": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": [
-        {
-          "repo": "gutenberg",
-          "path": "packages/editor/src/components/deprecated.js",
-          "rationale": "Single-token identifier collision — `deprecated.js` is a re-export shim, only matches generic `InnerBlocks` re-export; doc is a high-level concepts overview, not about deprecations."
-        },
-        {
-          "repo": "wordpress-develop",
-          "path": "src/wp-includes/theme.php",
-          "rationale": "Single-token English match — `add_theme_support` is mentioned in passing in the Styles section; theme.php is core theme API, not the subject of this conceptual overview."
         }
       ]
     },
@@ -5500,53 +5216,6 @@
         }
       ]
     },
-    "modularity": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": [
-        {
-          "repo": "wordpress-develop",
-          "path": "src/wp-includes/functions.php",
-          "rationale": "Generic match on the token `wp` — unrelated to the modularity/packages architecture doc."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/components/src/button/index.native.js",
-          "rationale": "Matched only on `Button` from the doc's code sample; the Button component is an illustrative example, not the doc's subject."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/components/src/button/index.tsx",
-          "rationale": "Matched only on `Button` from the doc's code sample; not authoritative on modularity architecture."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/ui/src/button/button.tsx",
-          "rationale": "Matched only on `Button` from the doc's code sample; tangential to the modularity narrative."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/ui/src/button/index.ts",
-          "rationale": "Matched only on `Button` from the doc's code sample; tangential to the modularity narrative."
-        },
-        {
-          "repo": "wordpress-develop",
-          "path": "src/wp-includes/class-wp.php",
-          "rationale": "Single-token match on `wp` — the WP core request class is unrelated to npm package architecture."
-        },
-        {
-          "repo": "wordpress-develop",
-          "path": "tests/phpunit/tests/customize/selective-refresh-ajax.php",
-          "rationale": "Single-token match on `wp`; customize test file unrelated to doc subject."
-        },
-        {
-          "repo": "wordpress-develop",
-          "path": "tests/phpunit/tests/customize/widgets.php",
-          "rationale": "Single-token match on `wp`; customize widgets test unrelated to doc subject."
-        }
-      ]
-    },
     "nested-blocks-inner-blocks": {
       "primary": [
         {
@@ -5607,12 +5276,6 @@
           "rationale": "Single English-word match on `insert` — rich-text insert utility, unrelated to InnerBlocks."
         }
       ]
-    },
-    "nodejs-development-environment": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
     },
     "notices": {
       "primary": [
@@ -5738,39 +5401,6 @@
         }
       ],
       "dropped": []
-    },
-    "performance": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
-    },
-    "platform": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": [
-        {
-          "repo": "gutenberg",
-          "path": "packages/components/src/button/index.native.js",
-          "rationale": "Single-token match on `Button` — the doc only uses Button as a one-line usage example for the @wordpress/components package, not as its subject."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/components/src/button/index.tsx",
-          "rationale": "Single-token match on `Button` — doc subject is the platform/packages overview, not the Button component implementation."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/ui/src/button/button.tsx",
-          "rationale": "Single-token match on `Button` — incidental example identifier in the doc, not the platform topic."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/ui/src/button/index.ts",
-          "rationale": "Single-token match on `Button` — incidental example identifier, unrelated to the platform overview doc."
-        }
-      ]
     },
     "plugin-block-settings-menu-item": {
       "primary": [
@@ -6465,29 +6095,6 @@
         }
       ]
     },
-    "quick-start-guide": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": [
-        {
-          "repo": "gutenberg",
-          "path": "schemas/json/font-collection.json",
-          "rationale": "Single weak-token match on `slug` — generic JSON-schema property, unrelated to the create-block quick-start guide."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "schemas/json/theme.json",
-          "rationale": "Single weak-token match on `slug` — generic theme.json schema property, unrelated to scaffolding a block plugin."
-        }
-      ]
-    },
-    "reference-guides": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
-    },
     "registration-of-a-block": {
       "primary": [
         {
@@ -6899,168 +6506,6 @@
           "repo": "gutenberg",
           "path": "packages/block-library/src/home-link/save.js",
           "rationale": "Generic `save` token match; block not referenced in the doc."
-        }
-      ]
-    },
-    "styles": {
-      "primary": [
-        {
-          "repo": "gutenberg",
-          "path": "schemas/json/theme.json",
-          "rationale": "theme.json schema is the canonical structure for Global Styles described throughout the doc (styles, settings, presets).",
-          "confidence": 0.9
-        },
-        {
-          "repo": "gutenberg",
-          "path": "schemas/json/block.json",
-          "rationale": "block.json schema defines `supports` (typography, layout, etc.) that the doc's Block Supports section centers on.",
-          "confidence": 0.85
-        }
-      ],
-      "secondary": [],
-      "context": [
-        {
-          "repo": "gutenberg",
-          "path": "schemas/json/font-collection.json",
-          "rationale": "Font collection schema is tangentially related to typography presets discussed in the global-styles section.",
-          "confidence": 0.5
-        }
-      ],
-      "dropped": [
-        {
-          "repo": "gutenberg",
-          "path": "packages/components/src/number-control/styles/number-control-styles.ts",
-          "rationale": "single-token match on `styles` — this is a component styled-system file, unrelated to editor styles concept."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/components/src/text/styles/font-family.native.js",
-          "rationale": "single-token match on `fontFamily` — native component styling, not theme.json/global styles."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/components/src/flex/styles.ts",
-          "rationale": "single-token match on `block` — component CSS-in-JS file, not block/global styles."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/components/src/text/styles.ts",
-          "rationale": "single-token match on `block` — component styles, unrelated to editor styles."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/components/src/toggle-group-control/toggle-group-control/styles.ts",
-          "rationale": "single-token match on `block` — component styling, not editor styles."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/block-library/src/accordion-heading/save.js",
-          "rationale": "single-token match on `save` — generic block save function, not styles."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/block-library/src/accordion-item/save.js",
-          "rationale": "single-token match on `save` — generic block save function."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/block-library/src/accordion-panel/save.js",
-          "rationale": "single-token match on `save` — generic block save function."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/block-library/src/accordion/save.js",
-          "rationale": "single-token match on `save` — generic block save function."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/block-library/src/audio/save.js",
-          "rationale": "single-token match on `save` — generic block save function."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/block-library/src/button/save.js",
-          "rationale": "single-token match on `save` — generic block save function."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/block-library/src/buttons/save.js",
-          "rationale": "single-token match on `save` — generic block save function."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/block-library/src/code/save.js",
-          "rationale": "single-token match on `save` — generic block save function."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/block-library/src/column/save.js",
-          "rationale": "single-token match on `save` — generic block save function."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/block-library/src/columns/save.js",
-          "rationale": "single-token match on `save` — generic block save function."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/block-library/src/comments-pagination/save.js",
-          "rationale": "single-token match on `save` — generic block save function."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/block-library/src/comments/save.js",
-          "rationale": "single-token match on `save` — generic block save function."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/block-library/src/cover/save.js",
-          "rationale": "single-token match on `save` — generic block save function."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/block-library/src/details/save.js",
-          "rationale": "single-token match on `save` — generic block save function."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/block-library/src/embed/save.js",
-          "rationale": "single-token match on `save` — generic block save function."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/block-library/src/file/save.js",
-          "rationale": "single-token match on `save` — generic block save function."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/block-library/src/form-input/save.js",
-          "rationale": "single-token match on `save` — generic block save function."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/block-library/src/form-submission-notification/save.js",
-          "rationale": "single-token match on `save` — generic block save function."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/block-library/src/form-submit-button/save.js",
-          "rationale": "single-token match on `save` — generic block save function."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/block-library/src/form/save.js",
-          "rationale": "single-token match on `save` — generic block save function."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/block-library/src/freeform/save.js",
-          "rationale": "single-token match on `save` — generic block save function."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/block-library/src/group/save.js",
-          "rationale": "single-token match on `save` — generic block save function."
         }
       ]
     },
@@ -7573,12 +7018,6 @@
         }
       ]
     },
-    "theme-json-reference": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
-    },
     "theme-json-v1": {
       "primary": [],
       "secondary": [],
@@ -7649,23 +7088,6 @@
           "repo": "gutenberg",
           "path": "packages/components/src/menu/stories/index.story.tsx",
           "rationale": "Storybook fixture matched only on generic `name` property — noise."
-        }
-      ]
-    },
-    "themes": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": [
-        {
-          "repo": "gutenberg",
-          "path": "packages/blocks/src/types.ts",
-          "rationale": "Single-token match on the generic word `Block`; this doc is about WordPress themes (classic vs block themes), not block type definitions."
-        },
-        {
-          "repo": "gutenberg",
-          "path": "packages/core-data/src/utils/crdt-blocks.ts",
-          "rationale": "Single-token match on `Block`; CRDT block utility is unrelated to theme.json, theme supports, or block themes."
         }
       ]
     },
@@ -8063,12 +7485,6 @@
         }
       ]
     },
-    "user-interface": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
-    },
     "using-typescript": {
       "primary": [
         {
@@ -8230,12 +7646,6 @@
           "rationale": "Single-token `store` match — unrelated @wordpress/data store."
         }
       ]
-    },
-    "widgets": {
-      "primary": [],
-      "secondary": [],
-      "context": [],
-      "dropped": []
     }
   }
 }

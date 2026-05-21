@@ -8,7 +8,28 @@
     "parentSlug": "*",
     "sourceUrlBase": "https://developer.wordpress.org/block-editor/",
     "ignore": {
-      "subtrees": ["packages", "components", "contributors", "data"]
+      "subtrees": ["packages", "components", "contributors", "data", "explanations", "devenv"],
+      "slugs": [
+        "handbook",
+        "getting-started",
+        "reference-guides",
+        "block-api",
+        "core-blocks",
+        "filters",
+        "theme-json-reference",
+        "block-tutorial",
+        "platform",
+        "data-basics",
+        "curating-the-editor-experience",
+        "themes",
+        "widgets",
+        "accessibility",
+        "quick-start-guide",
+        "glossary",
+        "faq",
+        "core-concepts",
+        "iapi-quick-start-guide"
+      ]
     }
   },
   "codeSources": {
