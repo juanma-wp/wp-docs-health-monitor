@@ -28,7 +28,9 @@
         "glossary",
         "faq",
         "core-concepts",
-        "iapi-quick-start-guide"
+        "iapi-quick-start-guide",
+        "theme-json-v1",
+        "theme-json-v2"   
       ]
     }
   },
