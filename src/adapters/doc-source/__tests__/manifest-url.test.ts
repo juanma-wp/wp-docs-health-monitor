@@ -335,6 +335,40 @@ describe('ManifestUrlDocSource — sourceUrl', () => {
       expect(results[0].doc.sourceUrl).toContain('/blob/');
     }
   });
+
+  it('uses entry.original_url as sourceUrl when present, ignoring sourceUrlBase derivation', async () => {
+    const rawUrl   = 'https://raw.githubusercontent.com/owner/repo/main/handbook/001-index.md';
+    const publishedUrl = 'https://developer.wordpress.org/themes/getting-started/';
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+      const urlStr = String(url);
+      if (urlStr === MANIFEST_URL) {
+        return new Response(JSON.stringify([{
+          slug: 'getting-started',
+          title: 'Getting Started',
+          markdown_source: rawUrl,
+          parent: 'handbook',
+          original_url: publishedUrl,
+        }]), { status: 200 });
+      }
+      if (urlStr === rawUrl) {
+        return new Response('# Getting Started\nContent.', { status: 200 });
+      }
+      return new Response(JSON.stringify([]), { status: 200 });
+    }));
+
+    const source = new ManifestUrlDocSource({
+      manifestUrl: MANIFEST_URL,
+      parentSlug: 'handbook',
+      // sourceUrlBase is intentionally set to confirm original_url takes precedence.
+      sourceUrlBase: 'https://example.invalid/should-not-be-used/',
+    });
+    const results = await source.fetchDocs();
+    expect(results).toHaveLength(1);
+    expect(results[0].ok).toBe(true);
+    if (results[0].ok) {
+      expect(results[0].doc.sourceUrl).toBe(publishedUrl);
+    }
+  });
 });
 
 // ---------------------------------------------------------------------------

@@ -1,0 +1,34 @@
+{
+  "project": {
+    "name": "WordPress Theme Handbook"
+  },
+  "docSource": {
+    "type": "manifest-url",
+    "manifestUrl": "https://raw.githubusercontent.com/juanma-wp/wp-handbooks-md/main/wp_dev_handbook_themes/manifest.json",
+    "parentSlug": "*",
+    "sourceUrlBase": "https://developer.wordpress.org/themes/",
+    "ignore": {
+      "subtrees": ["classic-themes", "credits", "releasing-your-theme"],
+      "slugs": ["classic-themes", "credits", "releasing-your-theme"]
+    }
+  },
+  "codeSources": {
+    "gutenberg": {
+      "type": "git-clone",
+      "repoUrl": "https://github.com/WordPress/gutenberg.git",
+      "ref": "trunk"
+    },
+    "wordpress-develop": {
+      "type": "git-clone",
+      "repoUrl": "https://github.com/WordPress/wordpress-develop.git",
+      "ref": "7.0"
+    }
+  },
+  "mappingPath": "mappings/wp-theme-handbook.json",
+  "outputDir": "./out-theme-handbook",
+  "validator": {
+    "type": "claude",
+    "pass1Model": "claude-sonnet-4-6",
+    "pass2Model": "claude-sonnet-4-6"
+  }
+}

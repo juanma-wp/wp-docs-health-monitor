@@ -1,0 +1,868 @@
+{
+  "global-settings-and-styles-settings-color": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/block.json"
+      }
+    ],
+    "context": []
+  },
+  "global-settings-and-styles-settings-typography": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/font-collection.json"
+      }
+    ],
+    "context": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/block.json"
+      }
+    ]
+  },
+  "global-settings-and-styles-settings-spacing": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/block.json"
+      }
+    ],
+    "context": []
+  },
+  "global-settings-and-styles-settings-dimensions": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/block.json"
+      }
+    ],
+    "context": []
+  },
+  "global-settings-and-styles-settings-border": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/block.json"
+      }
+    ],
+    "context": []
+  },
+  "patterns-registering-patterns": {
+    "primary": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/block-patterns.php"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/class-wp-block-type-registry.php"
+      }
+    ],
+    "context": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/blocks/src/store/reducer.ts"
+      }
+    ]
+  },
+  "patterns-using-php-in-patterns": {
+    "primary": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/l10n.php"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/formatting.php"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/link-template.php"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/query.php"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/post-template.php"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/post.php"
+      }
+    ],
+    "context": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-settings.php"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/rest-api/endpoints/class-wp-rest-templates-controller.php"
+      }
+    ]
+  },
+  "core-concepts-templates": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "advanced-topics-plugin-api-hooks": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "features-block-style-variations": {
+    "primary": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/blocks.php"
+      },
+      {
+        "repo": "gutenberg",
+        "path": "packages/blocks/src/api/registration.ts"
+      },
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/block.json"
+      }
+    ],
+    "context": [
+      {
+        "repo": "gutenberg",
+        "path": "lib/experimental/class-wp-rest-block-editor-settings-controller.php"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-admin/edit-form-blocks.php"
+      }
+    ]
+  },
+  "index": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "getting-started": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "getting-started-what-is-a-theme": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "getting-started-who-is-this-handbook-for": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "getting-started-reading-this-handbook": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "getting-started-tools-and-setup": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "getting-started-quick-start-guide": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "core-concepts": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "core-concepts-theme-structure": {
+    "primary": [],
+    "secondary": [],
+    "context": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ]
+  },
+  "core-concepts-main-stylesheet": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "core-concepts-custom-functionality": {
+    "primary": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/link-template.php"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/theme.php"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-settings.php"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "tests/phpunit/tests/theme.php"
+      }
+    ],
+    "context": [
+      {
+        "repo": "wordpress-develop",
+        "path": "tests/phpunit/tests/admin/themeBodyClass.php"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "tests/phpunit/tests/post/getBodyClass.php"
+      }
+    ]
+  },
+  "core-concepts-including-assets": {
+    "primary": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/functions.wp-styles.php"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/functions.wp-scripts.php"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/link-template.php"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/theme.php"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/script-loader.php"
+      }
+    ],
+    "context": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-admin/edit-form-blocks.php"
+      },
+      {
+        "repo": "gutenberg",
+        "path": "lib/experimental/class-wp-rest-block-editor-settings-controller.php"
+      }
+    ]
+  },
+  "core-concepts-global-settings-and-styles": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/block.json"
+      }
+    ],
+    "context": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/font-collection.json"
+      },
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/wp-env.json"
+      }
+    ]
+  },
+  "global-settings-and-styles": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "global-settings-and-styles-introduction-to-theme-json": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/block.json"
+      }
+    ],
+    "context": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/font-collection.json"
+      }
+    ]
+  },
+  "global-settings-and-styles-settings": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/block.json"
+      }
+    ],
+    "context": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/block-editor/src/store/reducer.js"
+      }
+    ]
+  },
+  "global-settings-and-styles-settings-appearance-tools": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "secondary": [],
+    "context": []
+  },
+  "global-settings-and-styles-settings-blocks": {
+    "primary": [],
+    "secondary": [],
+    "context": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ]
+  },
+  "global-settings-and-styles-settings-custom": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "secondary": [],
+    "context": []
+  },
+  "global-settings-and-styles-settings-layout": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/block.json"
+      }
+    ],
+    "context": []
+  },
+  "global-settings-and-styles-settings-lightbox": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "secondary": [],
+    "context": []
+  },
+  "global-settings-and-styles-settings-position": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/block.json"
+      }
+    ],
+    "context": []
+  },
+  "global-settings-and-styles-settings-shadow": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "secondary": [],
+    "context": []
+  },
+  "global-settings-and-styles-settings-use-root-padding-aware-alignments": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "global-settings-and-styles-settings-settings-reference": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/block.json"
+      }
+    ],
+    "context": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/font-collection.json"
+      }
+    ]
+  },
+  "global-settings-and-styles-styles": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/block.json"
+      }
+    ],
+    "context": []
+  },
+  "global-settings-and-styles-styles-applying-styles": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/block.json"
+      }
+    ],
+    "context": []
+  },
+  "global-settings-and-styles-styles-using-presets": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "secondary": [],
+    "context": []
+  },
+  "global-settings-and-styles-styles-styles-reference": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "secondary": [],
+    "context": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/block.json"
+      }
+    ]
+  },
+  "global-settings-and-styles-custom-templates": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "secondary": [],
+    "context": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/block.json"
+      }
+    ]
+  },
+  "global-settings-and-styles-patterns": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "secondary": [],
+    "context": []
+  },
+  "global-settings-and-styles-template-parts": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "secondary": [],
+    "context": []
+  },
+  "global-settings-and-styles-style-variations": {
+    "primary": [],
+    "secondary": [],
+    "context": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ]
+  },
+  "templates": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "templates-introduction-to-templates": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "templates-templates": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "templates-template-hierarchy": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "templates-template-parts": {
+    "primary": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/block-template-utils.php"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ],
+    "context": []
+  },
+  "patterns": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "patterns-introduction-to-patterns": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "patterns-usage-in-templates": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "patterns-starter-patterns": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "patterns-block-type-patterns": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "patterns-patterns-and-block-locking": {
+    "primary": [],
+    "secondary": [],
+    "context": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/block.json"
+      }
+    ]
+  },
+  "features": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "features-block-stylesheets": {
+    "primary": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/script-loader.php"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/functions.wp-styles.php"
+      }
+    ],
+    "context": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      }
+    ]
+  },
+  "features-block-variations": {
+    "primary": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/blocks/src/api/registration.ts"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/block.json"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/functions.wp-scripts.php"
+      },
+      {
+        "repo": "gutenberg",
+        "path": "packages/dom-ready/src/index.ts"
+      }
+    ],
+    "context": [
+      {
+        "repo": "gutenberg",
+        "path": "schemas/json/theme.json"
+      },
+      {
+        "repo": "gutenberg",
+        "path": "lib/experimental/class-wp-rest-block-editor-settings-controller.php"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-admin/edit-form-blocks.php"
+      }
+    ]
+  },
+  "features-block-patterns": {
+    "primary": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/block-patterns.php"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "gutenberg",
+        "path": "packages/blocks/src/store/reducer.ts"
+      }
+    ],
+    "context": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/link-template.php"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/l10n.php"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/formatting.php"
+      }
+    ]
+  },
+  "advanced-topics": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "advanced-topics-internationalization": {
+    "primary": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/l10n.php"
+      }
+    ],
+    "secondary": [],
+    "context": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-settings.php"
+      }
+    ]
+  },
+  "advanced-topics-child-themes": {
+    "primary": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/l10n.php"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/link-template.php"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/functions.wp-styles.php"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/theme.php"
+      }
+    ],
+    "context": []
+  },
+  "advanced-topics-build-process": {
+    "primary": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/functions.wp-scripts.php"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/functions.wp-styles.php"
+      }
+    ],
+    "secondary": [],
+    "context": []
+  },
+  "advanced-topics-privacy": {
+    "primary": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/link-template.php"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/comment-template.php"
+      }
+    ],
+    "secondary": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/post-template.php"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/blocks/post-content.php"
+      },
+      {
+        "repo": "gutenberg",
+        "path": "packages/block-library/src/post-content/index.php"
+      }
+    ],
+    "context": [
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/comment.php"
+      },
+      {
+        "repo": "wordpress-develop",
+        "path": "src/wp-includes/blocks.php"
+      }
+    ]
+  },
+  "advanced-topics-testing": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "advanced-topics-debugging": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "advanced-topics-security": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "advanced-topics-publishing-themes": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "advanced-topics-theme-testing": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "advanced-topics-ui-best-practices": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  },
+  "advanced-topics-javascript-best-practices": {
+    "primary": [],
+    "secondary": [],
+    "context": []
+  }
+}
