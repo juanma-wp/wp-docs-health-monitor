@@ -9,6 +9,7 @@ import { loadConfig } from './config/loader.js';
 import { runPipeline } from './pipeline.js';
 import { RunResultsSchema, type RunResults } from './types/results.js';
 import { generate } from './dashboard/generate.js';
+import type { DashboardHistoryEntry } from './dashboard/templates/shared.js';
 
 program
   .name('wp-docs-health-monitor')
@@ -76,6 +77,15 @@ async function main(): Promise<void> {
     process.exit(1);
   }
   const outputDir = resolve(opts.output);
+  const currentHistoryEntry: DashboardHistoryEntry = {
+    runId: results.runId,
+    timestamp: results.timestamp,
+    overallHealth: results.overallHealth,
+    docCount: results.totals.docs,
+    criticalIssues: results.totals.issues.critical,
+    majorIssues: results.totals.issues.major,
+    commitSha: results.docs[0]?.commitSha ?? '',
+  };
 
   // Explicit guard: runId must match the expected format (digits + hyphen only, no path separators)
   if (!/^\d{8}-\d{6}$/.test(results.runId)) {
@@ -88,7 +98,7 @@ async function main(): Promise<void> {
 
   // Update history.json
   const historyPath = join(outputDir, 'data', 'history.json');
-  let history: Array<{ runId: string; timestamp: string; overallHealth: number }> = [];
+  let history: DashboardHistoryEntry[] = [];
   if (existsSync(historyPath)) {
     try {
       history = JSON.parse(await readFile(historyPath, 'utf-8'));
@@ -97,12 +107,38 @@ async function main(): Promise<void> {
       history = [];
     }
   }
-  history.push({ runId: results.runId, timestamp: results.timestamp, overallHealth: results.overallHealth });
+  history = history.filter(entry => entry.runId !== results.runId);
+  history.push(currentHistoryEntry);
   await mkdir(join(outputDir, 'data'), { recursive: true });
   await writeFile(historyPath, JSON.stringify(history, null, 2), 'utf-8');
 
-  // Generate dashboard
-  await generate(results, outputDir);
+  // Generate latest dashboard
+  await generate(results, outputDir, { history, latestRunId: results.runId, mode: 'latest' });
+
+  // Regenerate archived dashboards for all stored runs so every report can navigate the same history.
+  for (const entry of history) {
+    const archivedResultsPath = join(outputDir, 'data', 'runs', entry.runId, 'results.json');
+
+    let archivedRaw: unknown;
+    try {
+      archivedRaw = JSON.parse(await readFile(archivedResultsPath, 'utf-8'));
+    } catch (err) {
+      process.stderr.write(`Warning: could not read archived results for "${entry.runId}": ${(err as Error).message}\n`);
+      continue;
+    }
+
+    const archivedResults = RunResultsSchema.safeParse(archivedRaw);
+    if (!archivedResults.success) {
+      process.stderr.write(`Warning: archived results for "${entry.runId}" are invalid and were skipped.\n`);
+      continue;
+    }
+
+    await generate(archivedResults.data, join(outputDir, 'runs', entry.runId), {
+      history,
+      latestRunId: results.runId,
+      mode: 'run',
+    });
+  }
 
   process.stdout.write(`Dashboard written to ${join(outputDir, 'index.html')}\n`);
 }
