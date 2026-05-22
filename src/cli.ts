@@ -9,6 +9,7 @@ import { loadConfig } from './config/loader.js';
 import { runPipeline } from './pipeline.js';
 import { RunResultsSchema, type RunResults } from './types/results.js';
 import { generate } from './dashboard/generate.js';
+import { renderLanding, type LandingEntry } from './dashboard/landing.js';
 
 program
   .name('wp-docs-health-monitor')
@@ -86,9 +87,17 @@ async function main(): Promise<void> {
   await mkdir(runDir, { recursive: true });
   await writeFile(join(runDir, 'results.json'), JSON.stringify(results, null, 2), 'utf-8');
 
-  // Update history.json
+  // Update history.json — entries may be richer (pipeline writes commitSha/totals/cost too)
+  type HistoryEntry = {
+    runId: string;
+    timestamp: string;
+    overallHealth: number;
+    commitSha?: string;
+    totals?: LandingEntry['totals'];
+    estimatedCostUsd?: number;
+  };
   const historyPath = join(outputDir, 'data', 'history.json');
-  let history: Array<{ runId: string; timestamp: string; overallHealth: number }> = [];
+  let history: HistoryEntry[] = [];
   if (existsSync(historyPath)) {
     try {
       history = JSON.parse(await readFile(historyPath, 'utf-8'));
@@ -101,10 +110,24 @@ async function main(): Promise<void> {
   await mkdir(join(outputDir, 'data'), { recursive: true });
   await writeFile(historyPath, JSON.stringify(history, null, 2), 'utf-8');
 
-  // Generate dashboard
-  await generate(results, outputDir);
+  // Generate per-run dashboard under outputDir/runs/<runId>/
+  const runDashboardDir = join(outputDir, 'runs', results.runId);
+  await generate(results, runDashboardDir);
 
-  process.stdout.write(`Dashboard written to ${join(outputDir, 'index.html')}\n`);
+  // Regenerate site landing at outputDir/index.html from history.json
+  const landingEntries: LandingEntry[] = history.map(h => ({
+    runId: h.runId,
+    timestamp: h.timestamp,
+    overallHealth: h.overallHealth,
+    commitSha: h.commitSha,
+    totals: h.totals,
+    estimatedCostUsd: h.estimatedCostUsd,
+    href: `runs/${h.runId}/index.html`,
+  }));
+  await writeFile(join(outputDir, 'index.html'), renderLanding(landingEntries), 'utf-8');
+
+  process.stdout.write(`Dashboard written to ${join(runDashboardDir, 'index.html')}\n`);
+  process.stdout.write(`Site landing at ${join(outputDir, 'index.html')}\n`);
 }
 
 main().catch(err => {
