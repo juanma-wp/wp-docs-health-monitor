@@ -149,7 +149,7 @@ export function htmlShell(title: string, body: string): string {
   ${tailwindScript()}
 </head>
 <body class="bg-gray-50 text-gray-900 min-h-screen">
-  <div class="max-w-5xl mx-auto px-4 py-8">
+  <div class="mx-auto w-full max-w-screen-2xl px-4 py-8 xl:px-6 2xl:px-8">
     ${body}
   </div>
 </body>
