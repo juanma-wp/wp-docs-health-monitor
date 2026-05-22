@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Template Parts</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/templates.html" class="hover:underline text-blue-600">templates</a>
+      &rsaquo; <span>Template Parts</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">Template Parts</h1>
+        <a href="https://developer.wordpress.org/themes/templates/template-parts/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/themes/templates/template-parts/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">86</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>
+      </div>
+    </div><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Issues (2)</h2>
+        
+    <div class="border-l-4 border-l-yellow-500 bg-yellow-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">major</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">default-value</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 97%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        By default, WordPress has three areas that you can register your templates for:
+*   <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">uncategorized</code> (labeled as <strong>General</strong> in the admin)
+*   <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">header</code>
+*   <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">footer</code>
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/wordpress-develop/blob/7.0/src/wp-includes/block-template-utils.php" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">wordpress-develop:src/wp-includes/block-template-utils.php</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>array(
+			&#39;area&#39;        =&gt; WP_TEMPLATE_PART_AREA_NAVIGATION_OVERLAY,
+			&#39;label&#39;       =&gt; _x( &#39;Navigation Overlay&#39;, &#39;template part area&#39; ),
+			&#39;description&#39; =&gt; __(
+				&#39;The Navigation Overlay template defines an overlay area that typically contains navigation links and can be toggled open and closed.&#39;
+			),
+			&#39;icon&#39;        =&gt; &#39;navigation-overlay&#39;,
+			&#39;area_tag&#39;    =&gt; &#39;div&#39;,
+		),</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Update the &quot;Template part areas&quot; section to list four default areas instead of three.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>Change the intro sentence from &quot;three areas&quot; to &quot;four areas&quot;.</li><li>Add <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">navigation-overlay</code> (labeled as <strong>Navigation Overlay</strong> in the admin) to the bullet list, alongside <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">uncategorized</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">header</code>, and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">footer</code>.</li><li>The constant <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">WP_TEMPLATE_PART_AREA_NAVIGATION_OVERLAY</code> is defined in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">src/wp-includes/block-template-utils.php</code> and the area is registered in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">get_allowed_block_template_part_areas()</code> as a default entry.</li></ul>
+      </div>
+    </div>
+    <div class="border-l-4 border-l-yellow-500 bg-yellow-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">major</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">default-value</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 95%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        By default, you can select from the General, Header, and Footer areas
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/wordpress-develop/blob/7.0/src/wp-includes/block-template-utils.php" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">wordpress-develop:src/wp-includes/block-template-utils.php</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>array(
+			&#39;area&#39;        =&gt; WP_TEMPLATE_PART_AREA_NAVIGATION_OVERLAY,
+			&#39;label&#39;       =&gt; _x( &#39;Navigation Overlay&#39;, &#39;template part area&#39; ),</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Update the sentence about default selectable areas in the &quot;Adding new template parts&quot; section to include the Navigation Overlay area.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>Change &quot;By default, you can select from the General, Header, and Footer areas&quot; to &quot;By default, you can select from the General, Header, Footer, and Navigation Overlay areas&quot;.</li></ul>
+      </div>
+    </div>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The hook name <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">default_wp_template_part_areas</code> is correctly documented — the code confirms it fires at <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">apply_filters( &#39;default_wp_template_part_areas&#39;, $default_area_definitions )</code> in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">get_allowed_block_template_part_areas()</code>.</li><li>The documented area-definition array keys (<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">area</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">area_tag</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">label</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">description</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">icon</code>) exactly match the keys used in the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$default_area_definitions</code> array in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">get_allowed_block_template_part_areas()</code>.</li><li>GAP: The code defines a fifth built-in constant <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">WP_TEMPLATE_PART_AREA_SIDEBAR</code> (<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">&#39;sidebar&#39;</code>), but the doc never mentions <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">sidebar</code> as a recognised area value. Developers who try to assign a part to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">sidebar</code> should know it is a defined constant, even though it is not surfaced as a default area in the UI.</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-900 font-medium"><code>wordpress-develop:src/wp-includes/block-template-utils.php</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-500"><code>gutenberg:schemas/json/theme.json</code> <span class="text-xs">[secondary] ✓</span></li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code>cec490a72d5361101000bc3e7a89dba2a6d05556</code> &nbsp;·&nbsp; Analyzed: 2026-05-22T16:57:26.450Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>

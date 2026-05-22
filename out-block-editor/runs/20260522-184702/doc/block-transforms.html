@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transforms</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/block-api.html" class="hover:underline text-blue-600">block-api</a>
+      &rsaquo; <span>Transforms</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">Transforms</h1>
+        <a href="https://developer.wordpress.org/block-editor/reference-guides/block-api/block-transforms/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/block-editor/reference-guides/block-api/block-transforms/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">85</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>
+      </div>
+    </div><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Issues (1)</h2>
+        
+    <div class="border-l-4 border-l-red-500 bg-red-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">critical</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">broken-example</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 98%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        schema = ({ phrasingContentSchema }) =&gt; {
+    div: {
+        required: true,
+        attributes: [ &#39;data-post-id&#39; ],
+        children: {
+            h2: { children: phrasingContentSchema },
+            p: { children: phrasingContentSchema }
+        }
+    }
+}
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/gutenberg/blob/trunk/packages/blocks/src/api/raw-handling/utils.ts" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">gutenberg:packages/blocks/src/api/raw-handling/utils.ts</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>schema = typeof schema === &#39;function&#39; ? schema( schemaArgs ) : schema;</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Fix the arrow-function schema example so it returns an object literal instead of a labeled statement block.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>Wrap the object in parentheses for an implicit return: <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">schema = ({ phrasingContentSchema }) =&gt; ({ div: { ... } })</code></li><li>Without the parentheses, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">{ div: { ... } }</code> is parsed as a JavaScript function body containing a labeled statement named <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">div</code>, so the function returns <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">undefined</code>.</li><li>The runtime in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">utils.ts</code> calls <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">schema( schemaArgs )</code> and uses the return value directly; when the function returns <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">undefined</code>, the schema is silently empty and the raw transform will never match any HTML.</li></ul>
+      </div>
+    </div>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">rawHandler</code> signature documented as <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">rawHandler({ HTML })</code> returning blocks is accurate — the source confirms <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">export function rawHandler( { HTML = &#39;&#39; }: { HTML?: string } ): Block[]</code>.</li><li>The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">isMultiBlock</code> transform behaviour is correctly documented: the source in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">switchToBlockType</code> confirms that when <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">transformation.isMultiBlock</code> is true, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">transform</code> is called with arrays of attributes and inner blocks respectively.</li><li>GAP: The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">schema</code> parameter for <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">raw</code> transforms also accepts a function that receives an <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">isPaste</code> boolean as a second argument (alongside <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">phrasingContentSchema</code>), but the documentation only mentions <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">phrasingContentSchema</code>. Developers who need to distinguish paste vs. drag-drop/convert operations cannot discover this from the docs.</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-900 font-medium"><code>gutenberg:packages/blocks/src/api/factory.ts</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/blocks/src/api/raw-handling/index.ts</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/dom/src/dom/clean-node-list.js</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:schemas/json/block.json</code> <span class="text-xs">[context] ✓</span></li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code>1642980d599be51c7cce7b2dc3a0c052b69ad367</code> &nbsp;·&nbsp; Analyzed: 2026-05-22T16:39:08.549Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>

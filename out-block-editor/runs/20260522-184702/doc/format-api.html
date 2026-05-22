@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Formatting Toolbar API</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/how-to-guides.html" class="hover:underline text-blue-600">how-to-guides</a>
+      &rsaquo; <span>Formatting Toolbar API</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">Formatting Toolbar API</h1>
+        <a href="https://developer.wordpress.org/block-editor/how-to-guides/format-api/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/block-editor/how-to-guides/format-api/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">93</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>
+      </div>
+    </div><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Issues (1)</h2>
+        
+    <div class="border-l-4 border-l-yellow-500 bg-yellow-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">major</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">broken-example</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 85%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        Using the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">RichTextToolbarButton</code> component, the button is added to the default dropdown menu. You can add the button directly to the toolbar by using the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">BlockControls</code> component.
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/gutenberg/blob/trunk/packages/block-editor/src/components/rich-text/toolbar-button.js" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">gutenberg:packages/block-editor/src/components/rich-text/toolbar-button.js</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>let fillName = &#39;RichText.ToolbarControls&#39;;
+
+	if ( name ) {
+		fillName += `.${ name }`;
+	}</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Correct the description of <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">RichTextToolbarButton</code> placement in the relevant step.</p><ul class="list-disc list-inside space-y-1 mt-2"><li><code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">RichTextToolbarButton</code> fills the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">RichText.ToolbarControls</code> slot. When a <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">name</code> prop is provided (e.g. <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">name=&quot;bold&quot;</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">name=&quot;italic&quot;</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">name=&quot;link&quot;</code>), it fills a named sub-slot and renders <strong>directly in the inline format toolbar</strong> alongside Bold/Italic/Link. When no <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">name</code> is provided, it fills the generic <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">RichText.ToolbarControls</code> slot, which is rendered inside a <strong>&quot;More&quot; <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">DropdownMenu</code></strong> (see <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">format-toolbar/index.js</code>).</li><li>The doc&#39;s contrast — &quot;RichTextToolbarButton = dropdown, BlockControls = toolbar&quot; — is only partially correct: named sub-slots render directly in the toolbar, not in the dropdown. Update the prose to clarify that unnamed <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">RichTextToolbarButton</code> usage lands in the &quot;More&quot; dropdown, while passing a recognised <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">name</code> value places the button directly in the inline format toolbar. <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">BlockControls</code> places the button in the block-level (top) toolbar, which is a separate concept.</li></ul>
+      </div>
+    </div>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">registerFormatType</code> call signature and required properties (<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">title</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">tagName</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">className</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">edit</code>) match the source exactly — the code validates all four fields and errors if they are missing or malformed.</li><li>The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">toggleFormat(value, format)</code> two-argument signature shown in all code examples is correct and matches the exported function signature in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">packages/rich-text/src/toggle-format.js</code>.</li><li>GAP: <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">registerFormatType</code> silently validates that <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">keywords</code>, if provided, must have at most 3 entries (enforced in the source with a <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">console.error</code>). The doc never mentions the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">keywords</code> property at all, which could surprise developers who want to make their format discoverable via search.</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-900 font-medium"><code>gutenberg:packages/rich-text/src/register-format-type.js</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-900 font-medium"><code>gutenberg:packages/rich-text/src/toggle-format.js</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-900 font-medium"><code>gutenberg:packages/block-editor/src/components/rich-text/toolbar-button.js</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/rich-text/src/apply-format.js</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/rich-text/src/remove-format.js</code> <span class="text-xs">[secondary] ✓</span></li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code>1642980d599be51c7cce7b2dc3a0c052b69ad367</code> &nbsp;·&nbsp; Analyzed: 2026-05-22T16:30:58.428Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>

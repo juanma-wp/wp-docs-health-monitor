@@ -60,3 +60,6 @@ CLAUDE.local.md
 .sandcastle/logs/
 .sandcastle/sessions/
 .sandcastle/.cache/
+
+!out-theme
+!out-block-editor

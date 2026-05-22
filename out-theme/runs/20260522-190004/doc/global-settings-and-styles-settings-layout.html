@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Layout</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/global-settings-and-styles-settings.html" class="hover:underline text-blue-600">global-settings-and-styles-settings</a>
+      &rsaquo; <span>Layout</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">Layout</h1>
+        <a href="https://developer.wordpress.org/themes/global-settings-and-styles/settings/layout/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/themes/global-settings-and-styles/settings/layout/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">98</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>
+      </div>
+    </div><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Issues (1)</h2>
+        
+    <div class="border-l-4 border-l-gray-400 bg-gray-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">minor</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">nonexistent-name</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 97%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        you will want to set this to a value that is greater than <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">settings.layout.contentWidth</code>
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/gutenberg/blob/trunk/schemas/json/theme.json" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">gutenberg:schemas/json/theme.json</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>&quot;contentSize&quot;: {
+              &quot;description&quot;: &quot;Sets the max-width of the content.&quot;,
+              &quot;type&quot;: &quot;string&quot;
+            }</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Replace the incorrect property name reference in the Wide Size section.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>Change <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">settings.layout.contentWidth</code> to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">settings.layout.contentSize</code> to match the actual property name defined in the schema (<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">contentSize</code>) — there is no <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">contentWidth</code> property anywhere in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">settings.layout</code>.</li></ul>
+      </div>
+    </div>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The two documented sub-properties of <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">settings.layout</code> — <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">contentSize</code> and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">wideSize</code> — exactly match the property names defined in the schema&#39;s <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">settingsLayoutProperties</code> definition, confirming the doc&#39;s property names are correct.</li><li>The doc&#39;s example JSON snippets use <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">&quot;version&quot;: 2</code> at the top level, which is consistent with the theme.json schema structure shown in the source.</li><li>GAP: The schema defines two additional <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">settings.layout</code> properties not mentioned in the doc — <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">allowEditing</code> (disables layout UI controls, default: true) and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">allowCustomContentAndWideSize</code> (enables/disables custom content and wide size controls, default: true) — which theme developers would benefit from knowing about.</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-900 font-medium"><code>gutenberg:schemas/json/theme.json</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-500"><code>gutenberg:schemas/json/block.json</code> <span class="text-xs">[secondary] ✓</span></li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code>1642980d599be51c7cce7b2dc3a0c052b69ad367</code> &nbsp;·&nbsp; Analyzed: 2026-05-22T16:53:04.398Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>

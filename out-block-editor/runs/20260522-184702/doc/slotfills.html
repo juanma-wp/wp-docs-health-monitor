@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SlotFills Reference</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/reference-guides.html" class="hover:underline text-blue-600">reference-guides</a>
+      &rsaquo; <span>SlotFills Reference</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">SlotFills Reference</h1>
+        <a href="https://developer.wordpress.org/block-editor/reference-guides/slotfills/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/block-editor/reference-guides/slotfills/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">98</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>
+      </div>
+    </div><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Issues (1)</h2>
+        
+    <div class="border-l-4 border-l-gray-400 bg-gray-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">minor</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">type-signature</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 75%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        SlotFills are created using <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">createSlotFill</code>. This creates two components, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">Slot</code> and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">Fill</code> which are then used to create a new component that is exported on the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">wp.plugins</code> global.
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/slot-fill/index.tsx" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">gutenberg:packages/components/src/slot-fill/index.tsx</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>return {
+		name: key,
+		Fill: FillComponent,
+		Slot: SlotComponent,
+	};</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Update the prose description of <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">createSlotFill</code> to reflect that it returns an object with three properties, not just two components.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>Change &quot;This creates two components, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">Slot</code> and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">Fill</code>&quot; to &quot;This returns an object with three properties: <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">name</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">Fill</code>, and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">Slot</code>&quot;</li><li>Note that <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">name</code> holds the slot key and is the preferred replacement for the deprecated <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">Slot.__unstableName</code> (deprecated in 6.8.0)</li></ul>
+      </div>
+    </div>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The doc&#39;s code examples correctly import SlotFills from <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">@wordpress/editor</code> (e.g. <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">import { PluginDocumentSettingPanel, store as editorStore } from &#39;@wordpress/editor&#39;</code>), which matches the actual package structure.</li><li>The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">registerPlugin</code> usage in examples correctly passes <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">{ render: ComponentName }</code> matching the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">PluginSettings</code> type in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">packages/plugins/src/api/index.ts</code> which requires <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">render: ComponentType</code>.</li><li>GAP: <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">createSlotFill</code> now returns a <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">name</code> property (the slot key) in addition to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">Fill</code> and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">Slot</code>. The doc&#39;s definition snippet omits this third return value, and developers should know about it as a replacement for the deprecated <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">Slot.__unstableName</code> property (marked <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">@deprecated 6.8.0</code> in source).</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-900 font-medium"><code>gutenberg:packages/components/src/slot-fill/index.tsx</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/components/src/slot-fill/fill.tsx</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/plugins/src/api/index.ts</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/components/src/slot-fill/index.native.js</code> <span class="text-xs">[secondary] ✓</span></li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code>1642980d599be51c7cce7b2dc3a0c052b69ad367</code> &nbsp;·&nbsp; Analyzed: 2026-05-22T16:43:59.779Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Styles</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/block-api.html" class="hover:underline text-blue-600">block-api</a>
+      &rsaquo; <span>Styles</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">Styles</h1>
+        <a href="https://developer.wordpress.org/block-editor/reference-guides/block-api/block-styles/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/block-editor/reference-guides/block-api/block-styles/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">93</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>
+      </div>
+    </div><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Issues (1)</h2>
+        
+    <div class="border-l-4 border-l-yellow-500 bg-yellow-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">major</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">required-optional-mismatch</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 92%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        Besides the two mandatory properties, the styles properties array should also include an <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">inline_style</code> or a <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">style_handle</code> or a <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">style_data</code>property
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/wordpress-develop/blob/7.0/src/wp-includes/class-wp-block-styles-registry.php" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">wordpress-develop:src/wp-includes/class-wp-block-styles-registry.php</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>However, you could also skip them and provide CSS styles in any stylesheet
+	 * or with an inline tag.</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Update the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">register_block_style</code> documentation to clarify that <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">inline_style</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">style_handle</code>, and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">style_data</code> are all optional.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>Change &quot;should also include an <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">inline_style</code> or a <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">style_handle</code> or a <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">style_data</code> property&quot; to something like &quot;may optionally include an <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">inline_style</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">style_handle</code>, or <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">style_data</code> property to associate CSS with the style&quot;.</li><li>Add a note that omitting all three is valid — the style will still register and apply its CSS class, but the developer is responsible for providing the CSS through another means (e.g. an existing stylesheet or inline tag).</li><li>This matches the explicit note in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">WP_Block_Styles_Registry::register()</code>: &quot;you could also skip them and provide CSS styles in any stylesheet or with an inline tag.&quot;</li></ul>
+      </div>
+    </div>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The doc correctly documents that <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">registerBlockStyle</code> (JS) accepts a string or array of block names as its first argument, matching the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">blockNames: string | string[]</code> signature in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">registration.ts</code>.</li><li>The doc accurately describes the server-side <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">register_block_style</code> PHP function signature — two positional arguments (<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$block_name</code> and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$style_properties</code>) with <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">name</code> and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">label</code> as mandatory keys — which matches <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">src/wp-includes/blocks.php</code>.</li><li>GAP: The JS <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">registerBlockStyle</code> function also accepts an array of <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">BlockStyle</code> objects as its second argument (<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">styleVariation: BlockStyle | BlockStyle[]</code>), but the documentation only shows a single style object in all examples. Developers who want to register multiple styles in one call cannot discover this from the docs.</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-900 font-medium"><code>wordpress-develop:src/wp-includes/blocks.php</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-900 font-medium"><code>gutenberg:packages/blocks/src/api/registration.ts</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/dom-ready/src/index.ts</code> <span class="text-xs">[context] ✓</span></li><li class="text-gray-500"><code>gutenberg:schemas/json/block.json</code> <span class="text-xs">[context] ✓</span></li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code>cec490a72d5361101000bc3e7a89dba2a6d05556</code> &nbsp;·&nbsp; Analyzed: 2026-05-22T16:37:52.053Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>

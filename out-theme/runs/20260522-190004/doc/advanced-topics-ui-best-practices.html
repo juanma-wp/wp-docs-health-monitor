@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UI Best Practices</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/advanced-topics.html" class="hover:underline text-blue-600">advanced-topics</a>
+      &rsaquo; <span>UI Best Practices</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">UI Best Practices</h1>
+        <a href="https://developer.wordpress.org/themes/advanced-topics/ui-best-practices/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/themes/advanced-topics/ui-best-practices/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">100</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>
+      </div>
+    </div><section class="mb-8"><p class="text-green-700 font-medium">✅ No issues found.</p></section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The doc correctly uses <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">esc_url( home_url( &#39;/&#39; ) )</code> for the logo href and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">get_stylesheet_directory_uri()</code> for the theme asset path — both are standard, current WordPress APIs for these purposes.</li><li>The doc correctly distinguishes the HTML <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">for</code> attribute on <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">&lt;label&gt;</code> as matching the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">id</code> attribute of the input (not the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">name</code>), which is accurate per the HTML spec and a common developer misconception.</li><li>GAP: The logo example contains a typo in the text-domain string: <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">&#39;textdmomain&#39;</code> (transposed letters) instead of <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">&#39;textdomain&#39;</code>. While this is a typo rather than an API drift issue, a developer copying it verbatim would register a misspelled text domain, causing translation strings to be silently orphaned.</li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code></code> &nbsp;·&nbsp; Analyzed: 2026-05-22T16:59:57.064Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>

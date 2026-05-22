@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial: Build your first block</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/getting-started.html" class="hover:underline text-blue-600">getting-started</a>
+      &rsaquo; <span>Tutorial: Build your first block</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">Tutorial: Build your first block</h1>
+        <a href="https://developer.wordpress.org/block-editor/getting-started/tutorial/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/block-editor/getting-started/tutorial/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">98</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>
+      </div>
+    </div><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Issues (1)</h2>
+        
+    <div class="border-l-4 border-l-gray-400 bg-gray-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">minor</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">broken-example</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 90%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        export default function Edit() {
+	return (
+		&lt;p { ...useBlockProps() }&gt;
+			{ __(
+				&#39;Copyright Date Block – hello from the editor!&#39;,
+				&#39;copyright-date-block-demo&#39;
+			) }
+		&lt;/p&gt;
+	);
+}
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/gutenberg/blob/trunk/docs/getting-started/tutorial.md" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">gutenberg:docs/getting-started/tutorial.md</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>&quot;textdomain&quot;: &quot;copyright-date-block&quot;</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Fix the textdomain in the initial <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">Edit()</code> function example shown in the &#39;Updating edit.js&#39; section.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>Change <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">&#39;copyright-date-block-demo&#39;</code> to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">&#39;copyright-date-block&#39;</code> in the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">__()</code> call to match the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">textdomain</code> declared in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">block.json</code>.</li><li>The surrounding prose describes this snippet as showing the scaffolded file&#39;s default message, so the textdomain should match the block&#39;s actual textdomain.</li></ul>
+      </div>
+    </div>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The tutorial correctly documents that <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">useBlockProps()</code> must be used on the outermost element of a block&#39;s Edit component, which matches the code&#39;s JSDoc: &#39;Use of this hook on the outermost element of a block is required if using API &gt;= v2.&#39;</li><li>The tutorial accurately shows <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">useBlockProps.save()</code> (not <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">useBlockProps()</code>) for the save function&#39;s wrapper element, which correctly reflects the code where <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">useBlockProps.save = getBlockProps</code> is a separate static method.</li><li>GAP: The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">TextControl</code> component&#39;s <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">__next40pxDefaultSize</code> prop is shown in the first <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">TextControl</code> example but is silently dropped in the later &#39;Updating the block content&#39; section&#39;s final <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">Edit()</code> function listing — developers copy-pasting the final complete example will get the deprecated 36px size warning since <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">__next40pxDefaultSize</code> is missing from the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">TextControl</code> in that final snippet.</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-900 font-medium"><code>gutenberg:packages/blocks/src/api/registration.ts</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-900 font-medium"><code>gutenberg:schemas/json/block.json</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/block-editor/src/components/block-list/use-block-props/index.js</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/components/src/text-control/index.tsx</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/components/src/toggle-control/index.tsx</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/components/src/panel/body.tsx</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/class-wp-block-supports.php</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/i18n/src/default-i18n.ts</code> <span class="text-xs">[context] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/block-editor/src/components/block-list/use-block-props/index.native.js</code> <span class="text-xs">[context] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/components/src/panel/body.native.js</code> <span class="text-xs">[context] ✓</span></li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code>1642980d599be51c7cce7b2dc3a0c052b69ad367</code> &nbsp;·&nbsp; Analyzed: 2026-05-22T16:25:31.787Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>

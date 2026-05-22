@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deprecation</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/block-api.html" class="hover:underline text-blue-600">block-api</a>
+      &rsaquo; <span>Deprecation</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">Deprecation</h1>
+        <a href="https://developer.wordpress.org/block-editor/reference-guides/block-api/block-deprecation/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/block-editor/reference-guides/block-api/block-deprecation/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">93</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>
+      </div>
+    </div><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Issues (1)</h2>
+        
+    <div class="border-l-4 border-l-yellow-500 bg-yellow-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">major</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">type-signature</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 92%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">data</code>: An object containing properties representing the block node and its resulting block object.
+			- <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">data.blockNode</code>: The raw form of the block as a result of parsing the serialized HTML.
+			- <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">data.block</code>: The block object, which is the result of applying the block type to the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">blockNode</code>.
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/gutenberg/blob/trunk/packages/blocks/src/types.ts" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">gutenberg:packages/blocks/src/types.ts</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>isEligible?: ( attributes: OldAttributes, innerBlocks: Block[] ) =&gt; boolean;</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Update the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">BlockDeprecation.isEligible</code> type signature in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">types.ts</code> to include the third <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">data</code> parameter, and ensure the documentation matches the runtime behaviour.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>The runtime call in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">apply-block-deprecated-versions.ts</code> (line ~58) passes a third argument <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">{ blockNode: rawBlock, block }</code> to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">isEligible</code>, so the third parameter IS available to developers who declare it.</li><li>The public type in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">types.ts</code> declares <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">isEligible</code> as <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">( attributes: OldAttributes, innerBlocks: Block[] ) =&gt; boolean</code> — only two parameters — which means TypeScript will reject any user-written <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">isEligible</code> that declares a third <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">data</code> parameter.</li><li>Either update the type to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">( attributes: OldAttributes, innerBlocks: Block[], data: { blockNode: RawBlock; block: Block } ) =&gt; boolean</code>, or remove the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">data</code> parameter documentation from the deprecation page to match the declared public contract.</li></ul>
+      </div>
+    </div>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The doc accurately describes the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">migrate</code> return type as <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">Object | Array</code> (either new attributes or a tuple <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">[attributes, innerBlocks]</code>), which matches the code&#39;s <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">NewAttributes | [ NewAttributes, Block[] ]</code> return type in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">types.ts</code>.</li><li>The doc correctly states that a deprecation&#39;s <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">migrate</code> will not be run if its <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">save</code> function does not return a valid block — confirmed by the runtime code in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">apply-block-deprecated-versions.ts</code> which only calls <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">migrate</code> after <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">isValid</code> is confirmed true.</li><li>GAP: The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">BlockDeprecation</code> interface in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">types.ts</code> includes an <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">apiVersion?: number</code> property that is not documented on the deprecation page. Block authors who need to specify the API version for a deprecated block form have no documentation to guide them.</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-900 font-medium"><code>gutenberg:packages/blocks/src/api/parser/apply-block-deprecated-versions.ts</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-900 font-medium"><code>gutenberg:packages/blocks/src/types.ts</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-500"><code>gutenberg:schemas/json/block.json</code> <span class="text-xs">[secondary] ✓</span></li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code>1642980d599be51c7cce7b2dc3a0c052b69ad367</code> &nbsp;·&nbsp; Analyzed: 2026-05-22T16:35:50.362Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>block.json</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/fundamentals.html" class="hover:underline text-blue-600">fundamentals</a>
+      &rsaquo; <span>block.json</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">block.json</h1>
+        <a href="https://developer.wordpress.org/block-editor/getting-started/fundamentals/block-json/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/block-editor/getting-started/fundamentals/block-json/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">98</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>
+      </div>
+    </div><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Issues (1)</h2>
+        
+    <div class="border-l-4 border-l-gray-400 bg-gray-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">minor</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">type-signature</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 92%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        Common categories include <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">text</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">media</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">design</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">widgets</code>, and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">theme</code>.
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/gutenberg/blob/trunk/schemas/json/block.json" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">gutenberg:schemas/json/block.json</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>&quot;enum&quot;: [
+					&quot;text&quot;,
+					&quot;media&quot;,
+					&quot;design&quot;,
+					&quot;widgets&quot;,
+					&quot;theme&quot;,
+					&quot;embed&quot;
+				]</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Update the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">category</code> property description to include <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">embed</code> in the list of common categories.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>Change the sentence from &quot;Common categories include <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">text</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">media</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">design</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">widgets</code>, and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">theme</code>.&quot; to &quot;Common categories include <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">text</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">media</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">design</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">widgets</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">theme</code>, and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">embed</code>.&quot;</li></ul>
+      </div>
+    </div>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The doc correctly identifies all five script/style asset properties (<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">editorScript</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">editorStyle</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">script</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">style</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">viewScript</code>) and accurately describes their loading contexts (editor-only vs. both editor and front end vs. front-end-only), which matches the schema definitions in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">schemas/json/block.json</code> and the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$script_fields</code>/<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$style_fields</code> arrays in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">register_block_type_from_metadata()</code>.</li><li>The doc accurately states that for asset properties you can provide a file path starting with <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">file:</code>, a registered handle, or an array combining both — this matches the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">remove_block_asset_path_prefix()</code> logic in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">src/wp-includes/blocks.php</code> which detects the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">file:</code> prefix and the fallback to treating the value as a plain handle.</li><li>GAP: The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">viewStyle</code> property (added in WordPress 6.5) is present in the schema (<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">schemas/json/block.json</code>) and processed in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">register_block_type_from_metadata()</code> under <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$style_fields</code>, but the doc&#39;s &quot;Files for the block&#39;s behavior, output, or style&quot; section does not list <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">viewStyle</code> at all. Developers who need a CSS file loaded only on the front end (not in the editor) would miss this option entirely.</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-900 font-medium"><code>gutenberg:schemas/json/block.json</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-900 font-medium"><code>wordpress-develop:src/wp-includes/blocks.php</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/functions.wp-scripts.php</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/functions.wp-styles.php</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:schemas/json/theme.json</code> <span class="text-xs">[context] ✓</span></li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code>1642980d599be51c7cce7b2dc3a0c052b69ad367</code> &nbsp;·&nbsp; Analyzed: 2026-05-22T16:25:44.995Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Adding a delete button</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/data-basics.html" class="hover:underline text-blue-600">data-basics</a>
+      &rsaquo; <span>Adding a delete button</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">Adding a delete button</h1>
+        <a href="https://developer.wordpress.org/block-editor/how-to-guides/data-basics/5-adding-a-delete-button/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/block-editor/how-to-guides/data-basics/5-adding-a-delete-button/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">100</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>
+      </div>
+    </div><section class="mb-8"><p class="text-green-700 font-medium">✅ No issues found.</p></section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The doc correctly documents <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">isDeletingEntityRecord( kind, name, recordId )</code> — the selector exists in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">packages/core-data/src/selectors.ts</code> with exactly that signature and returns a boolean, matching the doc&#39;s description of &#39;returns true or false and never issues any HTTP requests&#39;.</li><li>The doc correctly documents <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">getLastEntityDeleteError( kind, name, recordId )</code> — the selector exists in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">packages/core-data/src/selectors.ts</code> and returns the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">.error</code> from the deleting state, consistent with the doc&#39;s usage pattern.</li><li>GAP: <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">deleteEntityRecord</code> accepts a fifth <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">options</code> argument <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">{ throwOnError = false }</code> (visible in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">packages/core-data/src/actions.js</code>). The doc never mentions <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">throwOnError</code>, which would let developers get a thrown exception instead of checking the return value — a useful alternative pattern for error handling that the tutorial omits entirely.</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-900 font-medium"><code>gutenberg:packages/core-data/src/selectors.ts</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-900 font-medium"><code>gutenberg:packages/core-data/src/actions.js</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/notices/src/components/snackbar-notices/index.tsx</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/components/src/snackbar/index.tsx</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/data/src/components/use-select/index.ts</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/data/src/select.ts</code> <span class="text-xs">[context] ✓</span></li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code>1642980d599be51c7cce7b2dc3a0c052b69ad367</code> &nbsp;·&nbsp; Analyzed: 2026-05-22T16:30:12.007Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>

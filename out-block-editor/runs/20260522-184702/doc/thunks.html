@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thunks in Core-Data</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/how-to-guides.html" class="hover:underline text-blue-600">how-to-guides</a>
+      &rsaquo; <span>Thunks in Core-Data</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">Thunks in Core-Data</h1>
+        <a href="https://developer.wordpress.org/block-editor/how-to-guides/thunks/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/block-editor/how-to-guides/thunks/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">86</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>
+      </div>
+    </div><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Issues (2)</h2>
+        
+    <div class="border-l-4 border-l-yellow-500 bg-yellow-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">major</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">deprecated-api</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 97%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        export function toggleFeature( scope, featureName ) {
+	return function ( { select, dispatch } ) {
+		const currentValue = select.isFeatureActive( scope, featureName );
+		dispatch.setFeatureValue( scope, featureName, ! currentValue );
+	};
+}
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/gutenberg/blob/trunk/packages/interface/src/store/actions.js" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">gutenberg:packages/interface/src/store/actions.js</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>export function toggleFeature( scope, featureName ) {
+	return function ( { registry } ) {
+		deprecated( `dispatch( &#39;core/interface&#39; ).toggleFeature`, {
+			since: &#39;6.0&#39;,
+			alternative: `dispatch( &#39;core/preferences&#39; ).toggle`,
+		} );
+
+		registry.dispatch( preferencesStore ).toggle( scope, featureName );
+	};
+}</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Update the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">toggleFeature</code> documentation to reflect that this action is deprecated since Gutenberg 6.0.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>Replace the shown thunk body (which uses <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">{ select, dispatch }</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">select.isFeatureActive</code>, and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">dispatch.setFeatureValue</code>) with the current implementation using <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">{ registry }</code> and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">registry.dispatch( preferencesStore ).toggle( scope, featureName )</code>.</li><li>Add a prominent deprecation notice: <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">dispatch( &#39;core/interface&#39; ).toggleFeature</code> has been deprecated since 6.0; developers should use <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">dispatch( &#39;core/preferences&#39; ).toggle( scope, featureName )</code> instead.</li><li>Remove or clearly mark as outdated any references to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">select.isFeatureActive</code> and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">dispatch.setFeatureValue</code> in the same example, as neither is called by the current implementation.</li></ul>
+      </div>
+    </div>
+    <div class="border-l-4 border-l-yellow-500 bg-yellow-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">major</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">broken-example</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 97%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        export function toggleFeature( scope, featureName ) {
+	return function ( { select, dispatch } ) {
+		const currentValue = select.isFeatureActive( scope, featureName );
+		dispatch.setFeatureValue( scope, featureName, ! currentValue );
+	};
+}
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/gutenberg/blob/trunk/packages/interface/src/store/actions.js" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">gutenberg:packages/interface/src/store/actions.js</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>export function toggleFeature( scope, featureName ) {
+	return function ( { registry } ) {
+		deprecated( `dispatch( &#39;core/interface&#39; ).toggleFeature`, {
+			since: &#39;6.0&#39;,
+			alternative: `dispatch( &#39;core/preferences&#39; ).toggle`,
+		} );
+
+		registry.dispatch( preferencesStore ).toggle( scope, featureName );
+	};
+}</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Update the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">toggleFeature</code> code example to reflect the actual current implementation.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>Replace the documented thunk body <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">{ select, dispatch }</code> with <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">{ registry }</code> — the function no longer destructures <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">select</code> or <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">dispatch</code>.</li><li>Remove the calls to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">select.isFeatureActive</code> and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">dispatch.setFeatureValue</code>; neither exists on the current interface store&#39;s public API (<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">setFeatureValue</code> is itself deprecated since 6.0).</li><li>Add the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">deprecated()</code> call and the delegation to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">registry.dispatch( preferencesStore ).toggle( scope, featureName )</code> to match the real implementation.</li><li>Consider adding a note that <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">toggleFeature</code> has been deprecated since 6.0 and that callers should use <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">dispatch( &#39;core/preferences&#39; ).toggle</code> directly.</li></ul>
+      </div>
+    </div>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The doc&#39;s description of <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">registry.select( storeName )</code> returning an object of selectors is accurate and matches the pattern used throughout <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">packages/interface/src/store/actions.js</code>, e.g. <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">registry.select( preferencesStore ).get( scope, ... )</code>.</li><li>The doc correctly states that <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">resolveSelect</code> &#39;returns a promise that resolves with the value provided by the related resolver&#39;, which matches the exported symbol description: &#39;modified so that they return promises that resolve to their eventual values, after any resolvers have ran&#39;.</li><li>GAP: The doc never mentions that <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">dispatch</code> inside a thunk also accepts a plain Redux action object (e.g. <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">dispatch({ type: &#39;SET_TEMPERATURE&#39;, ... })</code>), but this is shown in the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">enableComplementaryArea</code> thunk in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">packages/interface/src/store/actions.js</code> (<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">dispatch({ type: &#39;ENABLE_COMPLEMENTARY_AREA&#39;, scope, area })</code>), confirming the inline-action dispatch pattern is real and useful for developers to know.</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-900 font-medium"><code>gutenberg:packages/interface/src/store/actions.js</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/data/src/dispatch.ts</code> <span class="text-xs">[context] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/data/src/select.ts</code> <span class="text-xs">[context] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/data/src/index.ts</code> <span class="text-xs">[context] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/data-controls/src/index.ts</code> <span class="text-xs">[context] ✓</span></li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code>1642980d599be51c7cce7b2dc3a0c052b69ad367</code> &nbsp;·&nbsp; Analyzed: 2026-05-22T16:33:35.390Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>

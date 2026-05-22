@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Supports</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/block-api.html" class="hover:underline text-blue-600">block-api</a>
+      &rsaquo; <span>Supports</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">Supports</h1>
+        <a href="https://developer.wordpress.org/block-editor/reference-guides/block-api/block-supports/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/block-editor/reference-guides/block-api/block-supports/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">86</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>
+      </div>
+    </div><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Issues (2)</h2>
+        
+    <div class="border-l-4 border-l-yellow-500 bg-yellow-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">major</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">nonexistent-name</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 95%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        -   <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">fontSize</code>: type <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">boolean</code>, default value <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">false</code>
+    -   <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">lineHeight</code>: type <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">boolean</code>, default value <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">false</code>
+    -   <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">textAlign</code>: type <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">boolean</code> or <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">array</code>, default value <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">false</code>
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/gutenberg/blob/trunk/schemas/json/block.json" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">gutenberg:schemas/json/block.json</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>&quot;fitText&quot;: {
+						&quot;description&quot;: &quot;Enable fit text support for the block. This allows text content to automatically adjust its font size to fit within the block&#39;s dimensions.&quot;,
+						&quot;type&quot;: &quot;boolean&quot;,
+						&quot;default&quot;: false
+					},
+					&quot;textIndent&quot;: {
+						&quot;description&quot;: &quot;This value signals that a block supports the text-indent CSS style property.</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Add <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">fitText</code> and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">textIndent</code> to the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">typography</code> subproperties table in the block-supports documentation.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>In the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">typography</code> section&#39;s subproperties list, add a row for <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">fitText</code>: type <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">boolean</code>, default value <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">false</code>. Description: enables automatic font-size adjustment to fit the block&#39;s dimensions.</li><li>Add a row for <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">textIndent</code>: type <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">boolean</code>, default value <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">false</code>. Description: enables the text-indent CSS style property control in the editor.</li><li>Both properties are defined in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">schemas/json/block.json</code> under <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">supports.typography.properties</code> and are silently ignored by developers who rely only on the documented subproperties list.</li></ul>
+      </div>
+    </div>
+    <div class="border-l-4 border-l-yellow-500 bg-yellow-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">major</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">nonexistent-name</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 95%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        ## customClassName
+
+-   Type: <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">boolean</code>
+-   Default value: <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">true</code>
+
+This property adds a field to define a custom className for the block&#39;s wrapper.
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/gutenberg/blob/trunk/schemas/json/block.json" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">gutenberg:schemas/json/block.json</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>&quot;customCSS&quot;: {
+					&quot;description&quot;: &quot;This property adds a field to define custom CSS for the block instance.&quot;,
+					&quot;type&quot;: &quot;boolean&quot;,
+					&quot;default&quot;: true
+				}</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Add a <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">customCSS</code> section to the Block Supports documentation, immediately after the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">customClassName</code> section.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>Add a new heading: <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">## customCSS</code></li><li>Document: Type: <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">boolean</code>, Default value: <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">true</code></li><li>Description: &quot;This property adds a field to define custom CSS for the block instance.&quot;</li><li>The property is defined in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">schemas/json/block.json</code> at lines 324–328, directly adjacent to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">customClassName</code>, but is entirely absent from the documentation page</li></ul>
+      </div>
+    </div>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">dimensions</code> section correctly documents all four subproperties (<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">height</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">minHeight</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">minWidth</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">width</code>) with accurate default values of <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">false</code>, matching the block.json schema definitions.</li><li>The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">color</code> section accurately documents the default values for all subproperties — <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">background: true</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">text: true</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">gradients: false</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">link: false</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">heading: false</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">button: false</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">enableContrastChecker: true</code> — all of which match the block.json schema defaults exactly.</li><li>GAP: The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">layout</code> schema defines a <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">grid</code> layout type (alongside <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">constrained</code> and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">flex</code>) in the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">layout.default.type</code> enum, but the documentation only mentions <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">flow</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">flex</code>, and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">constrained</code> layout types. Developers building grid-layout blocks would not know this type is available.</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-900 font-medium"><code>gutenberg:schemas/json/block.json</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-900 font-medium"><code>wordpress-develop:src/wp-includes/class-wp-block-supports.php</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-500"><code>gutenberg:schemas/json/theme.json</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/block-editor/src/components/block-list/use-block-props/index.js</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/block-editor/src/components/inner-blocks/index.js</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/server-side-render/src/server-side-render.js</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/block-editor/src/components/block-list/use-block-props/index.native.js</code> <span class="text-xs">[context] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/block-editor/src/components/inner-blocks/index.native.js</code> <span class="text-xs">[context] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/block-editor/src/components/block-edit/index.js</code> <span class="text-xs">[context] ✓</span></li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code>1642980d599be51c7cce7b2dc3a0c052b69ad367</code> &nbsp;·&nbsp; Analyzed: 2026-05-22T16:39:19.050Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>

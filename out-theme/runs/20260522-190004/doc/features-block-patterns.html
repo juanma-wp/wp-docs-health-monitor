@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Block Patterns (Archived)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/features.html" class="hover:underline text-blue-600">features</a>
+      &rsaquo; <span>Block Patterns (Archived)</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">Block Patterns (Archived)</h1>
+        <a href="https://developer.wordpress.org/themes/features/block-patterns/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/themes/features/block-patterns/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-yellow-100 text-yellow-800">84</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">needs-attention</span>
+      </div>
+    </div><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Issues (3)</h2>
+        
+    <div class="border-l-4 border-l-yellow-500 bg-yellow-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">major</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">nonexistent-name</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 95%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">query</code> (use <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">posts</code> instead)
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/wordpress-develop/blob/7.0/src/wp-includes/block-patterns.php" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">wordpress-develop:src/wp-includes/block-patterns.php</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>register_block_pattern_category(
+		&#39;query&#39;,
+		array(
+			&#39;label&#39;       =&gt; _x( &#39;Posts&#39;, &#39;Block pattern category&#39; ),
+			&#39;description&#39; =&gt; __( &#39;Display your latest posts in lists, grids or other layouts.&#39; ),
+		)
+	);</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Remove the &quot;(use <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">posts</code> instead)&quot; deprecation note from the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">query</code> category entry. Both <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">query</code> and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">posts</code> are actively registered as core block pattern categories in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">_register_core_block_patterns_and_categories()</code>. The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">query</code> category is not deprecated or removed — developers following the doc&#39;s advice to avoid it would be misled into abandoning a valid, still-registered category.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>In the block pattern categories table/list, change the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">query</code> entry from &quot;<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">query</code> (use <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">posts</code> instead)&quot; to simply &quot;<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">query</code>&quot;, with its label &quot;Posts&quot; and description &quot;Display your latest posts in lists, grids or other layouts.&quot;</li><li>If <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">posts</code> was introduced as a preferred replacement at a specific version, add a &quot;Since X.X&quot; note rather than implying <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">query</code> is gone.</li></ul>
+      </div>
+    </div>
+    <div class="border-l-4 border-l-yellow-500 bg-yellow-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">major</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">nonexistent-name</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 97%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">video</code> (added in WordPress 6.4)
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/wordpress-develop/blob/7.0/src/wp-includes/block-patterns.php" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">wordpress-develop:src/wp-includes/block-patterns.php</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>register_block_pattern_category(
+		&#39;videos&#39;,
+		array(
+			&#39;label&#39;       =&gt; _x( &#39;Videos&#39;, &#39;Block pattern category&#39; ),
+			&#39;description&#39; =&gt; __( &#39;Different layouts containing videos.&#39; ),
+		)
+	);</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Correct the category slug in the documentation from <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">video</code> to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">videos</code>.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>Change the documented slug from <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">video</code> to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">videos</code> to match the registered category name in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">_register_core_block_patterns_and_categories()</code> (line ~201 of <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">src/wp-includes/block-patterns.php</code>).</li><li>A developer using <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">video</code> as a pattern category slug would find their pattern silently unassigned, since no category with that slug exists.</li></ul>
+      </div>
+    </div>
+    <div class="border-l-4 border-l-gray-400 bg-gray-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">minor</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">nonexistent-name</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 92%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        WordPress has several block pattern categories that it registers by default:
+
+*   <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">featured</code>
+*   <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">about</code>
+*   <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">audio</code> (added in WordPress 6.4)
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/wordpress-develop/blob/7.0/src/wp-includes/block-patterns.php" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">wordpress-develop:src/wp-includes/block-patterns.php</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>register_block_pattern_category(
+		&#39;navigation&#39;,
+		array(
+			&#39;label&#39;       =&gt; _x( &#39;Navigation&#39;, &#39;Block pattern category&#39; ),
+			&#39;description&#39; =&gt; __( &#39;A variety of designs displaying site navigation.&#39; ),
+		)
+	);</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">The doc&#39;s list of default pattern categories is significantly incomplete. The code registers many more categories than the doc mentions. Add the following missing categories to the list: <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">banner</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">buttons</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">columns</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">text</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">query</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">call-to-action</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">team</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">testimonials</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">services</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">contact</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">portfolio</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">gallery</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">media</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">videos</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">posts</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">footer</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">header</code>, and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">navigation</code>.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>In the &quot;Default categories&quot; list, add each of the above slugs with a brief description matching the registered label.</li><li><code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">navigation</code> is the specific category cited in the original issue — confirm it is included in the updated list.</li></ul>
+      </div>
+    </div>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The documentation correctly describes the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">register_block_pattern()</code> function signature, its two parameters (<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$pattern_name</code> and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$pattern_properties</code>), and its <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">bool</code> return type, all of which match the source code in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">src/wp-includes/block-patterns.php</code>.</li><li>The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">should_load_remote_block_patterns</code> filter name is accurately documented and confirmed firing in the source at three separate call sites in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">src/wp-includes/block-patterns.php</code>.</li><li>GAP: The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">navigation</code> pattern category is registered by core (confirmed in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">_register_core_block_patterns_and_categories()</code>) but is absent from the documented list of default categories. Developers building navigation-related patterns would benefit from knowing this category exists.</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-900 font-medium"><code>wordpress-develop:src/wp-includes/block-patterns.php</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/blocks/src/store/reducer.ts</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/link-template.php</code> <span class="text-xs">[context] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/l10n.php</code> <span class="text-xs">[context] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/formatting.php</code> <span class="text-xs">[context] ✓</span></li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code>cec490a72d5361101000bc3e7a89dba2a6d05556</code> &nbsp;·&nbsp; Analyzed: 2026-05-22T16:59:32.748Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>

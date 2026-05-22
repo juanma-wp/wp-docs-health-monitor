@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Including Assets</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/core-concepts.html" class="hover:underline text-blue-600">core-concepts</a>
+      &rsaquo; <span>Including Assets</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">Including Assets</h1>
+        <a href="https://developer.wordpress.org/themes/core-concepts/including-assets/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/themes/core-concepts/including-assets/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">86</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>
+      </div>
+    </div><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Issues (2)</h2>
+        
+    <div class="border-l-4 border-l-yellow-500 bg-yellow-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">major</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">default-value</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 95%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        <strong><code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$ver</code></strong> sets the version number of your stylesheet and is used for cache busting. Defaults to the current WordPress version.
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/wordpress-develop/blob/7.0/src/wp-includes/functions.wp-styles.php" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">wordpress-develop:src/wp-includes/functions.wp-styles.php</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>* @param string|bool|null $ver    Optional. String specifying stylesheet version number, if it has one, which is added to the URL
+ *                                 as a query string for cache busting purposes. If version is set to false, a version
+ *                                 number is automatically added equal to current installed WordPress version.
+ *                                 If set to null, no version is added.</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Correct the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$ver</code> default-value description for <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">wp_enqueue_style()</code>.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>Change &quot;Defaults to the current WordPress version&quot; to &quot;Defaults to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">false</code>, which causes WordPress to automatically append the current installed WordPress version as a cache-busting query string.&quot;</li><li>Add a note: &quot;Pass <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">null</code> to suppress the version query string entirely; pass a string to use a custom version number.&quot;</li></ul>
+      </div>
+    </div>
+    <div class="border-l-4 border-l-yellow-500 bg-yellow-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">major</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">default-value</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 95%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        <strong><code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$ver</code>:</strong> Sets the version number of your script and is used for cache busting. Defaults to the current WordPress version.
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/wordpress-develop/blob/7.0/src/wp-includes/functions.wp-scripts.php" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">wordpress-develop:src/wp-includes/functions.wp-scripts.php</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>function wp_enqueue_script( $handle, $src = &#39;&#39;, $deps = array(), $ver = false, $args = array() )</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Correct the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$ver</code> parameter description for <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">wp_enqueue_script()</code>.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>Change &quot;Defaults to the current WordPress version&quot; to &quot;Defaults to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">false</code>, which causes WordPress to automatically append the current installed WordPress version as a cache-busting query string.&quot;</li><li>Add a note that passing <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">null</code> suppresses the version query string entirely.</li></ul>
+      </div>
+    </div>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">wp_add_inline_style()</code> and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">wp_add_inline_script()</code> function signatures shown in the doc match the source exactly, including the optional <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$position</code> parameter (default <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">&#39;after&#39;</code>) for the script variant.</li><li>The doc correctly describes <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">get_theme_file_uri()</code> as searching the child theme first and falling back to the parent theme, which matches the source code logic in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">link-template.php</code>.</li><li>GAP: <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">wp_enqueue_script()</code> now accepts a <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">fetchpriority</code> key in the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$args</code> array (added in WordPress 6.9) and a <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">module_dependencies</code> key (added in WordPress 7.0), neither of which is mentioned in the documentation&#39;s parameter table.</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-900 font-medium"><code>wordpress-develop:src/wp-includes/functions.wp-styles.php</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-900 font-medium"><code>wordpress-develop:src/wp-includes/functions.wp-scripts.php</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-900 font-medium"><code>wordpress-develop:src/wp-includes/link-template.php</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/theme.php</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/script-loader.php</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-admin/edit-form-blocks.php</code> <span class="text-xs">[context] ✓</span></li><li class="text-gray-500"><code>gutenberg:lib/experimental/class-wp-rest-block-editor-settings-controller.php</code> <span class="text-xs">[context] ✓</span></li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code>cec490a72d5361101000bc3e7a89dba2a6d05556</code> &nbsp;·&nbsp; Analyzed: 2026-05-22T16:52:21.721Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>

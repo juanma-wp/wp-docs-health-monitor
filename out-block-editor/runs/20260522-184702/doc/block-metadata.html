@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Metadata in block.json</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/block-api.html" class="hover:underline text-blue-600">block-api</a>
+      &rsaquo; <span>Metadata in block.json</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">Metadata in block.json</h1>
+        <a href="https://developer.wordpress.org/block-editor/reference-guides/block-api/block-metadata/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/block-editor/reference-guides/block-api/block-metadata/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">100</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>
+      </div>
+    </div><section class="mb-8"><p class="text-green-700 font-medium">✅ No issues found.</p></section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The doc correctly documents <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">blockHooks</code> position values (<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">before</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">after</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">firstChild</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">lastChild</code>) — these match exactly the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">position_mappings</code> array in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">register_block_type_from_metadata()</code> in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">blocks.php</code> and the schema&#39;s enum for <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">blockHooks</code> pattern properties.</li><li>The doc accurately describes the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">render</code> property&#39;s exposed PHP variables (<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$attributes</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$content</code>, <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$block</code>) — these match the render callback closure signature in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">register_block_type_from_metadata()</code>: <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">static function ( $attributes, $content, $block ) use ( $template_path )</code>.</li><li>GAP: The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">WPDefinedAsset</code> object shape documents a <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">handle</code> property that can be set in the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">.asset.php</code> file to override the auto-generated handle name. This is correctly implemented in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">register_block_script_handle()</code> via <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$script_handle = $script_asset[&#39;handle&#39;] ?? generate_block_asset_handle(...)</code>, but the doc does not mention that providing a <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">handle</code> in the asset file will cause WordPress to skip re-registering if that handle is already registered (<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">wp_script_is( $script_handle, &#39;registered&#39; )</code>), which is important for shared script handles.</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-900 font-medium"><code>gutenberg:schemas/json/block.json</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-900 font-medium"><code>wordpress-develop:src/wp-includes/blocks.php</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-900 font-medium"><code>gutenberg:packages/blocks/src/api/registration.ts</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/class-wp-block.php</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/functions.wp-scripts.php</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/functions.wp-styles.php</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/script-modules.php</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/l10n.php</code> <span class="text-xs">[context] ✓</span></li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code>1642980d599be51c7cce7b2dc3a0c052b69ad367</code> &nbsp;·&nbsp; Analyzed: 2026-05-22T16:37:30.505Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>

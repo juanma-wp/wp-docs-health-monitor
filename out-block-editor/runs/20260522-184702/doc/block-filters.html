@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Block Filters</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/filters.html" class="hover:underline text-blue-600">filters</a>
+      &rsaquo; <span>Block Filters</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">Block Filters</h1>
+        <a href="https://developer.wordpress.org/block-editor/reference-guides/filters/block-filters/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/block-editor/reference-guides/filters/block-filters/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">96</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>
+      </div>
+    </div><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Issues (2)</h2>
+        
+    <div class="border-l-4 border-l-gray-400 bg-gray-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">minor</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">broken-example</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 85%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        add_filter( &#39;render_block&#39;, &#39;example_add_custom_class_to_paragraph_block&#39;, 10, 2 );
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/wordpress-develop/blob/7.0/src/wp-includes/class-wp-block.php" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">wordpress-develop:src/wp-includes/class-wp-block.php</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>@param string   $block_content The block content.
+		 * @param array    $block         The full block, including name and attributes.
+		 * @param WP_Block $instance      The block instance.</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Update the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">render_block</code> filter example to register the callback with <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">accepted_args = 3</code> instead of <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">2</code>.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>Change <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">add_filter( &#39;render_block&#39;, &#39;example_add_custom_class_to_paragraph_block&#39;, 10, 2 )</code> to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">add_filter( &#39;render_block&#39;, &#39;example_add_custom_class_to_paragraph_block&#39;, 10, 3 )</code></li><li>Update the callback signature to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">function example_add_custom_class_to_paragraph_block( $block_content, $block, $instance )</code> to expose the third <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$instance</code> (<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">WP_Block</code>) argument, which was added in WordPress 5.9.0 and is passed by <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">apply_filters( &#39;render_block&#39;, $block_content, $this-&gt;parsed_block, $this )</code></li></ul>
+      </div>
+    </div>
+    <div class="border-l-4 border-l-gray-400 bg-gray-50 pl-4 py-3 mb-4 rounded-r">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-semibold text-sm uppercase tracking-wide">minor</span>
+        <span class="text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">broken-example</span>
+        <span class="text-xs text-gray-400 ml-auto">confidence: 75%</span>
+      </div>
+      <blockquote class="border-l-4 border-blue-300 bg-blue-50 px-3 py-2 mb-2 text-sm italic text-gray-700">
+        add_filter( &#39;render_block_core/paragraph&#39;, &#39;example_add_custom_class_to_paragraph_block&#39;, 10, 2 );
+      </blockquote>
+      <div class="mb-2">
+        <p class="text-xs text-gray-500 mb-1"><a href="https://github.com/WordPress/wordpress-develop/blob/7.0/src/wp-includes/class-wp-block.php" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-600">wordpress-develop:src/wp-includes/class-wp-block.php</a></p>
+        <pre class="bg-gray-100 text-sm rounded px-3 py-2 overflow-x-auto whitespace-pre-wrap"><code>$block_content = apply_filters( &quot;render_block_{$this-&gt;name}&quot;, $block_content, $this-&gt;parsed_block, $this );</code></pre>
+      </div>
+      <div class="bg-blue-100 border border-blue-200 rounded px-3 py-2 text-sm text-blue-900 leading-relaxed">
+        💡 <p class="mb-2">Update the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">add_filter</code> call in the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">render_block_core/paragraph</code> example to declare <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">accepted_args = 3</code> so the callback can optionally receive the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">WP_Block</code> instance.</p><ul class="list-disc list-inside space-y-1 mt-2"><li>Change <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">add_filter( &#39;render_block_core/paragraph&#39;, &#39;example_add_custom_class_to_paragraph_block&#39;, 10, 2 )</code> to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">add_filter( &#39;render_block_core/paragraph&#39;, &#39;example_add_custom_class_to_paragraph_block&#39;, 10, 3 )</code></li><li>Update the callback signature to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">function example_add_custom_class_to_paragraph_block( $block_content, $block, $instance )</code> to match the three arguments passed by <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">apply_filters</code></li><li>Note: the filter passes <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$block_content</code> (string), <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$this-&gt;parsed_block</code> (array), and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$this</code> (WP_Block) — the third argument was added in WordPress 5.9.0</li></ul>
+      </div>
+    </div>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">block_type_metadata_settings</code> filter documentation correctly documents both parameters (<code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$settings</code> and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">$metadata</code>) and their types, matching the actual <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">apply_filters( &#39;block_type_metadata_settings&#39;, $settings, $metadata )</code> call in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">blocks.php</code> at L754.</li><li>The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">blocks.registerBlockType</code> filter documentation accurately describes that it is also applied to each of a block&#39;s deprecated settings, which is confirmed in <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">process-block-type.ts</code> where <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">applyFilters(&#39;blocks.registerBlockType&#39;, ...)</code> is called both for the main block type and within the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">settings.deprecated.map(...)</code> loop.</li><li>GAP: The <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">render_block</code> filter documentation does not mention the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">pre_render_block</code> filter, which fires before <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">render_block</code> and can short-circuit rendering entirely by returning a non-null value. Developers who need to conditionally suppress block rendering entirely would benefit from knowing about this related filter.</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-900 font-medium"><code>wordpress-develop:src/wp-includes/blocks.php</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-900 font-medium"><code>gutenberg:packages/blocks/src/api/serializer.tsx</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-900 font-medium"><code>gutenberg:packages/blocks/src/store/process-block-type.ts</code> <span class="text-xs">[primary] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/block-editor.php</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/class-wp-block-type.php</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>wordpress-develop:src/wp-includes/class-wp-block.php</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/blocks/src/api/parser/get-block-attributes.ts</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/editor/src/components/provider/use-post-content-block-types.js</code> <span class="text-xs">[secondary] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/blocks/src/api/factory.ts</code> <span class="text-xs">[context] ✓</span></li><li class="text-gray-500"><code>gutenberg:packages/block-editor/src/components/block-edit/index.js</code> <span class="text-xs">[context] ✓</span></li><li class="text-gray-500"><code>gutenberg:schemas/json/block.json</code> <span class="text-xs">[context] ✓</span></li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code>cec490a72d5361101000bc3e7a89dba2a6d05556</code> &nbsp;·&nbsp; Analyzed: 2026-05-22T16:41:16.067Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>

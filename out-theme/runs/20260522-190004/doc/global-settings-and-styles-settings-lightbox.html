@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lightbox</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <nav class="text-sm text-gray-500 mb-6">
+      <a href="../index.html" class="hover:underline text-blue-600">Index</a>
+       &rsaquo; <a href="../folder/global-settings-and-styles-settings.html" class="hover:underline text-blue-600">global-settings-and-styles-settings</a>
+      &rsaquo; <span>Lightbox</span>
+    </nav>
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold mb-1">Lightbox</h1>
+        <a href="https://developer.wordpress.org/themes/global-settings-and-styles/settings/lightbox/" class="text-blue-600 text-sm hover:underline" target="_blank" rel="noopener noreferrer">https://developer.wordpress.org/themes/global-settings-and-styles/settings/lightbox/</a>
+      </div>
+      <div class="flex flex-col items-end gap-1 ml-4 shrink-0">
+        <span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">100</span>
+        <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">healthy</span>
+      </div>
+    </div><section class="mb-8"><p class="text-green-700 font-medium">✅ No issues found.</p></section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Positives</h2>
+        <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+          <li>The doc correctly identifies both <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">enabled</code> and <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">allowEditing</code> as the two nested properties of the <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">lightbox</code> object, matching the schema&#39;s <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">settingsLightboxProperties</code> definition which lists exactly those two properties.</li><li>The doc&#39;s statement that <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">allowEditing</code> defaults to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">true</code> is consistent with the schema, which defines <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">allowEditing</code> as a boolean with no explicit <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">default</code> field — however, the schema also omits a <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">default</code> for <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">enabled</code>, which aligns with the doc&#39;s claim that <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">enabled</code> defaults to <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">undefined</code>.</li><li>GAP: The schema shows <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">lightbox</code> is available under <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">settingsPropertiesComplete</code>, meaning it can technically be set at the global <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">settings</code> level (not just under <code class="bg-gray-100 text-gray-800 px-1 rounded text-xs font-mono">settings.blocks.core/image</code>), but the doc only demonstrates block-level usage. Theme authors may not realise they can set a global lightbox default.</li>
+        </ul>
+      </section><section class="mb-8">
+        <h2 class="text-lg font-semibold mb-3">Related Code</h2>
+        <ul class="space-y-1 text-sm">
+          <li class="text-gray-900 font-medium"><code>gutenberg:schemas/json/theme.json</code> <span class="text-xs">[primary] ✓</span></li>
+        </ul>
+      </section>
+    <footer class="mt-8 pt-4 border-t text-xs text-gray-400">
+      Commit: <code>1642980d599be51c7cce7b2dc3a0c052b69ad367</code> &nbsp;·&nbsp; Analyzed: 2026-05-22T16:53:03.641Z
+    </footer>
+    <div class="mt-4">
+      <a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>
+    </div>
+  </div>
+</body>
+</html>
