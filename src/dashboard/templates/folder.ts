@@ -12,6 +12,11 @@ function statCard(label: string, value: string): string {
 export function renderFolder(node: TreeNode, nav: DashboardNav): string {
   const issueCount = node.docs.reduce((count, doc) => count + doc.issues.length, 0);
   const criticalDocs = node.docs.filter(doc => doc.status === 'critical').length;
+  const lowestScore = node.docs.reduce<number | null>((currentLowest, doc) => {
+    if (doc.healthScore === null) return currentLowest;
+    if (currentLowest === null) return doc.healthScore;
+    return Math.min(currentLowest, doc.healthScore);
+  }, null);
 
   const header = `
     <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -30,7 +35,7 @@ export function renderFolder(node: TreeNode, nav: DashboardNav): string {
         ${statCard('Docs in folder', `${node.docs.length}`)}
         ${statCard('Issues', `${issueCount} total`)}
         ${statCard('Critical docs', `${criticalDocs}`)}
-        ${statCard('Lowest score', `${node.docs[0]?.healthScore ?? 'N/A'}`)}
+        ${statCard('Lowest score', `${lowestScore ?? 'N/A'}`)}
       </div>
     </section>`;
 

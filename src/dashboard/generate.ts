@@ -33,7 +33,7 @@ function normalizeHistory(results: RunResults, history: DashboardHistoryEntry[] 
   }
 
   entries.set(results.runId, {
-    ...entries.get(results.runId),
+    ...(entries.get(results.runId) ?? {}),
     ...buildHistoryEntry(results),
   });
 

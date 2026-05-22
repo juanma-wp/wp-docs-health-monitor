@@ -2,6 +2,8 @@ import type { RunResults } from '../../types/results.js';
 import type { TreeNode } from '../tree-builder.js';
 import { escapeHtml, healthBadge, statusBadge, formatTimestamp, renderDashboardLayout, type DashboardNav } from './shared.js';
 
+const MISSING_HEALTH_SORT_VALUE = 101;
+
 function renderStatCard(label: string, value: string, tone: string): string {
   return `
     <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -56,7 +58,7 @@ export function renderIndex(results: RunResults, tree: TreeNode[], nav: Dashboar
     .sort((a, b) => {
       const issueDelta = b.issues.length - a.issues.length;
       if (issueDelta !== 0) return issueDelta;
-      return (a.healthScore ?? 101) - (b.healthScore ?? 101);
+      return (a.healthScore ?? MISSING_HEALTH_SORT_VALUE) - (b.healthScore ?? MISSING_HEALTH_SORT_VALUE);
     })
     .slice(0, 8);
 
