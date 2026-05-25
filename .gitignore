@@ -5,9 +5,21 @@ node_modules/
 # Build output
 dist/
 build/
-out/
 out-*/
 *.tsbuildinfo
+
+# Generated dashboard output — ignore everything under out/ except the
+# token-paid source-of-truth artifacts. Every other file (HTML, the
+# meta-index sites.json, data/history.json) is derived and rebuilt from
+# these via scripts/rebuild.ts in CI.
+out/**
+!out/
+!out/*/
+!out/*/data/
+!out/*/data/site.json
+!out/*/data/runs/
+!out/*/data/runs/*/
+!out/*/data/runs/*/results.json
 
 # Environment / secrets
 .env
