@@ -12,29 +12,25 @@ function renderStatCard(label: string, value: string, tone: string, surface = 'b
     </div>`;
 }
 
-export function renderIndex(results: RunResults, tree: TreeNode[], nav: DashboardNav): string {
+export function renderIndex(results: RunResults, tree: TreeNode[], nav: DashboardNav, siteName?: string): string {
+  const isLatest = nav.currentRunId === nav.latestRunId;
+  const latestPill = isLatest
+    ? '<span class="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider text-emerald-200 ring-1 ring-emerald-500/40">Latest</span>'
+    : '';
+  const titleHtml = siteName
+    ? `<h2 class="text-2xl font-semibold tracking-tight">${escapeHtml(siteName)}</h2>`
+    : '';
+
   const headerHtml = `
-    <section class="rounded-3xl bg-slate-900 px-6 py-8 text-white shadow-lg">
-      <div class="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
-        <div class="max-w-3xl">
-          <p class="text-sm font-semibold uppercase tracking-[0.2em] text-slate-300">Overview</p>
-          <h2 class="mt-2 text-4xl font-semibold tracking-tight">Generated results dashboard</h2>
-          <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-300">This report highlights the riskiest documentation pages first, keeps folder rollups close at hand, and lets you jump between historical runs from the same generated dashboard.</p>
-        </div>
-        <div class="grid gap-3 rounded-3xl bg-white/10 p-4 text-sm text-slate-100 shadow-inner sm:grid-cols-2 xl:min-w-[22rem]">
-          <div>
-            <p class="text-xs uppercase tracking-[0.2em] text-slate-300">Run ID</p>
-            <p class="mt-1 font-mono text-sm">${escapeHtml(results.runId)}</p>
-          </div>
-          <div>
-            <p class="text-xs uppercase tracking-[0.2em] text-slate-300">Generated</p>
-            <p class="mt-1">${escapeHtml(formatTimestamp(results.timestamp))}</p>
-          </div>
-          <div>
-            <p class="text-xs uppercase tracking-[0.2em] text-slate-300">Models</p>
-            <p class="mt-1">${escapeHtml(results.models.pass1)} / ${escapeHtml(results.models.pass2)}</p>
-          </div>
-        </div>
+    <section class="rounded-2xl bg-slate-900 px-5 py-5 text-white shadow-sm">
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+        ${titleHtml}
+        ${latestPill}
+      </div>
+      <div class="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm text-slate-300">
+        <span class="font-medium text-slate-100">${escapeHtml(formatTimestamp(results.timestamp))}</span>
+        <span class="text-slate-500">·</span>
+        <span class="font-mono text-xs">Run ${escapeHtml(results.runId)}</span>
       </div>
     </section>`;
 

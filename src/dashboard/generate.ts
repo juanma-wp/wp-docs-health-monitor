@@ -1,4 +1,5 @@
 import { mkdir, writeFile } from 'fs/promises';
+import { existsSync } from 'fs';
 import { join } from 'path';
 import { RunResultsSchema, type RunResults } from '../types/results.js';
 import { buildTree } from './tree-builder.js';
@@ -11,6 +12,7 @@ export type GenerateDashboardOptions = {
   history?: DashboardHistoryEntry[];
   latestRunId?: string;
   mode?: 'latest' | 'run';
+  siteName?: string;
 };
 
 function buildHistoryEntry(results: RunResults): DashboardHistoryEntry {
@@ -44,16 +46,17 @@ function buildRelativePaths(mode: 'latest' | 'run', page: 'index' | 'nested'): {
   currentRunHref: string;
   latestRunHref: string | null;
   archivedRunPrefix: string;
+  metaIndexHref: string;
 } {
   if (mode === 'latest') {
     return page === 'index'
-      ? { currentRunHref: 'index.html', latestRunHref: null, archivedRunPrefix: 'runs' }
-      : { currentRunHref: '../index.html', latestRunHref: '../index.html', archivedRunPrefix: '../runs' };
+      ? { currentRunHref: 'index.html',    latestRunHref: null,             archivedRunPrefix: 'runs',     metaIndexHref: '../index.html' }
+      : { currentRunHref: '../index.html', latestRunHref: '../index.html',  archivedRunPrefix: '../runs',  metaIndexHref: '../../index.html' };
   }
 
   return page === 'index'
-    ? { currentRunHref: 'index.html', latestRunHref: '../../index.html', archivedRunPrefix: '..' }
-    : { currentRunHref: '../index.html', latestRunHref: '../../../index.html', archivedRunPrefix: '../..' };
+    ? { currentRunHref: 'index.html',    latestRunHref: '../../index.html',    archivedRunPrefix: '..',    metaIndexHref: '../../../index.html' }
+    : { currentRunHref: '../index.html', latestRunHref: '../../../index.html', archivedRunPrefix: '../..', metaIndexHref: '../../../../index.html' };
 }
 
 function buildNav(
@@ -62,6 +65,7 @@ function buildNav(
   history: DashboardHistoryEntry[],
   mode: 'latest' | 'run',
   page: 'index' | 'nested',
+  metaIndexAvailable: boolean,
 ): DashboardNav {
   const paths = buildRelativePaths(mode, page);
 
@@ -69,6 +73,7 @@ function buildNav(
     currentRunId,
     latestRunId,
     latestRunHref: currentRunId === latestRunId ? (page === 'index' ? null : paths.currentRunHref) : paths.latestRunHref,
+    metaIndexHref: metaIndexAvailable ? paths.metaIndexHref : null,
     history: history.map(entry => {
       const href = entry.runId === currentRunId
         ? paths.currentRunHref
@@ -95,11 +100,19 @@ export async function generate(results: RunResults, outDir: string, options: Gen
   await mkdir(join(outDir, 'doc'), { recursive: true });
   await mkdir(join(outDir, 'folder'), { recursive: true });
 
-  const tree = buildTree(results.docs);
-  const indexNav = buildNav(results.runId, latestRunId, history, mode, 'index');
-  const nestedNav = buildNav(results.runId, latestRunId, history, mode, 'nested');
+  // Probe for a sibling/ancestor meta-index. Relative to outDir:
+  //   mode='latest' (outDir == <site>): meta is at ../index.html
+  //   mode='run'    (outDir == <site>/runs/<id>): meta is at ../../../index.html
+  const metaProbePath = mode === 'latest'
+    ? join(outDir, '..', 'index.html')
+    : join(outDir, '..', '..', '..', 'index.html');
+  const metaIndexAvailable = existsSync(metaProbePath);
 
-  await writeFile(join(outDir, 'index.html'), renderIndex(results, tree, indexNav), 'utf-8');
+  const tree = buildTree(results.docs);
+  const indexNav = buildNav(results.runId, latestRunId, history, mode, 'index', metaIndexAvailable);
+  const nestedNav = buildNav(results.runId, latestRunId, history, mode, 'nested', metaIndexAvailable);
+
+  await writeFile(join(outDir, 'index.html'), renderIndex(results, tree, indexNav, options.siteName), 'utf-8');
 
   for (const doc of results.docs) {
     await writeFile(join(outDir, 'doc', `${doc.slug}.html`), renderDoc(doc, results.repoUrls, results.repoRefs, nestedNav), 'utf-8');

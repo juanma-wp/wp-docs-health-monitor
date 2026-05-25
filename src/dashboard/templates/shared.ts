@@ -41,10 +41,13 @@ export function issueBreakdown(issues: Issue[]): IssueBreakdown {
 }
 
 export function renderIssueBreakdown(b: IssueBreakdown): string {
-  const seg = (n: number, label: string, activeColor: string): string =>
-    `<span class="font-medium ${n > 0 ? activeColor : 'text-slate-400'}">${n}</span><span class="ml-1 ${n > 0 ? 'text-slate-600' : 'text-slate-400'}">${label}</span>`;
+  const seg = (n: number, label: string, activeColor: string): string => {
+    const numColor   = n > 0 ? activeColor    : 'text-slate-400';
+    const labelColor = n > 0 ? 'text-slate-600' : 'text-slate-400';
+    return `<span class="whitespace-nowrap"><span class="font-medium ${numColor}">${n}</span>&nbsp;<span class="${labelColor}">${label}</span></span>`;
+  };
   return `
-    <span class="inline-flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm">
+    <span class="inline-flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm">
       ${seg(b.critical, 'critical', 'text-red-700')}
       ${seg(b.major,    'major',    'text-amber-700')}
       ${seg(b.minor,    'minor',    'text-slate-700')}
@@ -104,6 +107,7 @@ export type DashboardNav = {
   currentRunId: string;
   latestRunId: string;
   latestRunHref: string | null;
+  metaIndexHref: string | null;
   history: DashboardRunLink[];
 };
 
@@ -141,11 +145,16 @@ export function renderDashboardLayout(title: string, nav: DashboardNav, content:
     ? `<a href="${escapeHtml(nav.latestRunHref)}" class="mt-2 inline-flex items-center rounded-full bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700">Go to latest dashboard</a>`
     : '';
 
+  const metaIndexLinkHtml = nav.metaIndexHref
+    ? `<a href="${escapeHtml(nav.metaIndexHref)}" class="inline-flex items-center text-xs font-medium text-blue-700 hover:text-blue-900 hover:underline">← All sites</a>`
+    : '';
+
   return htmlShell(title, `
     <div class="lg:grid lg:grid-cols-[19rem_minmax(0,1fr)] lg:gap-8">
       <aside class="mb-8 lg:sticky lg:top-6 lg:mb-0 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto">
         <div class="space-y-4 rounded-3xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
           <div>
+            ${metaIndexLinkHtml ? `<div class="mb-2">${metaIndexLinkHtml}</div>` : ''}
             <p class="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Report explorer</p>
             <h1 class="mt-2 text-2xl font-semibold text-slate-950">Docs Health Monitor</h1>
             <p class="mt-2 text-sm text-slate-600">Browse the latest report, jump to historical runs, and inspect changes without leaving the generated site.</p>
