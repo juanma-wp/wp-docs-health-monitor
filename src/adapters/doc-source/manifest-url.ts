@@ -141,8 +141,8 @@ export class ManifestUrlDocSource implements DocSource {
     const results = await Promise.all(
       scoped.map(entry =>
         limit(async (): Promise<DocFetchResult> => {
-          const { slug, title, markdown_source, parent } = entry;
-          const sourceUrl = deriveSourceUrl(markdown_source, sourceUrlBase);
+          const { slug, title, markdown_source, parent, original_url } = entry;
+          const sourceUrl = original_url ?? deriveSourceUrl(markdown_source, sourceUrlBase);
 
           let rawContent: string;
           try {

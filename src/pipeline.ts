@@ -5,6 +5,7 @@ import pLimit from 'p-limit';
 
 import type { Config } from './config/schema.js';
 import type { RunResults, DocResult } from './types/results.js';
+import { DEFAULT_DISCLAIMER } from './types/results.js';
 import type { DocFetchResult, Doc } from './adapters/doc-source/types.js';
 import { createDocSource, createCodeSources, createDocCodeMapper, createValidator } from './adapters/index.js';
 import type { CostAccumulator } from './adapters/validator/claude.js';
@@ -219,6 +220,7 @@ export async function runPipeline(config: Config, options: RunPipelineOptions = 
     repoRefs,
     totals,
     usage,
+    disclaimer: DEFAULT_DISCLAIMER,
     docs: docResults,
   };
 

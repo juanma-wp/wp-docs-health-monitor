@@ -1713,16 +1713,6 @@
     ],
     "context": []
   },
-  "theme-json-v2": {
-    "primary": [
-      {
-        "repo": "gutenberg",
-        "path": "schemas/json/theme.json"
-      }
-    ],
-    "secondary": [],
-    "context": []
-  },
   "theme-json-migrations": {
     "primary": [
       {
@@ -1982,10 +1972,5 @@
         "path": "packages/plugins/src/api/index.ts"
       }
     ]
-  },
-  "theme-json-v1": {
-    "primary": [],
-    "secondary": [],
-    "context": []
   }
 }

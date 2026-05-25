@@ -5,6 +5,7 @@ export const ManifestEntrySchema = z.object({
   title:           z.string(),
   markdown_source: z.string().url(),       // always absolute URL — adapter resolves before validating
   parent:          z.string().nullable(),  // null for top-level handbook entries
+  original_url:    z.string().url().optional(), // override for sourceUrl when the published URL can't be derived from markdown_source
 });
 export type ManifestEntry = z.infer<typeof ManifestEntrySchema>;
 
