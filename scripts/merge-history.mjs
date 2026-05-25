@@ -1,4 +1,5 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 
 export const RUN_ID_PATTERN = /^\d{8}-\d{6}$/;
@@ -85,7 +86,7 @@ export function buildPublishPlan(existingHistory, localHistory) {
 
 const [, scriptPath, existingPath, newPath] = process.argv;
 
-if (scriptPath === fileURLToPath(import.meta.url)) {
+if (scriptPath && resolve(scriptPath) === fileURLToPath(import.meta.url)) {
   if (!existingPath || !newPath) {
     console.error('Usage: node scripts/merge-history.mjs <existing-history-path> <new-entry-source-path>');
     process.exit(1);

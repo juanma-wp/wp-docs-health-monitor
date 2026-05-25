@@ -219,7 +219,7 @@ describe('scripts/publish.sh', () => {
     const outDir = join(repoDir, 'out');
     await mkdir(join(outDir, 'data', 'runs', '20240415-120000'), { recursive: true });
     await writeFile(join(outDir, 'index.html'), '<html></html>');
-    // This intentionally trips publish.sh's pre-merge JSON parsing path.
+    // This intentionally trips merge-history.mjs readHistoryFile validation via publish.sh.
     await writeFile(join(outDir, 'data', 'history.json'), '{invalid json');
     await writeFile(join(outDir, 'data', 'runs', '20240415-120000', 'results.json'), '{}');
 
