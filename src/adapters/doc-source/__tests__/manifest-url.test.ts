@@ -335,6 +335,40 @@ describe('ManifestUrlDocSource — sourceUrl', () => {
       expect(results[0].doc.sourceUrl).toContain('/blob/');
     }
   });
+
+  it('uses entry.original_url as sourceUrl when present, ignoring sourceUrlBase derivation', async () => {
+    const rawUrl   = 'https://raw.githubusercontent.com/owner/repo/main/handbook/001-index.md';
+    const publishedUrl = 'https://developer.wordpress.org/themes/getting-started/';
+    vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+      const urlStr = String(url);
+      if (urlStr === MANIFEST_URL) {
+        return new Response(JSON.stringify([{
+          slug: 'getting-started',
+          title: 'Getting Started',
+          markdown_source: rawUrl,
+          parent: 'handbook',
+          original_url: publishedUrl,
+        }]), { status: 200 });
+      }
+      if (urlStr === rawUrl) {
+        return new Response('# Getting Started\nContent.', { status: 200 });
+      }
+      return new Response(JSON.stringify([]), { status: 200 });
+    }));
+
+    const source = new ManifestUrlDocSource({
+      manifestUrl: MANIFEST_URL,
+      parentSlug: 'handbook',
+      // sourceUrlBase is intentionally set to confirm original_url takes precedence.
+      sourceUrlBase: 'https://example.invalid/should-not-be-used/',
+    });
+    const results = await source.fetchDocs();
+    expect(results).toHaveLength(1);
+    expect(results[0].ok).toBe(true);
+    if (results[0].ok) {
+      expect(results[0].doc.sourceUrl).toBe(publishedUrl);
+    }
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -453,5 +487,42 @@ describe('ManifestUrlDocSource — ignore', () => {
     const results = await source.fetchDocs();
     const slugs = results.flatMap(r => r.ok ? [r.doc.slug] : []);
     expect(slugs.sort()).toEqual(['block-attributes', 'block-bindings']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// parentSlug "*" — wildcard scope (every manifest entry, modulo ignore)
+// ---------------------------------------------------------------------------
+
+describe('ManifestUrlDocSource — parentSlug "*"', () => {
+  it('"*" skips the parent filter — every manifest entry reaches the fetch stage', async () => {
+    // flatManifest has 3 entries: block-api (parent: null), block-attributes,
+    // and block-bindings. Under literal-slug scoping `parentSlug: 'block-api'`
+    // only block-attributes / block-bindings make it through. Under "*" all 3
+    // do, including the parent-null root.
+    mockManifestFetch(flatManifest);
+    const source = new ManifestUrlDocSource({
+      manifestUrl: MANIFEST_URL,
+      parentSlug: '*',
+    });
+    const results = await source.fetchDocs();
+    const slugs = results.map(r => (r.ok ? r.doc.slug : r.slug));
+    expect(slugs.sort()).toEqual(['block-api', 'block-attributes', 'block-bindings']);
+  });
+
+  it('"*" composes with ignore.subtrees — drops the subtree, keeps the rest', async () => {
+    // deepManifest: block-api → block-bindings → binding-source-1 → sub-detail.
+    // ignore.subtrees: ['block-bindings'] drops block-bindings AND its
+    // transitive descendants. "*" keeps everything else, including the
+    // parent-null root block-api.
+    mockManifestFetch(deepManifest);
+    const source = new ManifestUrlDocSource({
+      manifestUrl: MANIFEST_URL,
+      parentSlug: '*',
+      ignore: { subtrees: ['block-bindings'] },
+    });
+    const results = await source.fetchDocs();
+    const slugs = results.map(r => (r.ok ? r.doc.slug : r.slug));
+    expect(slugs.sort()).toEqual(['block-api']);
   });
 });

@@ -73,21 +73,22 @@ Inside `validateDoc` (`src/adapters/validator/claude.ts:337`), each doc goes thr
 | 2 | `buildUserContent` | `claude.ts:357` | local | Concatenates the seven sections of the user message (see [PASS1.md → The user message](./PASS1.md#the-user-message-composed)). |
 | 3 | `runPass1` × `samples` | `claude.ts:614` | **1 Claude call per sample** | One `messages.create` call with the cached system prompt and forced `report_findings` tool. With `samples > 1` (issue #56), unique candidates are unioned by fingerprint before the gate. |
 | 4 | Verbatim gate | `claude.ts:414-453` | free (no LLM) | Two deterministic checks per candidate (`docSays` in doc, `codeSays` in file). See [PASS1.md → The verbatim check](./PASS1.md#the-verbatim-check-gate-function). |
-| 5 | `runPass2` × *N* | `claude.ts:458-474` | **1 Claude call per survivor** | Sequential within the doc. Each surviving candidate gets re-read with `fetch_code` and either confirmed or dropped. Survivors are deduped by `type \| codeFile \| docSays` immediately on emission. |
+| 5 | `runPass2` × *N* | `claude.ts:458-474` | **1 Pass 2 verification per survivor; each is an agentic loop of 1–10 API round-trips** | Sequential within the doc. For each surviving candidate, `runPass2` (`claude.ts:692-777`) runs a bounded loop where Claude alternates between calling `fetch_code(repo, path, start, end)` to inspect code regions and calling `report_findings` to emit its keep/revise/reject verdict. The loop ends as soon as `report_findings` fires (typically after 2–3 round-trips) or after the 10-turn cap. Survivors are deduped by `type \| codeFile \| docSays` immediately on emission. |
 | 6 | `buildDocResult` | `claude.ts:476-479` | local | Applies the health-score formula (see [ARCHITECTURE.md → Drift Validator](../ARCHITECTURE.md#drift-validator)) and packs the `DocResult`. |
 
 Per-doc API cost:
 
 ```
 1 × Pass 1                  (or `samples` × Pass 1 when samples > 1)
-+ N × Pass 2                (N = candidates that survived the gate)
++ N × Pass 2 verifications  (N = candidates that survived the gate)
+   └─ each = T API calls    (T ∈ [1, 10], typically 2–3: fetch_code → tool_result → report_findings)
 + verbatim gate              free
 + dedup                      free
 ─────────────────────────
-≈ (1 + N) Anthropic calls per doc
+≈ 1 + N × avg-T Anthropic calls per doc
 ```
 
-Aggregate for a 150-doc run: `150 × (1 + avg-N)` calls, with the cached system prompt amortised across all of them.
+Aggregate for a 150-doc run: `150 × (1 + avg-N × avg-T)` calls. The cached system prompt is paid once and amortised across all of them, so the marginal cost of extra Pass 2 turns is mostly the per-call input/output deltas rather than the full system-prompt re-tokenisation.
 
 ---
 

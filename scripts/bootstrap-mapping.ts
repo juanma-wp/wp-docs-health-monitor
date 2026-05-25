@@ -1,29 +1,26 @@
 /**
- * bootstrap-mapping.ts — dev-time helper for seeding mappings/gutenberg-block-api.json
+ * bootstrap-mapping.ts — dev-time helper for seeding a site's mapping file.
  *
  * Usage:
- *   npx tsx scripts/bootstrap-mapping.ts <slug> [--config <path>]
+ *   npx tsx scripts/bootstrap-mapping.ts <slug> --config <path>
  *
  * For each slug, asks Claude to propose a CodeTiers entry based on the doc
  * content and the repo file trees. A human reviews the output and merges it
- * into mappings/gutenberg-block-api.json.
+ * into the site's `mappings/<site>.json`.
  */
 
 import { readFileSync, writeFileSync } from 'fs';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { resolve } from 'path';
 import Anthropic from '@anthropic-ai/sdk';
 import { loadConfig } from '../src/config/loader.js';
 import { createCodeSources } from '../src/adapters/index.js';
 import { ManifestEntrySchema } from '../src/types/mapping.js';
 import { CodeTiersSchema } from '../src/types/mapping.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
 function parseArgs(argv: string[]): { slug: string; configPath: string } {
   const args = argv.slice(2);
   let slug = '';
-  let configPath = resolve(__dirname, '../config/gutenberg-block-api.json');
+  let configPath: string | null = null;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--config' && args[i + 1]) {
@@ -34,8 +31,8 @@ function parseArgs(argv: string[]): { slug: string; configPath: string } {
     }
   }
 
-  if (!slug) {
-    console.error('Usage: npx tsx scripts/bootstrap-mapping.ts <slug> [--config <path>]');
+  if (!slug || !configPath) {
+    console.error('Usage: npx tsx scripts/bootstrap-mapping.ts <slug> --config <path>');
     process.exit(1);
   }
 
@@ -142,7 +139,7 @@ ${fileTrees.join('\n\n')}`;
   // 6. Print to stdout as JSON for human review
   const output = { [slug]: tiers };
   console.log(JSON.stringify(output, null, 2));
-  console.error(`\nReview the above output and merge it into mappings/gutenberg-block-api.json`);
+  console.error(`\nReview the above output and merge it into ${config.mappingPath}`);
 }
 
 main().catch(err => {

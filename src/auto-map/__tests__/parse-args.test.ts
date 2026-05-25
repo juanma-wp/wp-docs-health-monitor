@@ -3,7 +3,14 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { parseArgs } from '../parse-args.js';
 
 // Use a sentinel `process.argv[0..1]` prefix so tests focus on the user args.
+// `argv` auto-injects `--config cfg.json` — `--config` is required by
+// parseArgs, and threading it through every test clutters the assertions.
+// `argvBare` is the escape hatch for tests that cover missing-config behaviour.
 function argv(...flags: string[]): string[] {
+  return ['node', 'auto-map.ts', '--config', 'cfg.json', ...flags];
+}
+
+function argvBare(...flags: string[]): string[] {
   return ['node', 'auto-map.ts', ...flags];
 }
 
@@ -89,6 +96,45 @@ describe('parseArgs', () => {
     const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     expect(() => parseArgs(argv())).toThrow(/exit:1/);
+
+    exitSpy.mockRestore();
+    errSpy.mockRestore();
+  });
+
+  it('parses --all --dry-run and suppresses the implicit --write', () => {
+    const args = parseArgs(argv('--all', '--dry-run'));
+    expect(args.all).toBe(true);
+    expect(args.dryRun).toBe(true);
+    // --dry-run exits before any write — implicit --write would be misleading.
+    expect(args.write).toBe(false);
+  });
+
+  it('dryRun defaults to false', () => {
+    expect(parseArgs(argv('block-metadata')).dryRun).toBe(false);
+    expect(parseArgs(argv('--all')).dryRun).toBe(false);
+  });
+
+  it('rejects --dry-run outside batch mode', () => {
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(((code?: number) => {
+      throw new Error(`exit:${code}`);
+    }) as never);
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    expect(() => parseArgs(argv('block-metadata', '--dry-run'))).toThrow(/exit:1/);
+    expect(errSpy.mock.calls.flat().join('\n')).toMatch(/--dry-run only applies in batch mode/);
+
+    exitSpy.mockRestore();
+    errSpy.mockRestore();
+  });
+
+  it('rejects missing --config (mirrors src/cli.ts contract)', () => {
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(((code?: number) => {
+      throw new Error(`exit:${code}`);
+    }) as never);
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    expect(() => parseArgs(argvBare('block-metadata'))).toThrow(/exit:1/);
+    expect(errSpy.mock.calls.flat().join('\n')).toMatch(/--config is required/);
 
     exitSpy.mockRestore();
     errSpy.mockRestore();

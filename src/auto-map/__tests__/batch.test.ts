@@ -147,4 +147,47 @@ describe('planBatch — drives `auto-map.ts --all` iteration', () => {
       'packages',
     ]);
   });
+
+  it('parentSlug "*" skips the parent filter — every manifest entry is in scope', () => {
+    const plan = planBatch({
+      entries:       MANIFEST,
+      parentSlug:    '*',
+      existingSlugs: new Set(),
+      force:         false,
+    });
+    // No ignore, no parent filter — every slug in the manifest in manifest order.
+    expect(plan.map(p => p.slug)).toEqual([
+      'block-api',
+      'block-attributes',
+      'block-bindings',
+      'block-metadata',
+      'some-other-area',
+      'inner-other',
+      'contributors',
+      'packages',
+      'packages-blocks',
+    ]);
+  });
+
+  it('parentSlug "*" composes with ignore — ignored subtree + slug excluded across the whole manifest', () => {
+    const plan = planBatch({
+      entries:       MANIFEST,
+      parentSlug:    '*',
+      ignore:        { slugs: ['contributors'], subtrees: ['packages'] },
+      existingSlugs: new Set(),
+      force:         false,
+    });
+    // contributors excluded by ignore.slugs; packages + packages-blocks excluded by subtree walk.
+    // Everything else stays — including the parent-null roots `block-api` and
+    // `some-other-area`, plus `inner-other` (out-of-scope under literal-slug
+    // mode but in-scope under "*").
+    expect(plan.map(p => p.slug)).toEqual([
+      'block-api',
+      'block-attributes',
+      'block-bindings',
+      'block-metadata',
+      'some-other-area',
+      'inner-other',
+    ]);
+  });
 });

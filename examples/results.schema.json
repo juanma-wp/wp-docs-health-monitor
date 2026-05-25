@@ -146,6 +146,10 @@
           ],
           "additionalProperties": false
         },
+        "disclaimer": {
+          "type": "string",
+          "default": "AI-surfaced candidates for documentation review. Each finding represents a potential discrepancy between docs and code, identified by a language model. Verify against source before applying fixes. Approximately 15–20% of candidates may be false positives or require editorial judgement."
+        },
         "docs": {
           "type": "array",
           "items": {

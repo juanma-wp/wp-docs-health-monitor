@@ -438,8 +438,8 @@ describe('orchestrator + AuditWriter wiring (smoke)', () => {
   });
 
   it('auditPathFor derives `<mapping>.audit.json` from `<mapping>.json`', () => {
-    expect(auditPathFor('mappings/gutenberg-block-api.json')).toBe(
-      'mappings/gutenberg-block-api.audit.json',
+    expect(auditPathFor('mappings/example-site.json')).toBe(
+      'mappings/example-site.audit.json',
     );
     // Falls back to suffix append for non-.json paths
     expect(auditPathFor('mappings/site')).toBe('mappings/site.audit.json');

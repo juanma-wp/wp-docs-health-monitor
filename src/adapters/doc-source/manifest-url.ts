@@ -109,8 +109,11 @@ export class ManifestUrlDocSource implements DocSource {
       return [parsed.data];
     });
 
-    // Filter by parentSlug
-    const filtered = resolvedEntries.filter(e => e.parent === parentSlug);
+    // Filter by parentSlug. "*" means "no parent filter" — every manifest
+    // entry is in scope, leaving `ignore` as the only narrowing mechanism.
+    const filtered = parentSlug === '*'
+      ? resolvedEntries
+      : resolvedEntries.filter(e => e.parent === parentSlug);
 
     // Apply ignore: drop entries by slug, or whose ancestor chain hits a subtree root.
     // The walk starts at the entry's own slug so `subtrees: [X]` drops X itself too.
@@ -138,8 +141,8 @@ export class ManifestUrlDocSource implements DocSource {
     const results = await Promise.all(
       scoped.map(entry =>
         limit(async (): Promise<DocFetchResult> => {
-          const { slug, title, markdown_source, parent } = entry;
-          const sourceUrl = deriveSourceUrl(markdown_source, sourceUrlBase);
+          const { slug, title, markdown_source, parent, original_url } = entry;
+          const sourceUrl = original_url ?? deriveSourceUrl(markdown_source, sourceUrlBase);
 
           let rawContent: string;
           try {

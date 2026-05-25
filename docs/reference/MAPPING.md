@@ -22,6 +22,27 @@ Mapping quality dominates analysis quality. A doc with no mapping entry is silen
 
 ---
 
+## Scope: which slugs get mapped
+
+`config.docSource.parentSlug` is the scope dial. Both auto-map and the validator runtime read it through the same predicate, so they always agree on which slugs are in scope.
+
+| Value | In scope |
+|---|---|
+| `"<slug>"` (literal, e.g. `"block-api"`) | Direct children of `<slug>` — manifest entries where `parent === "<slug>"`. |
+| `"*"` | Every manifest entry, regardless of `parent`. Use when you want handbook-wide scope. |
+| `""` or field omitted | Rejected at config-load with an error naming both valid forms. |
+
+`docSource.ignore` is the second-stage filter and applies in both modes:
+
+- `ignore.slugs: ["foo"]` drops the named entry.
+- `ignore.subtrees: ["foo"]` drops `foo` and every transitive descendant (via the manifest `parent` chain).
+
+So `parentSlug: "*"` + `ignore.subtrees: ["packages", "components"]` means "every manifest entry except those subtrees."
+
+**Cost flag for `"*"`**: the Gutenberg manifest has ~426 entries. After dropping a few subtrees you're still re-ranking ~300 slugs in one `auto-map.ts --all` run. Do a first pass with `--no-rerank` to sanity-check coverage before paying the LLM cost.
+
+---
+
 ## The two mapping files
 
 For a config named `<site>` (e.g. `gutenberg-block-api`), two files live under `mappings/`:

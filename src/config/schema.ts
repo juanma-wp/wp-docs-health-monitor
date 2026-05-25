@@ -7,7 +7,17 @@ export const ConfigSchema = z.object({
   docSource: z.object({
     type:          z.literal('manifest-url'),
     manifestUrl:   z.string().url(),
-    parentSlug:    z.string(),
+    // Scope dial. Two valid forms:
+    //   - A specific parent slug (e.g. "block-api"): include only manifest
+    //     entries whose `parent` matches. Direct children of one node.
+    //   - "*": no parent filter — every manifest entry is in scope, modulo
+    //     `ignore` below. Required for handbook-wide scope.
+    // Empty string and missing field are rejected at parse time. The wildcard
+    // is spelled "*" rather than left implicit so it's always discoverable in
+    // config files and grep.
+    parentSlug:    z.string().min(1,
+      'docSource.parentSlug must be set. Use "*" to scope to every manifest entry (minus docSource.ignore), or a specific parent slug (e.g. "block-api") to scope to that slug\'s direct children.',
+    ),
     sourceUrlBase: z.string().url().optional(), // e.g. "https://developer.wordpress.org/block-editor/"
                                                 // if absent, falls back to GitHub UI URL
     // Manifest entries to drop before any markdown fetches. `slugs` drops

@@ -1,0 +1,3876 @@
+{
+  "_comment": "GENERATED FILE — do not hand-edit. Re-run scripts/auto-map.ts to regenerate.",
+  "version": 1,
+  "audits": {
+    "advanced-topics": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    },
+    "advanced-topics-build-process": {
+      "primary": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/functions.wp-scripts.php",
+          "rationale": "Matched on `wp_enqueue_script`, which is the canonical PHP function discussed in the doc's 'Loading scripts and styles' section.",
+          "confidence": 0.82
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/functions.wp-styles.php",
+          "rationale": "Matched on `wp_enqueue_style`, which is the canonical PHP function discussed in the doc's 'Loading scripts and styles' section.",
+          "confidence": 0.82
+        }
+      ],
+      "secondary": [],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Single generic token match — `version` is a universal JSON-schema property, not related to the build process doc subject."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Single generic token match — `version` is a universal JSON-schema property, not related to the build process doc subject."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/embed/icons.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file; icon directory noise, unrelated to build process."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/navigator/stories/index.story.tsx",
+          "rationale": "Single generic token match — `path` in a stories/fixtures file; unrelated to the build process doc subject."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/form/stories/shared.tsx",
+          "rationale": "Single generic token match — `include` in a stories/fixtures file; unrelated to the build process doc subject."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/amazon.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file in icons directory; noise."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/bandcamp.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file in icons directory; noise."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/behance.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file in icons directory; noise."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/bluesky.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file in icons directory; noise."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/chain.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file in icons directory; noise."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/codepen.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file in icons directory; noise."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/deviantart.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file in icons directory; noise."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/discord.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file in icons directory; noise."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/dribbble.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file in icons directory; noise."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/dropbox.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file in icons directory; noise."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/etsy.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file in icons directory; noise."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/facebook.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file in icons directory; noise."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/feed.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file in icons directory; noise."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/fivehundredpx.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file in icons directory; noise."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/flickr.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file in icons directory; noise."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/foursquare.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file in icons directory; noise."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/github.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file in icons directory; noise."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/goodreads.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file in icons directory; noise."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/google.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file in icons directory; noise."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/gravatar.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file in icons directory; noise."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/instagram.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file in icons directory; noise."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/lastfm.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file in icons directory; noise."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/linkedin.js",
+          "rationale": "Single generic token match — `version` in an SVG icon file in icons directory; noise."
+        }
+      ]
+    },
+    "advanced-topics-child-themes": {
+      "primary": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/l10n.php",
+          "rationale": "Matched on `load_child_theme_textdomain` and `load_theme_textdomain`, the exact functions described in the Internationalization section of the child themes doc.",
+          "confidence": 0.92
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/link-template.php",
+          "rationale": "Matched on `get_theme_file_path` and `get_theme_file_uri`, the canonical functions for referencing files in child themes as documented.",
+          "confidence": 0.92
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/functions.wp-styles.php",
+          "rationale": "Matched on `wp_enqueue_style`, which is the function used in the doc's stylesheet-loading examples for child themes.",
+          "confidence": 0.82
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/theme.php",
+          "rationale": "Matched on `get_stylesheet_uri`, used in the doc's child theme style-loading code snippets.",
+          "confidence": 0.8
+        }
+      ],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/fields/src/types.ts",
+          "rationale": "Single-token match on `Template` — a generic TypeScript type identifier in the Gutenberg fields package, unrelated to the CSS `Template` header field for child themes."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "routes/template-list/types.ts",
+          "rationale": "Single-token match on `Template` — a route-level TypeScript type for block-editor template listing, not related to the child theme `Template` header field."
+        }
+      ]
+    },
+    "advanced-topics-debugging": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    },
+    "advanced-topics-internationalization": {
+      "primary": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/l10n.php",
+          "rationale": "Matched on `_e`, `load_theme_textdomain`, and `load_child_theme_textdomain` — the three core i18n functions central to this doc.",
+          "confidence": 0.97
+        }
+      ],
+      "secondary": [],
+      "context": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-settings.php",
+          "rationale": "Path-convention: core bootstrap file where `after_setup_theme` hook is fired, providing context for when textdomain loading runs.",
+          "confidence": 0.55
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/theme.php",
+          "rationale": "Single generic hook match — `after_setup_theme` is only incidentally used in theme tests; no i18n symbols matched."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/admin/themeBodyClass.php",
+          "rationale": "Single generic hook match — `after_setup_theme` used as test scaffolding for body class, unrelated to internationalization."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/post/getBodyClass.php",
+          "rationale": "Single generic hook match — `after_setup_theme` used as test scaffolding for body class, unrelated to internationalization."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/block-template.php",
+          "rationale": "Single generic hook match — `after_setup_theme` used as test setup for block templates, unrelated to i18n."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/customize/selective-refresh-ajax.php",
+          "rationale": "Single generic hook match — `after_setup_theme` used as test scaffolding for customizer, unrelated to internationalization."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/customize/widgets.php",
+          "rationale": "Single generic hook match — `after_setup_theme` used as test scaffolding for customizer widgets, unrelated to internationalization."
+        }
+      ]
+    },
+    "advanced-topics-javascript-best-practices": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    },
+    "advanced-topics-plugin-api-hooks": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    },
+    "advanced-topics-privacy": {
+      "primary": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/link-template.php",
+          "rationale": "Matched on `get_privacy_policy_url`, `the_privacy_policy_link`, and `get_the_privacy_policy_link` — the three canonical privacy policy link functions described in the doc.",
+          "confidence": 0.97
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/comment-template.php",
+          "rationale": "Matched on `comment_form` — the canonical implementation of the comment form function discussed in the Comment Cookies section.",
+          "confidence": 0.88
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/post-template.php",
+          "rationale": "Matched on `the_content`, the classic-theme function recommended for outputting Privacy Policy page content.",
+          "confidence": 0.72
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/blocks/post-content.php",
+          "rationale": "Path segment `post-content` corresponds to the Post Content block referenced in the doc for block themes; matched on `the_content`.",
+          "confidence": 0.72
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/post-content/index.php",
+          "rationale": "Path segment `post-content` corresponds to the Post Content block referenced for block themes; matched on `the_content`.",
+          "confidence": 0.71
+        }
+      ],
+      "context": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/comment.php",
+          "rationale": "Core comment functionality file; contextually related to the comment cookies/comment_form discussion, matched on `the_content`.",
+          "confidence": 0.55
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/blocks.php",
+          "rationale": "Core blocks registration file; provides context for block rendering mentioned in the doc, matched on `the_content`.",
+          "confidence": 0.52
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/media.php",
+          "rationale": "Single repeated token `the_content` match — unrelated media test file with no privacy or comment policy relevance."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/blocks/render.php",
+          "rationale": "Single repeated token `the_content` match — generic block render test, no privacy-specific content."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "lib/compat/wordpress-7.0/class-gutenberg-rest-revisions-controller.php",
+          "rationale": "Single-token `the_content` match — REST revisions controller, unrelated to privacy policy or comment cookies."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "lib/experimental/navigation-theme-opt-in.php",
+          "rationale": "Single-token `the_content` match — navigation theme opt-in experiment, unrelated to privacy features."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-content/themes/twentyseventeen/template-parts/post/content-audio.php",
+          "rationale": "Single-token `the_content` match in a theme template part for audio posts — unrelated to privacy."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-content/themes/twentyseventeen/template-parts/post/content-video.php",
+          "rationale": "Single-token `the_content` match in a theme template part for video posts — unrelated to privacy."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-content/themes/twentytwentyone/inc/template-functions.php",
+          "rationale": "Single-token `the_content` match in a bundled theme's template functions — unrelated to privacy."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/feed.php",
+          "rationale": "Single-token `the_content` match — feed output file, unrelated to privacy policy or comment cookies."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/formatting.php",
+          "rationale": "Single-token `the_content` match — generic text formatting utilities, unrelated to privacy."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/rest-api/endpoints/class-wp-rest-attachments-controller.php",
+          "rationale": "Single-token `the_content` match — REST attachments endpoint, unrelated to privacy policy features."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/rest-api/endpoints/class-wp-rest-posts-controller.php",
+          "rationale": "Single-token `the_content` match — REST posts endpoint, unrelated to privacy policy features."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/rest-api/endpoints/class-wp-rest-revisions-controller.php",
+          "rationale": "Single-token `the_content` match — REST revisions endpoint, unrelated to privacy policy features."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/block-bindings/postMetaSource.php",
+          "rationale": "Single-token `the_content` match — block bindings test, unrelated to privacy."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/customize/partial.php",
+          "rationale": "Single-token `the_content` match — Customizer partial test, unrelated to privacy."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/feed/atom.php",
+          "rationale": "Single-token `the_content` match — Atom feed test, unrelated to privacy."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/feed/rss2.php",
+          "rationale": "Single-token `the_content` match — RSS2 feed test, unrelated to privacy."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/multisite/updateBlogStatus.php",
+          "rationale": "Single-token `the_content` match — multisite blog status test, unrelated to privacy."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/rest-api/rest-autosaves-controller.php",
+          "rationale": "Single-token `the_content` match — REST autosaves test, unrelated to privacy."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/rest-api/rest-revisions-controller.php",
+          "rationale": "Single-token `the_content` match — REST revisions test, unrelated to privacy."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/shortcode.php",
+          "rationale": "Single-token `the_content` match — shortcode processing test, unrelated to privacy."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/template.php",
+          "rationale": "Single-token `the_content` match — generic template test, unrelated to privacy."
+        }
+      ]
+    },
+    "advanced-topics-publishing-themes": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    },
+    "advanced-topics-security": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/i18n/src/sprintf.ts",
+          "rationale": "Single-token English match — `sprintf` is a general-purpose string formatting utility in the i18n package, not related to the security/XSS/CSRF/SQL-injection subject of this doc."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/post.php",
+          "rationale": "Single-token match on `add_post_meta`, which is only mentioned in passing as an example of using WordPress API to avoid SQL injection; this file is not authoritative on the security topic itself."
+        }
+      ]
+    },
+    "advanced-topics-testing": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    },
+    "advanced-topics-theme-testing": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    },
+    "advanced-topics-ui-best-practices": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    },
+    "core-concepts": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    },
+    "core-concepts-custom-functionality": {
+      "primary": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/link-template.php",
+          "rationale": "Matched on `get_parent_theme_file_path` and `get_theme_file_path`, the two canonical functions documented for including PHP files from functions.php.",
+          "confidence": 0.9
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/theme.php",
+          "rationale": "Matched on `add_theme_support`, the core function used in the theme setup function example central to the doc.",
+          "confidence": 0.85
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-settings.php",
+          "rationale": "Matched on `after_setup_theme`; this is where WordPress bootstraps theme loading and fires the `after_setup_theme` hook described in the doc.",
+          "confidence": 0.75
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/theme.php",
+          "rationale": "Test file matched on `after_setup_theme` multiple times; provides corroborating test evidence for theme setup behaviour discussed in the doc.",
+          "confidence": 0.72
+        }
+      ],
+      "context": [
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/admin/themeBodyClass.php",
+          "rationale": "Test file matched on `after_setup_theme`; tangentially related via theme setup hook but focuses on admin body class, not functions.php concepts.",
+          "confidence": 0.55
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/post/getBodyClass.php",
+          "rationale": "Test file matched on `after_setup_theme`; uses the hook as test scaffolding but is about post body class, not functions.php directly.",
+          "confidence": 0.52
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/block-template.php",
+          "rationale": "Single weak token match — `after_setup_theme` used only as test scaffolding; file is about block templates, not functions.php."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/customize/selective-refresh-ajax.php",
+          "rationale": "Single weak token match — `after_setup_theme` used only as test scaffolding; file is about customizer AJAX, unrelated to functions.php."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/customize/widgets.php",
+          "rationale": "Single weak token match — `after_setup_theme` used only as test scaffolding; file is about customizer widgets, unrelated to functions.php."
+        }
+      ]
+    },
+    "core-concepts-global-settings-and-styles": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Canonical JSON schema for theme.json, matched on all top-level properties documented ($schema, version, settings, styles, customTemplates, templateParts, patterns) — this is the authoritative schema definition.",
+          "confidence": 0.98
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Related JSON schema file matched on $schema, version, styles — relevant context for understanding the schema system, though not the primary subject of this doc.",
+          "confidence": 0.72
+        }
+      ],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Another JSON schema in the same schemas/json/ directory, matched only on $schema — provides surrounding schema-system context.",
+          "confidence": 0.52
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/wp-env.json",
+          "rationale": "Another JSON schema in the same schemas/json/ directory, matched only on $schema — provides surrounding schema-system context.",
+          "confidence": 0.5
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/number-control/styles/number-control-styles.ts",
+          "rationale": "Single-token English match — `styles` here refers to CSS-in-JS component styling, not theme.json styles configuration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/embed/icons.js",
+          "rationale": "Single-token English match — `version` is a generic block metadata field, unrelated to theme.json versioning."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/store/reducer.js",
+          "rationale": "Single-token English match — `settings` refers to the block editor Redux store, not theme.json settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-heading/index.js",
+          "rationale": "Single-token English match — `settings` is a generic block registration field, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-item/index.js",
+          "rationale": "Single-token English match — `settings` is a generic block registration field, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-panel/index.js",
+          "rationale": "Single-token English match — `settings` is a generic block registration field, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion/index.js",
+          "rationale": "Single-token English match — `settings` is a generic block registration field, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/archives/index.js",
+          "rationale": "Single-token English match — `settings` is a generic block registration field, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/audio/index.js",
+          "rationale": "Single-token English match — `settings` is a generic block registration field, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/avatar/index.js",
+          "rationale": "Single-token English match — `settings` is a generic block registration field, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/block/index.js",
+          "rationale": "Single-token English match — `settings` is a generic block registration field, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/breadcrumbs/index.js",
+          "rationale": "Single-token English match — `settings` is a generic block registration field, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/button/index.js",
+          "rationale": "Single-token English match — `settings` is a generic block registration field, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/buttons/index.js",
+          "rationale": "Single-token English match — `settings` is a generic block registration field, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/calendar/index.js",
+          "rationale": "Single-token English match — `settings` is a generic block registration field, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/categories/index.js",
+          "rationale": "Single-token English match — `settings` is a generic block registration field, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/code/index.js",
+          "rationale": "Single-token English match — `settings` is a generic block registration field, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/column/index.js",
+          "rationale": "Single-token English match — `settings` is a generic block registration field, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/columns/index.js",
+          "rationale": "Single-token English match — `settings` is a generic block registration field, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-avatar/index.js",
+          "rationale": "Single-token English match — `settings` is a generic block registration field, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-name/index.js",
+          "rationale": "Single-token English match — `settings` is a generic block registration field, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-content/index.js",
+          "rationale": "Single-token English match — `settings` is a generic block registration field, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-date/index.js",
+          "rationale": "Single-token English match — `settings` is a generic block registration field, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-edit-link/index.js",
+          "rationale": "Single-token English match — `settings` is a generic block registration field, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-reply-link/index.js",
+          "rationale": "Single-token English match — `settings` is a generic block registration field, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-template/index.js",
+          "rationale": "Single-token English match — `settings` is a generic block registration field, not related to theme.json."
+        }
+      ]
+    },
+    "core-concepts-including-assets": {
+      "primary": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/functions.wp-styles.php",
+          "rationale": "Canonical implementation of wp_enqueue_style() and wp_add_inline_style() — the two core CSS enqueueing functions central to this doc.",
+          "confidence": 0.95
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/functions.wp-scripts.php",
+          "rationale": "Canonical implementation of wp_enqueue_script() and wp_add_inline_script() — the two core JS enqueueing functions central to this doc.",
+          "confidence": 0.95
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/link-template.php",
+          "rationale": "Implements get_theme_file_uri, get_parent_theme_file_uri, get_theme_file_path, get_parent_theme_file_path — all four URL/path helper functions documented on this page.",
+          "confidence": 0.93
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/theme.php",
+          "rationale": "Implements get_stylesheet_uri(), wp_get_theme(), and add_editor_style() — three functions directly referenced and demonstrated in this doc.",
+          "confidence": 0.88
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/script-loader.php",
+          "rationale": "Implements wp_enqueue_scripts hook registration and wp_enqueue_block_style(); also the canonical bundled-scripts list referenced in the 'Default WordPress scripts' section.",
+          "confidence": 0.85
+        }
+      ],
+      "context": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-admin/edit-form-blocks.php",
+          "rationale": "File fires enqueue_block_editor_assets hook, establishing the context in which editor JS enqueueing occurs as described in the doc.",
+          "confidence": 0.6
+        },
+        {
+          "repo": "gutenberg",
+          "path": "lib/experimental/class-wp-rest-block-editor-settings-controller.php",
+          "rationale": "Matched on enqueue_block_editor_assets; provides context for how the hook integrates with block editor settings.",
+          "confidence": 0.55
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Matched on generic token 'all' (media value); theme.json schema is unrelated to PHP asset enqueueing functions documented here."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-admin/site-editor.php",
+          "rationale": "Matched only on enqueue_block_editor_assets as a consumer hook call — not an implementation of the enqueueing functions documented here."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-admin/widgets-form-blocks.php",
+          "rationale": "Matched only on enqueue_block_editor_assets as a consumer hook call — tangential consumer file, not relevant to the asset-including functions documented here."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/class-wp-customize-widgets.php",
+          "rationale": "Matched only on enqueue_block_editor_assets in a Customizer-widgets context — cross-feature match, not about theme asset loading."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/navigator/stories/index.story.tsx",
+          "rationale": "Matched only on 'screen' — single English-word collision in a Storybook stories file, entirely unrelated to WordPress asset enqueueing."
+        }
+      ]
+    },
+    "core-concepts-main-stylesheet": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/fields/src/types.ts",
+          "rationale": "Single-token English match — `Template` matched a TypeScript type definition in the Gutenberg fields package, entirely unrelated to the style.css file header concept."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "routes/template-list/types.ts",
+          "rationale": "Single-token English match — `Template` matched a route-level TypeScript types file for template listing UI, not the style.css header field documentation subject."
+        }
+      ]
+    },
+    "core-concepts-templates": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    },
+    "core-concepts-theme-structure": {
+      "primary": [],
+      "secondary": [],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Matched on `patterns`, `styles`, and `src` — the theme.json schema defines the structure of the theme.json file mentioned in the doc, providing relevant context for that optional file.",
+          "confidence": 0.55
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Single weak token match (`src`) — unrelated font collection schema, not about theme file/folder structure."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Single weak token match (`styles`) — block schema, not about theme directory structure."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/number-control/styles/number-control-styles.ts",
+          "rationale": "Single weak token match (`styles`) — a UI component stylesheet, entirely unrelated to theme file/folder structure."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/components/inserter/stories/utils/fixtures.js",
+          "rationale": "Single weak token match (`patterns`) in a fixtures/stories directory — noise from generic identifier in unrelated test fixture."
+        }
+      ]
+    },
+    "features": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    },
+    "features-block-patterns": {
+      "primary": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/block-patterns.php",
+          "rationale": "Matched on register_block_pattern, unregister_block_pattern, register_block_pattern_category, unregister_block_pattern_category, and should_load_remote_block_patterns — the canonical implementation of all block pattern registration APIs documented.",
+          "confidence": 0.97
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/blocks/src/store/reducer.ts",
+          "rationale": "Matched on categories and blockTypes — likely manages block pattern/category state in the blocks store, relevant to how patterns and categories are stored.",
+          "confidence": 0.72
+        }
+      ],
+      "context": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/link-template.php",
+          "rationale": "Matched on get_theme_file_uri — provides the helper function used in pattern files to output dynamic theme asset URLs.",
+          "confidence": 0.62
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/l10n.php",
+          "rationale": "Matched on esc_html_e — provides the internationalization function demonstrated in pattern file examples.",
+          "confidence": 0.55
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/formatting.php",
+          "rationale": "Matched on esc_url — provides the URL escaping function used in pattern file examples for image assets.",
+          "confidence": 0.55
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Cross-schema property collision — matched generic schema properties (title, description, keywords, inserter, source) that are shared with block.json schema, not block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Cross-schema property collision — matched generic properties (title, slug, description, blockTypes, postTypes) from theme.json schema, not block pattern registration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Cross-schema property collision — matched only generic 'slug' and 'categories' properties shared across unrelated JSON schemas."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "routes/guidelines/types.ts",
+          "rationale": "Single-token English match — matched only 'Categories', a generic word unrelated to block pattern category registration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/mobile/gridicons/index.native.js",
+          "rationale": "Single-token English match — matched only 'posts', a generic word; icons file is unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/components/inserter/index.native.js",
+          "rationale": "Single-token English match — matched only 'Inserter' as a React component name, not block pattern inserter behavior."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/editor/src/components/deprecated.js",
+          "rationale": "Single-token English match — matched only 'Inserter'; deprecated.js is a deprecation shim unrelated to block patterns."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/class-wpdb.php",
+          "rationale": "Single-token English match — matched only 'query', a generic SQL/URL query term unrelated to block patterns."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/rss.php",
+          "rationale": "Single-token English match — matched only 'init', a generic WordPress hook name unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/empty-state/description.tsx",
+          "rationale": "Single-token English match — matched only 'Description', a generic UI component property unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/form/primitives/field/description.tsx",
+          "rationale": "Single-token English match — matched only 'Description', a generic UI component unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/notice/description.tsx",
+          "rationale": "Single-token English match — matched only 'Description', a generic UI component unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/card/title.tsx",
+          "rationale": "Single-token English match — matched only 'Title', a generic UI component property unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/empty-state/title.tsx",
+          "rationale": "Single-token English match — matched only 'Title', a generic UI component unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/notice/title.tsx",
+          "rationale": "Single-token English match — matched only 'Title', a generic UI component unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/text/styles/text-mixins.native.js",
+          "rationale": "Single-token English match — matched only 'text', a generic term; mobile text styles are unrelated to block patterns."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-settings.php",
+          "rationale": "Single-token English match — matched only 'init', a generic WordPress bootstrap hook unrelated to block patterns."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/customize/selective-refresh-ajax.php",
+          "rationale": "Single-token English match — matched only 'init'; customizer AJAX test is unrelated to block patterns."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/customize/widgets.php",
+          "rationale": "Single-token English match — matched only 'init'; customizer widgets test is unrelated to block patterns."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/query/vars.php",
+          "rationale": "Single-token English match — matched only 'init'; query vars test is unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-heading/index.js",
+          "rationale": "Single-token English match — matched only 'init'; accordion block registration is unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-item/index.js",
+          "rationale": "Single-token English match — matched only 'init'; accordion block registration is unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-panel/index.js",
+          "rationale": "Single-token English match — matched only 'init'; accordion block registration is unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion/index.js",
+          "rationale": "Single-token English match — matched only 'init'; accordion block registration is unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/archives/index.js",
+          "rationale": "Single-token English match — matched only 'init'; archives block registration is unrelated to block patterns."
+        }
+      ]
+    },
+    "features-block-style-variations": {
+      "primary": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/blocks.php",
+          "rationale": "Canonical PHP source for `register_block_style` and `unregister_block_style` — the two core functions documented in the PHP section.",
+          "confidence": 0.97
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/blocks/src/api/registration.ts",
+          "rationale": "Canonical JS source for `registerBlockStyle` and `unregisterBlockStyle` — the two JavaScript API functions documented.",
+          "confidence": 0.95
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "The theme.json schema defines the `styles.blocks.*.variations` structure used in the 'Customizing block styles via theme.json' section; matched on `core/image`, `core/button`, `outline`, `core/quote`, `core/site-logo`, `core/separator`, `core/social-links`.",
+          "confidence": 0.82
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Block schema defines `name`, `label`, `isDefault` — properties directly referenced in the `$style_properties` array documented for `register_block_style`.",
+          "confidence": 0.72
+        }
+      ],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "lib/experimental/class-wp-rest-block-editor-settings-controller.php",
+          "rationale": "Matched on `enqueue_block_editor_assets` — the hook used in the doc to enqueue the JS block-styles script; contextual integration point.",
+          "confidence": 0.55
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-admin/edit-form-blocks.php",
+          "rationale": "Matched on `enqueue_block_editor_assets` — one of the editor pages that fires the hook used to load block-style JS assets.",
+          "confidence": 0.52
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Single-token English match — only matched `name`, a generic JSON schema property unrelated to block style variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/card/styles.ts",
+          "rationale": "Single-token English match — matched `rounded`, which is a CSS utility in a UI component, not a block style registration file."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/item-group/styles.ts",
+          "rationale": "Single-token English match — matched `rounded`, a CSS utility in a UI component unrelated to block style variations."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/rss.php",
+          "rationale": "Single-token English match — matched only `init`, a generic WordPress hook, not related to block style variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/list-item/icons.native.js",
+          "rationale": "Single-token English match — matched `fill`, which is an SVG icon value, not a block style variation."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/guide/icons.tsx",
+          "rationale": "Single-token English match — matched `fill`, an SVG icon attribute unrelated to block style variations."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-admin/site-editor.php",
+          "rationale": "Single-token English match — matched only `enqueue_block_editor_assets`, tangential editor scaffolding unrelated to block styles specifically."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-admin/widgets-form-blocks.php",
+          "rationale": "Single-token English match — matched only `enqueue_block_editor_assets`, tangential editor scaffolding unrelated to block styles."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/class-wp-customize-widgets.php",
+          "rationale": "Single-token English match — matched only `enqueue_block_editor_assets`, customizer widgets file unrelated to block style variations."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-settings.php",
+          "rationale": "Single-token English match — matched only `init`, a generic WordPress bootstrap hook."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/customize/selective-refresh-ajax.php",
+          "rationale": "Single-token English match — matched only `init`, a test fixture for customizer unrelated to block styles."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/customize/widgets.php",
+          "rationale": "Single-token English match — matched only `init`, a customizer widgets test unrelated to block style variations."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/query/vars.php",
+          "rationale": "Single-token English match — matched only `init`, a query test unrelated to block style variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-heading/index.js",
+          "rationale": "Single-token English match — matched only `init`, generic block index file unrelated to block style variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-item/index.js",
+          "rationale": "Single-token English match — matched only `init`, generic block index file unrelated to block style variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-panel/index.js",
+          "rationale": "Single-token English match — matched only `init`, generic block index file unrelated to block style variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion/index.js",
+          "rationale": "Single-token English match — matched only `init`, generic block index file unrelated to block style variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/archives/index.js",
+          "rationale": "Single-token English match — matched only `init`, generic block index file unrelated to block style variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/audio/index.js",
+          "rationale": "Single-token English match — matched only `init`, generic block index file unrelated to block style variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/avatar/index.js",
+          "rationale": "Single-token English match — matched only `init`, generic block index file unrelated to block style variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/block/index.js",
+          "rationale": "Single-token English match — matched only `init`, generic block index file unrelated to block style variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/breadcrumbs/index.js",
+          "rationale": "Single-token English match — matched only `init`, generic block index file unrelated to block style variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/button/index.js",
+          "rationale": "Single-token English match — matched only `init`, generic block index file unrelated to block style variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/buttons/index.js",
+          "rationale": "Single-token English match — matched only `init`, generic block index file unrelated to block style variations."
+        }
+      ]
+    },
+    "features-block-stylesheets": {
+      "primary": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/script-loader.php",
+          "rationale": "Matched on `wp_enqueue_block_style`, the canonical function the doc teaches — this is the implementation of that function.",
+          "confidence": 0.95
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/functions.wp-styles.php",
+          "rationale": "Matched on `wp_register_style`, which is directly called by `wp_enqueue_block_style` and is referenced in the doc's parameter list.",
+          "confidence": 0.8
+        }
+      ],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Matched on `core/group`, `core/image`, and `src` — theme.json is the context the doc contrasts block stylesheets against, and the schema covers block style properties.",
+          "confidence": 0.6
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Single weak token match (`media`) — generic JSON schema property collision, not related to block stylesheets registration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/wp-env.json",
+          "rationale": "Single weak token match (`core`) — generic English word collision, unrelated to block stylesheets."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Single weak token match (`src`) — generic JSON schema property collision, not related to block stylesheets."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/rss.php",
+          "rationale": "Single weak token match (`init`) — generic WordPress hook name collision, RSS parsing is unrelated to block stylesheets."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-settings.php",
+          "rationale": "Single weak token match (`init`) — bootstrapping file matched only on the `init` hook name, not related to block stylesheets."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/customize/selective-refresh-ajax.php",
+          "rationale": "Single weak token match (`init`) — customizer AJAX test, unrelated to block stylesheets."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/customize/widgets.php",
+          "rationale": "Single weak token match (`init`) — customizer widgets test, unrelated to block stylesheets."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/query/vars.php",
+          "rationale": "Single weak token match (`init`) — query vars test, unrelated to block stylesheets."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-heading/index.js",
+          "rationale": "Single weak token match (`init`) — individual block registration file, unrelated to block stylesheet enqueueing."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-item/index.js",
+          "rationale": "Single weak token match (`init`) — individual block registration file, unrelated to block stylesheet enqueueing."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-panel/index.js",
+          "rationale": "Single weak token match (`init`) — individual block registration file, unrelated to block stylesheet enqueueing."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion/index.js",
+          "rationale": "Single weak token match (`init`) — individual block registration file, unrelated to block stylesheet enqueueing."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/archives/index.js",
+          "rationale": "Single weak token match (`init`) — individual block registration file, unrelated to block stylesheet enqueueing."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/audio/index.js",
+          "rationale": "Single weak token match (`init`) — individual block registration file, unrelated to block stylesheet enqueueing."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/avatar/index.js",
+          "rationale": "Single weak token match (`init`) — individual block registration file, unrelated to block stylesheet enqueueing."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/block/index.js",
+          "rationale": "Single weak token match (`init`) — individual block registration file, unrelated to block stylesheet enqueueing."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/breadcrumbs/index.js",
+          "rationale": "Single weak token match (`init`) — individual block registration file, unrelated to block stylesheet enqueueing."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/button/index.js",
+          "rationale": "Single weak token match (`init`) — individual block registration file, unrelated to block stylesheet enqueueing."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/buttons/index.js",
+          "rationale": "Single weak token match (`init`) — individual block registration file, unrelated to block stylesheet enqueueing."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/calendar/index.js",
+          "rationale": "Single weak token match (`init`) — individual block registration file, unrelated to block stylesheet enqueueing."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/categories/index.js",
+          "rationale": "Single weak token match (`init`) — individual block registration file, unrelated to block stylesheet enqueueing."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/code/index.js",
+          "rationale": "Single weak token match (`init`) — individual block registration file, unrelated to block stylesheet enqueueing."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/column/index.js",
+          "rationale": "Single weak token match (`init`) — individual block registration file, unrelated to block stylesheet enqueueing."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/columns/index.js",
+          "rationale": "Single weak token match (`init`) — individual block registration file, unrelated to block stylesheet enqueueing."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-avatar/index.js",
+          "rationale": "Single weak token match (`init`) — individual block registration file, unrelated to block stylesheet enqueueing."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-name/index.js",
+          "rationale": "Single weak token match (`init`) — individual block registration file, unrelated to block stylesheet enqueueing."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-content/index.js",
+          "rationale": "Single weak token match (`init`) — individual block registration file, unrelated to block stylesheet enqueueing."
+        }
+      ]
+    },
+    "features-block-variations": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/blocks/src/api/registration.ts",
+          "rationale": "Matched on `registerBlockVariation` and `unregisterBlockVariation` — the canonical implementation of the Block Variations registration API described in the doc.",
+          "confidence": 0.97
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Matched on `name`, `title`, `description`, `category`, `keywords`, `icon`, `attributes`, `innerBlocks` — the canonical schema defining all variation properties documented in the doc.",
+          "confidence": 0.82
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/functions.wp-scripts.php",
+          "rationale": "Matched on `wp_enqueue_script` — the PHP function used in the doc's setup section to enqueue the block variations JavaScript file.",
+          "confidence": 0.78
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/dom-ready/src/index.ts",
+          "rationale": "Matched on `domReady` — the `wp.domReady()` utility used in the doc's unregistering example to defer variation unregistration.",
+          "confidence": 0.75
+        }
+      ],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Matched on `name`, `title`, `description`, `block`, `height` — theme.json schema is context for how theme-level settings relate to block variations, but not authoritative on the API itself.",
+          "confidence": 0.55
+        },
+        {
+          "repo": "gutenberg",
+          "path": "lib/experimental/class-wp-rest-block-editor-settings-controller.php",
+          "rationale": "Matched on `enqueue_block_editor_assets` — provides context for how the action hook used in the doc's setup section is handled server-side.",
+          "confidence": 0.52
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-admin/edit-form-blocks.php",
+          "rationale": "Matched on `enqueue_block_editor_assets` — one of the admin pages where the block editor assets hook fires, providing context for the enqueue setup.",
+          "confidence": 0.51
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/blocks/src/api/factory.ts",
+          "rationale": "Single weak token match — `transform` is a generic block factory utility, not related to block variations registration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/list-item/icons.native.js",
+          "rationale": "Matched only on `height` — generic SVG attribute in an icon file, not related to block variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form-input/icons.js",
+          "rationale": "Single token match on `icon` — icon file in a block library, not related to the Block Variations API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form/icons.js",
+          "rationale": "Single token match on `icon` — icon file in a block library, not related to the Block Variations API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/flex/styles.ts",
+          "rationale": "Single token match on `block` — generic CSS-in-JS styles file, cross-schema property collision."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/text/styles.ts",
+          "rationale": "Single token match on `block` — generic CSS-in-JS styles file, cross-schema property collision."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/toggle-group-control/toggle-group-control/styles.ts",
+          "rationale": "Single token match on `block` — generic CSS-in-JS styles file, cross-schema property collision."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-admin/site-editor.php",
+          "rationale": "Matched on `enqueue_block_editor_assets` — generic admin page file, tangential to the block variations enqueue setup described in the doc."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-admin/widgets-form-blocks.php",
+          "rationale": "Matched on `enqueue_block_editor_assets` — widgets admin page, tangential to block variations theme setup."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/class-wp-customize-widgets.php",
+          "rationale": "Matched on `enqueue_block_editor_assets` — Customizer widgets context, tangential to block variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/embed/icons.js",
+          "rationale": "Single token match on `height` — SVG attribute in icon file, not related to block variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/guide/icons.tsx",
+          "rationale": "Single token match on `height` — SVG attribute in icon file, not related to block variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/icon/icon.js",
+          "rationale": "Matched on `icon` and `height` — generic SVG icon file, not related to block variations API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/composite/legacy/stories/utils.tsx",
+          "rationale": "Single token match on `transform` — stories utility file, fixtures/stories noise pattern."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/menu/stories/index.story.tsx",
+          "rationale": "Single token match on `name` — stories file, fixtures/stories noise pattern."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Matched on `name` and `block` — font collection schema, cross-schema property collision unrelated to block variations."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/amazon.js",
+          "rationale": "Single token match on `height` — SVG icon height attribute in social link icon file, not related to block variations API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/bandcamp.js",
+          "rationale": "Single token match on `height` — SVG icon height attribute, not related to block variations API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/behance.js",
+          "rationale": "Single token match on `height` — SVG icon height attribute, not related to block variations API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/bluesky.js",
+          "rationale": "Single token match on `height` — SVG icon height attribute, not related to block variations API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/chain.js",
+          "rationale": "Single token match on `height` — SVG icon height attribute, not related to block variations API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/codepen.js",
+          "rationale": "Single token match on `height` — SVG icon height attribute, not related to block variations API."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/social-link/icons/deviantart.js",
+          "rationale": "Single token match on `height` — SVG icon height attribute, not related to block variations API."
+        }
+      ]
+    },
+    "getting-started": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    },
+    "getting-started-quick-start-guide": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    },
+    "getting-started-reading-this-handbook": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/post.php",
+          "rationale": "Single-token English match — `get_post` is only mentioned in the doc as a cautionary example of a reserved WordPress function name to avoid, not as a subject the doc covers."
+        }
+      ]
+    },
+    "getting-started-tools-and-setup": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    },
+    "getting-started-what-is-a-theme": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    },
+    "getting-started-who-is-this-handbook-for": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    },
+    "global-settings-and-styles": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    },
+    "global-settings-and-styles-custom-templates": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Canonical schema for theme.json, matched on `customTemplates`, `name`, `title`, and `postTypes` — exactly the properties documented for registering custom templates.",
+          "confidence": 0.97
+        }
+      ],
+      "secondary": [],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Matched on `name`, `title`, `example` — generic schema property collision; block.json is a related JSON schema but not about customTemplates or theme-level template registration.",
+          "confidence": 0.52
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Single-token match on `name` only — generic JSON-schema property shared across many unrelated schemas, not related to custom templates."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/menu/stories/index.story.tsx",
+          "rationale": "Single-token match on `name` in a stories/fixtures file — generic identifier collision, entirely unrelated to theme.json or custom templates."
+        }
+      ]
+    },
+    "global-settings-and-styles-introduction-to-theme-json": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Canonical JSON schema for theme.json, matched on all top-level properties documented (version, $schema, settings, styles, customTemplates, templateParts, patterns) — this is the authoritative schema definition.",
+          "confidence": 0.98
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Related JSON schema file matched on version, $schema, and styles — useful for cross-referencing how the schema versioning system and $schema property work across WordPress JSON schemas.",
+          "confidence": 0.72
+        }
+      ],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Another WordPress JSON schema file matched on $schema — provides context on how $schema is used across the schema ecosystem.",
+          "confidence": 0.52
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/wp-env.json",
+          "rationale": "Single-token match on $schema only — wp-env configuration schema is unrelated to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/number-control/styles/number-control-styles.ts",
+          "rationale": "Single-token English match — matched only on `styles` which is a generic CSS-in-JS styled-component file, not theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/embed/icons.js",
+          "rationale": "Single-token match on `version` only — generic identifier in an unrelated block icon file."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/store/reducer.js",
+          "rationale": "Single-token match on `settings` only — this is a Redux store reducer, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-heading/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-item/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-panel/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/archives/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/audio/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/avatar/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/block/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/breadcrumbs/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/button/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/buttons/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/calendar/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/categories/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/code/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/column/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/columns/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-avatar/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-name/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-content/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-date/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-edit-link/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-reply-link/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-template/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json."
+        }
+      ]
+    },
+    "global-settings-and-styles-patterns": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Canonical JSON schema for theme.json; matched on `patterns`, which is the exact property documented as the subject of this page.",
+          "confidence": 0.92
+        }
+      ],
+      "secondary": [],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/components/inserter/stories/utils/fixtures.js",
+          "rationale": "Fixtures/stories directory match on generic token `patterns` — noise from a test/story utility file unrelated to theme.json patterns property."
+        }
+      ]
+    },
+    "global-settings-and-styles-settings": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Canonical theme.json schema file — matched on `settings`, `appearanceTools`, `color`, `dimensions`, `layout`, `lightbox`, `position`, `shadow`, all of which are the exact top-level settings properties documented on this page.",
+          "confidence": 0.97
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Block JSON schema matched on `color`, `dimensions`, `layout`, `position`, `shadow`, `spacing`, `typography` — these same settings properties appear in per-block settings context (`settings.blocks`), making this a useful cross-reference.",
+          "confidence": 0.72
+        }
+      ],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/store/reducer.js",
+          "rationale": "Matched on `settings` and `blocks` — store reducer likely manages editor settings state, providing integration context for how theme.json settings flow into the editor.",
+          "confidence": 0.52
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-heading/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-item/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-panel/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/archives/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/audio/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/avatar/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/block/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/breadcrumbs/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/button/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/buttons/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/calendar/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/categories/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/code/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/column/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/columns/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-avatar/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-name/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-content/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-date/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-edit-link/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-reply-link/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-template/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination-next/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination-numbers/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination-previous/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration property, not related to theme.json global settings."
+        }
+      ]
+    },
+    "global-settings-and-styles-settings-appearance-tools": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Canonical JSON schema for theme.json; matched on `appearanceTools` — the exact property this doc describes, making it the authoritative schema definition for the subject.",
+          "confidence": 0.92
+        }
+      ],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    },
+    "global-settings-and-styles-settings-blocks": {
+      "primary": [],
+      "secondary": [],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Canonical JSON schema for theme.json; matched on `core/cover` which is directly referenced in the doc's block-level settings examples — relevant as a schema reference but not the implementation source.",
+          "confidence": 0.65
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/wp-env.json",
+          "rationale": "Single-token English match — `core` is a generic namespace token present in virtually every WordPress schema file, not specific to theme.json block settings."
+        }
+      ]
+    },
+    "global-settings-and-styles-settings-border": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Canonical schema for theme.json; matched on `color`, `radius`, `style`, `width` — exactly the four `settings.border` properties documented.",
+          "confidence": 0.97
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Block-level schema that also defines border sub-properties (`color`, `radius`, `style`, `width`); corroborates how border settings map to individual block controls.",
+          "confidence": 0.78
+        }
+      ],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/icon/icon.js",
+          "rationale": "Single weak-token match on `width` only — unrelated icon component, not a border settings implementation."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/popover/stories/index.story.tsx",
+          "rationale": "Single weak-token match on `style` only — a Storybook story file for a Popover UI component, entirely unrelated to theme.json border settings."
+        }
+      ]
+    },
+    "global-settings-and-styles-settings-color": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Matched on `color`, `settings`, `duotone`, `gradients`, `palette`, `background`, `link`, `text` — this is the canonical theme.json schema defining all settings.color properties documented on this page.",
+          "confidence": 0.97
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Matched on `color`, `duotone`, `gradients`, `background`, `link`, `text`, `gradient` — block schema defines color supports that interact with theme.json settings.color configuration.",
+          "confidence": 0.72
+        }
+      ],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Single generic token match — `name` and `slug` are ubiquitous JSON schema properties, not related to color settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/surface/styles.ts",
+          "rationale": "Single-token English match — `background` is a generic CSS property, not the theme.json settings.color.background toggle."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/format-library/src/link/index.js",
+          "rationale": "Single-token English match — `link` refers to the Link text-format library component, not theme.json settings.color.link."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/format-library/src/link/index.native.js",
+          "rationale": "Single-token English match — `link` refers to the native Link text-format component, not theme.json settings.color.link."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/text/styles/text-mixins.native.js",
+          "rationale": "Single-token English match — `text` is a generic UI component identifier, not the theme.json settings.color.text toggle."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/store/reducer.js",
+          "rationale": "Single-token match on `settings` — generic block-editor store reducer, not specific to color settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-heading/index.js",
+          "rationale": "Single-token match on `settings` — a block index file unrelated to theme.json color settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-item/index.js",
+          "rationale": "Single-token match on `settings` — a block index file unrelated to theme.json color settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-panel/index.js",
+          "rationale": "Single-token match on `settings` — a block index file unrelated to theme.json color settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion/index.js",
+          "rationale": "Single-token match on `settings` — a block index file unrelated to theme.json color settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/archives/index.js",
+          "rationale": "Single-token match on `settings` — a block index file unrelated to theme.json color settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/audio/index.js",
+          "rationale": "Single-token match on `settings` — a block index file unrelated to theme.json color settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/avatar/index.js",
+          "rationale": "Single-token match on `settings` — a block index file unrelated to theme.json color settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/block/index.js",
+          "rationale": "Single-token match on `settings` — a block index file unrelated to theme.json color settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/breadcrumbs/index.js",
+          "rationale": "Single-token match on `settings` — a block index file unrelated to theme.json color settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/button/index.js",
+          "rationale": "Single-token match on `settings` — a block index file unrelated to theme.json color settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/buttons/index.js",
+          "rationale": "Single-token match on `settings` — a block index file unrelated to theme.json color settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/calendar/index.js",
+          "rationale": "Single-token match on `settings` — a block index file unrelated to theme.json color settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/categories/index.js",
+          "rationale": "Single-token match on `settings` — a block index file unrelated to theme.json color settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/code/index.js",
+          "rationale": "Single-token match on `settings` — a block index file unrelated to theme.json color settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/column/index.js",
+          "rationale": "Single-token match on `settings` — a block index file unrelated to theme.json color settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/columns/index.js",
+          "rationale": "Single-token match on `settings` — a block index file unrelated to theme.json color settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-avatar/index.js",
+          "rationale": "Single-token match on `settings` — a block index file unrelated to theme.json color settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-name/index.js",
+          "rationale": "Single-token match on `settings` — a block index file unrelated to theme.json color settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-content/index.js",
+          "rationale": "Single-token match on `settings` — a block index file unrelated to theme.json color settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-date/index.js",
+          "rationale": "Single-token match on `settings` — a block index file unrelated to theme.json color settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-edit-link/index.js",
+          "rationale": "Single-token match on `settings` — a block index file unrelated to theme.json color settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-reply-link/index.js",
+          "rationale": "Single-token match on `settings` — a block index file unrelated to theme.json color settings."
+        }
+      ]
+    },
+    "global-settings-and-styles-settings-custom": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Canonical JSON schema for theme.json; matched on `custom` and `lineHeight` — directly defines the `settings.custom` property documented here.",
+          "confidence": 0.9
+        }
+      ],
+      "secondary": [],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Single-token match on `lineHeight` only — this is the block schema, not the theme.json schema; no relation to `settings.custom`."
+        }
+      ]
+    },
+    "global-settings-and-styles-settings-dimensions": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Canonical schema for theme.json — matched on `dimensions`, `settings`, and `minHeight`, exactly the properties documented.",
+          "confidence": 0.97
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Block schema matched on `dimensions` and `minHeight` — relevant as it defines per-block support for the minHeight dimension feature described in the doc.",
+          "confidence": 0.75
+        }
+      ],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/store/reducer.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier shared across many unrelated files."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-heading/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-item/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-panel/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/archives/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/audio/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/avatar/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/block/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/breadcrumbs/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/button/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/buttons/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/calendar/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/categories/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/code/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/column/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/columns/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-avatar/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-name/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-content/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-date/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-edit-link/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-reply-link/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-template/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination-next/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination-numbers/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination-previous/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination/index.js",
+          "rationale": "Single-token English match — only matched `settings`, a generic identifier with no relation to dimensions/minHeight."
+        }
+      ]
+    },
+    "global-settings-and-styles-settings-layout": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Canonical JSON schema for theme.json; matched on `layout`, `settings`, and `wideSize` — the exact properties documented in this page.",
+          "confidence": 0.95
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Block schema matched on `layout` and `wideSize`, relevant as it defines how blocks declare support for layout/wide-size alignment described in the doc.",
+          "confidence": 0.72
+        }
+      ],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/store/reducer.js",
+          "rationale": "Single-token match on `settings` only — generic identifier shared across the entire codebase, not specific to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-heading/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-item/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-panel/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/archives/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/audio/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/avatar/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/block/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/breadcrumbs/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/button/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/buttons/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/calendar/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/categories/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/code/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/column/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/columns/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-avatar/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-name/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-content/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-date/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-edit-link/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-reply-link/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-template/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination-next/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination-numbers/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination-previous/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination/index.js",
+          "rationale": "Single-token match on `settings` only — generic block registration file unrelated to theme.json layout settings."
+        }
+      ]
+    },
+    "global-settings-and-styles-settings-lightbox": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Canonical theme.json schema file matched on `core/image`, `lightbox`, `enabled`, and `allowEditing` — all four symbols are direct subjects of this doc.",
+          "confidence": 0.95
+        }
+      ],
+      "secondary": [],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Single weak token match — `allowEditing` in block.json schema refers to block-level editing controls, not the lightbox-specific `allowEditing` property in theme.json settings."
+        }
+      ]
+    },
+    "global-settings-and-styles-settings-position": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Canonical schema for theme.json — matched on `position`, `settings`, and `sticky`, which are the exact properties documented.",
+          "confidence": 0.97
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Block schema matched on `position` and `sticky`, relevant as it defines block-level support for the position/sticky feature described in the doc.",
+          "confidence": 0.72
+        }
+      ],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/store/reducer.js",
+          "rationale": "Single generic token match — `settings` is a common Redux store key, not specific to position/sticky in theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-heading/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-item/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-panel/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/archives/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/audio/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/avatar/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/block/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/breadcrumbs/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/button/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/buttons/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/calendar/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/categories/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/code/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/column/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/columns/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-avatar/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-name/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-content/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-date/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-edit-link/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-reply-link/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-template/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination-next/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination-numbers/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination-previous/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination/index.js",
+          "rationale": "Single generic token match — `settings` is a common block registration field, unrelated to position settings."
+        }
+      ]
+    },
+    "global-settings-and-styles-settings-settings-reference": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Canonical JSON schema for theme.json, matched on `settings`, `appearanceTools`, `color`, `radius`, `style`, `width`, `background`, `custom` — directly defines all settings properties documented in this reference.",
+          "confidence": 0.98
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Block JSON schema matched on `color`, `radius`, `style`, `width`, `background`, `duotone`, `name`, `gradients` — shares many settings properties documented here, useful cross-reference for how block-level settings relate.",
+          "confidence": 0.72
+        }
+      ],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Font collection schema matched on `name`, `slug`, `fontFace`, `fontFamily`, `fontStyle`, `fontWeight` — provides context for typography-related settings properties like `fontFamilies`.",
+          "confidence": 0.55
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/surface/styles.ts",
+          "rationale": "Single weak token match (`background`) — this is a UI component style file, not related to theme.json settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/text/styles/font-family.native.js",
+          "rationale": "Single weak token match (`fontFamily`) — native component style utility, not related to theme.json settings schema."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/format-library/src/link/index.js",
+          "rationale": "Single weak token match (`link`) — format library link implementation, not related to theme.json settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/format-library/src/link/index.native.js",
+          "rationale": "Single weak token match (`link`) — native format library link implementation, not related to theme.json settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/text/styles/text-mixins.native.js",
+          "rationale": "Single weak token match (`text`) — native text style mixin utility, not related to theme.json settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/store/reducer.js",
+          "rationale": "Single weak token match (`settings`) — block editor Redux reducer, not related to theme.json settings schema."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-heading/index.js",
+          "rationale": "Single weak token match (`settings`) — generic block index file, not related to theme.json settings reference."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-item/index.js",
+          "rationale": "Single weak token match (`settings`) — generic block index file, not related to theme.json settings reference."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-panel/index.js",
+          "rationale": "Single weak token match (`settings`) — generic block index file, not related to theme.json settings reference."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion/index.js",
+          "rationale": "Single weak token match (`settings`) — generic block index file, not related to theme.json settings reference."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/archives/index.js",
+          "rationale": "Single weak token match (`settings`) — generic block index file, not related to theme.json settings reference."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/audio/index.js",
+          "rationale": "Single weak token match (`settings`) — generic block index file, not related to theme.json settings reference."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/avatar/index.js",
+          "rationale": "Single weak token match (`settings`) — generic block index file, not related to theme.json settings reference."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/block/index.js",
+          "rationale": "Single weak token match (`settings`) — generic block index file, not related to theme.json settings reference."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/breadcrumbs/index.js",
+          "rationale": "Single weak token match (`settings`) — generic block index file, not related to theme.json settings reference."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/button/index.js",
+          "rationale": "Single weak token match (`settings`) — generic block index file, not related to theme.json settings reference."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/buttons/index.js",
+          "rationale": "Single weak token match (`settings`) — generic block index file, not related to theme.json settings reference."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/calendar/index.js",
+          "rationale": "Single weak token match (`settings`) — generic block index file, not related to theme.json settings reference."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/categories/index.js",
+          "rationale": "Single weak token match (`settings`) — generic block index file, not related to theme.json settings reference."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/code/index.js",
+          "rationale": "Single weak token match (`settings`) — generic block index file, not related to theme.json settings reference."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/column/index.js",
+          "rationale": "Single weak token match (`settings`) — generic block index file, not related to theme.json settings reference."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/columns/index.js",
+          "rationale": "Single weak token match (`settings`) — generic block index file, not related to theme.json settings reference."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-avatar/index.js",
+          "rationale": "Single weak token match (`settings`) — generic block index file, not related to theme.json settings reference."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-name/index.js",
+          "rationale": "Single weak token match (`settings`) — generic block index file, not related to theme.json settings reference."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-content/index.js",
+          "rationale": "Single weak token match (`settings`) — generic block index file, not related to theme.json settings reference."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-date/index.js",
+          "rationale": "Single weak token match (`settings`) — generic block index file, not related to theme.json settings reference."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-edit-link/index.js",
+          "rationale": "Single weak token match (`settings`) — generic block index file, not related to theme.json settings reference."
+        }
+      ]
+    },
+    "global-settings-and-styles-settings-shadow": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Canonical schema for theme.json; matched on `defaultPresets`, `shadow`, `name`, and `slug` — all core symbols from the `settings.shadow` section documented here.",
+          "confidence": 0.97
+        }
+      ],
+      "secondary": [],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Matched only on generic `name` and `shadow` — cross-schema property collision; block.json schema is unrelated to theme.json settings.shadow presets."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Matched only on generic `name` and `slug` — cross-schema property collision; font-collection schema is unrelated to shadow settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/menu/stories/index.story.tsx",
+          "rationale": "Matched only on single generic token `name` in a stories/fixtures directory — single-token English match noise."
+        }
+      ]
+    },
+    "global-settings-and-styles-settings-spacing": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Canonical schema for theme.json; matched all key spacing symbols: blockGap, margin, padding, customSpacingSize, spacingScale, spacingSizes, units — the authoritative definition for the doc's subject.",
+          "confidence": 0.98
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Block schema matched blockGap, margin, padding — relevant as it defines which blocks support these spacing features, corroborating the doc's discussion of block-level spacing support.",
+          "confidence": 0.72
+        }
+      ],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Cross-schema property collision — `name` and `slug` are generic JSON schema identifiers present in font-collection schema, not related to spacing."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/utils/math.js",
+          "rationale": "Single-token English match — `clamp` matches a generic math utility, not the CSS clamp() spacing preset feature."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/admin-ui/src/page/stories/index.story.tsx",
+          "rationale": "Fixtures/stories noise — matched only generic `size` identifier in a Storybook stories file, no relation to spacing settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/menu/stories/index.story.tsx",
+          "rationale": "Single-token generic match — `name` in a menu stories file is unrelated to theme.json spacing settings."
+        }
+      ]
+    },
+    "global-settings-and-styles-settings-typography": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Canonical schema for theme.json, matched on dropCap, customFontSize, fontStyle, letterSpacing, lineHeight, textColumns, textDecoration, textTransform — all core typography settings documented on this page.",
+          "confidence": 0.98
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Matched on fontStyle, name, slug, fontFamily, fontFace, fontWeight, fontStretch, src — directly covers the fontFace/fontFamilies registration properties described in this doc.",
+          "confidence": 0.82
+        }
+      ],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Matched on fontStyle, letterSpacing, lineHeight, textDecoration, textTransform — provides block-level schema context for how typography settings are consumed by blocks, but not the primary theme.json settings schema.",
+          "confidence": 0.65
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/surface/styles.ts",
+          "rationale": "Single-token English match — 'primary' and 'secondary' are generic CSS/component identifiers, not font family slug names from theme.json typography settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/utils/math.js",
+          "rationale": "Single-token English match — 'clamp' is a generic math utility function, not the CSS clamp() used in fluid typography context."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/text/styles/font-family.native.js",
+          "rationale": "Single-token match on 'fontFamily' in a React Native component styles file — unrelated to theme.json typography settings registration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/admin-ui/src/page/stories/index.story.tsx",
+          "rationale": "Fixtures/stories directory match on generic 'size' identifier — not related to theme.json typography settings."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/menu/stories/index.story.tsx",
+          "rationale": "Fixtures/stories directory match on generic 'name' identifier — not related to theme.json typography settings."
+        }
+      ]
+    },
+    "global-settings-and-styles-settings-use-root-padding-aware-alignments": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    },
+    "global-settings-and-styles-style-variations": {
+      "primary": [],
+      "secondary": [],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "The theme.json JSON schema defines the structure (including `title`, `settings`, `styles`) that style variation files conform to — provides structural context for variation files.",
+          "confidence": 0.6
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Single-token English match — only `title` matched, which is a generic JSON-schema property shared across unrelated schemas; block.json is for block metadata, not theme style variations."
+        }
+      ]
+    },
+    "global-settings-and-styles-styles": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Canonical JSON schema for theme.json, matched on both `styles` and `settings` — the authoritative structural definition of the `styles` property documented here.",
+          "confidence": 0.95
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Block-level JSON schema matched on `styles`, relevant as blocks are a key sub-property of the `styles` object described in the doc.",
+          "confidence": 0.72
+        }
+      ],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/number-control/styles/number-control-styles.ts",
+          "rationale": "Single-token English match — `styles` here is a UI component stylesheet, unrelated to theme.json global styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/store/reducer.js",
+          "rationale": "Single-token match on `settings` — generic identifier in a Redux reducer, not related to theme.json styles configuration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-heading/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-item/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-panel/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/archives/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/audio/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/avatar/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/block/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/breadcrumbs/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/button/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/buttons/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/calendar/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/categories/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/code/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/column/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/columns/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-avatar/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-author-name/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-content/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-date/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-edit-link/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-reply-link/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comment-template/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination-next/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination-numbers/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/comments-pagination-previous/index.js",
+          "rationale": "Single-token match on `settings` — generic block registration index file, not related to theme.json styles."
+        }
+      ]
+    },
+    "global-settings-and-styles-styles-applying-styles": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Canonical JSON schema for theme.json, matched on `styles`, `color`, `text`, `background`, `typography`, `spacing`, `button`, `caption` — directly defines the structure documented in this page.",
+          "confidence": 0.97
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Canonical JSON schema for block.json, matched on `styles`, `color`, `text`, `background`, `typography`, `spacing`, `button`, `heading` — relevant as block-level styles are a core topic of this doc and block.json defines block style variation support.",
+          "confidence": 0.75
+        }
+      ],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/wp-env.json",
+          "rationale": "Single-token match on `core` — wp-env schema is unrelated to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/format-library/src/image/index.js",
+          "rationale": "Single-token English match — `image` matches the Image block example but this file is a format library utility, not a block styles implementation."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/card/styles.ts",
+          "rationale": "Single-token match on `rounded` — component-level styling utility unrelated to theme.json applying styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/item-group/styles.ts",
+          "rationale": "Single-token match on `rounded` — component-level styling utility unrelated to theme.json applying styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/list-item/icons.native.js",
+          "rationale": "Single-token match on `fill` — icon definition file, not related to block style variations or theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/guide/icons.tsx",
+          "rationale": "Single-token match on `fill` — icon file in a UI component, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/number-control/styles/number-control-styles.ts",
+          "rationale": "Single-token match on `styles` — component-level CSS-in-JS for a UI control, not related to theme.json applying styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/surface/styles.ts",
+          "rationale": "Single-token match on `background` — component surface styling, not related to theme.json applying styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/format-library/src/link/index.js",
+          "rationale": "Single-token match on `link` — format library link implementation, not related to theme.json element styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/format-library/src/link/index.native.js",
+          "rationale": "Single-token match on `link` — native format library link implementation, not related to theme.json element styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/text/styles/text-mixins.native.js",
+          "rationale": "Single-token match on `text` — native component text mixin, not related to theme.json applying styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/icon/icon.js",
+          "rationale": "Single-token match on `fill` — icon rendering utility, not related to theme.json styles."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/composite/stories/index.story.tsx",
+          "rationale": "Single-token match on `text` in a Storybook stories file — fixtures/stories noise, not related to theme.json."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/menu/stories/index.story.tsx",
+          "rationale": "Single-token match on `text` in a Storybook stories file — fixtures/stories noise, not related to theme.json."
+        }
+      ]
+    },
+    "global-settings-and-styles-styles-styles-reference": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Canonical JSON schema for theme.json — directly defines all style properties documented (border, color, dimensions, filter, spacing, typography, css) matched on border, color, dimensions, filter, top, right, bottom, left.",
+          "confidence": 0.97
+        }
+      ],
+      "secondary": [],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Block schema shares many of the same style property definitions (border, color, dimensions, filter) as context for how these style properties are applied per-block in theme.json.",
+          "confidence": 0.62
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Cross-schema property collision — fontFamily, fontStyle, fontWeight appear in a font collection schema, not the theme.json styles reference subject."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/text/styles/font-family.native.js",
+          "rationale": "Single-token match on `fontFamily` only — this is a React Native component stylesheet, unrelated to theme.json style properties documentation."
+        }
+      ]
+    },
+    "global-settings-and-styles-styles-using-presets": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Matched on `custom`, `palette`, `presets`, `spacingScale`, `spacingSizes`, `fontSizes`, `fontFamily` — the canonical JSON schema for theme.json, which is the exact file the doc teaches readers to configure.",
+          "confidence": 0.95
+        }
+      ],
+      "secondary": [],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Single weak token match (`fontFamily`) — block.json schema is unrelated to theme.json preset styles; cross-schema property collision."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Single weak token match (`fontFamily`) — font-collection schema is unrelated to theme.json preset styles; cross-schema property collision."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/surface/styles.ts",
+          "rationale": "Single English-word match (`primary`) — refers to a UI component style token, not a theme.json preset concept."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/text/styles/font-family.native.js",
+          "rationale": "Single weak token match (`fontFamily`) — native React Native text component style, unrelated to theme.json preset registration or application."
+        }
+      ]
+    },
+    "global-settings-and-styles-template-parts": {
+      "primary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Canonical schema for theme.json, matched on `templateParts`, `area`, `name`, and `title` — the exact properties the doc explains for registering template parts.",
+          "confidence": 0.95
+        }
+      ],
+      "secondary": [],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Generic JSON-schema property collision — only matched on `name` and `title`, which are common across all schemas and unrelated to template parts."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Single-token generic match — only matched on `name`, a ubiquitous JSON-schema property with no relation to template parts."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/menu/stories/index.story.tsx",
+          "rationale": "Fixtures/stories directory match on a single generic token `name` — unrelated to theme.json or template parts."
+        }
+      ]
+    },
+    "index": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    },
+    "patterns": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    },
+    "patterns-block-type-patterns": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Cross-schema property collision — matched only on block name strings `core/gallery` and `core/query` which appear incidentally in the theme.json schema; this file is the theme.json schema definition, not an implementation of block type patterns."
+        }
+      ]
+    },
+    "patterns-introduction-to-patterns": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    },
+    "patterns-patterns-and-block-locking": {
+      "primary": [],
+      "secondary": [],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Matched on `lock` — the block.json schema defines block attributes including the `lock` attribute used for block locking, making it tangentially relevant context.",
+          "confidence": 0.55
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Single weak token match — `all` is an extremely common English word / generic JSON value, not specific to block locking or patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/rich-text/src/insert.js",
+          "rationale": "Single-token English match — `insert` matches a rich-text utility function for inserting text, unrelated to block template locking or patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/dom/src/dom/remove.js",
+          "rationale": "Single-token English match — `remove` matches a DOM utility for removing nodes, unrelated to block locking's `remove` lock attribute."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/rich-text/src/remove.js",
+          "rationale": "Single-token English match — `remove` matches a rich-text utility for removing content, unrelated to block locking's `remove` lock attribute."
+        }
+      ]
+    },
+    "patterns-registering-patterns": {
+      "primary": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/block-patterns.php",
+          "rationale": "Matched on `register_block_pattern`, `unregister_block_pattern`, `register_block_pattern_category`, `unregister_block_pattern_category`, and `should_load_remote_block_patterns` — the canonical implementation of all core functions documented on this page.",
+          "confidence": 0.98
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/class-wp-block-type-registry.php",
+          "rationale": "Matched on `WP_Block_Type_Registry`, which the doc uses for conditional pattern registration via `is_registered()` — the canonical class implementation.",
+          "confidence": 0.85
+        }
+      ],
+      "context": [
+        {
+          "repo": "gutenberg",
+          "path": "packages/blocks/src/store/reducer.ts",
+          "rationale": "Matched on `categories` and `blockTypes` — likely manages block pattern/category state on the JS side, providing context for how registered patterns are stored.",
+          "confidence": 0.55
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Cross-schema property collision — matched generic block schema properties (`title`, `description`, `inserter`, `keywords`, `source`, etc.) that are defined for block types, not block pattern registration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Cross-schema property collision — matched `title`, `description`, `blockTypes`, `postTypes`, `core/cover`, `core/paragraph` as theme.json schema properties, not pattern registration code."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "routes/guidelines/types.ts",
+          "rationale": "Single-token English match — `Categories` is a generic TypeScript type identifier, not related to block pattern categories."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Single-token English match — `categories` is a generic JSON schema property in the font-collection schema, unrelated to block patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/mobile/gridicons/index.native.js",
+          "rationale": "Single-token English match — `posts` matches a grid icon name, not block pattern post types."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/components/inserter/index.native.js",
+          "rationale": "Single-token match on `Inserter` — this is a React component for the block inserter UI, not related to registering patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/editor/src/components/deprecated.js",
+          "rationale": "Single-token match on `Inserter` — this is a deprecated JS exports file, not related to block pattern registration."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/class-wpdb.php",
+          "rationale": "Single-token English match — `query` is the database query method, not the block pattern `query` category."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/rss.php",
+          "rationale": "Single-token English match — `init` matches a generic WordPress hook name used throughout the codebase, not specific to pattern registration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/empty-state/description.tsx",
+          "rationale": "Single-token English match — `Description` is a generic UI component name, unrelated to pattern registration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/form/primitives/field/description.tsx",
+          "rationale": "Single-token English match — `Description` is a generic UI form field component, unrelated to pattern registration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/notice/description.tsx",
+          "rationale": "Single-token English match — `Description` is a generic UI notice component, unrelated to pattern registration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/card/title.tsx",
+          "rationale": "Single-token English match — `Title` is a generic UI card component, unrelated to pattern registration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/empty-state/title.tsx",
+          "rationale": "Single-token English match — `Title` is a generic UI empty-state component, unrelated to pattern registration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/ui/src/notice/title.tsx",
+          "rationale": "Single-token English match — `Title` is a generic UI notice component, unrelated to pattern registration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/text/styles/text-mixins.native.js",
+          "rationale": "Single-token English match — `text` matches the pattern category name but this is a mobile styling utility, not related to patterns."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-settings.php",
+          "rationale": "Single-token English match — `init` matches the WordPress hook but this is the core settings bootstrap file, not related to pattern registration."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/customize/selective-refresh-ajax.php",
+          "rationale": "Single-token English match — `init` matches a hook name used in an unrelated Customizer test file."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/customize/widgets.php",
+          "rationale": "Single-token English match — `init` matches a hook name used in an unrelated Customizer widgets test file."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/query/vars.php",
+          "rationale": "Single-token English match — `init` matches a hook name used in an unrelated query vars test file."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-heading/index.js",
+          "rationale": "Single-token English match — `init` is a generic block registration call, unrelated to pattern registration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-item/index.js",
+          "rationale": "Single-token English match — `init` is a generic block registration call, unrelated to pattern registration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-panel/index.js",
+          "rationale": "Single-token English match — `init` is a generic block registration call, unrelated to pattern registration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion/index.js",
+          "rationale": "Single-token English match — `init` is a generic block registration call, unrelated to pattern registration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/archives/index.js",
+          "rationale": "Single-token English match — `init` is a generic block registration call, unrelated to pattern registration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/audio/index.js",
+          "rationale": "Single-token English match — `init` is a generic block registration call, unrelated to pattern registration."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/avatar/index.js",
+          "rationale": "Single-token English match — `init` is a generic block registration call, unrelated to pattern registration."
+        }
+      ]
+    },
+    "patterns-starter-patterns": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Single weak token match — `category` is a generic JSON schema property shared across many unrelated schemas, not specific to starter patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Cross-schema property collision — `core/post-content` appears as a schema reference in theme.json but this file is the theme JSON schema, not the pattern registration logic described in the doc."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/components/src/mobile/gridicons/index.native.js",
+          "rationale": "Single-token English match — `search` matches a generic icon in a mobile gridicons index, entirely unrelated to starter patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/date/src/index.ts",
+          "rationale": "Single-token English match — `date` matches a date-formatting utility library, not related to starter patterns or template types."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-editor/src/components/inserter/index.native.js",
+          "rationale": "Single-token English match — `Inserter` matches the block inserter UI component for mobile, not the pattern file header field described in the doc."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/editor/src/components/deprecated.js",
+          "rationale": "Single-token English match — `Inserter` matched a deprecated components re-export file, entirely unrelated to starter pattern registration."
+        }
+      ]
+    },
+    "patterns-usage-in-templates": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Single-token English match — `slug` is a generic JSON-schema property shared across many unrelated schemas; this file is about font collections, not pattern usage in templates."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Single-token English match — `slug` is a generic JSON-schema property; this file is the theme.json schema definition, not related to the Pattern block or template pattern inclusion."
+        }
+      ]
+    },
+    "patterns-using-php-in-patterns": {
+      "primary": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/l10n.php",
+          "rationale": "Matched on `esc_html_e`, the primary internationalization function demonstrated throughout the doc for translating pattern text.",
+          "confidence": 0.82
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/formatting.php",
+          "rationale": "Matched on `esc_url`, the escaping function used in the doc's dynamic image URL examples.",
+          "confidence": 0.78
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/link-template.php",
+          "rationale": "Matched on both `get_theme_file_uri` and `the_title`, where `get_theme_file_uri` is the central function for dynamic asset URLs in the doc.",
+          "confidence": 0.8
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/query.php",
+          "rationale": "Matched on `is_home`, `is_single`, `is_page` — exactly the functions the doc cites as unavailable during `init` pattern registration.",
+          "confidence": 0.75
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/post-template.php",
+          "rationale": "Matched on `the_title`, which the doc cites as a function unavailable at pattern registration time on `init`.",
+          "confidence": 0.72
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/post.php",
+          "rationale": "Matched on `get_post`, explicitly named in the doc as a function unavailable during pattern registration.",
+          "confidence": 0.7
+        }
+      ],
+      "context": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-settings.php",
+          "rationale": "Matched on `init`; relevant as the file where WordPress fires the `init` hook discussed as the pattern registration timing.",
+          "confidence": 0.55
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/rest-api/endpoints/class-wp-rest-templates-controller.php",
+          "rationale": "Path matches template/pattern registration infrastructure; matched on `the_title` in a REST API templates context.",
+          "confidence": 0.52
+        }
+      ],
+      "dropped": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/deprecated.php",
+          "rationale": "Single-symbol match on `the_title` in a deprecated-functions file — cross-schema collision, not relevant to PHP in patterns."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/rss.php",
+          "rationale": "Single-token match on `init` — generic hook name collision, RSS functionality is unrelated to block patterns."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/customize/selective-refresh-ajax.php",
+          "rationale": "Single-token match on `init` in a Customizer AJAX test — unrelated to block pattern PHP usage."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/customize/widgets.php",
+          "rationale": "Single-token match on `init` in a Customizer widgets test — unrelated to block pattern PHP usage."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "tests/phpunit/tests/query/vars.php",
+          "rationale": "Single-token match on `init` in a query vars test — unrelated to block pattern PHP usage."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-admin/includes/class-walker-nav-menu-checklist.php",
+          "rationale": "Single-token match on `the_title` in a nav-menu walker — cross-schema collision, unrelated to patterns."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-admin/includes/class-wp-posts-list-table.php",
+          "rationale": "Single-token match on `the_title` in an admin list table — cross-schema collision, unrelated to patterns."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-content/themes/twentytwenty/classes/class-twentytwenty-walker-page.php",
+          "rationale": "Single-token match on `the_title` in a theme walker class — cross-schema collision, unrelated to PHP in patterns."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/class-walker-nav-menu.php",
+          "rationale": "Single-token match on `the_title` in nav-menu walker — cross-schema collision."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/class-walker-page.php",
+          "rationale": "Single-token match on `the_title` in page walker — cross-schema collision."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/comment.php",
+          "rationale": "Single-token match on `the_title` in comment functions — cross-schema collision, unrelated to patterns."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/customize/class-wp-customize-nav-menu-item-setting.php",
+          "rationale": "Single-token match on `the_title` in Customizer nav-menu setting — cross-schema collision."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/general-template.php",
+          "rationale": "Single-token match on `the_title` — general template functions file not specific to pattern PHP usage."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/nav-menu.php",
+          "rationale": "Single-token match on `the_title` in nav-menu functions — cross-schema collision."
+        },
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/rest-api/endpoints/class-wp-rest-menu-items-controller.php",
+          "rationale": "Single-token match on `the_title` in REST menu items controller — cross-schema collision, unrelated to patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "lib/compat/wordpress-7.0/class-gutenberg-rest-templates-controller-7-0.php",
+          "rationale": "Single-token match on `the_title` in an old compat REST templates controller — tangential, not about PHP in patterns."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-heading/index.js",
+          "rationale": "Single-token match on `init` in a JS block registration file — unrelated to PHP pattern usage."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-item/index.js",
+          "rationale": "Single-token match on `init` in a JS block registration file — unrelated to PHP pattern usage."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion-panel/index.js",
+          "rationale": "Single-token match on `init` in a JS block registration file — unrelated to PHP pattern usage."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/accordion/index.js",
+          "rationale": "Single-token match on `init` in a JS block registration file — unrelated to PHP pattern usage."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/archives/index.js",
+          "rationale": "Single-token match on `init` in a JS block registration file — unrelated to PHP pattern usage."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/audio/index.js",
+          "rationale": "Single-token match on `init` in a JS block registration file — unrelated to PHP pattern usage."
+        }
+      ]
+    },
+    "templates": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    },
+    "templates-introduction-to-templates": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Single-token English match — `core/site-title` appears only as an incidental example in the doc; the file is a theme.json schema, not a templates implementation file."
+        }
+      ]
+    },
+    "templates-template-hierarchy": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Single-token English match — `category` is a generic JSON schema property, not related to the WordPress template hierarchy system."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/format-library/src/image/index.js",
+          "rationale": "Single-token English match — `image` matched incidentally against the attachment/mime-type example in the doc, not related to template hierarchy logic."
+        }
+      ]
+    },
+    "templates-template-parts": {
+      "primary": [
+        {
+          "repo": "wordpress-develop",
+          "path": "src/wp-includes/block-template-utils.php",
+          "rationale": "Matched on `default_wp_template_part_areas`, the exact hook documented for registering custom template part areas — this is the canonical implementation file.",
+          "confidence": 0.92
+        }
+      ],
+      "secondary": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/theme.json",
+          "rationale": "Matched on `slug` and `area`, which correspond directly to the `templateParts` entries (`name`, `area`) documented in theme.json registration of template parts.",
+          "confidence": 0.75
+        }
+      ],
+      "context": [],
+      "dropped": [
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/block.json",
+          "rationale": "Matched only on generic schema properties `label`, `description`, `icon` — cross-schema property collision, not related to template parts."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "schemas/json/font-collection.json",
+          "rationale": "Single-token match on `slug` — generic JSON-schema property collision unrelated to template parts."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form-input/icons.js",
+          "rationale": "Single-token match on `icon` — generic identifier collision, this is a form-input block icons file unrelated to template parts."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/form/icons.js",
+          "rationale": "Single-token match on `icon` — generic identifier collision, this is a form block icons file unrelated to template parts."
+        },
+        {
+          "repo": "gutenberg",
+          "path": "packages/block-library/src/icon/icon.js",
+          "rationale": "Single-token match on `icon` — generic identifier collision, this is an icon block component unrelated to template parts."
+        }
+      ]
+    },
+    "templates-templates": {
+      "primary": [],
+      "secondary": [],
+      "context": [],
+      "dropped": []
+    }
+  }
+}

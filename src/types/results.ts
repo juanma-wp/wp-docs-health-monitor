@@ -1,5 +1,14 @@
 import { z } from 'zod';
 
+// Default disclaimer text surfaced in every RunResults. Tells downstream
+// consumers (dashboards, exports) how to present findings — as candidates
+// worth reviewing, not as confirmed defects. See docs/output-framing.md.
+export const DEFAULT_DISCLAIMER =
+  'AI-surfaced candidates for documentation review. Each finding represents ' +
+  'a potential discrepancy between docs and code, identified by a language model. ' +
+  'Verify against source before applying fixes. Approximately 15–20% of candidates ' +
+  'may be false positives or require editorial judgement.';
+
 export const IssueSchema = z.object({
   severity: z.enum(['critical', 'major', 'minor']),
   type: z.enum([
@@ -87,6 +96,7 @@ export const RunResultsSchema = z.object({
     }),
   }),
   usage: RunUsageSchema.optional(),
+  disclaimer: z.string().default(DEFAULT_DISCLAIMER),
   docs: z.array(DocResultSchema),
 });
 export type RunResults = z.infer<typeof RunResultsSchema>;
