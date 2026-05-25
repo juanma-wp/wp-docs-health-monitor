@@ -1,5 +1,5 @@
 import type { TreeNode } from '../tree-builder.js';
-import { escapeHtml, healthBadge, statusBadge, renderDashboardLayout, type DashboardNav } from './shared.js';
+import { escapeHtml, healthBadge, statusBadge, issueBreakdown, renderIssueBreakdown, renderDashboardLayout, type DashboardNav } from './shared.js';
 
 function statCard(label: string, value: string): string {
   return `
@@ -10,7 +10,9 @@ function statCard(label: string, value: string): string {
 }
 
 export function renderFolder(node: TreeNode, nav: DashboardNav): string {
-  const issueCount = node.docs.reduce((count, doc) => count + doc.issues.length, 0);
+  const folderIssues = node.docs.flatMap(doc => doc.issues);
+  const issueCount = folderIssues.length;
+  const folderBreakdown = issueBreakdown(folderIssues);
   const criticalDocs = node.docs.filter(doc => doc.status === 'critical').length;
   const lowestScore = node.docs.reduce<number | null>((currentLowest, doc) => {
     if (doc.healthScore === null) return currentLowest;
@@ -33,7 +35,7 @@ export function renderFolder(node: TreeNode, nav: DashboardNav): string {
       </div>
       <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         ${statCard('Docs in folder', `${node.docs.length}`)}
-        ${statCard('Issues', `${issueCount} total`)}
+        ${statCard('Issues', `<span class="block">${issueCount} total</span><span class="mt-2 block">${renderIssueBreakdown(folderBreakdown)}</span>`)}
         ${statCard('Critical docs', `${criticalDocs}`)}
         ${statCard('Lowest score', `${lowestScore ?? 'N/A'}`)}
       </div>
@@ -47,7 +49,7 @@ export function renderFolder(node: TreeNode, nav: DashboardNav): string {
       </td>
       <td class="px-6 py-4">${healthBadge(doc.healthScore)}</td>
       <td class="px-6 py-4">${statusBadge(doc.status)}</td>
-      <td class="px-6 py-4 text-sm text-slate-600">${doc.issues.length} issue${doc.issues.length !== 1 ? 's' : ''}</td>
+      <td class="px-6 py-4">${renderIssueBreakdown(issueBreakdown(doc.issues))}</td>
     </tr>`).join('');
 
   const tableHtml = `

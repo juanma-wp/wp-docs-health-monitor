@@ -1,3 +1,5 @@
+import type { Issue } from '../../types/results.js';
+
 export function escapeHtml(str: string): string {
   return str
     .replace(/&/g, '&amp;')
@@ -12,6 +14,41 @@ export function healthBadge(score: number | null): string {
   if (score >= 85) return `<span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-green-100 text-green-800">${score}</span>`;
   if (score >= 60) return `<span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-yellow-100 text-yellow-800">${score}</span>`;
   return `<span class="inline-block px-2 py-0.5 rounded text-sm font-semibold bg-red-100 text-red-800">${score}</span>`;
+}
+
+export function healthScoreText(score: number | null): string {
+  if (score === null)  return 'text-slate-400';
+  if (score >= 85)     return 'text-emerald-700';
+  if (score >= 60)     return 'text-amber-700';
+  return 'text-red-700';
+}
+
+export function healthScoreSurface(score: number | null): string {
+  if (score === null)  return 'border-slate-200 bg-slate-50';
+  if (score >= 85)     return 'border-emerald-200 bg-emerald-50';
+  if (score >= 60)     return 'border-amber-200 bg-amber-50';
+  return 'border-red-200 bg-red-50';
+}
+
+export type IssueBreakdown = { critical: number; major: number; minor: number };
+
+export function issueBreakdown(issues: Issue[]): IssueBreakdown {
+  return {
+    critical: issues.filter(i => i.severity === 'critical').length,
+    major:    issues.filter(i => i.severity === 'major').length,
+    minor:    issues.filter(i => i.severity === 'minor').length,
+  };
+}
+
+export function renderIssueBreakdown(b: IssueBreakdown): string {
+  const seg = (n: number, label: string, activeColor: string): string =>
+    `<span class="font-medium ${n > 0 ? activeColor : 'text-slate-400'}">${n}</span><span class="ml-1 ${n > 0 ? 'text-slate-600' : 'text-slate-400'}">${label}</span>`;
+  return `
+    <span class="inline-flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm">
+      ${seg(b.critical, 'critical', 'text-red-700')}
+      ${seg(b.major,    'major',    'text-amber-700')}
+      ${seg(b.minor,    'minor',    'text-slate-700')}
+    </span>`;
 }
 
 export function statusBadge(status: string): string {
@@ -53,6 +90,7 @@ export type DashboardHistoryEntry = {
   docCount?: number;
   criticalIssues?: number;
   majorIssues?: number;
+  minorIssues?: number;
   commitSha?: string;
 };
 
@@ -71,10 +109,6 @@ export type DashboardNav = {
 
 export function formatTimestamp(timestamp: string): string {
   return new Date(timestamp).toLocaleString();
-}
-
-function shortSha(commitSha?: string): string {
-  return commitSha ? commitSha.slice(0, 7) : '';
 }
 
 export function renderDashboardLayout(title: string, nav: DashboardNav, content: string): string {
@@ -98,14 +132,14 @@ export function renderDashboardLayout(title: string, nav: DashboardNav, content:
             ${typeof run.criticalIssues === 'number' ? `<span class="rounded-full bg-red-100 px-2 py-1 text-red-800">${run.criticalIssues} critical</span>` : ''}
             ${typeof run.majorIssues === 'number' ? `<span class="rounded-full bg-amber-100 px-2 py-1 text-amber-800">${run.majorIssues} major</span>` : ''}
           </div>
-          ${shortSha(run.commitSha) ? `<p class="mt-2 text-xs text-slate-500">commit ${escapeHtml(shortSha(run.commitSha))}</p>` : ''}
         </a>
       `).join('')
     : '<p class="rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-6 text-sm text-slate-500">No previous reports available yet.</p>';
 
-  const latestLinkHtml = nav.latestRunHref
-    ? `<a href="${escapeHtml(nav.latestRunHref)}" class="inline-flex items-center rounded-full bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700">Latest dashboard</a>`
-    : '<span class="inline-flex items-center rounded-full bg-slate-900 px-3 py-1.5 text-sm font-medium text-white">Latest dashboard</span>';
+  const onLatest = nav.currentRunId === nav.latestRunId;
+  const latestLinkHtml = !onLatest && nav.latestRunHref
+    ? `<a href="${escapeHtml(nav.latestRunHref)}" class="mt-2 inline-flex items-center rounded-full bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700">Go to latest dashboard</a>`
+    : '';
 
   return htmlShell(title, `
     <div class="lg:grid lg:grid-cols-[19rem_minmax(0,1fr)] lg:gap-8">

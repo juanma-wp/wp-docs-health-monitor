@@ -6,6 +6,8 @@ import { tmpdir } from 'os';
 import { dirname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import type { RunResults } from '../types/results.js';
+import type { DashboardHistoryEntry } from '../dashboard/templates/shared.js';
+import { SiteIdentitySchema } from '../types/site.js';
 
 const execFileAsync = promisify(execFile);
 
@@ -55,5 +57,84 @@ describe('cli dashboard generation', () => {
     expect(archivedIndex).toContain('2 total');
     expect(archivedIndex).toContain(results.runId);
     expect(archivedIndex).toContain('../../index.html');
+
+    const history = JSON.parse(
+      await readFile(join(outputDir, 'data', 'history.json'), 'utf-8'),
+    ) as DashboardHistoryEntry[];
+    const newest = history[history.length - 1];
+    expect(newest.minorIssues).toBeTypeOf('number');
+  });
+
+  it('derives outputDir as <config.outputDir>/<slug> when --output is omitted', async () => {
+    const tempDir = await mkdtemp(join(tmpdir(), 'wp-docs-cli-'));
+    tempDirs.push(tempDir);
+
+    const configPath = join(tempDir, 'my-handbook.json');
+    const configFixture = {
+      project: { name: 'My Handbook' },
+      docSource: {
+        type: 'manifest-url',
+        manifestUrl: 'https://example.com/manifest.json',
+        parentSlug: '*',
+      },
+      codeSources: {
+        gutenberg: { type: 'git-clone', repoUrl: 'https://github.com/example/repo.git' },
+      },
+      mappingPath: 'mappings/test.json',
+      outputDir: tempDir,
+      validator: { type: 'claude' },
+    };
+    await writeFile(configPath, JSON.stringify(configFixture, null, 2), 'utf-8');
+
+    await execFileAsync(process.execPath, [
+      tsxCliPath, cliPath,
+      '--config', configPath,
+      '--results', mockResultsPath,
+    ], { cwd: projectRoot });
+
+    const derivedDir = join(tempDir, 'my-handbook');
+    const siteJson = JSON.parse(
+      await readFile(join(derivedDir, 'data', 'site.json'), 'utf-8'),
+    );
+    expect(siteJson.id).toBe('my-handbook');
+    const dashboardHtml = await readFile(join(derivedDir, 'index.html'), 'utf-8');
+    expect(dashboardHtml).toBeTruthy();
+  });
+
+  it('writes data/site.json from --config when supplied alongside --results', async () => {
+    const tempDir = await mkdtemp(join(tmpdir(), 'wp-docs-cli-'));
+    tempDirs.push(tempDir);
+
+    const configPath = join(tempDir, 'my-handbook.json');
+    const configFixture = {
+      project: { name: 'My Handbook' },
+      docSource: {
+        type: 'manifest-url',
+        manifestUrl: 'https://example.com/manifest.json',
+        parentSlug: '*',
+      },
+      codeSources: {
+        gutenberg: { type: 'git-clone', repoUrl: 'https://github.com/example/repo.git' },
+      },
+      mappingPath: 'mappings/test.json',
+      outputDir: 'out',
+      validator: { type: 'claude' },
+    };
+    await writeFile(configPath, JSON.stringify(configFixture, null, 2), 'utf-8');
+
+    const outputDir = join(tempDir, 'site');
+    await execFileAsync(process.execPath, [
+      tsxCliPath, cliPath,
+      '--config', configPath,
+      '--results', mockResultsPath,
+      '--output', outputDir,
+    ], { cwd: projectRoot });
+
+    const siteJson = JSON.parse(
+      await readFile(join(outputDir, 'data', 'site.json'), 'utf-8'),
+    );
+    const parsed = SiteIdentitySchema.parse(siteJson);
+    expect(parsed.id).toBe('my-handbook');
+    expect(parsed.name).toBe('My Handbook');
   });
 });

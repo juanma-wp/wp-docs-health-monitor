@@ -127,8 +127,7 @@ export function renderDoc(doc: DocResult, repoUrls: Record<string, string>, repo
 
   const footer = `
     <footer class="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-sm">
-      <p>Commit: <code>${escapeHtml(doc.commitSha)}</code></p>
-      <p class="mt-1">Analyzed: ${escapeHtml(formatTimestamp(doc.analyzedAt))}</p>
+      <p>Analyzed: ${escapeHtml(formatTimestamp(doc.analyzedAt))}</p>
       <div class="mt-4">
         <a href="../index.html" class="font-medium text-blue-700 hover:text-blue-900 hover:underline">← Back to run overview</a>
       </div>

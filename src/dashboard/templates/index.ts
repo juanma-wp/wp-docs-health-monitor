@@ -1,21 +1,18 @@
 import type { RunResults } from '../../types/results.js';
 import type { TreeNode } from '../tree-builder.js';
-import { escapeHtml, healthBadge, statusBadge, formatTimestamp, renderDashboardLayout, type DashboardNav } from './shared.js';
+import { escapeHtml, healthBadge, healthScoreText, healthScoreSurface, statusBadge, formatTimestamp, issueBreakdown, renderIssueBreakdown, renderDashboardLayout, type DashboardNav } from './shared.js';
 
 const MISSING_HEALTH_SORT_VALUE = 101;
 
-function renderStatCard(label: string, value: string, tone: string): string {
+function renderStatCard(label: string, value: string, tone: string, surface = 'border-slate-200 bg-white'): string {
   return `
-    <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="rounded-3xl border ${surface} p-5 shadow-sm">
       <p class="text-sm font-medium text-slate-500">${label}</p>
       <p class="mt-3 text-3xl font-semibold ${tone}">${value}</p>
     </div>`;
 }
 
 export function renderIndex(results: RunResults, tree: TreeNode[], nav: DashboardNav): string {
-  const commitSha = results.docs[0]?.commitSha ?? '';
-  const shortSha = commitSha ? commitSha.slice(0, 7) : '';
-
   const headerHtml = `
     <section class="rounded-3xl bg-slate-900 px-6 py-8 text-white shadow-lg">
       <div class="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
@@ -34,10 +31,6 @@ export function renderIndex(results: RunResults, tree: TreeNode[], nav: Dashboar
             <p class="mt-1">${escapeHtml(formatTimestamp(results.timestamp))}</p>
           </div>
           <div>
-            <p class="text-xs uppercase tracking-[0.2em] text-slate-300">Commit</p>
-            <p class="mt-1">${shortSha ? `<code>${escapeHtml(shortSha)}</code>` : '—'}</p>
-          </div>
-          <div>
             <p class="text-xs uppercase tracking-[0.2em] text-slate-300">Models</p>
             <p class="mt-1">${escapeHtml(results.models.pass1)} / ${escapeHtml(results.models.pass2)}</p>
           </div>
@@ -47,7 +40,7 @@ export function renderIndex(results: RunResults, tree: TreeNode[], nav: Dashboar
 
   const summaryHtml = `
     <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-      ${renderStatCard('Overall health', healthBadge(results.overallHealth), 'text-slate-900')}
+      ${renderStatCard('Overall health', String(results.overallHealth), healthScoreText(results.overallHealth), healthScoreSurface(results.overallHealth))}
       ${renderStatCard('Docs analyzed', String(results.totals.docs), 'text-slate-900')}
       ${renderStatCard('Healthy docs', String(results.totals.healthy), 'text-emerald-700')}
       ${renderStatCard('Critical issues', String(results.totals.issues.critical), 'text-red-700')}
@@ -95,7 +88,7 @@ export function renderIndex(results: RunResults, tree: TreeNode[], nav: Dashboar
                   <td class="px-6 py-4 text-slate-600">${doc.parent ? `<a href="folder/${escapeHtml(doc.parent)}.html" class="hover:text-slate-900 hover:underline">${escapeHtml(doc.parent)}</a>` : 'Uncategorized'}</td>
                   <td class="px-6 py-4">${healthBadge(doc.healthScore)}</td>
                   <td class="px-6 py-4">${statusBadge(doc.status)}</td>
-                  <td class="px-6 py-4 text-slate-600">${doc.issues.length} total · ${doc.issues.filter(issue => issue.severity === 'critical').length} critical</td>
+                  <td class="px-6 py-4">${renderIssueBreakdown(issueBreakdown(doc.issues))}</td>
                 </tr>`).join('')}
             </tbody>
           </table>
@@ -111,7 +104,10 @@ export function renderIndex(results: RunResults, tree: TreeNode[], nav: Dashboar
           <p class="mt-1 text-sm text-slate-500">Use folder rollups to find the sections of the docs site that need attention first.</p>
         </div>
         <div class="grid gap-4 p-6 xl:grid-cols-2">
-          ${tree.map(node => `
+          ${tree.map(node => {
+            const folderIssues = node.docs.flatMap(doc => doc.issues);
+            const breakdown = issueBreakdown(folderIssues);
+            return `
             <a href="folder/${escapeHtml(node.parent)}.html" class="rounded-3xl border border-slate-200 bg-slate-50 p-5 transition hover:border-slate-300 hover:bg-white hover:shadow-sm">
               <div class="flex items-start justify-between gap-3">
                 <div>
@@ -120,11 +116,13 @@ export function renderIndex(results: RunResults, tree: TreeNode[], nav: Dashboar
                 </div>
                 ${healthBadge(node.folderHealth)}
               </div>
-              <div class="mt-4 flex flex-wrap gap-2">
+              <div class="mt-4 flex flex-wrap items-center gap-2">
                 ${statusBadge(node.folderStatus)}
-                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">${node.docs.reduce((count, doc) => count + doc.issues.length, 0)} issues</span>
+                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">${folderIssues.length} issues</span>
               </div>
-            </a>`).join('')}
+              <div class="mt-3">${renderIssueBreakdown(breakdown)}</div>
+            </a>`;
+          }).join('')}
         </div>
       </section>`;
 

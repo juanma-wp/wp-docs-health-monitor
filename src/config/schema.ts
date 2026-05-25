@@ -38,7 +38,7 @@ export const ConfigSchema = z.object({
     })
   ),
   mappingPath: z.string(),
-  outputDir:   z.string(),
+  outputDir:   z.string().default('./out'),
   validator: z.object({
     type:                   z.literal('claude'),
     pass1Model:             z.string().default('claude-sonnet-4-6'),

@@ -1,6 +1,3 @@
-import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'fs';
-import { join, dirname } from 'path';
-
 import pLimit from 'p-limit';
 
 import type { Config } from './config/schema.js';
@@ -223,31 +220,6 @@ export async function runPipeline(config: Config, options: RunPipelineOptions = 
     disclaimer: DEFAULT_DISCLAIMER,
     docs: docResults,
   };
-
-  // Write output files
-  const outputDir = config.outputDir;
-  try {
-    const runDir = join(outputDir, 'data', 'runs', runId);
-    mkdirSync(runDir, { recursive: true });
-    writeFileSync(join(runDir, 'results.json'), JSON.stringify(runResults, null, 2) + '\n');
-
-    // Append to history.json
-    const historyPath = join(outputDir, 'data', 'history.json');
-    let history: unknown[] = [];
-    if (existsSync(historyPath)) {
-      try {
-        history = JSON.parse(readFileSync(historyPath, 'utf-8')) as unknown[];
-      } catch {
-        history = [];
-      }
-    }
-    const commitSha = docResults.find(d => d.commitSha)?.commitSha ?? '';
-    history.push({ runId, timestamp: now.toISOString(), commitSha, overallHealth, totals, estimatedCostUsd: usage?.estimatedCostUsd });
-    mkdirSync(dirname(historyPath), { recursive: true });
-    writeFileSync(historyPath, JSON.stringify(history, null, 2) + '\n');
-  } catch (err) {
-    console.warn(`[pipeline] Could not write output files: ${String(err)}`);
-  }
 
   if (usage) logCostSummary(docResults, usage);
 

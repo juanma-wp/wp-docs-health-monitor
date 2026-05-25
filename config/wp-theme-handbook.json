@@ -25,7 +25,6 @@
     }
   },
   "mappingPath": "mappings/wp-theme-handbook.json",
-  "outputDir": "./out-theme-handbook",
   "validator": {
     "type": "claude",
     "pass1Model": "claude-sonnet-4-6",

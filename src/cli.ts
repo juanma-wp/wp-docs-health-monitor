@@ -4,12 +4,14 @@
 import { program } from 'commander';
 import { readFile, writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
-import { resolve, join } from 'path';
+import { resolve, join, basename } from 'path';
 import { loadConfig } from './config/loader.js';
+import type { Config } from './config/schema.js';
 import { runPipeline } from './pipeline.js';
 import { RunResultsSchema, type RunResults } from './types/results.js';
 import { generate } from './dashboard/generate.js';
 import type { DashboardHistoryEntry } from './dashboard/templates/shared.js';
+import type { SiteIdentity } from './types/site.js';
 
 program
   .name('wp-docs-health-monitor')
@@ -31,9 +33,18 @@ const opts = program.opts<{
 
 async function main(): Promise<void> {
   let results: RunResults;
+  let config: Config | undefined;
+
+  if (opts.config) {
+    try {
+      config = await loadConfig(resolve(opts.config));
+    } catch (err) {
+      process.stderr.write(`${(err as Error).message}\n`);
+      process.exit(1);
+    }
+  }
 
   if (opts.results) {
-    // Load results from file — no pipeline needed
     let raw: unknown;
     try {
       raw = JSON.parse(await readFile(resolve(opts.results), 'utf-8'));
@@ -48,16 +59,8 @@ async function main(): Promise<void> {
     }
     results = parsed.data;
   } else {
-    if (!opts.config) {
+    if (!config) {
       process.stderr.write('Error: --config is required when --results is not provided.\n');
-      process.exit(1);
-    }
-
-    let config;
-    try {
-      config = await loadConfig(resolve(opts.config));
-    } catch (err) {
-      process.stderr.write(`${(err as Error).message}\n`);
       process.exit(1);
     }
 
@@ -71,12 +74,19 @@ async function main(): Promise<void> {
     results = await runPipeline(config, { slugs: opts.slug });
   }
 
-  // Determine output directory
-  if (!opts.output) {
-    process.stderr.write('Error: --output is required.\n');
+  // Determine output directory. Precedence:
+  //   1. --output explicit override
+  //   2. derived from config: <config.outputDir>/<config-filename-slug>/
+  //   3. error (only --results was passed; no slug available to derive from)
+  let outputDir: string;
+  if (opts.output) {
+    outputDir = resolve(opts.output);
+  } else if (config && opts.config) {
+    outputDir = resolve(config.outputDir, basename(opts.config, '.json'));
+  } else {
+    process.stderr.write('Error: --output is required when --config is not provided.\n');
     process.exit(1);
   }
-  const outputDir = resolve(opts.output);
   const currentHistoryEntry: DashboardHistoryEntry = {
     runId: results.runId,
     timestamp: results.timestamp,
@@ -84,6 +94,7 @@ async function main(): Promise<void> {
     docCount: results.totals.docs,
     criticalIssues: results.totals.issues.critical,
     majorIssues: results.totals.issues.major,
+    minorIssues: results.totals.issues.minor,
     commitSha: results.docs[0]?.commitSha ?? '',
   };
 
@@ -111,6 +122,15 @@ async function main(): Promise<void> {
   history.push(currentHistoryEntry);
   await mkdir(join(outputDir, 'data'), { recursive: true });
   await writeFile(historyPath, JSON.stringify(history, null, 2), 'utf-8');
+
+  if (config && opts.config) {
+    const siteIdentity: SiteIdentity = {
+      id:          basename(opts.config, '.json'),
+      name:        config.project.name,
+      lastUpdated: results.timestamp,
+    };
+    await writeFile(join(outputDir, 'data', 'site.json'), JSON.stringify(siteIdentity, null, 2), 'utf-8');
+  }
 
   // Generate latest dashboard
   await generate(results, outputDir, { history, latestRunId: results.runId, mode: 'latest' });
