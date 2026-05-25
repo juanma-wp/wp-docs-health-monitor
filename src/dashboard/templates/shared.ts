@@ -109,6 +109,7 @@ export type DashboardNav = {
   latestRunHref: string | null;
   metaIndexHref: string | null;
   history: DashboardRunLink[];
+  disclaimer: string;
 };
 
 export function formatTimestamp(timestamp: string): string {
@@ -176,6 +177,10 @@ export function renderDashboardLayout(title: string, nav: DashboardNav, content:
         </div>
       </aside>
       <main class="min-w-0 space-y-6">
+        ${nav.disclaimer ? `
+          <aside class="rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+            <p><span class="mr-1" aria-hidden="true">ℹ️</span><span class="font-semibold">Heads-up:</span> ${escapeHtml(nav.disclaimer)}</p>
+          </aside>` : ''}
         ${content}
       </main>
     </div>

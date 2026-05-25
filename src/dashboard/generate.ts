@@ -66,6 +66,7 @@ function buildNav(
   mode: 'latest' | 'run',
   page: 'index' | 'nested',
   metaIndexAvailable: boolean,
+  disclaimer: string,
 ): DashboardNav {
   const paths = buildRelativePaths(mode, page);
 
@@ -74,6 +75,7 @@ function buildNav(
     latestRunId,
     latestRunHref: currentRunId === latestRunId ? (page === 'index' ? null : paths.currentRunHref) : paths.latestRunHref,
     metaIndexHref: metaIndexAvailable ? paths.metaIndexHref : null,
+    disclaimer,
     history: history.map(entry => {
       const href = entry.runId === currentRunId
         ? paths.currentRunHref
@@ -108,8 +110,8 @@ export async function generate(results: RunResults, outDir: string, options: Gen
   const metaIndexAvailable = existsSync(metaProbePath);
 
   const tree = buildTree(results.docs);
-  const indexNav = buildNav(results.runId, latestRunId, history, mode, 'index', metaIndexAvailable);
-  const nestedNav = buildNav(results.runId, latestRunId, history, mode, 'nested', metaIndexAvailable);
+  const indexNav = buildNav(results.runId, latestRunId, history, mode, 'index', metaIndexAvailable, results.disclaimer);
+  const nestedNav = buildNav(results.runId, latestRunId, history, mode, 'nested', metaIndexAvailable, results.disclaimer);
 
   // The latest dashboard's index.html lives at <site>/index.html but links into
   // <site>/runs/<latestId>/doc/ and <site>/runs/<latestId>/folder/ — the same
