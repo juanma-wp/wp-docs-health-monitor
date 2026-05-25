@@ -20,12 +20,12 @@ if (!Array.isArray(incoming) || incoming.length === 0) {
   throw new Error(`Expected incoming history at ${newPath} to be a non-empty JSON array.`);
 }
 
-const newEntry = incoming[incoming.length - 1];
-if (!newEntry || typeof newEntry.runId !== 'string' || newEntry.runId.length === 0) {
+const newestLocalEntry = incoming[incoming.length - 1];
+if (!newestLocalEntry || typeof newestLocalEntry.runId !== 'string' || newestLocalEntry.runId.length === 0) {
   throw new Error(`Expected incoming history at ${newPath} to contain an entry with a runId.`);
 }
 
-const merged = [newEntry, ...existing.filter(entry => entry?.runId !== newEntry.runId)];
+const merged = [newestLocalEntry, ...existing.filter(entry => entry?.runId !== newestLocalEntry.runId)];
 
 writeFileSync(existingPath, JSON.stringify(merged, null, 2) + '\n');
 console.log(`history.json updated — ${merged.length} total runs`);

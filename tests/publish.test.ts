@@ -142,7 +142,10 @@ describe('scripts/publish.sh', () => {
     await writeOut(
       repoDir,
       '20240416-120000',
-      [{ runId: '20240416-120000', timestamp: '2024-04-16T12:00:00.000Z', overallHealth: 80 }],
+      [
+        { runId: '20240415-120000', timestamp: '2024-04-15T12:00:00.000Z', overallHealth: 65 },
+        { runId: '20240416-120000', timestamp: '2024-04-16T12:00:00.000Z', overallHealth: 80 },
+      ],
       { runId: '20240416-120000', payload: 'second' },
       'second publish',
     );

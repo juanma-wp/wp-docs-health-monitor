@@ -56,7 +56,8 @@ RUN_ID="$(
       process.exit(1);
     }
 
-    const runId = history.at(-1)?.runId;
+    const newestLocalEntry = history[history.length - 1];
+    const runId = newestLocalEntry?.runId;
     if (typeof runId !== 'string' || !/^\\d{8}-\\d{6}$/.test(runId)) {
       console.error('Error: out/data/history.json must end with an entry containing a valid runId.');
       process.exit(1);
