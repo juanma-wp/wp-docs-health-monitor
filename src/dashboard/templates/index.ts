@@ -12,7 +12,7 @@ function renderStatCard(label: string, value: string, tone: string, surface = 'b
     </div>`;
 }
 
-export function renderIndex(results: RunResults, tree: TreeNode[], nav: DashboardNav, siteName?: string): string {
+export function renderIndex(results: RunResults, tree: TreeNode[], nav: DashboardNav, siteName?: string, docFolderLinkPrefix = ''): string {
   const isLatest = nav.currentRunId === nav.latestRunId;
   const latestPill = isLatest
     ? '<span class="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider text-emerald-200 ring-1 ring-emerald-500/40">Latest</span>'
@@ -78,10 +78,10 @@ export function renderIndex(results: RunResults, tree: TreeNode[], nav: Dashboar
               ${priorityDocs.map(doc => `
                 <tr class="hover:bg-slate-50">
                   <td class="px-6 py-4">
-                    <a href="doc/${escapeHtml(doc.slug)}.html" class="font-semibold text-blue-700 hover:text-blue-900 hover:underline">${escapeHtml(doc.title)}</a>
+                    <a href="${escapeHtml(docFolderLinkPrefix)}doc/${escapeHtml(doc.slug)}.html" class="font-semibold text-blue-700 hover:text-blue-900 hover:underline">${escapeHtml(doc.title)}</a>
                     <p class="mt-1 text-xs text-slate-500">${escapeHtml(doc.slug)}</p>
                   </td>
-                  <td class="px-6 py-4 text-slate-600">${doc.parent ? `<a href="folder/${escapeHtml(doc.parent)}.html" class="hover:text-slate-900 hover:underline">${escapeHtml(doc.parent)}</a>` : 'Uncategorized'}</td>
+                  <td class="px-6 py-4 text-slate-600">${doc.parent ? `<a href="${escapeHtml(docFolderLinkPrefix)}folder/${escapeHtml(doc.parent)}.html" class="hover:text-slate-900 hover:underline">${escapeHtml(doc.parent)}</a>` : 'Uncategorized'}</td>
                   <td class="px-6 py-4">${healthBadge(doc.healthScore)}</td>
                   <td class="px-6 py-4">${statusBadge(doc.status)}</td>
                   <td class="px-6 py-4">${renderIssueBreakdown(issueBreakdown(doc.issues))}</td>
@@ -104,7 +104,7 @@ export function renderIndex(results: RunResults, tree: TreeNode[], nav: Dashboar
             const folderIssues = node.docs.flatMap(doc => doc.issues);
             const breakdown = issueBreakdown(folderIssues);
             return `
-            <a href="folder/${escapeHtml(node.parent)}.html" class="rounded-3xl border border-slate-200 bg-slate-50 p-5 transition hover:border-slate-300 hover:bg-white hover:shadow-sm">
+            <a href="${escapeHtml(docFolderLinkPrefix)}folder/${escapeHtml(node.parent)}.html" class="rounded-3xl border border-slate-200 bg-slate-50 p-5 transition hover:border-slate-300 hover:bg-white hover:shadow-sm">
               <div class="flex items-start justify-between gap-3">
                 <div>
                   <p class="text-lg font-semibold text-slate-950">${escapeHtml(node.label)}</p>

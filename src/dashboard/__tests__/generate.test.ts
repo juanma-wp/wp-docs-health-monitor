@@ -28,12 +28,25 @@ afterAll(async () => {
   }
 });
 
+// generate() in mode='latest' writes only the root index.html. The per-doc
+// and per-folder pages for the latest run come from the archived-run loop
+// (cli.ts) which calls generate() with mode='run' for every history entry
+// including the latest. Tests replicate that two-step pattern.
+async function generateLatestAndArchived(results: RunResults, dir = outDir): Promise<void> {
+  await generate(results, dir, { latestRunId: results.runId, mode: 'latest' });
+  await generate(results, join(dir, 'runs', results.runId), { latestRunId: results.runId, mode: 'run' });
+}
+
+const archivedRunDir = (results: RunResults): string => join(outDir, 'runs', results.runId);
+
 describe('generate()', () => {
   it('creates expected HTML files', async () => {
     const results = await loadMockResults();
-    await generateDashboard(results);
+    await generateLatestAndArchived(results);
 
-    const expectedFiles = [
+    expect(existsSync(join(outDir, 'index.html')), 'expected root index.html').toBe(true);
+    const runDir = archivedRunDir(results);
+    const expectedRunFiles = [
       'index.html',
       'doc/block-metadata.html',
       'doc/block-registration.html',
@@ -41,52 +54,63 @@ describe('generate()', () => {
       'doc/block-supports.html',
       'folder/block-api.html',
     ];
-
-    for (const file of expectedFiles) {
-      expect(existsSync(join(outDir, file)), `Expected ${file} to exist`).toBe(true);
+    for (const file of expectedRunFiles) {
+      expect(existsSync(join(runDir, file)), `Expected runs/<id>/${file} to exist`).toBe(true);
     }
+
+    // doc/ and folder/ must NOT exist at site root — the latest's links point
+    // into runs/<latestId>/ instead.
+    expect(existsSync(join(outDir, 'doc')), 'root-level doc/ should not exist').toBe(false);
+    expect(existsSync(join(outDir, 'folder')), 'root-level folder/ should not exist').toBe(false);
   });
 
   it('index.html contains block-metadata and overall health score', async () => {
     const results = await loadMockResults();
-    await generateDashboard(results);
+    await generateLatestAndArchived(results);
     const content = await readFile(join(outDir, 'index.html'), 'utf-8');
     expect(content).toContain('block-metadata');
     expect(content).toContain(String(results.overallHealth));
   });
 
-  it('doc/block-metadata.html contains "healthy" and not "critical" as a status', async () => {
+  it('root index.html links into runs/<latestId>/doc and folder', async () => {
     const results = await loadMockResults();
-    await generateDashboard(results);
-    const content = await readFile(join(outDir, 'doc/block-metadata.html'), 'utf-8');
+    await generateLatestAndArchived(results);
+    const content = await readFile(join(outDir, 'index.html'), 'utf-8');
+    expect(content).toContain(`runs/${results.runId}/doc/`);
+    expect(content).toContain(`runs/${results.runId}/folder/`);
+  });
+
+  it('per-doc page (under runs/<id>/doc/) contains "healthy" and not "critical" as a status', async () => {
+    const results = await loadMockResults();
+    await generateLatestAndArchived(results);
+    const content = await readFile(join(archivedRunDir(results), 'doc/block-metadata.html'), 'utf-8');
     expect(content).toContain('healthy');
     // block-metadata has no critical issues; status badge should not say critical
     expect(content).not.toMatch(/text-red-800[^<]*>critical/);
   });
 
-  it('doc/block-attributes.html contains "critical" and at least one issue docSays text', async () => {
+  it('per-doc page (under runs/<id>/doc/) contains "critical" and at least one issue docSays text', async () => {
     const results = await loadMockResults();
-    await generateDashboard(results);
-    const content = await readFile(join(outDir, 'doc/block-attributes.html'), 'utf-8');
+    await generateLatestAndArchived(results);
+    const content = await readFile(join(archivedRunDir(results), 'doc/block-attributes.html'), 'utf-8');
     expect(content).toContain('critical');
     const attrDoc = results.docs.find(d => d.slug === 'block-attributes');
     expect(attrDoc).toBeDefined();
-    // The docSays text should appear (HTML-escaped) in the output
-    // Use a segment from the text that contains no characters affected by HTML escaping
     expect(content).toContain('to store attribute values in post meta');
   });
 
   it('all generated files include the Tailwind CDN script', async () => {
     const results = await loadMockResults();
-    await generateDashboard(results);
+    await generateLatestAndArchived(results);
+    const runDir = archivedRunDir(results);
     const files = [
-      'index.html',
-      'doc/block-metadata.html',
-      'doc/block-attributes.html',
-      'folder/block-api.html',
+      join(outDir, 'index.html'),
+      join(runDir, 'doc/block-metadata.html'),
+      join(runDir, 'doc/block-attributes.html'),
+      join(runDir, 'folder/block-api.html'),
     ];
     for (const file of files) {
-      const content = await readFile(join(outDir, file), 'utf-8');
+      const content = await readFile(file, 'utf-8');
       expect(content, `${file} should include Tailwind CDN`).toContain(
         '<script src="https://cdn.tailwindcss.com"></script>',
       );

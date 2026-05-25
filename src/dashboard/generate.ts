@@ -97,8 +97,7 @@ export async function generate(results: RunResults, outDir: string, options: Gen
   const history = normalizeHistory(results, options.history);
   const latestRunId = options.latestRunId ?? history[0]?.runId ?? results.runId;
 
-  await mkdir(join(outDir, 'doc'), { recursive: true });
-  await mkdir(join(outDir, 'folder'), { recursive: true });
+  await mkdir(outDir, { recursive: true });
 
   // Probe for a sibling/ancestor meta-index. Relative to outDir:
   //   mode='latest' (outDir == <site>): meta is at ../index.html
@@ -112,13 +111,28 @@ export async function generate(results: RunResults, outDir: string, options: Gen
   const indexNav = buildNav(results.runId, latestRunId, history, mode, 'index', metaIndexAvailable);
   const nestedNav = buildNav(results.runId, latestRunId, history, mode, 'nested', metaIndexAvailable);
 
-  await writeFile(join(outDir, 'index.html'), renderIndex(results, tree, indexNav, options.siteName), 'utf-8');
+  // The latest dashboard's index.html lives at <site>/index.html but links into
+  // <site>/runs/<latestId>/doc/ and <site>/runs/<latestId>/folder/ — the same
+  // files the archived-run loop renders. Avoids duplicating per-doc HTML at
+  // both <site>/doc/ and <site>/runs/<latestId>/doc/.
+  const docFolderLinkPrefix = mode === 'latest' ? `runs/${latestRunId}/` : '';
 
-  for (const doc of results.docs) {
-    await writeFile(join(outDir, 'doc', `${doc.slug}.html`), renderDoc(doc, results.repoUrls, results.repoRefs, nestedNav), 'utf-8');
-  }
+  await writeFile(join(outDir, 'index.html'), renderIndex(results, tree, indexNav, options.siteName, docFolderLinkPrefix), 'utf-8');
 
-  for (const node of tree) {
-    await writeFile(join(outDir, 'folder', `${node.parent}.html`), renderFolder(node, nestedNav), 'utf-8');
+  // doc/ and folder/ pages are written only by mode='run' calls. The latest
+  // run's per-doc pages come from the archived-run regeneration loop in the
+  // caller (cli.ts) which calls generate() again with mode='run' for every
+  // history entry — including the latest itself.
+  if (mode === 'run') {
+    await mkdir(join(outDir, 'doc'), { recursive: true });
+    await mkdir(join(outDir, 'folder'), { recursive: true });
+
+    for (const doc of results.docs) {
+      await writeFile(join(outDir, 'doc', `${doc.slug}.html`), renderDoc(doc, results.repoUrls, results.repoRefs, nestedNav), 'utf-8');
+    }
+
+    for (const node of tree) {
+      await writeFile(join(outDir, 'folder', `${node.parent}.html`), renderFolder(node, nestedNav), 'utf-8');
+    }
   }
 }
