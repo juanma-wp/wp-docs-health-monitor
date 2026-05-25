@@ -1,0 +1,2380 @@
+{
+  "runId": "20260525-102714",
+  "timestamp": "2026-05-25T08:27:14.200Z",
+  "overallHealth": 98,
+  "models": {
+    "pass1": "claude-sonnet-4-6",
+    "pass2": "claude-sonnet-4-6"
+  },
+  "sampling": {
+    "temperature": 0,
+    "samples": 1
+  },
+  "repoUrls": {
+    "gutenberg": "https://github.com/WordPress/gutenberg",
+    "wordpress-develop": "https://github.com/WordPress/wordpress-develop"
+  },
+  "repoRefs": {
+    "gutenberg": "trunk",
+    "wordpress-develop": "7.0"
+  },
+  "totals": {
+    "docs": 70,
+    "healthy": 64,
+    "needsAttention": 6,
+    "critical": 0,
+    "notMapped": 0,
+    "analysisFailed": 0,
+    "issues": {
+      "total": 28,
+      "critical": 1,
+      "major": 20,
+      "minor": 7
+    }
+  },
+  "usage": {
+    "inputTokens": 3664519,
+    "outputTokens": 82051,
+    "cacheReadTokens": 2245179,
+    "cacheWriteTokens": 348766,
+    "estimatedCostUsd": 14.2057
+  },
+  "disclaimer": "AI-surfaced candidates for documentation review. Each finding represents a potential discrepancy between docs and code, identified by a language model. Verify against source before applying fixes. Approximately 15–20% of candidates may be false positives or require editorial judgement.",
+  "docs": [
+    {
+      "slug": "index",
+      "title": "Theme Handbook",
+      "parent": null,
+      "sourceUrl": "https://developer.wordpress.org/themes/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The handbook correctly distinguishes block themes (available from WordPress 5.9, HTML + theme.json based, Site Editor) from classic themes (PHP/JS/CSS, hooks and filters) — this is an accurate and useful high-level orientation for developers choosing a theme type.",
+        "The handbook accurately describes the two-track learning path (block themes and classic themes) and correctly points developers toward the Core Concepts section as the next step after the introduction.",
+        "GAP: No source files were provided for this document, so no runtime behaviour, API signatures, default values, or code examples could be validated against an implementation. A deeper audit would require the source files backing the linked handbook pages (e.g., theme registration functions, template hierarchy logic, theme.json schema)."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:17:03.085Z"
+    },
+    {
+      "slug": "getting-started",
+      "title": "Getting Started",
+      "parent": null,
+      "sourceUrl": "https://developer.wordpress.org/themes/getting-started/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The documentation accurately describes its own scope and audience — both newcomers and experienced themers transitioning to block themes — which is a useful and honest framing that sets correct expectations.",
+        "The five sub-articles listed (What Is a Theme?, Who Is This Handbook For?, Reading This Handbook, Tools and Setup, Quick-Start Guide) are presented as a coherent, logically ordered learning path, which is a well-structured navigational aid.",
+        "GAP: No source files were provided for this document, so no code-level drift analysis was possible. If any of the linked sub-articles (e.g., Quick-Start Guide or Tools and Setup) contain code examples or API references, those pages should be validated separately against the WordPress theme source code."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:17:02.435Z"
+    },
+    {
+      "slug": "getting-started-what-is-a-theme",
+      "title": "What Is a Theme?",
+      "parent": "getting-started",
+      "sourceUrl": "https://developer.wordpress.org/themes/getting-started/what-is-a-theme/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly distinguishes block themes (HTML-based templates, theme.json, Site Editor) from classic themes (PHP-based templating), which aligns with the well-established WordPress theming architecture.",
+        "The doc accurately notes that hybrid themes are classic themes that have adopted block-related features like global settings/styles or block template parts — this is a precise and correct characterisation of the hybrid pattern.",
+        "GAP: The doc mentions that themes can be exported directly from the Site Editor, but does not mention the create-block-theme plugin or the programmatic wp_is_block_theme() function, which developers building tooling around theme detection would benefit from knowing about."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:17:02.156Z"
+    },
+    {
+      "slug": "getting-started-who-is-this-handbook-for",
+      "title": "Who Is This Handbook For?",
+      "parent": "getting-started",
+      "sourceUrl": "https://developer.wordpress.org/themes/getting-started/who-is-this-handbook-for/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The handbook accurately describes the two distinct theme types (block themes and classic themes) and correctly notes that classic themes are built entirely from code, which aligns with the general WordPress theme architecture.",
+        "The doc correctly identifies the Site Editor export capability for block themes, which is a real WordPress feature introduced in recent major versions.",
+        "GAP: No source code was provided for this documentation page, so no runtime behaviour, API signatures, or default values could be verified against an implementation. This page is conceptual/introductory prose with no code-backed claims to validate."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:17:06.564Z"
+    },
+    {
+      "slug": "getting-started-reading-this-handbook",
+      "title": "Reading This Handbook",
+      "parent": "getting-started",
+      "sourceUrl": "https://developer.wordpress.org/themes/getting-started/reading-this-handbook/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The handbook's explanation of namespacing conventions (snake_case for PHP functions, kebab-case for handles/slugs, PascalCase for classes) is consistent with WordPress Coding Standards and accurately reflects real-world WordPress development practice.",
+        "The warning about redeclaring get_post() causing a fatal error is a concrete, accurate example that correctly illustrates why namespacing matters — developers copying this pattern will avoid a real class of bugs.",
+        "GAP: The 'Potentially removed APIs' list (theme.json, theme_slug, fabled_sunset, etc.) consists entirely of placeholder/example identifiers and a well-known core function name used as a teaching example — none of these are real API drift candidates. No source files were provided, so no code-backed drift can be verified for this purely introductory/conceptual page."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:17:09.055Z"
+    },
+    {
+      "slug": "getting-started-tools-and-setup",
+      "title": "Tools and Setup",
+      "parent": "getting-started",
+      "sourceUrl": "https://developer.wordpress.org/themes/getting-started/tools-and-setup/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly identifies @wordpress/env as a local WordPress environment package and links to the official Block Editor Handbook — this matches the actual npm package name and its documented purpose.",
+        "The plugin list accurately names real, currently available WordPress.org plugins (Theme Check, Debug Bar, Query Monitor, Log Deprecated Notices, Monster Widget) with correct slugs that resolve to live plugin directory pages.",
+        "GAP: The 'single.html' file referenced in the screenshot caption is a valid block theme template filename per WordPress block theme conventions, but the doc never explains the template file naming system or where these files live in a theme's directory structure — a gap that would leave first-time theme developers without guidance on how templates are organised."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:17:08.848Z"
+    },
+    {
+      "slug": "getting-started-quick-start-guide",
+      "title": "Quick-Start Guide",
+      "parent": "getting-started",
+      "sourceUrl": "https://developer.wordpress.org/themes/getting-started/quick-start-guide/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly identifies the Site Editor access path as Appearance > Editor, which aligns with standard WordPress admin navigation for block themes.",
+        "The doc accurately describes the style.css header fields (Theme Name, Theme URI, Author, Author URI) that WordPress requires for theme identification — these are well-established WordPress conventions.",
+        "GAP: The doc mentions screenshot.[png|jpg] as a file to add for distribution, but does not specify the required dimensions (1200×900 pixels) that WordPress.org and the theme review guidelines mandate — developers distributing themes would benefit from knowing this constraint."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:17:11.295Z"
+    },
+    {
+      "slug": "core-concepts",
+      "title": "Core Concepts",
+      "parent": null,
+      "sourceUrl": "https://developer.wordpress.org/themes/core-concepts/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The documentation accurately identifies the three foundational theme files (`style.css`, `functions.php`, and `theme.json`) that are central to WordPress block theme development — these are well-established WordPress conventions.",
+        "The chapter structure and reading order reflect a logical progression from theme structure through to global settings, matching how WordPress theme development is typically taught.",
+        "GAP: No source files were provided for this documentation page, so a full drift analysis against runtime behaviour, default values, and API signatures could not be performed. The 'Potentially removed APIs' flags for `style.css`, `functions.php`, and `theme.json` are false positives — these are filenames/conventions, not code identifiers, and their existence cannot be verified or refuted without source files."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:17:14.380Z"
+    },
+    {
+      "slug": "core-concepts-theme-structure",
+      "title": "Theme Structure",
+      "parent": "core-concepts",
+      "sourceUrl": "https://developer.wordpress.org/themes/core-concepts/theme-structure/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly identifies `style.css` and `templates/index.html` as the only two required files for a block theme, which aligns with WordPress core's theme recognition logic.",
+        "The doc accurately describes `theme.json` as used to configure settings and styles, consistent with the Gutenberg schema's stated purpose: 'JSON schema for WordPress block theme global settings and styles'.",
+        "GAP: The doc mentions `screenshot.png` accepts both `.png` and `.jpg` formats, but does not mention the recommended image dimensions for the `.jpg` variant — the schema and WordPress core also accept `.jpeg` as an extension, which could be useful for developers to know."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:17:18.255Z"
+    },
+    {
+      "slug": "core-concepts-main-stylesheet",
+      "title": "Main Stylesheet (style.css)",
+      "parent": "core-concepts",
+      "sourceUrl": "https://developer.wordpress.org/themes/core-concepts/main-stylesheet/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly identifies 'Theme Name' as the only required header field for WordPress to recognize a theme — this aligns with the well-established WordPress theme loading behaviour.",
+        "The doc accurately describes the 'Template' field as the mechanism for designating a parent theme in child themes, and correctly notes it must match the parent theme's folder name exactly.",
+        "GAP: No source files were provided for this document, so runtime behaviour (e.g., the exact 8kb limit for header scanning, the default '/languages' Domain Path fallback) could not be verified against code. These claims are plausible but unverifiable from the supplied corpus."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:17:16.032Z"
+    },
+    {
+      "slug": "core-concepts-templates",
+      "title": "Templates",
+      "parent": "core-concepts",
+      "sourceUrl": "https://developer.wordpress.org/themes/core-concepts/templates/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly describes the template hierarchy fallback behaviour — if no specific template is found, WordPress falls back to index.html — which aligns with the well-established WordPress template hierarchy.",
+        "The doc accurately identifies /templates as the expected folder for template files and /parts for template parts, consistent with block theme conventions.",
+        "GAP: No source files were provided for this document, so runtime behaviour (e.g., exact fallback logic, registration hooks for template parts) could not be verified against code. The 'potentially removed APIs' list consists entirely of conventional file paths and filenames, not callable PHP/JS identifiers — their absence from source files is expected and does not constitute drift."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:17:19.593Z"
+    },
+    {
+      "slug": "core-concepts-custom-functionality",
+      "title": "Custom Functionality (functions.php)",
+      "parent": "core-concepts",
+      "sourceUrl": "https://developer.wordpress.org/themes/core-concepts/custom-functionality/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly states that WordPress loads the child theme's functions.php *before* the parent theme's functions.php — this matches the load order in src/wp-settings.php where `wp_get_active_and_valid_themes()` iterates themes with the child theme first.",
+        "The `after_setup_theme` hook is correctly identified as the appropriate hook for theme setup functions. The source code in src/wp-settings.php confirms `do_action('after_setup_theme')` fires immediately after all theme functions.php files are loaded.",
+        "GAP: The doc mentions `get_theme_file_path()` for child-theme override scenarios but never mentions the companion `get_theme_file_uri()` function, which serves the same child-before-parent lookup for URLs (e.g., for enqueuing assets). Developers loading assets from `/inc/` would benefit from knowing this URL-returning counterpart exists."
+      ],
+      "relatedCode": [
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/link-template.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/theme.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-settings.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "tests/phpunit/tests/theme.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "tests/phpunit/tests/admin/themeBodyClass.php",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "tests/phpunit/tests/post/getBodyClass.php",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "cec490a72d5361101000bc3e7a89dba2a6d05556",
+      "analyzedAt": "2026-05-25T08:17:47.064Z"
+    },
+    {
+      "slug": "core-concepts-including-assets",
+      "title": "Including Assets",
+      "parent": "core-concepts",
+      "sourceUrl": "https://developer.wordpress.org/themes/core-concepts/including-assets/",
+      "healthScore": 72,
+      "status": "needs-attention",
+      "issues": [
+        {
+          "severity": "major",
+          "type": "default-value",
+          "evidence": {
+            "docSays": "**`strategy`:** Accepts either `'defer'` (default) or `'async'` to set the script-loading strategy.",
+            "codeSays": "@type string $strategy            Optional. If provided, may be either 'defer' or 'async'.",
+            "codeFile": "src/wp-includes/functions.wp-scripts.php",
+            "codeRepo": "wordpress-develop"
+          },
+          "suggestion": "Remove the false claim that `'defer'` is the default for the `strategy` key in the `$args` / `$in_footer` parameter description.\n- Change \"Accepts either `'defer'` (default) or `'async'`\" to \"Accepts either `'defer'` or `'async'`\".\n- The source code confirms there is no default strategy: the `strategy` key is entirely optional and, when omitted, no strategy value is stored at all (the `if ( ! empty( $args['strategy'] ) )` branch is simply skipped). A developer reading the doc would incorrectly assume that omitting `strategy` is equivalent to passing `'defer'`.",
+          "confidence": 0.95,
+          "fingerprint": "fd7a5a2da43514ff"
+        },
+        {
+          "severity": "major",
+          "type": "default-value",
+          "evidence": {
+            "docSays": "**`$ver`** sets the version number of your stylesheet and is used for cache busting. Defaults to the current WordPress version.",
+            "codeSays": "string|bool|null $ver    Optional. String specifying stylesheet version number, if it has one, which is added to the URL\n *                                 as a query string for cache busting purposes. If version is set to false, a version\n *                                 number is automatically added equal to current installed WordPress version.\n *                                 If set to null, no version is added.",
+            "codeFile": "src/wp-includes/functions.wp-styles.php",
+            "codeRepo": "wordpress-develop"
+          },
+          "suggestion": "Correct the `$ver` default-value description for `wp_enqueue_style()`.\n- Change \"Defaults to the current WordPress version\" to \"Defaults to `false`, which causes WordPress to automatically append the current installed WordPress version as a cache-busting query string.\"\n- Add a note that passing `null` suppresses the version query string entirely (no version is appended).\n- The actual default in the function signature is `$ver = false`, not the WordPress version string itself.",
+          "confidence": 0.95,
+          "fingerprint": "bf4da10577e16e3f"
+        },
+        {
+          "severity": "major",
+          "type": "default-value",
+          "evidence": {
+            "docSays": "**`$ver`:** Sets the version number of your script and is used for cache busting. Defaults to the current WordPress version.",
+            "codeSays": "If version is set to false, a version\n *                                 number is automatically added equal to current installed WordPress version.\n *                                 If set to null, no version is added.",
+            "codeFile": "src/wp-includes/functions.wp-scripts.php",
+            "codeRepo": "wordpress-develop"
+          },
+          "suggestion": "Correct the `$ver` default-value description for `wp_enqueue_script()`.\n- Change \"Defaults to the current WordPress version\" to \"Defaults to `false`, which causes WordPress to automatically append the current installed WordPress version as a query string for cache busting. Pass `null` to suppress the version query string entirely.\"",
+          "confidence": 0.95,
+          "fingerprint": "91d0b762c6ed9c46"
+        },
+        {
+          "severity": "major",
+          "type": "type-signature",
+          "evidence": {
+            "docSays": "wp_enqueue_script( \n\tstring $handle, \n\tstring $src           = '', \n\tstring[] $deps        = array(), \n\tstring|bool|null $ver = false, \n\tarray|bool $in_footer = false\n);",
+            "codeSays": "function wp_enqueue_script( $handle, $src = '', $deps = array(), $ver = false, $args = array() ) {",
+            "codeFile": "src/wp-includes/functions.wp-scripts.php",
+            "codeRepo": "wordpress-develop"
+          },
+          "suggestion": "Update the `wp_enqueue_script()` function signature in the documentation to reflect the current fifth parameter.\n- Change the parameter name from `$in_footer` to `$args` in the displayed signature.\n- Change the default value from `false` to `array()` (i.e., `array|bool $args = array()`).\n- Add a note that passing a plain `bool` is the legacy form (supported for back-compat since WordPress 6.3), and the preferred form is an array such as `['in_footer' => true, 'strategy' => 'defer']`.",
+          "confidence": 0.97,
+          "fingerprint": "56cf1fe9f20615f3"
+        }
+      ],
+      "positives": [
+        "The documentation correctly describes `get_theme_file_uri()` as searching the stylesheet (child theme) directory before the template (parent theme) directory, which matches the source code implementation in `link-template.php` where `file_exists( $stylesheet_directory . '/' . $file )` is checked first.",
+        "The `wp_add_inline_style()` and `wp_add_inline_script()` descriptions accurately state that the inline content is only added if the parent handle is already in the queue, matching the source code's `add_inline_style()` / `add_inline_script()` behavior.",
+        "GAP: The `wp_enqueue_script()` `$args` array now supports a `fetchpriority` key (added in WordPress 6.9) and a `module_dependencies` key (added in WordPress 7.0), neither of which is mentioned in the documentation. Developers loading scripts with fetch-priority hints or ES module dependencies would benefit from knowing these options exist."
+      ],
+      "relatedCode": [
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/functions.wp-styles.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/functions.wp-scripts.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/link-template.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/theme.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/script-loader.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-admin/edit-form-blocks.php",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "lib/experimental/class-wp-rest-block-editor-settings-controller.php",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "cec490a72d5361101000bc3e7a89dba2a6d05556",
+      "analyzedAt": "2026-05-25T08:19:08.888Z"
+    },
+    {
+      "slug": "core-concepts-global-settings-and-styles",
+      "title": "Global Settings and Styles",
+      "parent": "core-concepts",
+      "sourceUrl": "https://developer.wordpress.org/themes/core-concepts/global-settings-and-styles/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The documentation's top-level structure example (`$schema`, `version`, `settings`, `styles`, `customTemplates`, `templateParts`, `patterns`) accurately matches the properties defined and used in the gutenberg `schemas/json/theme.json` schema.",
+        "The doc correctly describes `patterns` as 'An array of pattern slugs', which aligns with the schema defining `patterns` as an array type.",
+        "GAP: The schema defines a `version` 2 for `theme.json`, but the schema itself is served from `trunk` (i.e., the living/latest reference). If a version 3 exists in the living reference, the doc's claim that 'The latest version is 2' would be stale — developers building new themes should be directed to verify the current version in the Living Reference rather than relying on the static claim in this introductory page."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/block.json",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/font-collection.json",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/wp-env.json",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-05-25T08:17:30.390Z"
+    },
+    {
+      "slug": "global-settings-and-styles",
+      "title": "Global Settings and Styles (theme.json)",
+      "parent": null,
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The documentation accurately describes theme.json as 'not a strictly required file', which aligns with the optional nature of theme.json in WordPress block theme development — themes can function without it.",
+        "The documentation correctly identifies the major top-level sections of theme.json (settings, styles, custom templates, template parts, patterns, style variations), which correspond to the well-established schema structure.",
+        "GAP: No source files were provided for this documentation page, so runtime behaviour, default values, and API signatures could not be verified against implementation code. The 'Potentially removed APIs' flag on `theme.json` itself is a false positive from the tooling — `theme.json` is a configuration filename, not a code identifier, and its existence is not in question."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:17:35.846Z"
+    },
+    {
+      "slug": "global-settings-and-styles-introduction-to-theme-json",
+      "title": "Introduction to theme.json",
+      "parent": "global-settings-and-styles",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/introduction-to-theme-json/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc's top-level structure example (`version`, `$schema`, `settings`, `styles`, `customTemplates`, `templateParts`, `patterns`) matches the schema's defined top-level properties exactly — no phantom or missing keys.",
+        "The doc correctly describes `$schema` and `version` as the minimum recommended fields, which aligns with the schema where all other top-level properties are optional objects/arrays.",
+        "GAP: The schema defines a `version` field but the current supported version is not explicitly constrained in the schema (no `const` or `enum`), so the doc's claim that version `2` is current cannot be verified or refuted from the provided sources alone — developers relying solely on the schema for version validation would get no enforcement."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/block.json",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/font-collection.json",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-05-25T08:17:42.448Z"
+    },
+    {
+      "slug": "global-settings-and-styles-settings",
+      "title": "Settings",
+      "parent": "global-settings-and-styles",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/settings/",
+      "healthScore": 93,
+      "status": "healthy",
+      "issues": [
+        {
+          "severity": "major",
+          "type": "nonexistent-name",
+          "evidence": {
+            "docSays": "\"settings\": {\n\t\t\"appearanceTools\": false,\n\t\t\"border\": {},\n\t\t\"color\": {},\n\t\t\"custom\": {},\n\t\t\"dimensions\": {},\n\t\t\"layout\": {},\n\t\t\"position\": {},\n\t\t\"shadow\": {},\n\t\t\"spacing\": {},\n\t\t\"typography\": {},\n\t\t\"useRootPaddingAwareAlignments\": false,\n\t\t\"blocks\": {}\n\t}",
+            "codeSays": "\"settingsPropertyNames\": {\n\t\t\t\"enum\": [\n\t\t\t\t\"appearanceTools\",\n\t\t\t\t\"background\",\n\t\t\t\t\"border\",\n\t\t\t\t\"color\",\n\t\t\t\t\"dimensions\",\n\t\t\t\t\"layout\",\n\t\t\t\t\"lightbox\",\n\t\t\t\t\"position\",\n\t\t\t\t\"shadow\",\n\t\t\t\t\"spacing\",\n\t\t\t\t\"typography\",\n\t\t\t\t\"custom\"\n\t\t\t]",
+            "codeFile": "schemas/json/theme.json",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Update the `settings` overview snippet to include the `background` property, which is a valid top-level settings property defined in the schema.\n- Add `\"background\": {}` to the settings object in the code example, alongside the other existing properties (e.g., between `\"appearanceTools\"` and `\"border\"`).",
+          "confidence": 0.95,
+          "fingerprint": "ea35f15d579ac70f"
+        }
+      ],
+      "positives": [
+        "The documentation correctly lists `useRootPaddingAwareAlignments` as a boolean setting — the schema confirms it is defined under `settingsAppearanceToolsProperties` as `\"type\": \"boolean\", \"default\": false`.",
+        "The documentation accurately describes `blocks` as 'An object for configuring per-block settings', which matches the schema's `settingsBlocksPropertiesComplete` definition.",
+        "GAP: The schema defines a `background` top-level settings property (with sub-properties `backgroundImage`, `backgroundSize`, and `gradient`) that is entirely absent from both the overview code snippet and the settings documentation list. Developers would not know this property exists."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/block.json",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-editor/src/store/reducer.js",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-05-25T08:18:44.429Z"
+    },
+    {
+      "slug": "global-settings-and-styles-settings-appearance-tools",
+      "title": "Appearance Tools",
+      "parent": "global-settings-and-styles-settings",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/settings/appearance-tools/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly states that `settings.appearanceTools` defaults to `false`, which matches the schema: `\"default\": false` in `settingsAppearanceToolsProperties`.",
+        "The doc's 'Overwriting appearance tools' section correctly demonstrates that individual sub-properties (e.g. `position.sticky: false`) can override the catchall — this is consistent with how theme.json merging works.",
+        "GAP: The schema description for `appearanceTools` lists `background: backgroundImage, backgroundSize` as one of the groups it enables, but the documentation page never mentions the `background` group at all, nor links to a Background section. Developers enabling `appearanceTools` would unexpectedly gain background image/size controls without being warned."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-05-25T08:17:59.100Z"
+    },
+    {
+      "slug": "global-settings-and-styles-settings-blocks",
+      "title": "Blocks",
+      "parent": "global-settings-and-styles-settings",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/settings/blocks/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly identifies `core/button` and `core/pullquote` as the two blocks that receive default block-level settings in WordPress's built-in `theme.json`, matching the schema's `settingsBlocksPropertiesComplete` definition which includes both blocks.",
+        "The doc accurately describes the JSON path structure for per-block settings (`settings.blocks[core/cover].color.palette`), which aligns with the schema's `settingsBlocksPropertiesComplete` definition where block keys follow the `namespace/slug` pattern under `settings.blocks`.",
+        "GAP: The schema supports `patternProperties` with the pattern `^[a-z][a-z0-9-]*/[a-z][a-z0-9-]*$` for third-party block namespaces under `settings.blocks`, but the doc only mentions finding the namespace/slug in `block.json` without explaining the naming pattern constraint (lowercase letters, numbers, and hyphens only)."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [
+        "Could not read gutenberg: for verbatim check — dropping issue"
+      ],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:18:16.822Z"
+    },
+    {
+      "slug": "global-settings-and-styles-settings-border",
+      "title": "Border",
+      "parent": "global-settings-and-styles-settings",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/settings/border/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly lists all four `settings.border` sub-properties (`color`, `radius`, `style`, `width`) with `default: false` for each — this matches the schema exactly (`\"default\": false` on all four in `settingsBorderProperties`).",
+        "The doc's example `theme.json` snippet uses `\"version\": 2`, which is a valid historical version; the schema does not restrict the version field to a single value in the truncated portion shown, so the example is not broken for theme authors.",
+        "GAP: The schema defines a fifth `settings.border` property — `radiusSizes` — which allows theme authors to register border-radius size presets (generating `--wp--preset--border-radius--{slug}` custom properties). The documentation page makes no mention of `radiusSizes` at all, leaving developers unaware of this preset capability."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/block.json",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-05-25T08:18:24.575Z"
+    },
+    {
+      "slug": "global-settings-and-styles-settings-color",
+      "title": "Color",
+      "parent": "global-settings-and-styles-settings",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/settings/color/",
+      "healthScore": 93,
+      "status": "healthy",
+      "issues": [
+        {
+          "severity": "major",
+          "type": "default-value",
+          "evidence": {
+            "docSays": "\"link\": true",
+            "codeSays": "\"link\": {\n\t\t\t\t\t\t\t\"description\": \"Allow users to set link colors in a block.\",\n\t\t\t\t\t\t\t\"type\": \"boolean\",\n\t\t\t\t\t\t\t\"default\": false\n\t\t\t\t\t\t}",
+            "codeFile": "schemas/json/theme.json",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Update the `settings.color.link` default value throughout the documentation.\n- In the opening \"Color settings\" code block showing all defaults, change `\"link\": true` to `\"link\": false`.\n- In the \"Text, background, and link settings\" section, update any prose stating \"By default, all are set to `true`\" to clarify that `link` defaults to `false`, while `background` and `text` default to `true`.\n- Update any example snippet in that section that shows `\"link\": true` as a default to `\"link\": false`.",
+          "confidence": 0.97,
+          "fingerprint": "7836ba8c5635ecae"
+        }
+      ],
+      "positives": [
+        "The documentation correctly states that `background`, `custom`, `customDuotone`, `customGradient`, `defaultDuotone`, `defaultGradients`, and `defaultPalette` all default to `true`, which matches the schema's `\"default\": true` for each of those properties.",
+        "The three required properties for each `palette` preset object (`color`, `name`, `slug`) are accurately documented and match the schema's `\"required\": [\"name\", \"slug\", \"color\"]` definition.",
+        "GAP: The schema defines `settings.color.heading`, `settings.color.button`, and `settings.color.caption` as valid color-control toggle properties (all defaulting to `true`), but the documentation never mentions them. Theme authors who want to disable heading, button, or caption color controls in the editor would have no way to discover these options from this page."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/block.json",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-05-25T08:18:56.883Z"
+    },
+    {
+      "slug": "global-settings-and-styles-settings-custom",
+      "title": "Custom",
+      "parent": "global-settings-and-styles-settings",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/settings/custom/",
+      "healthScore": 93,
+      "status": "healthy",
+      "issues": [
+        {
+          "severity": "major",
+          "type": "broken-example",
+          "evidence": {
+            "docSays": "The generated CSS custom property will follow this pattern: `--wp--custom--{key}--{value}`.",
+            "codeSays": "Generate custom CSS custom properties of the form `--wp--custom--{key}--{nested-key}: {value};`.",
+            "codeFile": "schemas/json/theme.json",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Correct the CSS custom property pattern description in the 'Overview of the custom setting' section.\n- Replace `--wp--custom--{key}--{value}` with `--wp--custom--{key}: {value};` for a flat (non-nested) key, to make clear that `{value}` is the CSS value assigned after the colon, not part of the property name.\n- For nested keys, show the full pattern: `--wp--custom--{key}--{nested-key}: {value};`.\n- The current doc pattern `--wp--custom--{key}--{value}` incorrectly implies the value is appended to the property name with a `--` separator, which would mislead developers into expecting a wrong property name in the generated CSS.",
+          "confidence": 0.92,
+          "fingerprint": "09df9590b2de3186"
+        }
+      ],
+      "positives": [
+        "The doc correctly describes that `camelCased` keys are transformed to `kebab-case` (e.g., `lineHeight` → `line-height`), which matches the schema's description: '`camelCased` keys are transformed to `kebab-case` as to follow the CSS property naming schema.'",
+        "The doc accurately states that nested keys are separated by `--` in the generated CSS custom property name (e.g., `lineHeight.xs` → `--wp--custom--line-height--xs`), consistent with the schema's `--wp--custom--{key}--{nested-key}` pattern.",
+        "GAP: The schema notes that 'keys should not include `--` in the name' as a constraint on `settings.custom` keys, but the documentation never warns developers about this restriction. A developer who uses a key containing `--` would produce malformed or ambiguous CSS custom property names."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-05-25T08:19:58.998Z"
+    },
+    {
+      "slug": "global-settings-and-styles-settings-dimensions",
+      "title": "Dimensions",
+      "parent": "global-settings-and-styles-settings",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/settings/dimensions/",
+      "healthScore": 93,
+      "status": "healthy",
+      "issues": [
+        {
+          "severity": "major",
+          "type": "nonexistent-name",
+          "evidence": {
+            "docSays": "Currently, it only lets you set a single property: \n\n*   **`minHeight`:** A boolean value for enabling block support for the **Minimum Height** control.",
+            "codeSays": "\"aspectRatio\": {\n\t\t\t\t\t\t\t\"description\": \"Allow users to set an aspect ratio.\",\n\t\t\t\t\t\t\t\"type\": \"boolean\",\n\t\t\t\t\t\t\t\"default\": false\n\t\t\t\t\t\t},\n\t\t\t\t\t\t\"defaultAspectRatios\": {\n\t\t\t\t\t\t\t\"description\": \"Allow users to choose aspect ratios from the default set of aspect ratios.\",\n\t\t\t\t\t\t\t\"type\": \"boolean\",\n\t\t\t\t\t\t\t\"default\": true\n\t\t\t\t\t\t},\n\t\t\t\t\t\t\"aspectRatios\": {\n\t\t\t\t\t\t\t\"description\": \"Allow users to define aspect ratios for some blocks.\",\n\t\t\t\t\t\t\t\"type\": \"array\",\n\t\t\t\t\t\t},\n\t\t\t\t\t\t\"height\": {\n\t\t\t\t\t\t\t\"description\": \"Allow users to set custom height.\",\n\t\t\t\t\t\t\t\"type\": \"boolean\",\n\t\t\t\t\t\t\t\"default\": false\n\t\t\t\t\t\t},\n\t\t\t\t\t\t\"minHeight\": {\n\t\t\t\t\t\t\t\"description\": \"Allow users to set custom minimum height.\",\n\t\t\t\t\t\t\t\"type\": \"boolean\",\n\t\t\t\t\t\t\t\"default\": false\n\t\t\t\t\t\t},\n\t\t\t\t\t\t\"minWidth\": {\n\t\t\t\t\t\t\t\"description\": \"Allow users to set custom minimum width.\",\n\t\t\t\t\t\t\t\"type\": \"boolean\",\n\t\t\t\t\t\t\t\"default\": false\n\t\t\t\t\t\t},\n\t\t\t\t\t\t\"width\": {\n\t\t\t\t\t\t\t\"description\": \"Allow users to set custom width.\",\n\t\t\t\t\t\t\t\"type\": \"boolean\",\n\t\t\t\t\t\t\t\"default\": false\n\t\t\t\t\t\t},\n\t\t\t\t\t\t\"dimensionSizes\": {",
+            "codeFile": "schemas/json/theme.json",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Update the `settings.dimensions` documentation to remove the false claim that it \"only lets you set a single property\" and document all supported sub-properties.\n- Remove the sentence \"Currently, it only lets you set a single property\".\n- Add `aspectRatio` (boolean, default: `false`) — allows users to set an aspect ratio.\n- Add `defaultAspectRatios` (boolean, default: `true`) — allows users to choose from the default set of aspect ratio presets.\n- Add `aspectRatios` (array) — allows users to define custom aspect ratio presets (each with `name`, `slug`, and `ratio` fields).\n- Add `height` (boolean, default: `false`) — allows users to set a custom height.\n- Add `minWidth` (boolean, default: `false`) — allows users to set a custom minimum width.\n- Add `width` (boolean, default: `false`) — allows users to set a custom width.\n- Add `dimensionSizes` (array) — dimension size presets that generate `--wp--preset--dimension--{slug}` custom properties.",
+          "confidence": 0.97,
+          "fingerprint": "b3e5462564510067"
+        }
+      ],
+      "positives": [
+        "The doc correctly states that `settings.dimensions.minHeight` has a default value of `false`, which matches the schema: `\"minHeight\": { \"type\": \"boolean\", \"default\": false }`.",
+        "GAP: `settings.dimensions` supports `aspectRatio`, `defaultAspectRatios`, `aspectRatios`, `height`, `minWidth`, `width`, and `dimensionSizes` — none of which are documented. Theme developers who need to enable aspect ratio controls or width/height controls would have no guidance from this page.",
+        "GAP: `settings.dimensions.dimensionSizes` allows defining named dimension presets that generate `--wp--preset--dimension--{slug}` CSS custom properties, a potentially useful feature for theme authors that is entirely absent from the documentation."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/block.json",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-05-25T08:19:37.335Z"
+    },
+    {
+      "slug": "global-settings-and-styles-settings-layout",
+      "title": "Layout",
+      "parent": "global-settings-and-styles-settings",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/settings/layout/",
+      "healthScore": 98,
+      "status": "healthy",
+      "issues": [
+        {
+          "severity": "minor",
+          "type": "nonexistent-name",
+          "evidence": {
+            "docSays": "you will want to set this to a value that is greater than `settings.layout.contentWidth`",
+            "codeSays": "\"contentSize\": {\n              \"description\": \"Sets the max-width of the content.\",\n              \"type\": \"string\"",
+            "codeFile": "schemas/json/theme.json",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Replace the incorrect property name reference in the Wide Size section.\n- Change `settings.layout.contentWidth` to `settings.layout.contentSize` to match the actual property name defined in the schema (`settingsLayoutProperties > layout > contentSize`).",
+          "confidence": 0.97,
+          "fingerprint": "1817687084ac7088"
+        }
+      ],
+      "positives": [
+        "The doc correctly documents both `contentSize` and `wideSize` as the only two user-configurable string properties under `settings.layout`, which matches the schema's `settingsLayoutProperties` definition exactly.",
+        "The doc's JSON examples use `\"version\": 2` at the top level, which is consistent with the theme.json schema structure shown in the source.",
+        "GAP: The schema defines two additional boolean properties under `settings.layout` — `allowEditing` (default: true) and `allowCustomContentAndWideSize` (default: true) — that are not mentioned anywhere in the documentation. Theme developers who need to lock down layout UI controls or hide the custom size inputs would have no way to discover these options from this page."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/block.json",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-05-25T08:19:36.925Z"
+    },
+    {
+      "slug": "global-settings-and-styles-settings-lightbox",
+      "title": "Lightbox",
+      "parent": "global-settings-and-styles-settings",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/settings/lightbox/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly identifies both `enabled` and `allowEditing` as the only two nested properties of the `lightbox` object — this matches the schema's `settingsLightboxProperties` definition, which lists exactly those two properties with `additionalProperties: false`.",
+        "The doc's JSON examples are structurally valid against the schema: `settings.blocks.core/image.lightbox` is a recognised path (`core/image` maps to `settingsPropertiesComplete`, which includes `settingsLightboxProperties`), and the property names used in all three snippets (`allowEditing`, `enabled`) match the schema exactly.",
+        "GAP: The schema defines no `default` value for either `lightbox.enabled` or `lightbox.allowEditing` (both fields simply have `type: boolean` with no `default` annotation), yet the doc states `allowEditing` defaults to `true`. Without source code to confirm the runtime default, this claim cannot be verified from the available evidence — developers relying on the stated default of `true` for `allowEditing` may be building on an unverified assumption."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-05-25T08:19:45.103Z"
+    },
+    {
+      "slug": "global-settings-and-styles-settings-position",
+      "title": "Position",
+      "parent": "global-settings-and-styles-settings",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/settings/position/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly states that `settings.position.sticky` defaults to `false`, which matches the schema: `\"sticky\": { \"type\": \"boolean\", \"default\": false }`.",
+        "The doc accurately describes `settings.position` as containing only a single property (`sticky`), consistent with the schema's `settingsPositionProperties` definition which lists only `sticky` under `position.properties`.",
+        "GAP: The `appearanceTools` setting (documented in the schema as enabling `position: sticky` among other features) is not mentioned on this page. Developers who want to enable sticky positioning alongside other appearance tools via a single flag would benefit from knowing that setting `appearanceTools: true` also enables `settings.position.sticky`."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/block.json",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-05-25T08:19:43.224Z"
+    },
+    {
+      "slug": "global-settings-and-styles-settings-shadow",
+      "title": "Shadow",
+      "parent": "global-settings-and-styles-settings",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/settings/shadow/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The documentation correctly describes `settings.shadow.defaultPresets` as a boolean defaulting to `true`, which matches the schema definition: `\"default\": true` under `settingsShadowProperties`.",
+        "The documentation accurately describes the three required fields for each shadow preset object (`name`, `slug`, `shadow`), consistent with the schema's `\"required\": [ \"name\", \"slug\", \"shadow\" ]` on the presets items.",
+        "The CSS custom property naming pattern `--wp--preset--shadow--{slug}` documented matches the schema description: \"Generates a single custom property (`--wp--preset--shadow--{slug}`) per preset value.\""
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-05-25T08:19:52.896Z"
+    },
+    {
+      "slug": "global-settings-and-styles-settings-spacing",
+      "title": "Spacing",
+      "parent": "global-settings-and-styles-settings",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/settings/spacing/",
+      "healthScore": 84,
+      "status": "needs-attention",
+      "issues": [
+        {
+          "severity": "major",
+          "type": "nonexistent-name",
+          "evidence": {
+            "docSays": "To do this, you must set the `customSpacingSizes` setting to `false`.",
+            "codeSays": "\"customSpacingSize\": {\n\t\t\t\t\t\t\"description\": \"Allow users to set custom space sizes.\",\n\t\t\t\t\t\t\"type\": \"boolean\",\n\t\t\t\t\t\t\"default\": true\n\t\t\t\t\t}",
+            "codeFile": "schemas/json/theme.json",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Replace the incorrect property name `customSpacingSizes` with the correct name `customSpacingSize` (no trailing 's') in the prose instruction under the 'Disabling user-defined spacing sizes' section.\n- Change: \"you must set the `customSpacingSizes` setting to `false`\"\n- To: \"you must set the `customSpacingSize` setting to `false`\"",
+          "confidence": 0.97,
+          "fingerprint": "90e6018e0e6681c8"
+        },
+        {
+          "severity": "major",
+          "type": "nonexistent-name",
+          "evidence": {
+            "docSays": "If you choose to enable the `settings.spacing.customSpaceSize` option covered in the previous section",
+            "codeSays": "\"customSpacingSize\": {\n\t\t\t\t\t\t\"description\": \"Allow users to set custom space sizes.\",\n\t\t\t\t\t\t\"type\": \"boolean\",\n\t\t\t\t\t\t\"default\": true\n\t\t\t\t\t}",
+            "codeFile": "schemas/json/theme.json",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Replace the incorrect property name `customSpaceSize` with the correct name `customSpacingSize` in the 'Defining allowed spacing units' section intro sentence.\n- Change: \"`settings.spacing.customSpaceSize`\"\n- To: \"`settings.spacing.customSpacingSize`\"",
+          "confidence": 0.99,
+          "fingerprint": "c7d2c47c187f9450"
+        },
+        {
+          "severity": "minor",
+          "type": "type-signature",
+          "evidence": {
+            "docSays": "**`unit`:** A valid CSS spacing unit. The available options are `px`, `em`, `rem`, `vh`, `vw`, and `%`. The default value is `rem`.",
+            "codeSays": "\"unit\": {\n\t\t\t\t\t\t\t\"description\": \"Unit that the scale uses, eg. rem, em, px.\",\n\t\t\t\t\t\t\t\"type\": \"string\",\n\t\t\t\t\t\t\t\"enum\": [\n\t\t\t\t\t\t\t\t\"px\",\n\t\t\t\t\t\t\t\t\"em\",\n\t\t\t\t\t\t\t\t\"rem\",\n\t\t\t\t\t\t\t\t\"%\",\n\t\t\t\t\t\t\t\t\"vw\",\n\t\t\t\t\t\t\t\t\"svw\",\n\t\t\t\t\t\t\t\t\"lvw\",\n\t\t\t\t\t\t\t\t\"dvw\",\n\t\t\t\t\t\t\t\t\"vh\",\n\t\t\t\t\t\t\t\t\"svh\",\n\t\t\t\t\t\t\t\t\"lvh\",\n\t\t\t\t\t\t\t\t\"dvh\"",
+            "codeFile": "schemas/json/theme.json",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Update the `spacingScale.unit` description to reflect the full list of allowed enum values.\n- Change: \"The available options are `px`, `em`, `rem`, `vh`, `vw`, and `%`.\"\n- To: list all enum values from `schemas/json/theme.json`, or at minimum note that many additional modern viewport-relative units are also accepted (e.g., `svw`, `lvw`, `dvw`, `svh`, `lvh`, `dvh`, `vi`, `vb`, `vmin`, `vmax`, and their `s`/`l`/`d` prefixed variants).",
+          "confidence": 0.85,
+          "fingerprint": "89bf2668d4149f1e"
+        }
+      ],
+      "positives": [
+        "The doc correctly documents `blockGap`'s three-state behaviour (null/true/false) and its effect on both the UI control and WordPress-generated CSS, which matches the schema description: \"A value of `null` instead of `false` further disables layout styles from being generated.\"",
+        "The default values for `margin` (false), `padding` (false), `customSpacingSize` (true), and `units` ([\"px\",\"em\",\"rem\",\"vh\",\"vw\",\"%\"]) all match the schema defaults exactly.",
+        "GAP: The schema defines a `defaultSpacingSizes` boolean property (default: true) under `settings.spacing` that controls whether users can choose from the default WordPress spacing size presets. The documentation never mentions this property, which would be useful for theme authors who want to hide the default presets while providing their own via `spacingSizes`."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/block.json",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-05-25T08:22:18.603Z"
+    },
+    {
+      "slug": "global-settings-and-styles-settings-typography",
+      "title": "Typography",
+      "parent": "global-settings-and-styles-settings",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/settings/typography/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The documentation correctly states that `lineHeight` defaults to `false`, which matches the schema: `\"lineHeight\": { \"default\": false }`.",
+        "The documentation accurately describes the `fontFace` object's `required` fields (`fontFamily` and `src`), which matches the schema's `\"required\": [ \"fontFamily\", \"src\" ]` for font face items.",
+        "GAP: The schema exposes a `defaultFontSizes` boolean property (`settings.typography.defaultFontSizes`, default `true`) that controls whether users can choose from the default font size presets. The documentation never mentions this property, which would be useful for theme developers who want to hide the default sizes."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/font-collection.json",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/block.json",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-05-25T08:20:28.203Z"
+    },
+    {
+      "slug": "global-settings-and-styles-settings-use-root-padding-aware-alignments",
+      "title": "Use Root Padding Aware Alignments",
+      "parent": "global-settings-and-styles-settings",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/settings/use-root-padding-aware-alignments/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "No source files were provided for this document, so no runtime behaviour, default values, or API signatures could be verified against code. The 'potentially removed APIs' list contains identifiers (e.g., `<body>`, `0`, `2rem`) that are clearly CSS/HTML literals or JSON values, not code symbols — these are not meaningful nonexistent-name candidates.",
+        "GAP: The doc does not mention the minimum theme.json `version` value required for `settings.useRootPaddingAwareAlignments` to be recognised. Developers using an older schema version might silently get no effect, so documenting the minimum supported version would be valuable.",
+        "GAP: The doc does not explain what happens to the `.has-global-padding` class for blocks that do NOT use a constrained layout — clarifying that non-constrained blocks are unaffected would help developers debug unexpected layout behaviour."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:20:07.027Z"
+    },
+    {
+      "slug": "global-settings-and-styles-settings-settings-reference",
+      "title": "Settings Reference",
+      "parent": "global-settings-and-styles-settings",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/settings/settings-reference/",
+      "healthScore": 79,
+      "status": "needs-attention",
+      "issues": [
+        {
+          "severity": "major",
+          "type": "nonexistent-name",
+          "evidence": {
+            "docSays": "`settings.color` is an object that supports the nested properties listed in the below table.",
+            "codeSays": "\"heading\": {\n\t\t\t\t\t\t\t\"description\": \"Allow users to set heading colors in a block.\",\n\t\t\t\t\t\t\t\"type\": \"boolean\",\n\t\t\t\t\t\t\t\"default\": true\n\t\t\t\t\t\t},\n\t\t\t\t\t\t\"button\": {\n\t\t\t\t\t\t\t\"description\": \"Allow users to set button colors in a block.\",\n\t\t\t\t\t\t\t\"type\": \"boolean\",\n\t\t\t\t\t\t\t\"default\": true\n\t\t\t\t\t\t},\n\t\t\t\t\t\t\"caption\": {\n\t\t\t\t\t\t\t\"description\": \"Allow users to set caption colors in a block.\",\n\t\t\t\t\t\t\t\"type\": \"boolean\",\n\t\t\t\t\t\t\t\"default\": true\n\t\t\t\t\t\t}",
+            "codeFile": "schemas/json/theme.json",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Update the `settings.color` property table to include the three missing sub-properties.\n- Add `heading` (boolean, default `true`): \"Allow users to set heading colors in a block.\"\n- Add `button` (boolean, default `true`): \"Allow users to set button colors in a block.\"\n- Add `caption` (boolean, default `true`): \"Allow users to set caption colors in a block.\"\nAll three are defined in `schemas/json/theme.json` under `settingsColorProperties.color.properties` but are absent from the documentation table, so developers would not know they can be configured.",
+          "confidence": 0.97,
+          "fingerprint": "d4269d3ecc6d75c4"
+        },
+        {
+          "severity": "major",
+          "type": "nonexistent-name",
+          "evidence": {
+            "docSays": "`settings.spacing` is an object that supports the nested properties listed in the below table.",
+            "codeSays": "\"defaultSpacingSizes\": {\n\t\t\t\t\t\t\t\"description\": \"Allow users to choose space sizes from the default space size presets.\",\n\t\t\t\t\t\t\t\"type\": \"boolean\",\n\t\t\t\t\t\t\t\"default\": true\n\t\t\t\t\t\t},",
+            "codeFile": "schemas/json/theme.json",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Add `defaultSpacingSizes` to the `settings.spacing` properties table in the documentation.\n- Add a row for `defaultSpacingSizes` with type `boolean` and default `true`\n- Description: \"Allow users to choose space sizes from the default space size presets.\"\n- This property is defined in `schemas/json/theme.json` under `settingsSpacingProperties.spacing.properties.defaultSpacingSizes` but is absent from the documented table",
+          "confidence": 0.95,
+          "fingerprint": "a4b79c4f88bd8497"
+        },
+        {
+          "severity": "major",
+          "type": "nonexistent-name",
+          "evidence": {
+            "docSays": "`settings.typography` is an object that supports the nested properties listed in the below table.",
+            "codeSays": "\"defaultFontSizes\": {\n\t\t\t\t\t\t\t\"description\": \"Allow users to choose font sizes from the default font size presets.\",\n\t\t\t\t\t\t\t\"type\": \"boolean\",\n\t\t\t\t\t\t\t\"default\": true\n\t\t\t\t\t\t},",
+            "codeFile": "schemas/json/theme.json",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Update the `settings.typography` property table to include the three missing sub-properties confirmed in the schema.\n- Add `defaultFontSizes` (type: `boolean`, default: `true`) — \"Allow users to choose font sizes from the default font size presets.\"\n- Add `textAlign` (type: `boolean`, default: `true`) — \"Allow users to set the text align.\"\n- Add `textIndent` (type: `boolean | \"subsequent\" | \"all\"`, default: `\"subsequent\"`) — \"Allow users to set custom text indent.\" Note that the only valid boolean value is `false`; the string values `\"subsequent\"` and `\"all\"` enable the feature with different scope.",
+          "confidence": 0.95,
+          "fingerprint": "5f9cfbd0b7715265"
+        }
+      ],
+      "positives": [
+        "The `settings.spacing.units` default value `[ \"px\", \"em\", \"rem\", \"vh\", \"vw\", \"%\" ]` is correctly documented and matches the schema's `\"default\": [ \"px\", \"em\", \"rem\", \"vh\", \"vw\", \"%\" ]`.",
+        "The `settings.shadow` table correctly documents both `defaultPresets` (boolean, default `true`) and `presets` (array with `name`, `shadow`, `slug` props), matching the schema exactly.",
+        "GAP: `settings.background` is an entire top-level settings group (`backgroundImage`, `backgroundSize`, `gradient`) present in the schema under `settingsBackgroundProperties`, but the documentation page has no section for it at all — developers would not know they can configure background settings via `theme.json`."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/block.json",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/font-collection.json",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-05-25T08:23:42.856Z"
+    },
+    {
+      "slug": "global-settings-and-styles-styles",
+      "title": "Styles",
+      "parent": "global-settings-and-styles",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/styles/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly identifies `styles` as a top-level property in `theme.json` with `elements` and `blocks` as nested properties — this matches the schema's `stylesBlocksPropertiesComplete` and `stylesElementsPropertiesComplete` definitions exactly.",
+        "The example JSON snippets use `\"version\": 2`, which is consistent with the schema's structure (the schema does not mandate a specific version value for theme.json, so no conflict exists).",
+        "GAP: The schema exposes a `css` property directly under `styles` (and per-block styles) for injecting custom CSS strings, but the documentation page does not mention this capability at all. Developers who want to add custom CSS via theme.json would benefit from knowing about `styles.css` and `styles.blocks.{block-name}.css`."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/block.json",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-05-25T08:20:35.203Z"
+    },
+    {
+      "slug": "global-settings-and-styles-styles-applying-styles",
+      "title": "Applying Styles",
+      "parent": "global-settings-and-styles-styles",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/styles/applying-styles/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The documented list of core block style variations (e.g., `core/button`: `outline`, `fill`; `core/image`: `rounded`; `core/separator`: `wide`, `dots`) matches the pattern properties defined in the theme.json schema's `stylesBlocksPropertiesComplete` section, which confirms these block names are valid targets.",
+        "The schema correctly confirms that `styles.elements` supports exactly the named element keys the doc lists (`button`, `link`, `heading`, `h1`–`h6`, `caption`, `cite`), and that `button` and `link` are the only elements with pseudo-selector support — consistent with the doc's claim.",
+        "GAP: The schema defines `:focus-visible` as a supported pseudo-class for both block-level (`stylesBlocksPseudoSelectorsPropertyNames`) and element-level (`stylesElementsPseudoSelectorsPropertyNames`) selectors, but the documentation never mentions `:focus-visible` at all. Developers building accessible focus styles would benefit from knowing this pseudo-class is available."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/block.json",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-05-25T08:21:53.399Z"
+    },
+    {
+      "slug": "global-settings-and-styles-styles-using-presets",
+      "title": "Using Presets",
+      "parent": "global-settings-and-styles-styles",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/styles/using-presets/",
+      "healthScore": 93,
+      "status": "healthy",
+      "issues": [
+        {
+          "severity": "major",
+          "type": "nonexistent-name",
+          "evidence": {
+            "docSays": "Typography (`fontSizes`, `fontFamily`)",
+            "codeSays": "\"fontFamilies\"",
+            "codeFile": "schemas/json/theme.json",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Correct the Typography preset property name in the Available Presets section.\n- Change `fontFamily` to `fontFamilies` to match the actual `settings.typography.fontFamilies` property defined in the schema\n- A developer following the doc and writing `settings.typography.fontFamily` as a preset array would be using a non-existent property (the schema uses `additionalProperties: false`, so the key would be silently ignored or rejected by validators)",
+          "confidence": 0.97,
+          "fingerprint": "a34e1f197832f76b"
+        }
+      ],
+      "positives": [
+        "The doc correctly describes the `var:preset|$feature|$slug` syntax for referencing presets in theme.json styles, and the example `var:preset|color|base` maps accurately to the schema's `settings.color.palette` structure with slug-based custom properties.",
+        "The `var:custom` syntax example for custom settings (e.g. `var:custom|line-height|md`) correctly reflects how camelCase keys like `lineHeight` are transformed to kebab-case `line-height` in the generated CSS custom property, consistent with the schema's `settingsCustomAdditionalProperties` description.",
+        "GAP: The schema supports `settings.border.radiusSizes` as a preset array that generates `--wp--preset--border-radius--{slug}` custom properties, but this preset type is not mentioned anywhere in the Available Presets section of the doc."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-05-25T08:23:20.893Z"
+    },
+    {
+      "slug": "global-settings-and-styles-styles-styles-reference",
+      "title": "Styles Reference",
+      "parent": "global-settings-and-styles-styles",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/styles/styles-reference/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The `border` side-specific properties (`top`, `right`, `bottom`, `left`) are accurately documented and match the schema's `stylesProperties.border` object, which defines all four sides with `color`, `style`, and `width` sub-properties.",
+        "The `spacing.blockGap`, `spacing.margin`, and `spacing.padding` property names in the Spacing section exactly match the schema's `stylesProperties.spacing` definition, including the correct nesting of `top`/`right`/`bottom`/`left` sides.",
+        "GAP: The schema exposes `styles.typography.textTransform` (maps to `text-transform`) and `styles.typography.textAlign` (maps to `text-align`), but neither property is listed in the Typography section of the documentation. Developers who want to set text-transform or text-align via theme.json styles would not know these keys exist."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/block.json",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-05-25T08:23:49.755Z"
+    },
+    {
+      "slug": "global-settings-and-styles-custom-templates",
+      "title": "Custom Templates",
+      "parent": "global-settings-and-styles",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/custom-templates/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly identifies all three supported properties of a customTemplates entry (`name`, `title`, `postTypes`) — these match the theme.json schema's `customTemplates` array item definition.",
+        "The doc accurately states that `postTypes` is optional and defaults to the `page` post type, which is consistent with the schema's description of the property as an optional setting.",
+        "GAP: The theme.json schema shows `version` 2 is used in the example, but the schema itself does not constrain the version field shown in the doc snippet — developers should be aware that the current recommended version may differ from what is shown in the example JSON (`\"version\": 2`)."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/block.json",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-05-25T08:23:26.799Z"
+    },
+    {
+      "slug": "global-settings-and-styles-patterns",
+      "title": "Patterns",
+      "parent": "global-settings-and-styles",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/patterns/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The documentation correctly describes `patterns` as an optional array property in `theme.json`, which aligns with the schema where `patterns` is not listed in any `required` array.",
+        "The documentation accurately explains the slug extraction mechanism from the Pattern Directory URL format (`https://wordpress.org/patterns/pattern/{slug}/`), which is a concrete and actionable instruction for developers.",
+        "GAP: The schema source provided does not include a `patterns` property definition at the top-level `theme.json` object, which means developers relying on JSON schema validation in their editors may not get autocomplete or validation for the `patterns` array — worth noting in the documentation as a caveat for schema-assisted authoring."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-05-25T08:23:33.165Z"
+    },
+    {
+      "slug": "global-settings-and-styles-template-parts",
+      "title": "Template Parts",
+      "parent": "global-settings-and-styles",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/template-parts/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly identifies the three `templateParts` object keys (`area`, `name`, `title`) that match the schema's `templateParts` array item structure.",
+        "The doc correctly states that the default area options are `header`, `footer`, and `uncategorized`, which aligns with the known WordPress template-part area constants.",
+        "GAP: The schema shows `templateParts` items have no `required` array, meaning all three fields (`area`, `name`, `title`) are technically optional at the schema level — the doc could clarify which fields are truly required for a part to be recognised by WordPress at runtime."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-05-25T08:23:40.335Z"
+    },
+    {
+      "slug": "global-settings-and-styles-style-variations",
+      "title": "Style Variations",
+      "parent": "global-settings-and-styles",
+      "sourceUrl": "https://developer.wordpress.org/themes/global-settings-and-styles/style-variations/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly identifies that style variation files belong in the `/styles` folder, which aligns with the theme.json schema's overall structure for theme file organization.",
+        "The doc's example variation JSON snippet uses `\"version\": 2`, which is consistent with the schema's current theme.json version format.",
+        "GAP: The doc does not mention that style variation files support a `slug` property in addition to `title` for programmatic identification — theme developers who need to reference variations by identifier would benefit from knowing this."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:23:45.998Z"
+    },
+    {
+      "slug": "templates",
+      "title": "Templates",
+      "parent": null,
+      "sourceUrl": "https://developer.wordpress.org/themes/templates/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The four documented sub-sections (Introduction to Templates, Templates, Template Hierarchy, Template Parts) accurately reflect the standard block-theme templating concepts in WordPress, and the described relationships between the template hierarchy, templates, and template parts are consistent with how the WordPress block theme system works.",
+        "The page correctly positions templates as a core concept of WordPress theme development and accurately describes their role in presenting content in the browser.",
+        "GAP: No source files were provided for this document, so a full runtime-behaviour audit (e.g., template resolution order, fallback logic in the hierarchy) could not be performed. A deeper audit against the WordPress core template-loading source (e.g., class-wp-theme-json.php, template-loader.php) may surface additional drift in the linked sub-pages."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:23:48.778Z"
+    },
+    {
+      "slug": "templates-introduction-to-templates",
+      "title": "Introduction to Templates",
+      "parent": "templates",
+      "sourceUrl": "https://developer.wordpress.org/themes/templates/introduction-to-templates/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly explains that block markup uses the `<!-- wp:namespace/slug -->` comment syntax and that core blocks omit the `core/` namespace prefix (e.g., `<!-- wp:site-title /-->`), which is accurate WordPress block markup behaviour.",
+        "The doc accurately describes the `/templates` and `/parts` folder structure for block themes, and correctly identifies `index.html` as the only required template file.",
+        "GAP: The doc mentions that user template customisations are saved to the database but does not explain the precedence order (database-saved templates override theme file templates). Developers distributing themes would benefit from knowing this hierarchy explicitly, as it affects how theme updates interact with user customisations."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:23:51.676Z"
+    },
+    {
+      "slug": "templates-templates",
+      "title": "Templates",
+      "parent": "templates",
+      "sourceUrl": "https://developer.wordpress.org/themes/templates/templates/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly describes the three-tier template lookup order (database → child theme → theme), which matches WordPress core's template resolution logic.",
+        "The doc accurately states that `index.html` is the only required template file and that its presence signals a block theme to WordPress.",
+        "GAP: The doc mentions `/block-templates` as a backward-compatibility fallback but does not explain which specific WordPress version introduced or deprecated this folder, which would help developers understand when they might encounter it in older themes."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:23:53.582Z"
+    },
+    {
+      "slug": "templates-template-hierarchy",
+      "title": "Template Hierarchy",
+      "parent": "templates",
+      "sourceUrl": "https://developer.wordpress.org/themes/templates/template-hierarchy/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly notes that embed templates are not supported by the block templates system and must use PHP file extensions in the theme root — this is a non-obvious but accurate distinction that would save developers real confusion.",
+        "The doc accurately describes the singular hierarchy fallback chain (singular.html → index.html) and correctly calls out that 'page' and 'attachment' post types are special cases handled outside the default Single hierarchy.",
+        "GAP: No source files were provided for this document, so runtime behaviour (e.g., exact filter hooks like 'template_hierarchy' filters, or the get_query_template() fallback logic) could not be verified. Developers customising the hierarchy programmatically would benefit from documentation of the relevant filters (e.g., '{type}_template_hierarchy', 'template_include')."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:23:56.718Z"
+    },
+    {
+      "slug": "templates-template-parts",
+      "title": "Template Parts",
+      "parent": "templates",
+      "sourceUrl": "https://developer.wordpress.org/themes/templates/template-parts/",
+      "healthScore": 91,
+      "status": "healthy",
+      "issues": [
+        {
+          "severity": "major",
+          "type": "default-value",
+          "evidence": {
+            "docSays": "By default, WordPress has three areas that you can register your templates for:\n*   `uncategorized` (labeled as **General** in the admin)\n*   `header`\n*   `footer`",
+            "codeSays": "array(\n\t\t\t'area'        => WP_TEMPLATE_PART_AREA_NAVIGATION_OVERLAY,\n\t\t\t'label'       => _x( 'Navigation Overlay', 'template part area' ),\n\t\t\t'description' => __(\n\t\t\t\t'The Navigation Overlay template defines an overlay area that typically contains navigation links and can be toggled open and closed.'\n\t\t\t),\n\t\t\t'icon'        => 'navigation-overlay',\n\t\t\t'area_tag'    => 'div',\n\t\t),",
+            "codeFile": "src/wp-includes/block-template-utils.php",
+            "codeRepo": "wordpress-develop"
+          },
+          "suggestion": "Update the 'Template part areas' section to list four default areas instead of three.\n- Change the intro sentence from \"three areas\" to \"four areas\".\n- Add `navigation-overlay` (labeled as **Navigation Overlay** in the admin) to the list, after `footer`.\n- The constant for this area is `WP_TEMPLATE_PART_AREA_NAVIGATION_OVERLAY` and its `area_tag` is `div`.",
+          "confidence": 0.98,
+          "fingerprint": "92af53ee517d1d03"
+        },
+        {
+          "severity": "minor",
+          "type": "default-value",
+          "evidence": {
+            "docSays": "By default, you can select from the General, Header, and Footer areas",
+            "codeSays": "array(\n\t\t\t'area'        => WP_TEMPLATE_PART_AREA_NAVIGATION_OVERLAY,\n\t\t\t'label'       => _x( 'Navigation Overlay', 'template part area' ),",
+            "codeFile": "src/wp-includes/block-template-utils.php",
+            "codeRepo": "wordpress-develop"
+          },
+          "suggestion": "Update the area list in the 'Adding new template parts' section to include the Navigation Overlay area.\n- Change the sentence to: 'By default, you can select from the General, Header, Footer, and Navigation Overlay areas.'\n- The fourth entry in `get_allowed_block_template_part_areas()` (lines ~102–110 of `src/wp-includes/block-template-utils.php`) defines `WP_TEMPLATE_PART_AREA_NAVIGATION_OVERLAY` ('navigation-overlay') as a built-in default area alongside General, Header, and Footer.",
+          "confidence": 0.95,
+          "fingerprint": "93ab183b1c4d3ff1"
+        }
+      ],
+      "positives": [
+        "The documentation correctly identifies the `default_wp_template_part_areas` filter hook name — confirmed at L132 of block-template-utils.php: `return apply_filters( 'default_wp_template_part_areas', $default_area_definitions );`",
+        "The documentation correctly states that the callback for `default_wp_template_part_areas` receives `$areas` as an array of area definitions with keys `area`, `area_tag`, `label`, `description`, and `icon` — all five keys are confirmed in the `$default_area_definitions` array in the source.",
+        "GAP: The source defines a `WP_TEMPLATE_PART_AREA_SIDEBAR` constant (`'sidebar'`) alongside the other area constants, but `sidebar` is never listed as a built-in area in `get_allowed_block_template_part_areas()`. The doc lists sidebar as a common template part but never clarifies that there is no built-in `sidebar` area — developers who try to assign a part to `area: sidebar` in theme.json will have it silently fall back to `uncategorized` (per `_filter_block_template_part_area`)."
+      ],
+      "relatedCode": [
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/block-template-utils.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "cec490a72d5361101000bc3e7a89dba2a6d05556",
+      "analyzedAt": "2026-05-25T08:24:42.309Z"
+    },
+    {
+      "slug": "patterns",
+      "title": "Patterns",
+      "parent": null,
+      "sourceUrl": "https://developer.wordpress.org/themes/patterns/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The chapter navigation links are well-structured and cover a logical progression of topics — from introduction through registration, PHP usage, templates, block-type patterns, starter patterns, and block locking — matching what a theme developer would need in sequence.",
+        "GAP: No source files were provided for this documentation page, so runtime behaviour, default values, and API signatures could not be verified against code. Any drift in the linked sub-pages (e.g., Registering Patterns, Block Type Patterns) would need to be validated separately.",
+        "GAP: The introductory page does not mention the `patterns` directory convention (placing `.php` files in a theme's `/patterns` folder for auto-registration), which is a key practical capability developers would benefit from knowing upfront before diving into the sub-pages."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:23:59.372Z"
+    },
+    {
+      "slug": "patterns-introduction-to-patterns",
+      "title": "Introduction to Patterns",
+      "parent": "patterns",
+      "sourceUrl": "https://developer.wordpress.org/themes/patterns/introduction-to-patterns/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly distinguishes between Synced and Not Synced pattern types, accurately noting that theme-registered patterns are always of the Not Synced type and linking to the open Gutenberg issue (#59272) for future syncing support — this is a non-trivial technical nuance handled well.",
+        "The doc accurately notes the historical terminology change from 'reusable blocks' to 'Synced' patterns, which helps developers understand legacy references they may encounter.",
+        "GAP: No source files were provided for this document, so no code-level drift analysis was possible. All findings above are based solely on the documentation text itself — no runtime behaviour, default values, or API signatures could be cross-checked against implementation code."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:24:03.004Z"
+    },
+    {
+      "slug": "patterns-registering-patterns",
+      "title": "Registering Patterns",
+      "parent": "patterns",
+      "sourceUrl": "https://developer.wordpress.org/themes/patterns/registering-patterns/",
+      "healthScore": 78,
+      "status": "needs-attention",
+      "issues": [
+        {
+          "severity": "critical",
+          "type": "broken-example",
+          "evidence": {
+            "docSays": "function themeslug_unregister_pattern_categories() {\n\tregister_block_pattern_category( 'themeslug/custom' );\n}",
+            "codeSays": "function register_block_pattern_category( $category_name, $category_properties ) {\n\treturn WP_Block_Pattern_Categories_Registry::get_instance()->register( $category_name, $category_properties );\n}",
+            "codeFile": "src/wp-includes/block-patterns.php",
+            "codeRepo": "wordpress-develop"
+          },
+          "suggestion": "Replace the call to `register_block_pattern_category()` with `unregister_block_pattern_category()` in the unregistering example.\n- Change `register_block_pattern_category( 'themeslug/custom' );` to `unregister_block_pattern_category( 'themeslug/custom' );`\n- `register_block_pattern_category()` requires two parameters (`$category_name` and `$category_properties`); calling it with only one argument is incorrect and would not register anything meaningful.\n- The function named in the doc (`themeslug_unregister_pattern_categories`) clearly intends to unregister, so the correct API is `unregister_block_pattern_category( 'themeslug/custom' );`.",
+          "confidence": 1,
+          "fingerprint": "674be19651bfe00b"
+        },
+        {
+          "severity": "major",
+          "type": "nonexistent-name",
+          "evidence": {
+            "docSays": "`video` (added in WordPress 6.4)",
+            "codeSays": "register_block_pattern_category(\n\t\t'videos',\n\t\tarray(\n\t\t\t'label'       => _x( 'Videos', 'Block pattern category' ),\n\t\t\t'description' => __( 'Different layouts containing videos.' ),\n\t\t)\n\t);",
+            "codeFile": "src/wp-includes/block-patterns.php",
+            "codeRepo": "wordpress-develop"
+          },
+          "suggestion": "Correct the category slug for the video category in the default categories list.\n- Change `` `video` (added in WordPress 6.4) `` to `` `videos` (added in WordPress 6.4) ``\n- The registered slug in core is `videos` (line 202 of src/wp-includes/block-patterns.php), not `video`. A developer using `video` as a pattern category slug would find it does not match any registered core category.",
+          "confidence": 0.99,
+          "fingerprint": "d36b5c4de701162f"
+        }
+      ],
+      "positives": [
+        "The `register_block_pattern()` function signature, parameter names (`$pattern_name`, `$pattern_properties`), and `bool` return type are accurately documented and match the source in `src/wp-includes/block-patterns.php`.",
+        "The `should_load_remote_block_patterns` filter name is correctly documented and matches the firing site at L299, L332, and L371 of `src/wp-includes/block-patterns.php`.",
+        "GAP: The `navigation` category is registered in core (`_register_core_block_patterns_and_categories`) but is absent from the documented list of default WordPress pattern categories, leaving developers unaware it exists."
+      ],
+      "relatedCode": [
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/block-patterns.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/class-wp-block-type-registry.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/reducer.ts",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "cec490a72d5361101000bc3e7a89dba2a6d05556",
+      "analyzedAt": "2026-05-25T08:24:41.635Z"
+    },
+    {
+      "slug": "patterns-using-php-in-patterns",
+      "title": "Using PHP in Patterns",
+      "parent": "patterns",
+      "sourceUrl": "https://developer.wordpress.org/themes/patterns/using-php-in-patterns/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly explains that pattern registration happens on the `init` hook and that PHP executes at registration time, not at render time — this matches the `do_action( 'init' )` call in src/wp-settings.php and the WordPress pattern registration mechanism.",
+        "The doc accurately describes `esc_html_e()` as both escaping text for HTML output and making it ready for translation, which matches the source: `function esc_html_e( $text, $domain = 'default' ) { echo esc_html( translate( $text, $domain ) ); }`.",
+        "GAP: The doc does not mention `get_theme_file_path()` (as opposed to `get_theme_file_uri()`), which is also available in patterns and is useful when developers need the filesystem path to a theme asset rather than its URL — for example, to check `file_exists()` before outputting a URL."
+      ],
+      "relatedCode": [
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/l10n.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/formatting.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/link-template.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/query.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/post-template.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/post.php",
+          "tier": "secondary",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-settings.php",
+          "tier": "context",
+          "includedInAnalysis": false
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/rest-api/endpoints/class-wp-rest-templates-controller.php",
+          "tier": "context",
+          "includedInAnalysis": false
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "cec490a72d5361101000bc3e7a89dba2a6d05556",
+      "analyzedAt": "2026-05-25T08:24:37.383Z"
+    },
+    {
+      "slug": "patterns-usage-in-templates",
+      "title": "Usage in Templates",
+      "parent": "patterns",
+      "sourceUrl": "https://developer.wordpress.org/themes/patterns/usage-in-templates/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly describes the Pattern block markup syntax (`<!-- wp:pattern {\"slug\":\"namespace/pattern-slug\"} /-->`) and its `slug` parameter, which aligns with how the Pattern block is used in WordPress core block templates.",
+        "The doc accurately explains that the Pattern block is not surfaced in the block inserter UI and is primarily intended for theme template use — this is consistent with the block's design intent in WordPress.",
+        "GAP: The doc does not mention that patterns registered with `Inserter: false` in their file header will still be usable via `wp:pattern` in templates but will be hidden from the user-facing block inserter — a distinction that would be very useful for theme authors who want template-only patterns."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:24:43.634Z"
+    },
+    {
+      "slug": "patterns-starter-patterns",
+      "title": "Starter Patterns",
+      "parent": "patterns",
+      "sourceUrl": "https://developer.wordpress.org/themes/patterns/starter-patterns/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly identifies both required header fields (`Block Types: core/post-content` and `Post Types`) for registering a starter page pattern, which aligns with the WordPress pattern registration system's documented behaviour.",
+        "The doc accurately distinguishes between page patterns (tied to post content, no global elements like header/footer) and template patterns (full-template scope, typically including header/footer), which reflects the real functional difference between the two pattern types.",
+        "GAP: No source files were provided for this document, so runtime behaviour of the pattern registration system (e.g., how `Template Types` values are parsed, whether `Inserter: false` and `Inserter: no` are truly equivalent at runtime) could not be verified against code. The 'Potentially removed APIs' list is entirely composed of pattern header field names and conventional path strings — none of these are PHP/JS identifiers that would appear in source files, so their absence from source is expected and not evidence of drift."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:24:51.707Z"
+    },
+    {
+      "slug": "patterns-block-type-patterns",
+      "title": "Block Type Patterns",
+      "parent": "patterns",
+      "sourceUrl": "https://developer.wordpress.org/themes/patterns/block-type-patterns/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly describes the three-component block type name format for template parts (e.g., `core/template-part/header` and `core/template-part/footer`), which is a non-obvious convention that developers need to get right.",
+        "The doc accurately notes the limitation that only Header and Footer template part areas are supported, and links to the open GitHub ticket (#44689) — this is a useful, honest caveat that prevents developer confusion.",
+        "GAP: No source files were provided for this document, so runtime behaviour (e.g., how `Block Types` header fields are parsed, whether comma-separated values are trimmed, case sensitivity of block type slugs) could not be verified against implementation code. Developers relying on edge-case behaviour of the pattern registration system should consult the Gutenberg source directly."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:24:48.843Z"
+    },
+    {
+      "slug": "patterns-patterns-and-block-locking",
+      "title": "Patterns and Block Locking",
+      "parent": "patterns",
+      "sourceUrl": "https://developer.wordpress.org/themes/patterns/patterns-and-block-locking/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly documents all four `templateLock` values (`all`, `insert`, `contentOnly`, and the block-level `lock` object with `move`/`remove` keys) — these are standard WordPress block editor serialization attributes that are well-established in the block grammar and consistent with the block.json schema's `supports.lock` entry.",
+        "The doc accurately notes that `contentOnly` and `insert` template locking have no UI controls and must be applied manually to block markup — this is a non-trivial behavioural distinction that would otherwise trip up developers.",
+        "GAP: The block.json schema exposes a `supports.contentRole` boolean (default `false`) that allows blocks to opt into content-only editing modes even without declaring content attributes. This is not mentioned anywhere in the doc, and theme/block developers building patterns with `contentOnly` locking would benefit from knowing about it."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/block.json",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:24:50.935Z"
+    },
+    {
+      "slug": "features",
+      "title": "Features",
+      "parent": null,
+      "sourceUrl": "https://developer.wordpress.org/themes/features/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The three feature links listed (Block Style Variations, Block Stylesheets, Block Variations) are clearly distinguished from one another with accurate, concise descriptions that correctly differentiate their purposes (styling variations vs. per-block CSS loading vs. block configuration presets).",
+        "The chapter correctly positions itself as a follow-on to 'Global Settings and Styles' and 'Templates', giving developers accurate navigational context within the broader theme documentation hierarchy.",
+        "GAP: No source files were provided for this document, so it is not possible to verify whether additional block-theme features exist in the codebase that are absent from this index page (e.g., theme.json schema features, template parts, patterns, or style variations at the theme level). If such features are documented elsewhere in the codebase, this index page may be incomplete."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:24:54.895Z"
+    },
+    {
+      "slug": "features-block-style-variations",
+      "title": "Block Style Variations",
+      "parent": "features",
+      "sourceUrl": "https://developer.wordpress.org/themes/features/block-style-variations/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly states that `register_block_style()` returns `true` or `false`, which matches the PHP source: `return WP_Block_Styles_Registry::get_instance()->register( $block_name, $style_properties );` returning `bool`.",
+        "The doc correctly identifies `wp-blocks`, `wp-dom-ready`, and `wp-edit-post` as the JavaScript dependencies to enqueue for block editor scripts, which aligns with the standard block editor asset loading pattern shown in `edit-form-blocks.php`.",
+        "GAP: The PHP `register_block_style()` function also accepts a `style_data` property (a theme.json-like array to generate CSS from) in `$style_properties`, as documented in the source code PHPDoc (`style_data (theme.json-like array to generate CSS from)`), but this property is not mentioned in the documentation's list of `$style_properties` arguments."
+      ],
+      "relatedCode": [
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/blocks.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/registration.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/block.json",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "lib/experimental/class-wp-rest-block-editor-settings-controller.php",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-admin/edit-form-blocks.php",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [
+        "Could not read wordpress-develop: for verbatim check — dropping issue"
+      ],
+      "commitSha": "cec490a72d5361101000bc3e7a89dba2a6d05556",
+      "analyzedAt": "2026-05-25T08:25:38.712Z"
+    },
+    {
+      "slug": "features-block-stylesheets",
+      "title": "Block Stylesheets",
+      "parent": "features",
+      "sourceUrl": "https://developer.wordpress.org/themes/features/block-stylesheets/",
+      "healthScore": 96,
+      "status": "healthy",
+      "issues": [
+        {
+          "severity": "minor",
+          "type": "default-value",
+          "evidence": {
+            "docSays": "@type string|bool|null $ver    Stylesheet version number.",
+            "codeSays": "'ver'    => false,",
+            "codeFile": "src/wp-includes/script-loader.php",
+            "codeRepo": "wordpress-develop"
+          },
+          "suggestion": "Update the `$args` parameter table for `wp_enqueue_block_style()` to document the default value and behaviour of `ver`.\n- Change the `@type` line for `$ver` to: `@type string|bool|null $ver    Stylesheet version number. Defaults to `false`, which automatically appends the current WordPress version as a cache-busting query string. Set to `null` to omit the version entirely.",
+          "confidence": 0.75,
+          "fingerprint": "7c843694868de998"
+        },
+        {
+          "severity": "minor",
+          "type": "default-value",
+          "evidence": {
+            "docSays": "@type string           $media  The media for which this stylesheet has been defined.",
+            "codeSays": "'media'  => 'all',",
+            "codeFile": "src/wp-includes/script-loader.php",
+            "codeRepo": "wordpress-develop"
+          },
+          "suggestion": "Update the `@type` doc comment for the `$media` argument in `wp_enqueue_block_style()` to document its default value.\n- Change the `@type` line to: `@type string           $media  The media for which this stylesheet has been defined. Default 'all'.`",
+          "confidence": 0.9,
+          "fingerprint": "42c561fd2b016807"
+        }
+      ],
+      "positives": [
+        "The doc correctly identifies `wp_enqueue_block_style()` as the function to use and accurately describes both required parameters (`$block_name` and `$args`), matching the function signature in the source code.",
+        "The doc correctly states that `path` is needed to inline the CSS in `<head>`, which aligns with the source code's use of `wp_style_add_data( $args['handle'], 'path', $args['path'] )` inside `wp_enqueue_block_style()` to trigger `wp_maybe_inline_styles()`.",
+        "GAP: The doc does not mention that `wp_enqueue_block_style()` automatically handles RTL stylesheets — if a `-rtl.css` variant of the `path` file exists, it is registered and used automatically. Developers building RTL-compatible themes would benefit from knowing this."
+      ],
+      "relatedCode": [
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/script-loader.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/functions.wp-styles.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "cec490a72d5361101000bc3e7a89dba2a6d05556",
+      "analyzedAt": "2026-05-25T08:25:47.507Z"
+    },
+    {
+      "slug": "features-block-variations",
+      "title": "Block Variations",
+      "parent": "features",
+      "sourceUrl": "https://developer.wordpress.org/themes/features/block-variations/",
+      "healthScore": 84,
+      "status": "needs-attention",
+      "issues": [
+        {
+          "severity": "major",
+          "type": "required-optional-mismatch",
+          "evidence": {
+            "docSays": "**`variation`:** An optional object for configuring the variation",
+            "codeSays": "export const registerBlockVariation = (\n\tblockName: string,\n\tvariation: BlockVariation | BlockVariation[]\n): void => {",
+            "codeFile": "packages/blocks/src/api/registration.ts",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Update the `registerBlockVariation` documentation to mark the `variation` parameter as required, not optional.\n- Change `**\\`variation\\`:** An optional object for configuring the variation` to `**\\`variation\\`:** A required object (or array of objects) for configuring the variation`\n- The function signature `(blockName: string, variation: BlockVariation | BlockVariation[])` has no `?` on `variation`, confirming it is required and not optional",
+          "confidence": 0.95,
+          "fingerprint": "46baada774f13e06"
+        },
+        {
+          "severity": "minor",
+          "type": "type-signature",
+          "evidence": {
+            "docSays": "**`variation`:** An optional object for configuring the variation, which may include any of the following properties:",
+            "codeSays": "variation: BlockVariation | BlockVariation[]",
+            "codeFile": "packages/blocks/src/api/registration.ts",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Update the `registerBlockVariation` documentation to reflect that `variation` also accepts an array of `BlockVariation` objects.\n- Change the description from \"An optional object\" to \"An object or array of objects for configuring the variation(s)\"\n- Note that when an array is passed, each element must have a unique string `name` property",
+          "confidence": 0.88,
+          "fingerprint": "bd6a1d837bbc98b5"
+        },
+        {
+          "severity": "major",
+          "type": "type-signature",
+          "evidence": {
+            "docSays": "**`variationName`:** The name of the variation to unregister.",
+            "codeSays": "export const unregisterBlockVariation = (\n\tblockName: string,\n\tvariationName: string | string[]\n): void => {",
+            "codeFile": "packages/blocks/src/api/registration.ts",
+            "codeRepo": "gutenberg"
+          },
+          "suggestion": "Update the `unregisterBlockVariation` documentation to reflect that `variationName` accepts either a single string or an array of strings.\n- Change the `variationName` parameter description from `The name of the variation to unregister.` to `The name (or array of names) of the variation(s) to unregister.`\n- Update the JSDoc `@param` tag at line ~697 in `packages/blocks/src/api/registration.ts` from `@param variationName Name of the variation defined for the block.` to `@param variationName Name or array of names of the variation(s) defined for the block.`",
+          "confidence": 0.95,
+          "fingerprint": "e1dc80d3ea642846"
+        }
+      ],
+      "positives": [
+        "The doc correctly identifies `wp-blocks`, `wp-dom-ready`, and `wp-i18n` as the required script dependencies in the `wp_enqueue_script()` call — these match the actual JavaScript APIs used in the examples (`wp.blocks.registerBlockVariation`, `wp.domReady`, `wp.i18n.__`).",
+        "The doc correctly states that `isDefault` defaults to `false` — this matches the schema definition `\"isDefault\": { \"type\": \"boolean\", \"default\": false }` in `schemas/json/block.json`.",
+        "GAP: `registerBlockVariation` also accepts an array of `BlockVariation` objects as its second argument (signature: `BlockVariation | BlockVariation[]`), but the documentation only describes passing a single variation object. Developers who need to register multiple variations at once would not know this is possible."
+      ],
+      "relatedCode": [
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/api/registration.ts",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/block.json",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/functions.wp-scripts.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/dom-ready/src/index.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "schemas/json/theme.json",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "lib/experimental/class-wp-rest-block-editor-settings-controller.php",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-admin/edit-form-blocks.php",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "1642980d599be51c7cce7b2dc3a0c052b69ad367",
+      "analyzedAt": "2026-05-25T08:25:59.309Z"
+    },
+    {
+      "slug": "features-block-patterns",
+      "title": "Block Patterns (Archived)",
+      "parent": "features",
+      "sourceUrl": "https://developer.wordpress.org/themes/features/block-patterns/",
+      "healthScore": 84,
+      "status": "needs-attention",
+      "issues": [
+        {
+          "severity": "major",
+          "type": "nonexistent-name",
+          "evidence": {
+            "docSays": "`video` (added in WordPress 6.4)",
+            "codeSays": "register_block_pattern_category(\n\t\t'videos',\n\t\tarray(\n\t\t\t'label'       => _x( 'Videos', 'Block pattern category' ),\n\t\t\t'description' => __( 'Different layouts containing videos.' ),\n\t\t)\n\t);",
+            "codeFile": "src/wp-includes/block-patterns.php",
+            "codeRepo": "wordpress-develop"
+          },
+          "suggestion": "Update the pattern categories list to correct the slug from `video` to `videos`.\n- In the pattern categories list, change `\\`video\\` (added in WordPress 6.4)` to `\\`videos\\` (added in WordPress 6.4)`\n- The registered category slug is `videos` (plural) at line 202 of `src/wp-includes/block-patterns.php`; a developer using `video` as a category slug would find no matching registered category.",
+          "confidence": 0.97,
+          "fingerprint": "1e017fd52ce2de1c"
+        },
+        {
+          "severity": "major",
+          "type": "nonexistent-name",
+          "evidence": {
+            "docSays": "`query` (use `posts` instead)",
+            "codeSays": "register_block_pattern_category(\n\t\t'query',\n\t\tarray(\n\t\t\t'label'       => _x( 'Posts', 'Block pattern category' ),\n\t\t\t'description' => __( 'Display your latest posts in lists, grids or other layouts.' ),\n\t\t)\n\t);",
+            "codeFile": "src/wp-includes/block-patterns.php",
+            "codeRepo": "wordpress-develop"
+          },
+          "suggestion": "Remove the deprecation note for the `query` category — it is still actively registered in core alongside `posts`.\n- In the pattern categories list, change `- \\`query\\` (use \\`posts\\` instead)` to simply `- \\`query\\``\n- Optionally add a note that both `query` and `posts` share the same label (\"Posts\") and description, so either slug can be used when assigning patterns to this category.",
+          "confidence": 0.95,
+          "fingerprint": "6a35b9663dc17113"
+        },
+        {
+          "severity": "minor",
+          "type": "nonexistent-name",
+          "evidence": {
+            "docSays": "WordPress has several block pattern categories that it registers by default:\n\n*   `featured`\n*   `about`\n*   `audio` (added in WordPress 6.4)",
+            "codeSays": "register_block_pattern_category(\n\t\t'navigation',\n\t\tarray(\n\t\t\t'label'       => _x( 'Navigation', 'Block pattern category' ),\n\t\t\t'description' => __( 'A variety of designs displaying site navigation.' ),\n\t\t)\n\t);",
+            "codeFile": "src/wp-includes/block-patterns.php",
+            "codeRepo": "wordpress-develop"
+          },
+          "suggestion": "The documented list of default pattern categories is incomplete — it omits many categories that are registered in code. Update the list to include all registered defaults.\n- Add `navigation` to the list of default pattern categories\n- Also add the following categories that are registered in `src/wp-includes/block-patterns.php` but absent from the doc: `banner`, `buttons`, `columns`, `text`, `query`, `call-to-action`, `team`, `testimonials`, `services`, `contact`, `portfolio`, `gallery`, `media`, `videos`, `posts`, `footer`, `header`",
+          "confidence": 0.9,
+          "fingerprint": "37c821ba68a753eb"
+        }
+      ],
+      "positives": [
+        "The documentation correctly describes the `register_block_pattern()` function signature, its two parameters (`$pattern_name` and `$pattern_properties`), and its `bool` return type, all of which match the source code in `src/wp-includes/block-patterns.php`.",
+        "The documentation correctly identifies `should_load_remote_block_patterns` as the filter hook to disable remote patterns, and the source code confirms this filter is applied in three places within `_load_remote_block_patterns()`, `_load_remote_featured_patterns()`, and `_register_remote_theme_patterns()`.",
+        "GAP: The `register_block_pattern_category()` function accepts a `description` property in `$category_properties`, which the doc correctly documents. However, the doc does not mention that the `navigation` category is registered by default in core — a developer building a navigation-focused theme would benefit from knowing this built-in category exists."
+      ],
+      "relatedCode": [
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/block-patterns.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/blocks/src/store/reducer.ts",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/link-template.php",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/l10n.php",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/formatting.php",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "cec490a72d5361101000bc3e7a89dba2a6d05556",
+      "analyzedAt": "2026-05-25T08:26:52.821Z"
+    },
+    {
+      "slug": "advanced-topics",
+      "title": "Advanced Topics",
+      "parent": null,
+      "sourceUrl": "https://developer.wordpress.org/themes/advanced-topics/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The documentation accurately references `@wordpress/scripts` as the package for processing and bundling theme assets — this package is a real, actively maintained npm package in the WordPress ecosystem and the reference is correct.",
+        "The chapter navigation links are well-structured and cover genuinely distinct advanced topics (internationalization, child themes, security, etc.), each of which corresponds to real WordPress theme development concerns.",
+        "GAP: No source files were available for this document, so runtime behaviour, API signatures, and default values could not be cross-checked. This is a high-level navigation/index page with no code examples or API claims, so no drift analysis was possible beyond confirming named identifiers."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:25:52.791Z"
+    },
+    {
+      "slug": "advanced-topics-internationalization",
+      "title": "Internationalization",
+      "parent": "advanced-topics",
+      "sourceUrl": "https://developer.wordpress.org/themes/advanced-topics/internationalization/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly documents the `load_theme_textdomain()` function signature — `string $domain` and `string|false $path = false` — which matches the source exactly.",
+        "The doc correctly states that `after_setup_theme` fires immediately after the theme's `functions.php` is loaded, which is confirmed by `wp-settings.php` where `do_action( 'after_setup_theme' )` fires right after the `functions.php` include loop.",
+        "GAP: WordPress 6.7+ introduced just-in-time (JIT) translation loading, meaning `load_theme_textdomain()` no longer immediately loads translations but registers the path for JIT loading (see `@since 6.7.0` tag on `load_theme_textdomain`). The doc does not mention this behaviour change, which could surprise developers who rely on translations being available immediately after the call."
+      ],
+      "relatedCode": [
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/l10n.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-settings.php",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "cec490a72d5361101000bc3e7a89dba2a6d05556",
+      "analyzedAt": "2026-05-25T08:26:35.740Z"
+    },
+    {
+      "slug": "advanced-topics-child-themes",
+      "title": "Child Themes",
+      "parent": "advanced-topics",
+      "sourceUrl": "https://developer.wordpress.org/themes/advanced-topics/child-themes/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly states that `get_theme_file_path()` searches the stylesheet (child theme) directory before the template (parent theme) directory — confirmed by the source: `if ( $stylesheet_directory !== $template_directory && file_exists( $stylesheet_directory . '/' . $file ) )` in `src/wp-includes/link-template.php`.",
+        "The doc correctly states that `get_stylesheet_uri()` returns the child theme's `style.css` URI when a child theme is active — confirmed by `get_stylesheet_uri()` in `src/wp-includes/theme.php` which appends `/style.css` to `get_stylesheet_directory_uri()`, which resolves to the active (child) theme's directory.",
+        "GAP: The doc does not mention that `load_child_theme_textdomain()` is essentially a thin wrapper around `load_theme_textdomain()` that defaults the path to `get_stylesheet_directory()`. Developers who call `load_theme_textdomain()` with the stylesheet directory manually would get identical behaviour, but the doc implies these are meaningfully different functions without explaining why."
+      ],
+      "relatedCode": [
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/l10n.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/link-template.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/functions.wp-styles.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/theme.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "cec490a72d5361101000bc3e7a89dba2a6d05556",
+      "analyzedAt": "2026-05-25T08:26:36.548Z"
+    },
+    {
+      "slug": "advanced-topics-build-process",
+      "title": "Build Process",
+      "parent": "advanced-topics",
+      "sourceUrl": "https://developer.wordpress.org/themes/advanced-topics/build-process/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The PHP enqueue example correctly uses `get_theme_file_path()` for `include` (server-side path) and `get_theme_file_uri()` for the URL argument to `wp_enqueue_style()`/`wp_enqueue_script()` — a subtle but important distinction that the doc gets right.",
+        "The `wp_enqueue_script()` call in `themeslug_editor_assets()` correctly passes `true` as the fifth (`$args`/in_footer) argument, which matches the function signature in the source code and is appropriate for editor scripts.",
+        "GAP: The `webpack.config.js` example spreads `...defaultConfig.plugins` before adding `RemoveEmptyScriptsPlugin`, which is important for preserving WP's asset manifest generation. The doc mentions this in a comment but does not explain that omitting `...defaultConfig.plugins` would break `*.asset.php` file generation — a common mistake developers make when customising the plugins array."
+      ],
+      "relatedCode": [
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/functions.wp-scripts.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/functions.wp-styles.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "cec490a72d5361101000bc3e7a89dba2a6d05556",
+      "analyzedAt": "2026-05-25T08:26:50.075Z"
+    },
+    {
+      "slug": "advanced-topics-privacy",
+      "title": "Privacy",
+      "parent": "advanced-topics",
+      "sourceUrl": "https://developer.wordpress.org/themes/advanced-topics/privacy/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The three privacy policy functions (`get_privacy_policy_url()`, `the_privacy_policy_link()`, `get_the_privacy_policy_link()`) are all confirmed to exist in `src/wp-includes/link-template.php` with exactly the signatures and behaviour described in the doc — including the optional `$before`/`$after` parameters and the since-4.9.6 version tag.",
+        "The doc correctly states that the cookies checkbox is added by `comment_form()` — confirmed in `src/wp-includes/comment-template.php` where the `cookies` field is conditionally built and injected into `$fields` when `show_comments_cookies_opt_in` is enabled (since 4.9.6).",
+        "GAP: `get_privacy_policy_url()` only returns a non-empty URL when the privacy policy page has `post_status === 'publish'` (confirmed in source: `get_post_status( $policy_page_id ) === 'publish'`). The doc does not mention this constraint, which could surprise developers who set a draft privacy policy page and wonder why the URL is empty."
+      ],
+      "relatedCode": [
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/link-template.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/comment-template.php",
+          "tier": "primary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/post-template.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/blocks/post-content.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "gutenberg",
+          "file": "packages/block-library/src/post-content/index.php",
+          "tier": "secondary",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/comment.php",
+          "tier": "context",
+          "includedInAnalysis": true
+        },
+        {
+          "repo": "wordpress-develop",
+          "file": "src/wp-includes/blocks.php",
+          "tier": "context",
+          "includedInAnalysis": true
+        }
+      ],
+      "diagnostics": [],
+      "commitSha": "cec490a72d5361101000bc3e7a89dba2a6d05556",
+      "analyzedAt": "2026-05-25T08:27:06.732Z"
+    },
+    {
+      "slug": "advanced-topics-testing",
+      "title": "Testing",
+      "parent": "advanced-topics",
+      "sourceUrl": "https://developer.wordpress.org/themes/advanced-topics/testing/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The documentation accurately describes the Theme Unit Test Data XML file location at the GitHub repository (https://github.com/WordPress/theme-test-data/blob/master/themeunittestdata.wordpress.xml), which is a specific and verifiable reference developers would rely on.",
+        "The plugin recommendations (Theme Check, Debug Bar, Query Monitor, Log Deprecated Notices, Monster Widget) are each linked to their correct wordpress.org plugin slugs, reducing the risk of a developer landing on the wrong plugin.",
+        "GAP: No source files were provided for this documentation page, so runtime behaviour, default values, and API contracts cannot be validated against code. All content on this page is editorial/guidance rather than API documentation, meaning there are no function signatures, parameter defaults, or code contracts to drift from."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:26:56.031Z"
+    },
+    {
+      "slug": "advanced-topics-debugging",
+      "title": "Debugging",
+      "parent": "advanced-topics",
+      "sourceUrl": "https://developer.wordpress.org/themes/advanced-topics/debugging/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly describes WP_DEBUG as the only constant defined in a default wp-config.php and set to false in a standard install — this matches the well-known WordPress core behaviour.",
+        "The doc accurately notes that WP_DEBUG_DISPLAY controls on-screen display of debug messages and that it defaults to showing messages when WP_DEBUG is enabled, which is consistent with WordPress core's default behaviour.",
+        "GAP: The doc does not mention that WP_DEBUG_LOG can accept a string file path (not just true/false) to write the log to a custom location — a useful capability for developers who want logs outside the /wp-content directory."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:26:57.504Z"
+    },
+    {
+      "slug": "advanced-topics-security",
+      "title": "Security",
+      "parent": "advanced-topics",
+      "sourceUrl": "https://developer.wordpress.org/themes/advanced-topics/security/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly documents wp_nonce_field() with both required parameters ('name_of_my_action' and 'name_of_nonce_field'), matching the function's actual signature.",
+        "The doc correctly describes wp_kses() usage with an associative array of allowed HTML elements and attributes, which matches the function's expected $allowed_html parameter shape.",
+        "The doc correctly notes that $wpdb->prepare() supports both sprintf()-like and vsprintf()-like syntax, which is accurate to the wpdb implementation."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:27:00.050Z"
+    },
+    {
+      "slug": "advanced-topics-publishing-themes",
+      "title": "Publishing Themes",
+      "parent": "advanced-topics",
+      "sourceUrl": "https://developer.wordpress.org/themes/advanced-topics/publishing-themes/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The documentation accurately describes the WordPress Theme Directory submission workflow, including the required theme files (theme.json, style.css, templates), which are well-established WordPress theme structure requirements.",
+        "The documentation correctly identifies the Theme Review Guidelines and WordPress Coding Standards as requirements for submission, which aligns with the actual WordPress.org theme review process.",
+        "GAP: The documentation does not mention the Theme Check plugin, which is a widely-used tool recommended by the Themes Team to automatically scan themes for common errors and standards compliance before submission — developers would benefit from knowing about it."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:27:04.780Z"
+    },
+    {
+      "slug": "advanced-topics-theme-testing",
+      "title": "Theme Testing",
+      "parent": "advanced-topics",
+      "sourceUrl": "https://developer.wordpress.org/themes/advanced-topics/theme-testing/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly references WP_DEBUG via `define('WP_DEBUG', true);` — this is a long-standing, stable WordPress constant used to surface deprecated function calls and errors, and remains the correct way to enable debug mode in wp-config.php.",
+        "The doc's step-by-step checklist accurately reflects the standard WordPress theme review workflow, including HTML/CSS validation, JavaScript error checking, and cross-browser testing, all of which align with current Theme Review team guidance.",
+        "GAP: The doc does not mention WP_DEBUG_LOG or WP_DEBUG_DISPLAY, companion constants that control whether errors are written to a log file or suppressed from screen output — both are commonly needed alongside WP_DEBUG during theme testing and would benefit developers."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:27:06.433Z"
+    },
+    {
+      "slug": "advanced-topics-plugin-api-hooks",
+      "title": "Plugin API Hooks",
+      "parent": "advanced-topics",
+      "sourceUrl": "https://developer.wordpress.org/themes/advanced-topics/plugin-api-hooks/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly identifies all five hooks (`wp_head`, `wp_body_open`, `wp_footer`, `wp_meta`, `comment_form`) that require explicit placement in theme templates, which is accurate to WordPress core conventions.",
+        "GAP: No source files were provided, so runtime behaviour (e.g., whether `wp_body_open()` gracefully no-ops when the action has no callbacks, or what `comment_form()` passes to its hook) could not be verified against code. Deeper accuracy of placement descriptions and hook arguments is unconfirmed.",
+        "GAP: The doc does not mention that `wp_body_open()` was introduced in WordPress 5.2 and that themes should include a compatibility shim (e.g., `function_exists('wp_body_open')`) for backward compatibility — a common developer pitfall when targeting older WordPress versions."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:27:14.200Z"
+    },
+    {
+      "slug": "advanced-topics-ui-best-practices",
+      "title": "UI Best Practices",
+      "parent": "advanced-topics",
+      "sourceUrl": "https://developer.wordpress.org/themes/advanced-topics/ui-best-practices/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly uses `esc_url( home_url( '/' ) )` for the logo href and `get_stylesheet_directory_uri()` for the theme asset path — both are standard, current WordPress APIs for safe URL output in templates.",
+        "The doc correctly distinguishes the five CSS link pseudo-states (link/visited/hover/focus/active) and gives accurate, actionable guidance on pairing hover and focus styles for accessibility.",
+        "GAP: The logo example contains a typo in the text-domain string: `'textdmomain'` should be `'textdomain'`. While this won't cause a PHP error, it will silently break translation lookups for that string, causing the alt text to never be translated in any locale."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:27:11.958Z"
+    },
+    {
+      "slug": "advanced-topics-javascript-best-practices",
+      "title": "JavaScript Best Practices",
+      "parent": "advanced-topics",
+      "sourceUrl": "https://developer.wordpress.org/themes/advanced-topics/javascript-best-practices/",
+      "healthScore": 100,
+      "status": "healthy",
+      "issues": [],
+      "positives": [
+        "The doc correctly explains that WordPress loads jQuery in noConflict() mode and provides the standard IIFE wrapper pattern `( function( $ ) { } )( jQuery );` — this is accurate and matches long-standing WordPress core behaviour.",
+        "The doc correctly advises using `array( 'jquery' )` as a dependency when enqueuing scripts, which is the correct wp_enqueue_script() pattern for ensuring jQuery is loaded first.",
+        "GAP: The doc's 'Potentially removed APIs' list flags `.bind` and `.click` as possibly removed — developers should be aware that jQuery's `.bind()` method was deprecated in jQuery 3.0 (bundled with WordPress) in favour of `.on()`, but the doc only uses `.bind` in a passing reference in prose, not as a recommended API, so no drift exists. However, the doc could explicitly note that `.bind()` is deprecated in favour of `.on()` to prevent developers from adopting it."
+      ],
+      "relatedCode": [],
+      "diagnostics": [],
+      "commitSha": "",
+      "analyzedAt": "2026-05-25T08:27:12.954Z"
+    }
+  ]
+}
