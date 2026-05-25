@@ -1,43 +1,74 @@
 import type { TreeNode } from '../tree-builder.js';
-import { escapeHtml, healthBadge, statusBadge, htmlShell } from './shared.js';
+import { escapeHtml, healthBadge, statusBadge, issueBreakdown, renderIssueBreakdown, renderDashboardLayout, type DashboardNav } from './shared.js';
 
-export function renderFolder(node: TreeNode): string {
-  const header = `
-    <div class="flex items-center gap-3 mb-6">
-      <h1 class="text-2xl font-bold">${escapeHtml(node.label)}</h1>
-      ${healthBadge(node.folderHealth)}
-      ${statusBadge(node.folderStatus)}
+function statCard(label: string, value: string): string {
+  return `
+    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+      <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">${label}</p>
+      <div class="mt-3 text-sm font-medium text-slate-900">${value}</div>
     </div>`;
+}
+
+export function renderFolder(node: TreeNode, nav: DashboardNav): string {
+  const folderIssues = node.docs.flatMap(doc => doc.issues);
+  const issueCount = folderIssues.length;
+  const folderBreakdown = issueBreakdown(folderIssues);
+  const criticalDocs = node.docs.filter(doc => doc.status === 'critical').length;
+  const lowestScore = node.docs.reduce<number | null>((currentLowest, doc) => {
+    if (doc.healthScore === null) return currentLowest;
+    if (currentLowest === null) return doc.healthScore;
+    return Math.min(currentLowest, doc.healthScore);
+  }, null);
+
+  const header = `
+    <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <a href="../index.html" class="text-sm font-medium text-blue-700 hover:text-blue-900 hover:underline">← Back to run overview</a>
+      <div class="mt-4 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+        <div>
+          <p class="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Folder rollup</p>
+          <h2 class="mt-2 text-3xl font-semibold tracking-tight text-slate-950">${escapeHtml(node.label)}</h2>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          ${healthBadge(node.folderHealth)}
+          ${statusBadge(node.folderStatus)}
+        </div>
+      </div>
+      <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        ${statCard('Docs in folder', `${node.docs.length}`)}
+        ${statCard('Issues', `<span class="block">${issueCount} total</span><span class="mt-2 block">${renderIssueBreakdown(folderBreakdown)}</span>`)}
+        ${statCard('Critical docs', `${criticalDocs}`)}
+        ${statCard('Lowest score', `${lowestScore ?? 'N/A'}`)}
+      </div>
+    </section>`;
 
   const docRows = node.docs.map(doc => `
-    <tr class="border-t hover:bg-gray-50">
-      <td class="py-3 pr-4">
-        <a href="../doc/${escapeHtml(doc.slug)}.html" class="text-blue-600 hover:underline font-medium">${escapeHtml(doc.title)}</a>
+    <tr class="hover:bg-slate-50">
+      <td class="px-6 py-4">
+        <a href="../doc/${escapeHtml(doc.slug)}.html" class="font-semibold text-blue-700 hover:text-blue-900 hover:underline">${escapeHtml(doc.title)}</a>
+        <p class="mt-1 text-xs text-slate-500">${escapeHtml(doc.slug)}</p>
       </td>
-      <td class="py-3 pr-4">${healthBadge(doc.healthScore)}</td>
-      <td class="py-3 pr-4">${statusBadge(doc.status)}</td>
-      <td class="py-3 text-sm text-gray-500">${doc.issues.length} issue${doc.issues.length !== 1 ? 's' : ''}</td>
+      <td class="px-6 py-4">${healthBadge(doc.healthScore)}</td>
+      <td class="px-6 py-4">${statusBadge(doc.status)}</td>
+      <td class="px-6 py-4">${renderIssueBreakdown(issueBreakdown(doc.issues))}</td>
     </tr>`).join('');
 
   const tableHtml = `
-    <section class="bg-white rounded shadow overflow-hidden mb-8">
+    <section class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
       <table class="w-full text-sm">
-        <thead class="bg-gray-100 text-left text-xs uppercase text-gray-600">
+        <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
           <tr>
-            <th class="px-4 py-2">Document</th>
-            <th class="px-4 py-2">Score</th>
-            <th class="px-4 py-2">Status</th>
-            <th class="px-4 py-2">Issues</th>
+            <th class="px-6 py-3">Document</th>
+            <th class="px-6 py-3">Score</th>
+            <th class="px-6 py-3">Status</th>
+            <th class="px-6 py-3">Issues</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-100 px-4">
+        <tbody class="divide-y divide-slate-200">
           ${docRows}
         </tbody>
       </table>
     </section>`;
 
-  const backLink = `<a href="../index.html" class="text-blue-600 hover:underline text-sm">← Back to index</a>`;
-
-  const body = backLink + header + tableHtml;
-  return htmlShell(node.label, body);
+  const body = header + tableHtml;
+  return renderDashboardLayout(node.label, nav, body);
 }

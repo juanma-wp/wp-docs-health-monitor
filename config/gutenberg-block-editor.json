@@ -47,7 +47,6 @@
     }
   },
   "mappingPath": "mappings/gutenberg-block-editor.json",
-  "outputDir": "./out",
   "validator": {
     "type": "claude",
     "pass1Model": "claude-sonnet-4-6",
