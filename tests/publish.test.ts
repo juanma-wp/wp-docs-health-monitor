@@ -18,6 +18,13 @@ type RunHistoryEntry = {
   overallHealth: number;
 };
 
+type WriteOutOptions = {
+  history: RunHistoryEntry[];
+  resultBodies: Record<string, object>;
+  htmlLabel: string;
+  runDashboards?: Record<string, string>;
+};
+
 function git(cwd: string, args: string[]): string {
   return execFileSync('git', args, { cwd, encoding: 'utf-8' }).trim();
 }
@@ -52,12 +59,22 @@ async function createRepoFixture(): Promise<{ repoDir: string; remoteDir: string
   return { repoDir, remoteDir };
 }
 
-async function writeOut(repoDir: string, runId: string, history: RunHistoryEntry[], resultBody: object, htmlLabel: string): Promise<void> {
+async function writeOut(repoDir: string, options: WriteOutOptions): Promise<void> {
   const outDir = join(repoDir, 'out');
-  await mkdir(join(outDir, 'data', 'runs', runId), { recursive: true });
-  await writeFile(join(outDir, 'index.html'), `<html><body>${htmlLabel}</body></html>`);
-  await writeFile(join(outDir, 'data', 'history.json'), JSON.stringify(history, null, 2) + '\n');
-  await writeFile(join(outDir, 'data', 'runs', runId, 'results.json'), JSON.stringify(resultBody, null, 2) + '\n');
+  await mkdir(outDir, { recursive: true });
+  await mkdir(join(outDir, 'data'), { recursive: true });
+  await writeFile(join(outDir, 'index.html'), `<html><body>${options.htmlLabel}</body></html>`);
+  await writeFile(join(outDir, 'data', 'history.json'), JSON.stringify(options.history, null, 2) + '\n');
+
+  for (const [runId, resultBody] of Object.entries(options.resultBodies)) {
+    await mkdir(join(outDir, 'data', 'runs', runId), { recursive: true });
+    await writeFile(join(outDir, 'data', 'runs', runId, 'results.json'), JSON.stringify(resultBody, null, 2) + '\n');
+  }
+
+  for (const [runId, html] of Object.entries(options.runDashboards ?? {})) {
+    await mkdir(join(outDir, 'runs', runId), { recursive: true });
+    await writeFile(join(outDir, 'runs', runId, 'index.html'), html);
+  }
 }
 
 async function runPublish(repoDir: string): Promise<{ stdout: string; stderr: string }> {
@@ -93,13 +110,13 @@ describe('scripts/publish.sh', () => {
   it('fails with a readable error when the working tree is dirty', async () => {
     const { repoDir } = await createRepoFixture();
 
-    await writeOut(
-      repoDir,
-      '20240415-120000',
-      [{ runId: '20240415-120000', timestamp: '2024-04-15T12:00:00.000Z', overallHealth: 65 }],
-      { runId: '20240415-120000', payload: 'first' },
-      'first publish',
-    );
+    await writeOut(repoDir, {
+      history: [{ runId: '20240415-120000', timestamp: '2024-04-15T12:00:00.000Z', overallHealth: 65 }],
+      resultBodies: {
+        '20240415-120000': { runId: '20240415-120000', payload: 'first' },
+      },
+      htmlLabel: 'first publish',
+    });
     await writeFile(join(repoDir, 'README.md'), '# dirty repo\n');
 
     await expect(runPublish(repoDir)).rejects.toMatchObject({
@@ -107,16 +124,24 @@ describe('scripts/publish.sh', () => {
     });
   });
 
-  it('publishes twice without clobbering the first run data', async () => {
+  it('publishes every unpublished local run and preserves archived dashboards across later publishes', async () => {
     const { repoDir, remoteDir } = await createRepoFixture();
 
-    await writeOut(
-      repoDir,
-      '20240415-120000',
-      [{ runId: '20240415-120000', timestamp: '2024-04-15T12:00:00.000Z', overallHealth: 65 }],
-      { runId: '20240415-120000', payload: 'first' },
-      'first publish',
-    );
+    await writeOut(repoDir, {
+      history: [
+        { runId: '20240415-120000', timestamp: '2024-04-15T12:00:00.000Z', overallHealth: 65 },
+        { runId: '20240416-120000', timestamp: '2024-04-16T12:00:00.000Z', overallHealth: 80 },
+      ],
+      resultBodies: {
+        '20240415-120000': { runId: '20240415-120000', payload: 'first' },
+        '20240416-120000': { runId: '20240416-120000', payload: 'second' },
+      },
+      htmlLabel: 'second publish',
+      runDashboards: {
+        '20240415-120000': '<html><body>run one dashboard</body></html>',
+        '20240416-120000': '<html><body>run two dashboard</body></html>',
+      },
+    });
 
     await runPublish(repoDir);
 
@@ -124,36 +149,47 @@ describe('scripts/publish.sh', () => {
       '.nojekyll',
       'data/history.json',
       'data/runs/20240415-120000/results.json',
+      'data/runs/20240416-120000/results.json',
       'index.html',
+      'runs/20240415-120000/index.html',
+      'runs/20240416-120000/index.html',
     ]));
 
     const firstHistory = JSON.parse(readRemoteFile(remoteDir, 'data/history.json'));
     expect(firstHistory).toEqual([
+      { runId: '20240416-120000', timestamp: '2024-04-16T12:00:00.000Z', overallHealth: 80 },
       { runId: '20240415-120000', timestamp: '2024-04-15T12:00:00.000Z', overallHealth: 65 },
     ]);
     expect(JSON.parse(readRemoteFile(remoteDir, 'data/runs/20240415-120000/results.json'))).toEqual({
       runId: '20240415-120000',
       payload: 'first',
     });
+    expect(JSON.parse(readRemoteFile(remoteDir, 'data/runs/20240416-120000/results.json'))).toEqual({
+      runId: '20240416-120000',
+      payload: 'second',
+    });
+    expect(readRemoteFile(remoteDir, 'runs/20240415-120000/index.html')).toContain('run one dashboard');
+    expect(readRemoteFile(remoteDir, 'runs/20240416-120000/index.html')).toContain('run two dashboard');
 
     await rm(join(repoDir, 'out'), { recursive: true, force: true });
     expect(existsSync(join(repoDir, 'tmp', 'gh-pages'))).toBe(false);
 
-    await writeOut(
-      repoDir,
-      '20240416-120000',
-      [
-        { runId: '20240415-120000', timestamp: '2024-04-15T12:00:00.000Z', overallHealth: 65 },
-        { runId: '20240416-120000', timestamp: '2024-04-16T12:00:00.000Z', overallHealth: 80 },
-      ],
-      { runId: '20240416-120000', payload: 'second' },
-      'second publish',
-    );
+    await writeOut(repoDir, {
+      history: [{ runId: '20240417-120000', timestamp: '2024-04-17T12:00:00.000Z', overallHealth: 90 }],
+      resultBodies: {
+        '20240417-120000': { runId: '20240417-120000', payload: 'third' },
+      },
+      htmlLabel: 'third publish',
+      runDashboards: {
+        '20240417-120000': '<html><body>run three dashboard</body></html>',
+      },
+    });
 
     await runPublish(repoDir);
 
     const history = JSON.parse(readRemoteFile(remoteDir, 'data/history.json'));
     expect(history).toEqual([
+      { runId: '20240417-120000', timestamp: '2024-04-17T12:00:00.000Z', overallHealth: 90 },
       { runId: '20240416-120000', timestamp: '2024-04-16T12:00:00.000Z', overallHealth: 80 },
       { runId: '20240415-120000', timestamp: '2024-04-15T12:00:00.000Z', overallHealth: 65 },
     ]);
@@ -166,7 +202,14 @@ describe('scripts/publish.sh', () => {
       runId: '20240416-120000',
       payload: 'second',
     });
-    expect(readRemoteFile(remoteDir, 'index.html')).toContain('second publish');
+    expect(JSON.parse(readRemoteFile(remoteDir, 'data/runs/20240417-120000/results.json'))).toEqual({
+      runId: '20240417-120000',
+      payload: 'third',
+    });
+    expect(readRemoteFile(remoteDir, 'runs/20240415-120000/index.html')).toContain('run one dashboard');
+    expect(readRemoteFile(remoteDir, 'runs/20240416-120000/index.html')).toContain('run two dashboard');
+    expect(readRemoteFile(remoteDir, 'runs/20240417-120000/index.html')).toContain('run three dashboard');
+    expect(readRemoteFile(remoteDir, 'index.html')).toContain('third publish');
     expect(existsSync(join(repoDir, 'tmp', 'gh-pages'))).toBe(false);
   });
 
@@ -176,11 +219,12 @@ describe('scripts/publish.sh', () => {
     const outDir = join(repoDir, 'out');
     await mkdir(join(outDir, 'data', 'runs', '20240415-120000'), { recursive: true });
     await writeFile(join(outDir, 'index.html'), '<html></html>');
+    // This intentionally trips publish.sh's pre-merge JSON parsing path.
     await writeFile(join(outDir, 'data', 'history.json'), '{invalid json');
     await writeFile(join(outDir, 'data', 'runs', '20240415-120000', 'results.json'), '{}');
 
     await expect(runPublish(repoDir)).rejects.toMatchObject({
-      stderr: expect.stringContaining('Error: out/data/history.json is not valid JSON'),
+      stderr: expect.stringContaining('is not valid JSON'),
     });
   });
 });

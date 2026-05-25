@@ -16,7 +16,7 @@ afterAll(async () => {
 });
 
 describe('scripts/merge-history.mjs', () => {
-  it('prepends the newest entry and deduplicates by runId', async () => {
+  it('prepends every unpublished local entry in newest-first order and deduplicates by runId', async () => {
     const tempDir = await mkdtemp(join(tmpdir(), 'merge-history-test-'));
     tempDirs.push(tempDir);
 
@@ -24,11 +24,11 @@ describe('scripts/merge-history.mjs', () => {
     const incomingPath = join(tempDir, 'incoming-history.json');
 
     await writeFile(existingPath, JSON.stringify([
-      { runId: '20240415-120000', timestamp: '2024-04-15T12:00:00.000Z', overallHealth: 65 },
       { runId: '20240414-120000', timestamp: '2024-04-14T12:00:00.000Z', overallHealth: 70 },
     ], null, 2));
     await writeFile(incomingPath, JSON.stringify([
       { runId: '20240414-120000', timestamp: '2024-04-14T12:00:00.000Z', overallHealth: 70 },
+      { runId: '20240415-120000', timestamp: '2024-04-15T12:00:00.000Z', overallHealth: 65 },
       { runId: '20240416-120000', timestamp: '2024-04-16T12:00:00.000Z', overallHealth: 80 },
     ], null, 2));
 

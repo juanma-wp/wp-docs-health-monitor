@@ -1,31 +1,100 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { fileURLToPath } from 'url';
 
-const [, , existingPath, newPath] = process.argv;
+export const RUN_ID_PATTERN = /^\d{8}-\d{6}$/;
 
-if (!existingPath || !newPath) {
-  console.error('Usage: node scripts/merge-history.mjs <existing-history-path> <new-entry-source-path>');
-  process.exit(1);
+function assertHistoryEntry(entry, pathLabel) {
+  if (!entry || typeof entry !== 'object') {
+    throw new Error(`Expected every history entry in ${pathLabel} to be an object.`);
+  }
+
+  if (typeof entry.runId !== 'string' || !RUN_ID_PATTERN.test(entry.runId)) {
+    throw new Error(`Expected every history entry in ${pathLabel} to contain a valid runId.`);
+  }
 }
 
-const existing = existsSync(existingPath)
-  ? JSON.parse(readFileSync(existingPath, 'utf-8'))
-  : [];
-const incoming = JSON.parse(readFileSync(newPath, 'utf-8'));
+function dedupeAppendOrder(history) {
+  const deduped = new Map();
 
-if (!Array.isArray(existing)) {
-  throw new Error(`Expected existing history at ${existingPath} to be a JSON array.`);
+  for (const entry of history) {
+    deduped.delete(entry.runId);
+    deduped.set(entry.runId, entry);
+  }
+
+  return [...deduped.values()];
 }
 
-if (!Array.isArray(incoming) || incoming.length === 0) {
-  throw new Error(`Expected incoming history at ${newPath} to be a non-empty JSON array.`);
+function dedupeNewestFirst(history) {
+  const seen = new Set();
+  const deduped = [];
+
+  for (const entry of history) {
+    if (seen.has(entry.runId)) {
+      continue;
+    }
+    seen.add(entry.runId);
+    deduped.push(entry);
+  }
+
+  return deduped;
 }
 
-const newestLocalEntry = incoming[incoming.length - 1];
-if (!newestLocalEntry || typeof newestLocalEntry.runId !== 'string' || newestLocalEntry.runId.length === 0) {
-  throw new Error(`Expected incoming history at ${newPath} to contain an entry with a runId.`);
+export function readHistoryFile(path, options = {}) {
+  const { allowMissing = false } = options;
+
+  if (!existsSync(path)) {
+    if (allowMissing) {
+      return [];
+    }
+    throw new Error(`History file does not exist: ${path}`);
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(readFileSync(path, 'utf-8'));
+  } catch (error) {
+    throw new Error(`${path} is not valid JSON: ${error.message}`);
+  }
+  if (!Array.isArray(parsed)) {
+    throw new Error(`Expected history at ${path} to be a JSON array.`);
+  }
+
+  for (const entry of parsed) {
+    assertHistoryEntry(entry, path);
+  }
+
+  return parsed;
 }
 
-const merged = [newestLocalEntry, ...existing.filter(entry => entry?.runId !== newestLocalEntry.runId)];
+export function buildPublishPlan(existingHistory, localHistory) {
+  if (localHistory.length === 0) {
+    throw new Error('Expected local history to contain at least one run.');
+  }
 
-writeFileSync(existingPath, JSON.stringify(merged, null, 2) + '\n');
-console.log(`history.json updated — ${merged.length} total runs`);
+  const publishedHistory = dedupeNewestFirst(existingHistory);
+  const dedupedLocalHistory = dedupeAppendOrder(localHistory);
+  const publishedRunIds = new Set(publishedHistory.map(entry => entry.runId));
+  const unpublishedLocalEntries = dedupedLocalHistory.filter(entry => !publishedRunIds.has(entry.runId));
+
+  return {
+    latestLocalEntry: dedupedLocalHistory[dedupedLocalHistory.length - 1],
+    unpublishedLocalEntries,
+    mergedHistory: [...unpublishedLocalEntries.slice().reverse(), ...publishedHistory],
+  };
+}
+
+const [, scriptPath, existingPath, newPath] = process.argv;
+
+if (scriptPath === fileURLToPath(import.meta.url)) {
+  if (!existingPath || !newPath) {
+    console.error('Usage: node scripts/merge-history.mjs <existing-history-path> <new-entry-source-path>');
+    process.exit(1);
+  }
+
+  const existing = readHistoryFile(existingPath, { allowMissing: true });
+  const incoming = readHistoryFile(newPath);
+  const { mergedHistory, unpublishedLocalEntries } = buildPublishPlan(existing, incoming);
+
+  writeFileSync(existingPath, JSON.stringify(mergedHistory, null, 2) + '\n');
+  console.log(`history.json updated — ${mergedHistory.length} total runs (${unpublishedLocalEntries.length} newly published)`);
+}
