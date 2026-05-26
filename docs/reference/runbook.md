@@ -1,6 +1,6 @@
 # Dashboard deploy runbook
 
-Operator guide for the current GitHub Pages flow. This covers the CI-driven deploy path implemented by [`scripts/rebuild.ts`](../scripts/rebuild.ts) and [`.github/workflows/deploy-dashboard.yml`](../.github/workflows/deploy-dashboard.yml).
+Operator guide for the current GitHub Pages flow. This covers the CI-driven deploy path implemented by [`scripts/rebuild.ts`](../../scripts/rebuild.ts) and [`.github/workflows/deploy-dashboard.yml`](../../.github/workflows/deploy-dashboard.yml).
 
 ## One-time GitHub Pages setup
 
@@ -16,7 +16,7 @@ Published URL pattern:
 
 ## What triggers a deploy
 
-The [`deploy-dashboard`](../.github/workflows/deploy-dashboard.yml) workflow runs when:
+The [`deploy-dashboard`](../../.github/workflows/deploy-dashboard.yml) workflow runs when:
 
 - a commit lands on `main` and changes any of:
   - `out/**/results.json`
@@ -55,6 +55,8 @@ Watch the run in the **Actions** tab:
 - workflow: **deploy-dashboard**
 
 Open the latest run to inspect the `build` and `deploy` jobs, then use the Pages environment link once deployment completes.
+
+If a deploy fails for a transient CI reason, fix the underlying issue if needed and re-run the workflow manually with **Actions → deploy-dashboard → Run workflow**.
 
 ## Verify a deploy
 

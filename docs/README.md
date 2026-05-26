@@ -18,7 +18,7 @@ After that, jump to whichever section below matches your task.
 
 ## Operational reference — the *how* — `reference/`
 
-- **[runbook.md](./runbook.md)** — operator runbook for the CI-driven GitHub Pages deploy flow.
+- **[reference/runbook.md](./reference/runbook.md)** — operator runbook for the CI-driven GitHub Pages deploy flow.
 - **[reference/checks.md](./reference/checks.md)** — every drift type the validator runs (`type-signature`, `default-value`, `deprecated-api`, `broken-example`, `nonexistent-name`, `required-optional-mismatch`), with severity and real examples.
 - **[reference/mapping-guidelines.md](./reference/mapping-guidelines.md)** — building entries in `mappings/`: source authority order, tier assignment, schema-as-contract guidance.
 - **[reference/PER-DOC-PIPELINE.md](./reference/PER-DOC-PIPELINE.md)** — the per-doc loop: what runs for each doc, per-doc independence, the shared prompt cache, cost shape, and why `p-limit(3)`.
