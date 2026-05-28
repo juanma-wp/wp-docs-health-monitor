@@ -112,6 +112,8 @@ export type DashboardNav = {
   disclaimer: string;
 };
 
+export const GITHUB_REPOSITORY_URL = 'https://github.com/juanma-wp/wp-docs-health-monitor';
+
 export function formatTimestamp(timestamp: string): string {
   return new Date(timestamp).toLocaleString();
 }
@@ -149,6 +151,7 @@ export function renderDashboardLayout(title: string, nav: DashboardNav, content:
   const metaIndexLinkHtml = nav.metaIndexHref
     ? `<a href="${escapeHtml(nav.metaIndexHref)}" class="inline-flex items-center text-xs font-medium text-blue-700 hover:text-blue-900 hover:underline">← All sites</a>`
     : '';
+  const repositoryLinkHtml = `<a href="${GITHUB_REPOSITORY_URL}" class="inline-flex items-center text-sm font-medium text-blue-700 hover:text-blue-900 hover:underline" target="_blank" rel="noopener noreferrer">GitHub repository</a>`;
 
   return htmlShell(title, `
     <div class="lg:grid lg:grid-cols-[19rem_minmax(0,1fr)] lg:gap-8">
@@ -159,6 +162,12 @@ export function renderDashboardLayout(title: string, nav: DashboardNav, content:
             <p class="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Report explorer</p>
             <h1 class="mt-2 text-2xl font-semibold text-slate-950">Docs Health Monitor</h1>
             <p class="mt-2 text-sm text-slate-600">Browse the latest report, jump to historical runs, and inspect changes without leaving the generated site.</p>
+          </div>
+          <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Project</p>
+            <div class="mt-2">
+              ${repositoryLinkHtml}
+            </div>
           </div>
           <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Current report</p>

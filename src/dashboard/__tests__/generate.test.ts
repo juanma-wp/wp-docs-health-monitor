@@ -5,6 +5,7 @@ import { join, resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { generate, type GenerateDashboardOptions } from '../generate.js';
 import type { RunResults } from '../../types/results.js';
+import { GITHUB_REPOSITORY_URL } from '../templates/shared.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '../../../');
@@ -114,6 +115,24 @@ describe('generate()', () => {
       expect(content, `${file} should include Tailwind CDN`).toContain(
         '<script src="https://cdn.tailwindcss.com"></script>',
       );
+    }
+  });
+
+  it('adds the GitHub repository link to the latest and archived dashboard pages', async () => {
+    const results = await loadMockResults();
+    await generateLatestAndArchived(results);
+    const runDir = archivedRunDir(results);
+    const files = [
+      join(outDir, 'index.html'),
+      join(runDir, 'index.html'),
+      join(runDir, 'doc/block-metadata.html'),
+      join(runDir, 'folder/block-api.html'),
+    ];
+
+    for (const file of files) {
+      const content = await readFile(file, 'utf-8');
+      expect(content, `${file} should include the repository link`).toContain(GITHUB_REPOSITORY_URL);
+      expect(content, `${file} should include the repository link label`).toContain('GitHub repository');
     }
   });
 

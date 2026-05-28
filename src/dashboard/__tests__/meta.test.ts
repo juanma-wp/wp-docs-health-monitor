@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { renderMetaIndex } from '../meta.js';
 import type { SiteRegistry } from '../../types/meta.js';
-import type { DashboardHistoryEntry } from '../templates/shared.js';
+import { GITHUB_REPOSITORY_URL, type DashboardHistoryEntry } from '../templates/shared.js';
 
 function entry(over: Partial<DashboardHistoryEntry> = {}): DashboardHistoryEntry {
   return {
@@ -45,6 +45,8 @@ describe('renderMetaIndex', () => {
     expect(html).toContain('16 major');
     expect(html).toContain('Analyzed');
     expect(html).toContain('1642980');
+    expect(html).toContain(GITHUB_REPOSITORY_URL);
+    expect(html).toContain('GitHub repository');
   });
 
   it('shows a "no history found" placeholder when the histories entry is undefined', () => {
