@@ -73,7 +73,9 @@ function buildNav(
   return {
     currentRunId,
     latestRunId,
-    latestRunHref: currentRunId === latestRunId ? (page === 'index' ? null : paths.currentRunHref) : paths.latestRunHref,
+    latestRunHref: mode === 'latest' && page === 'index'
+      ? null
+      : paths.latestRunHref,
     metaIndexHref: metaIndexAvailable ? paths.metaIndexHref : null,
     disclaimer,
     history: history.map(entry => {

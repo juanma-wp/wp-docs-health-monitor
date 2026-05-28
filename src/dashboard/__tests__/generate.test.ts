@@ -99,6 +99,14 @@ describe('generate()', () => {
     expect(content).toContain('to store attribute values in post meta');
   });
 
+  it('per-doc page links back to the latest dashboard home', async () => {
+    const results = await loadMockResults();
+    await generateLatestAndArchived(results);
+    const content = await readFile(join(archivedRunDir(results), 'doc/block-metadata.html'), 'utf-8');
+    expect(content).toContain('href="../../../index.html"');
+    expect(content).toContain('Go to latest dashboard');
+  });
+
   it('all generated files include the Tailwind CDN script', async () => {
     const results = await loadMockResults();
     await generateLatestAndArchived(results);
