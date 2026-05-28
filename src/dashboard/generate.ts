@@ -1,5 +1,4 @@
 import { mkdir, writeFile } from 'fs/promises';
-import { existsSync } from 'fs';
 import { join } from 'path';
 import { RunResultsSchema, type RunResults } from '../types/results.js';
 import { buildTree } from './tree-builder.js';
@@ -13,6 +12,7 @@ export type GenerateDashboardOptions = {
   latestRunId?: string;
   mode?: 'latest' | 'run';
   siteName?: string;
+  metaIndexAvailable?: boolean;
 };
 
 function buildHistoryEntry(results: RunResults): DashboardHistoryEntry {
@@ -101,13 +101,7 @@ export async function generate(results: RunResults, outDir: string, options: Gen
 
   await mkdir(outDir, { recursive: true });
 
-  // Probe for a sibling/ancestor meta-index. Relative to outDir:
-  //   mode='latest' (outDir == <site>): meta is at ../index.html
-  //   mode='run'    (outDir == <site>/runs/<id>): meta is at ../../../index.html
-  const metaProbePath = mode === 'latest'
-    ? join(outDir, '..', 'index.html')
-    : join(outDir, '..', '..', '..', 'index.html');
-  const metaIndexAvailable = existsSync(metaProbePath);
+  const metaIndexAvailable = options.metaIndexAvailable ?? false;
 
   const tree = buildTree(results.docs);
   const indexNav = buildNav(results.runId, latestRunId, history, mode, 'index', metaIndexAvailable, results.disclaimer);

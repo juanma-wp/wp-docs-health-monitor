@@ -108,6 +108,7 @@ async function rebuildSite(configPath: string): Promise<RebuiltSite | null> {
     latestRunId: latest.runId,
     mode:        'latest',
     siteName:    config.project.name,
+    metaIndexAvailable: true,
   });
 
   // Archived run dashboards (one per history entry). The mode='run' generate
@@ -118,6 +119,7 @@ async function rebuildSite(configPath: string): Promise<RebuiltSite | null> {
       latestRunId: latest.runId,
       mode:        'run',
       siteName:    config.project.name,
+      metaIndexAvailable: true,
     });
   }
 
