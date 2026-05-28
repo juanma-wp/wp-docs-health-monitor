@@ -150,11 +150,13 @@ async function main(): Promise<void> {
   if (!latestResults) throw new Error('Latest results not found after scrub');
 
   // Rebuild dashboards.
+  const metaIndexAvailable = existsSync(join(siteDir, '..', 'index.html'));
   await generate(latestResults, siteDir, {
     history,
     latestRunId: latest.runId,
     mode: 'latest',
     siteName: config.project.name,
+    metaIndexAvailable,
   });
   for (const r of scrubbedRuns) {
     await generate(r, join(siteDir, 'runs', r.runId), {
@@ -162,6 +164,7 @@ async function main(): Promise<void> {
       latestRunId: latest.runId,
       mode: 'run',
       siteName: config.project.name,
+      metaIndexAvailable,
     });
   }
 
