@@ -135,7 +135,13 @@ async function main(): Promise<void> {
   const siteName = config?.project.name;
 
   // Generate latest dashboard
-  await generate(results, outputDir, { history, latestRunId: results.runId, mode: 'latest', siteName });
+  await generate(results, outputDir, {
+    history,
+    latestRunId: results.runId,
+    mode: 'latest',
+    siteName,
+    metaIndexAvailable: false,
+  });
 
   // Regenerate archived dashboards for all stored runs so every report can navigate the same history.
   for (const entry of history) {
@@ -160,6 +166,7 @@ async function main(): Promise<void> {
       latestRunId: results.runId,
       mode: 'run',
       siteName,
+      metaIndexAvailable: false,
     });
   }
 
