@@ -8,6 +8,29 @@ The tool compares docs against their underlying source code and produces an evid
 
 see [diagram](https://excalidraw.com/#json=NQXUcZaoSsTj6SHnI4Z_F,W7sPJGcKmJ_-6fnPgZ99Nw) 
 
+## Quick start
+
+Real validator results are committed to this repo, so you can see actual dashboards **without an API key and at zero cost** — just rebuild the HTML from the stored data:
+
+```bash
+npm install
+npm run rebuild        # regenerates every site dashboard from committed results.json
+```
+
+Then open `out/index.html` (the cross-site landing page) or a specific site such as `out/gutenberg-block-editor/index.html`.
+
+The five commands that cover the whole workflow:
+
+| Command | What it does | Cost |
+|---------|--------------|------|
+| `npm install` | Install dependencies. | — |
+| `npm run rebuild` | Rebuild **all** dashboards + the cross-site meta-index from committed `results.json`. No network, no API. | free |
+| `npx tsx scripts/auto-map.ts --all --config config/<site>.json --dry-run` | Plan the slug→code mapping for a site (drop `--dry-run` to build it). | free in dry-run / `--no-rerank` |
+| `npm run analyze -- --config config/<site>.json` | Run the validator over a whole corpus and write a fresh dashboard. | **billable** (Anthropic API) |
+| `npm run analyze -- --results examples/mock-results.json --output ./out` | Render a dashboard from a single pre-computed results file (synthetic example). | free |
+
+Everything below expands on these.
+
 ## Prerequisites
 
 - Node.js ≥ 20
@@ -25,25 +48,41 @@ npm install
 
 ```bash
 # Inline
-ANTHROPIC_API_KEY=sk-ant-... npm run analyze -- --config config/gutenberg-block-api.json --output ./out
+ANTHROPIC_API_KEY=sk-ant-... npm run analyze -- --config config/gutenberg-block-api.json
 
 # Exported in your shell session
 export ANTHROPIC_API_KEY=sk-ant-...
-npm run analyze -- --config config/gutenberg-block-api.json --output ./out
+npm run analyze -- --config config/gutenberg-block-api.json
 
-# Via 1Password CLI
-op run -- npm run analyze -- --config config/gutenberg-block-api.json --output ./out
+# Add it to an `.env` file on the root of the folder's project
 ```
 
 **Optional:** set `GITHUB_TOKEN` to authenticate the `manifest-url` DocSource's GitHub Commits API calls (used to populate each doc's `lastModified` field). Without it you'll hit the 60/hr anonymous rate limit after ~50 docs.
 
 ## Usage
 
+### Simplest way to run it
+
+```bash
+npm run analyze -- --config config/wp-theme-handbook.json
+```
+
+That single flag is all you need. Here's exactly what it does:
+
+- **Analyzes the whole corpus.** With no `--slug`, there's no filter — every doc in the config's manifest is validated (minus any `docSource.ignore` entries).
+- **Clones the configured `codeSources` repos** and calls the Anthropic API once per mapped doc. This is a real, billable run with no confirmation prompt — see [Cost note](#cost-note).
+- **Derives the output directory** from the config since `--output` is omitted: `<outputDir>/<config-filename>/`, e.g. `./out/wp-theme-handbook/`.
+- **Writes the run** to `data/runs/<runId>/results.json`, updates `data/history.json`, and regenerates the dashboard. It finishes with `Dashboard written to out/wp-theme-handbook/index.html`.
+
+To start safely without spending anything, add `--dry-run` (just validates the config and prints what would run) or scope to a single page with `--slug <slug>`.
+
 ### Run against live docs (requires config + API key)
 
 ```bash
-npm run analyze -- --config config/gutenberg-block-api.json --output ./out
+npm run analyze -- --config config/gutenberg-block-api.json
 ```
+
+The dashboard lands in `./out/gutenberg-block-api/` (derived from the config — see [Simplest way to run it](#simplest-way-to-run-it)). Pass `--output <dir>` to override.
 
 ### Preview with mock data (no API key needed)
 
@@ -53,14 +92,30 @@ npm run analyze -- --results examples/mock-results.json --output ./out
 
 Then open `./out/index.html` in your browser.
 
+### Regenerate dashboards from existing results
+
+Dashboards are pure derivations of the committed `results.json` files — no API calls needed to (re)build the HTML. There are two ways to do it:
+
+```bash
+# Bulk: rebuild EVERY site's dashboard + the cross-site meta-index from all
+# committed out/<site>/data/runs/<runId>/results.json files. This is what CI
+# runs before deploying to GitHub Pages; it's idempotent.
+npm run rebuild
+
+# Single file: render one dashboard from one results file.
+npm run analyze -- --results out/wp-theme-handbook/data/runs/<runId>/results.json --output ./out
+```
+
+Use `npm run rebuild` after editing templates, pulling new committed runs, or whenever you want fresh HTML. Use `--results` when you have one specific results file (e.g. the synthetic `examples/mock-results.json`) and want just that dashboard.
+
 ## CLI flags
 
 | Flag | Description |
 |------|-------------|
 | `--config <path>` | Path to a config JSON file. Required unless `--results` is provided. |
-| `--output <dir>` | Output directory for the dashboard. Required. |
+| `--output <dir>` | Output directory for the dashboard. Optional — when omitted with `--config`, it's derived as `<config.outputDir>/<config-filename>/`. Required when only `--results` is provided. |
 | `--results <path>` | Load a pre-computed `RunResults` JSON instead of running the pipeline. |
-| `--only <slug>` | Analyze only the doc with this slug (pipeline runs only). |
+| `--slug <slug...>` | Only validate the given doc slug(s); repeatable (pipeline runs only). |
 | `--dry-run` | Print what would be analyzed without running the pipeline. Requires `--config`. |
 
 `--results` and `--config` are mutually exclusive for pipeline execution.
@@ -162,16 +217,35 @@ Slug-keyed, tiered code references. Tiers hint at token-budget priority: `primar
 
 See `mappings/gutenberg-block-api.json` for a real example.
 
-### Bootstrap a mapping with Claude
+#### Auto-map a docs site
 
-Curating these by hand is tedious. The bootstrap helper asks Claude to propose a `CodeTiers` entry for a single slug, based on the doc content and the cloned repo's file tree. Review and commit the output yourself — it's a dev-time accelerator, not a runtime component.
+Curating these tiers by hand is tedious. **`scripts/auto-map.ts` is the canonical way to build a mapping.** It clones the configured `codeSources`, builds a symbol index, scores candidate files against the symbols each doc references, and (optionally) runs an AI re-ranker to pick the final tiers. It writes directly to the config's `mappingPath`. It's a dev-time accelerator, not a runtime component — review the output before committing.
+
+```bash
+# Plan first — prints the per-slug action plan and exits before any clone or
+# LLM call. Zero cost, fast. Refuses slugs excluded by docSource.ignore.
+npx tsx scripts/auto-map.ts --all --config config/your-site.json --dry-run
+
+# Build the whole mapping. Resumable: slugs already present are skipped
+# (add --force to re-map them). Implies --write.
+npx tsx scripts/auto-map.ts --all --config config/your-site.json
+
+# Map (or re-map) a single slug. --write persists; without it, prints only.
+npx tsx scripts/auto-map.ts <slug> --config config/your-site.json --write
+```
+
+Key flags: `--no-rerank` skips the AI step for **lexical-only, zero-API-cost** output (good for a first coverage pass — see the cost note below); `--explain` prints why each file was kept or dropped; `--force` re-maps slugs already in the file.
+
+> **Cost flag for `parentSlug: "*"`:** a large manifest (e.g. Gutenberg's ~426 entries) means re-ranking hundreds of slugs in one `--all` run. Do a first pass with `--no-rerank` to sanity-check coverage before paying the LLM cost.
+
+Re-running auto-map on a slug overwrites its entry; hand-edits and auto-regeneration coexist by overwrite, with git history as the audit trail. See [`docs/reference/MAPPING.md`](./docs/reference/MAPPING.md) for the full reference.
+
+**Fallback — `scripts/bootstrap-mapping.ts`:** an older, AI-only single-slug helper that asks Claude to propose a `CodeTiers` entry from the doc content and repo file tree. Reach for it only if auto-map produces unusably thin coverage for a slug:
 
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
 npx tsx scripts/bootstrap-mapping.ts <slug> --config config/your-site.json
 ```
-
-Run it once per slug, paste the suggested JSON into your mapping file, then sanity-check that every referenced file exists in the repo.
 
 ## For contributors
 
