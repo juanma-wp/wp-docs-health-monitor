@@ -1,6 +1,7 @@
 import {
   escapeHtml,
   formatTimestamp,
+  GITHUB_REPOSITORY_URL,
   healthBadge,
   htmlShell,
   type DashboardHistoryEntry,
@@ -106,6 +107,7 @@ export function renderMetaIndex(
     <header class="mb-6">
       <h1 class="text-2xl font-semibold text-slate-950">WordPress Docs Health Monitor</h1>
       <p class="mt-1 text-sm text-slate-500">Published runs</p>
+      <a href="${GITHUB_REPOSITORY_URL}" class="mt-3 inline-flex items-center text-sm font-medium text-blue-700 hover:text-blue-900 hover:underline" target="_blank" rel="noopener noreferrer">GitHub repository</a>
     </header>
     <section class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
       ${cardsHtml}
