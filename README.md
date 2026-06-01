@@ -2,11 +2,17 @@
 
 Automated health monitor for WordPress-hosted developer documentation sites.
 
+> [!NOTE]
+> The dashboard is deployed at https://juanma-wp.github.io/wp-docs-health-monitor/
+
 The tool compares docs against their underlying source code and produces an evidence-backed, scored report of drift — outdated APIs, missing parameters, broken examples, deprecated usage — with suggested fixes, rendered as a static HTML dashboard.
 
 ![architecture](./docs/assets/architecture.png)
 
 see [diagram](https://excalidraw.com/#json=NQXUcZaoSsTj6SHnI4Z_F,W7sPJGcKmJ_-6fnPgZ99Nw) 
+
+> [!NOTE]
+> Read [Building a Health Monitor Dashboard for WordPress Docs](https://juanma.codes/2026/05/12/building-a-health-monitor-dashboard-for-wordpress-docs/) for a deep dive on the project
 
 ## Quick start
 
