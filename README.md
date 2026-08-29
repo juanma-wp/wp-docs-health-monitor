@@ -114,6 +114,22 @@ npm run analyze -- --results out/wp-theme-handbook/data/runs/<runId>/results.jso
 
 Use `npm run rebuild` after editing templates, pulling new committed runs, or whenever you want fresh HTML. Use `--results` when you have one specific results file (e.g. the synthetic `examples/mock-results.json`) and want just that dashboard.
 
+### Feed review verdicts back into the validator
+
+Every reviewed report makes the next run better. Record verdicts on a run's findings and the tooling turns them into calibration guidance in the site's prompt extension, plus a per-site precision trend:
+
+```bash
+# Skeleton with every reported issue pre-listed as "pending"
+npm run feedback -- init --site gutenberg-block-editor --run <runId>
+
+# ...edit feedback/<site>/<runId>.json: verdicts, notes, missed drift...
+
+# Regenerate the prompt's AUTO-CALIBRATION block + feedback/<site>/metrics.json
+npm run feedback -- apply
+```
+
+Pushing verdict files to `main` triggers the `feedback-loop` workflow, which runs `apply` and opens a PR with the regenerated calibration — merge it and the next run has learned from the review. Full cycle: [`docs/reference/FEEDBACK.md`](docs/reference/FEEDBACK.md).
+
 ## CLI flags
 
 | Flag | Description |

@@ -12,7 +12,8 @@
     "gen:schema": "tsx scripts/gen-schema.ts",
     "analyze": "tsx --env-file=.env src/cli.ts",
     "index": "tsx src/cli-meta.ts",
-    "rebuild": "tsx scripts/rebuild.ts"
+    "rebuild": "tsx scripts/rebuild.ts",
+    "feedback": "tsx scripts/feedback.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.0",

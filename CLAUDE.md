@@ -9,6 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npx vitest run <path>` — run a single test file (e.g. `npx vitest run src/adapters/doc-source/__tests__/manifest-url.test.ts`). Add `-t "<name>"` to match a single `it`/`describe`.
 - `npm run typecheck` — `tsc --noEmit`. CI-equivalent correctness check; run before pushing.
 - `npm run gen:schema` — regenerates `examples/results.schema.json` from `src/types/results.ts` (Zod → JSON Schema). Run after changing any of the `*Schema` exports in `src/types/`.
+- `npm run feedback -- init|apply|metrics` — the report-review feedback loop: structured verdicts in `feedback/<site>/<runId>.json` regenerate the AUTO-CALIBRATION block in the site-extension prompt and the per-site precision metrics. See `docs/reference/FEEDBACK.md`.
 - `npx tsx scripts/verify-ingestion.ts` — smoke-tests the full ingestion pipeline end-to-end against `config/gutenberg-block-api.json` (clones Gutenberg, fetches ~10 docs). Network-dependent; produces clone under `tmp/`.
 
 Node 20+ required. ESM throughout (`"type": "module"`); intra-package imports use `.js` suffixes even for `.ts` sources.
@@ -35,6 +36,7 @@ These are conventions and invariants that surprise readers and aren't carried by
 - `mappings/test.json` — intentionally empty `{}`, used by unit tests.
 - `examples/mock-results.json` — canonical `RunResults` fixture; round-trips `RunResultsSchema`.
 - `examples/results.schema.json` — generated artifact; never hand-edit.
+- `feedback/<site>/` — structured review verdicts per run (`<runId>.json`, hand-edited) plus generated `metrics.json` (never hand-edit). Applying them rewrites ONLY the marker-delimited AUTO-CALIBRATION block in the site-extension prompt; hand-written prompt rules outside the markers are never touched, and the common `SYSTEM_PROMPT` is never written by automation.
 - `scripts/bootstrap-mapping.ts` — dev-time accelerator for generating mappings via Claude.
 - `scripts/verify-ingestion.ts` — end-to-end smoke test of the ingestion pipeline.
 - `scripts/gen-schema.ts` — regenerates `examples/results.schema.json` from Zod.
